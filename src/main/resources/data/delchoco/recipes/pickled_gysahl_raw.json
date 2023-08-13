@@ -1,0 +1,14 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "ingredients": [
+    { "item": "delchoco:gysahl_green" },
+    { "item": "delchoco:gysahl_green" },
+    { "item": "delchoco:gysahl_green" },
+    { "item": "minecraft:sugar" },
+    { "item": "minecraft:water_bucket" }
+  ],
+  "result": {
+    "item": "delchoco:pickled_gysahl_raw",
+    "count": 5
+  }
+}

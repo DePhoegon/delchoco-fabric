@@ -1,0 +1,11 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "ingredients": [
+    { "item": "delchoco:chocobo_feather" },
+    { "item": "minecraft:egg" },
+    { "item": "minecraft:crimson_fungus" }
+  ],
+  "result": {
+    "item": "delchoco:flame_chocobo_spawn_egg"
+  }
+}

@@ -1,0 +1,19 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "TFT",
+    "WSW",
+    "TLT"
+  ],
+  "key": {
+    "L": { "tag": "forge:leather" },
+    "W": { "tag": "minecraft:wool" },
+    "F": { "item": "delchoco:chocobo_feather" },
+	"T": { "tag": "forge:string" },
+	"S": { "item": "delchoco:chocobo_saddle_bags" }
+  },
+  "result": {
+    "item": "delchoco:chocobo_saddle_pack",
+    "count": 1
+  }
+}

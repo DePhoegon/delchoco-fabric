@@ -1,0 +1,11 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "ingredients": [
+    { "item": "delchoco:chocobo_feather" },
+    { "item": "minecraft:wheat_seeds" },
+    { "item": "minecraft:feather" }
+  ],
+  "result": {
+    "item": "delchoco:gysahl_green_seeds"
+  }
+}

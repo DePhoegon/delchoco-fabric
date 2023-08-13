@@ -1,0 +1,17 @@
+{
+  "parent": "item/generated",
+  "textures": {
+    "layer0": "delchoco:item/guise_gear/diamond/head_yellow"
+  },
+  "overrides": [
+    { "predicate": { "custom_model_data": 2}, "model": "delchoco:item/armor/diamond_helm_2" },
+    { "predicate": { "custom_model_data": 3}, "model": "delchoco:item/armor/diamond_helm_3" },
+    { "predicate": { "custom_model_data": 4}, "model": "delchoco:item/armor/diamond_helm_4" },
+    { "predicate": { "custom_model_data": 5}, "model": "delchoco:item/armor/diamond_helm_5" },
+    { "predicate": { "custom_model_data": 6}, "model": "delchoco:item/armor/diamond_helm_6" },
+    { "predicate": { "custom_model_data": 7}, "model": "delchoco:item/armor/diamond_helm_7" },
+    { "predicate": { "custom_model_data": 8}, "model": "delchoco:item/armor/diamond_helm_8" },
+    { "predicate": { "custom_model_data": 9}, "model": "delchoco:item/armor/diamond_helm_9" },
+    { "predicate": { "custom_model_data": 10}, "model": "delchoco:item/armor/diamond_helm_10" }
+  ]
+}

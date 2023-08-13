@@ -1,0 +1,9 @@
+{
+  "type": "minecraft:smelting",
+  "ingredient": {
+    "item": "delchoco:chocobo_drumstick_raw"
+  },
+  "result": "delchoco:chocobo_drumstick_cooked",
+  "experience": 0.35,
+  "cookingtime": 200
+}

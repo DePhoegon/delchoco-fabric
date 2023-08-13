@@ -1,0 +1,9 @@
+{
+  "type": "minecraft:smoking",
+  "ingredient": {
+    "item": "delchoco:pickled_gysahl_raw"
+  },
+  "result": "delchoco:pickled_gysahl_cooked",
+  "experience": 0.35,
+  "cookingtime": 100
+}

@@ -1,0 +1,12 @@
+{
+  "type": "minecraft:smithing",
+  "base": {
+    "item": "delchoco:choco_disguise_diamond_leggings"
+  },
+  "addition": {
+    "item": "minecraft:netherite_leggings"
+  },
+  "result": {
+    "item": "delchoco:choco_disguise_netherite_leggings"
+  }
+}

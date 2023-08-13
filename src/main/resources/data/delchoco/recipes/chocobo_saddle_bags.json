@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    " F ",
+    "LSL",
+    " L "
+  ],
+  "key": {
+    "L": { "tag": "forge:leather" },
+    "F": { "item": "delchoco:chocobo_feather" },
+	"S": { "item": "delchoco:chocobo_saddle"}
+  },
+  "result": {
+    "item": "delchoco:chocobo_saddle_bags",
+    "count": 1
+  }
+}

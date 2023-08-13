@@ -1,0 +1,11 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "ingredients": [
+    { "item": "minecraft:saddle" },
+    { "item": "delchoco:chocobo_feather" }
+  ],
+  "result": {
+    "item": "delchoco:chocobo_saddle",
+    "count": 1
+  }
+}

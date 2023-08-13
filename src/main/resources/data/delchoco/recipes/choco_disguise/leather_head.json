@@ -1,0 +1,19 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "FFF",
+    "FAF"
+  ],
+  "key": {
+    "F": {
+      "item": "delchoco:chocobo_feather"
+    },
+    "A": {
+      "item": "minecraft:leather_helmet"
+    }
+  },
+  "result": {
+    "item": "delchoco:choco_disguise_leather_helmet",
+    "count": 1
+  }
+}

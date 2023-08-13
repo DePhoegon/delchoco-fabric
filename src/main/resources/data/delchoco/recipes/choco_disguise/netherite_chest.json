@@ -1,0 +1,12 @@
+{
+  "type": "minecraft:smithing",
+  "base": {
+    "item": "delchoco:choco_disguise_diamond_chestplate"
+  },
+  "addition": {
+    "item": "minecraft:netherite_chestplate"
+  },
+  "result": {
+    "item": "delchoco:choco_disguise_netherite_chestplate"
+  }
+}

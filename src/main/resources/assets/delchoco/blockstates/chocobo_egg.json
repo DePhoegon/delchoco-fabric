@@ -1,0 +1,9 @@
+{
+  "variants": {
+    "": [
+      {
+        "model": "delchoco:block/chocobo_egg"
+      }
+    ]
+  }
+}

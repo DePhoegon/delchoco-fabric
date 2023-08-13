@@ -1,0 +1,10 @@
+{
+  "variants": {
+    "egg=false": {
+      "model": "delchoco:block/straw_nest"
+    },
+    "egg=true": {
+      "model": "delchoco:block/egg_in_nest"
+    }
+  }
+}

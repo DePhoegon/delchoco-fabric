@@ -16,7 +16,10 @@
 	"environment": "*",
 	"entrypoints": {
 		"main": [
-			"com.dephoegon.ExampleMod"
+			"com.dephoegon.delchoco.DelChoco"
+		],
+		"client": [
+			"com.dephoegon.delchoco.DelChoco"
 		]
 	},
 	"mixins": [

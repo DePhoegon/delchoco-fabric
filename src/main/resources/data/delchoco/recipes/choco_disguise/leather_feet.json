@@ -1,0 +1,19 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "FAF",
+    "F F"
+  ],
+  "key": {
+    "F": {
+      "item": "delchoco:chocobo_feather"
+    },
+    "A": {
+      "item": "minecraft:leather_boots"
+    }
+  },
+  "result": {
+    "item": "delchoco:choco_disguise_leather_boots",
+    "count": 1
+  }
+}

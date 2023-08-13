@@ -1,0 +1,12 @@
+{
+  "type": "minecraft:smithing",
+  "base": {
+    "item": "delchoco:choco_disguise_iron_boots"
+  },
+  "addition": {
+    "item": "minecraft:diamond_boots"
+  },
+  "result": {
+    "item": "delchoco:choco_disguise_diamond_boots"
+  }
+}

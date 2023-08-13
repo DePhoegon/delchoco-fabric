@@ -1,0 +1,12 @@
+{
+  "criteria": {
+    "tick": {
+      "trigger": "minecraft:tick"
+    }
+  },
+  "rewards": {
+    "loot": [
+      "delchoco:grant_chocobo_leash_stick_on_first_join"
+    ]
+  }
+}

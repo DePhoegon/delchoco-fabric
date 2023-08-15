@@ -15,7 +15,7 @@ public class Chocobo extends TameableEntity implements Angerable {
     public static final int tier_one_chocobo_inv_slot_count = 15; // 3*5
     public static final int tier_two_chocobo_inv_slot_count = 45; //5*9
     private final int top_tier_chocobo_inv_slot_count = tier_two_chocobo_inv_slot_count;
-    protected Chocobo(EntityType<? extends TameableEntity> entityType, World world) {
+    public Chocobo(EntityType<? extends TameableEntity> entityType, World world) {
         super(entityType, world);
     }
 

@@ -1,14 +1,18 @@
 package com.dephoegon.delchoco.common.init;
 
 import com.dephoegon.delchoco.DelChoco;
+import com.dephoegon.delchoco.common.blocks.GysahlGreenBlock;
 import com.dephoegon.delchoco.common.items.ChocoboArmorItems;
 import com.dephoegon.delchoco.common.items.ChocoboSaddleItem;
 import com.dephoegon.delchoco.common.items.ChocoboWeaponItem;
+import com.dephoegon.delchoco.common.items.CustomBlockNamedItem;
 import net.fabricmc.fabric.api.item.v1.FabricItemSettings;
+import net.minecraft.block.AbstractBlock;
+import net.minecraft.block.Block;
+import net.minecraft.block.Material;
 import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.item.Item;
-import net.minecraft.util.Identifier;
-import net.minecraft.util.registry.Registry;
+import net.minecraft.sound.BlockSoundGroup;
 
 import static com.dephoegon.delchoco.common.entities.Chocobo.tier_one_chocobo_inv_slot_count;
 import static com.dephoegon.delchoco.common.entities.Chocobo.tier_two_chocobo_inv_slot_count;
@@ -16,13 +20,17 @@ import static com.dephoegon.delchoco.common.items.ChocoboArmorItems.CHOCOBO_ARMO
 import static com.dephoegon.delchoco.common.items.ChocoboWeaponItem.CHOCOBO_WEAPON_TIERS;
 
 
-public class ModItems {
+public class ModItems extends BaseReg {
     //Eatables
     public static final Item GYSAHL_GREEN_ITEM = registerItem("gysahl_green", new Item(new FabricItemSettings().group(DelChoco.DELCHOCO_ITEMS).maxCount(64).food(ModFoods.GYSAHL_GREEN)));
     public static final Item CHOCOBO_DRUMSTICK_RAW = registerItem("chocobo_drumstick_raw", new Item(new FabricItemSettings().group(DelChoco.DELCHOCO_ITEMS).maxCount(64).food(ModFoods.CHOCOBO_DRUMSTICK_RAW)));
     public static final Item CHOCOBO_DRUMSTICK_COOKED = registerItem("chocobo_drumstick_cooked", new Item(new FabricItemSettings().group(DelChoco.DELCHOCO_ITEMS).maxCount(64).food(ModFoods.CHOCOBO_DRUMSTICK_COOKED)));
     public static final Item PICKLED_GYSAHL_COOKED = registerItem("pickled_gysahl_cooked", new Item(new FabricItemSettings().group(DelChoco.DELCHOCO_ITEMS).maxCount(64).food(ModFoods.PICKLED_GYSAHL_COOKED)));
     public static final Item PICKLED_GYSAHL_RAW = registerItem("pickled_gysahl_raw", new Item(new FabricItemSettings().group(DelChoco.DELCHOCO_ITEMS).maxCount(64).food(ModFoods.PICKLED_GYSAHL_RAW)));
+
+    // Plantish
+    public static final Block GYSAHL_GREEN = registerBlock("gysahl_green", new GysahlGreenBlock(AbstractBlock.Settings.of(Material.PLANT).noCollision().ticksRandomly().breakInstantly().sounds(BlockSoundGroup.CROP)));
+    public static final Item GYSAHL_GREEN_SEEDS = registerItem("gysahl_green_seeds", new CustomBlockNamedItem(GYSAHL_GREEN, new FabricItemSettings().group(DelChoco.DELCHOCO_ITEMS).maxCount(64)));
 
     // Spawn Eggs
 
@@ -42,9 +50,4 @@ public class ModItems {
 
     // ChocoGuise Gear
 
-
-    private static Item registerItem(String name, Item item) {
-        return Registry.register(Registry.ITEM, new Identifier(DelChoco.Mod_ID, name), item);
-    }
-    public static void registerModItems() { DelChoco.LOGGER.info("Registering "+DelChoco.Mod_ID+" Items"); }
 }

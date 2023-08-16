@@ -59,13 +59,13 @@ public class StaticGlobalVariables {
     public static final String MaxArmor_name = "chocobo_max_armor_limit";
     public static Double MaxArmorToughness;
     public static final String MaxArmorToughness_name = "chocobo_max_armor_toughness_limit";
-    public static Double ArmorAlpha;
+    public static Float ArmorAlpha;
     public static final String ArmorAlpha_name = "chocobo_layer_armor_alpha";
-    public static Double WeaponAlpha;
+    public static Float WeaponAlpha;
     public static final String WeaponAlpha_name = "chocobo_layer_weapon_alpha";
-    public static Double CollarAlpha;
+    public static Float CollarAlpha;
     public static final String CollarAlpha_name = "chocobo_layer_collar_alpha";
-    public static Double SaddleAlpha;
+    public static Float SaddleAlpha;
     public static final String SaddleAlpha_name = "chocobo_layer_saddle_alpha";
     public static Integer ChocoboMinPack;
     public static final String ChocoboMinPack_name = "chocobo_pack_min_size";
@@ -150,14 +150,14 @@ public class StaticGlobalVariables {
     public static void setMaxArmor(double maxArmor) { StaticGlobalVariables.MaxArmor = maxArmor; }
     public static Double getMaxArmorToughness() { return MaxArmorToughness; }
     public static void setMaxArmorToughness(double maxArmorToughness) { StaticGlobalVariables.MaxArmorToughness = maxArmorToughness; }
-    public static Double getArmorAlpha() { return ArmorAlpha; }
-    public static void setArmorAlpha(double armorAlpha) { StaticGlobalVariables.ArmorAlpha = armorAlpha; }
-    public static Double getWeaponAlpha() { return WeaponAlpha; }
-    public static void setWeaponAlpha(double weaponAlpha) { StaticGlobalVariables.WeaponAlpha = weaponAlpha; }
-    public static Double getCollarAlpha() { return CollarAlpha; }
-    public static void setCollarAlpha(double collarAlpha) { StaticGlobalVariables.CollarAlpha = collarAlpha; }
-    public static Double getSaddleAlpha() { return SaddleAlpha; }
-    public static void setSaddleAlpha(double saddleAlpha) { StaticGlobalVariables.SaddleAlpha = saddleAlpha; }
+    public static Float getArmorAlpha() { return ArmorAlpha; }
+    public static void setArmorAlpha(float armorAlpha) { StaticGlobalVariables.ArmorAlpha = armorAlpha; }
+    public static Float getWeaponAlpha() { return WeaponAlpha; }
+    public static void setWeaponAlpha(float weaponAlpha) { StaticGlobalVariables.WeaponAlpha = weaponAlpha; }
+    public static Float getCollarAlpha() { return CollarAlpha; }
+    public static void setCollarAlpha(float collarAlpha) { StaticGlobalVariables.CollarAlpha = collarAlpha; }
+    public static Float getSaddleAlpha() { return SaddleAlpha; }
+    public static void setSaddleAlpha(float saddleAlpha) { StaticGlobalVariables.SaddleAlpha = saddleAlpha; }
     public static Boolean getCanSpawn() { return CanSpawn; }
     public static void setCanSpawn(boolean canSpawn) { StaticGlobalVariables.CanSpawn = canSpawn; }
     public static Boolean getExtraChocoboEffects() { return ExtraChocoboEffects; }
@@ -182,4 +182,5 @@ public class StaticGlobalVariables {
     public static int getValueOrDefault(Integer value, int defaultValue) { return value != null ? value : defaultValue; }
     public static double getValueOrDefault(Double value, double defaultValue) { return value != null ? value : defaultValue; }
     public static boolean getValueOrDefault(Boolean value, boolean defaultValue) { return value != null ? value : defaultValue; }
+    public static float getValueOrDefault(Float value, float defaultValue) { return value != null ? value : defaultValue; }
 }

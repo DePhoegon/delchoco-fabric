@@ -1,93 +1,93 @@
 package com.dephoegon.delchoco.aid.world;
 
 public class StaticGlobalVariables {
-    public static Integer Stamina;
+    private static Integer Stamina;
     public static final String Stamina_name = "default_stamina";
-    public static Integer Speed;
+    private static Integer Speed;
     public static final String Speed_name = "default_speed";
-    public static Integer Health;
+    private static Integer Health;
     public static final String Health_name = "default_health";
-    public static Integer Armor;
+    private static Integer Armor;
     public static final String Armor_name = "default_armor";
-    public static Integer ArmorTough;
+    private static Integer ArmorTough;
     public static final String ArmorTough_name = "default_armor_toughness";
-    public static Integer Attack;
+    private static Integer Attack;
     public static final String Attack_name = "default_attack_damage";
-    public static Integer WeaponModifier;
+    private static Integer WeaponModifier;
     public static final String WeaponModifier_name = "chocobo_weapon_modifier";
-    public static Integer HealAmount;
+    private static Integer HealAmount;
     public static final String HealAmount_name = "chocobo_heal_amount";
-    public static Double StaminaRegen;
+    private static Double StaminaRegen;
     public static final String StaminaRegen_name = "chocobo_samina_regen";
-    public static Double Tame;
+    private static Double Tame;
     public static final String Tame_name = "chocobo_tame_chance";
-    public static Double StaminaCost;
+    private static Double StaminaCost;
     public static final String StaminaCost_name = "chocobo_sprint_stamina_cost";
-    public static Double StaminaGlide;
+    private static Double StaminaGlide;
     public static final String StaminaGlide_name = "chocobo_glide_stamina_cost";
-    public static Double StaminaJump;
+    private static Double StaminaJump;
     public static final String StaminaJump_name = "chocobo_jump_stamina_cost";
-    public static Boolean CanSpawn;
+    private static Boolean CanSpawn;
     public static final String CanSpawn_name = "natural_spawning";
-    public static Boolean ExtraChocoboEffects;
+    private static Boolean ExtraChocoboEffects;
     public static final String ExtraChocoboEffects_name = "chocobo_effects";
-    public static Boolean ExtraChocoboResourcesOnHit;
+    private static Boolean ExtraChocoboResourcesOnHit;
     public static final String ExtraChocoboResourcesOnHit_name = "chocobo_on_hit_resources";
-    public static Boolean ExtraChocoboResourcesOnKill;
+    private static Boolean ExtraChocoboResourcesOnKill;
     public static final String ExtraChocoboResourcesOnKill_name = "chocobo_on_kill_resource";
-    public static Boolean ShiftHitBypass;
+    private static Boolean ShiftHitBypass;
     public static final String ShiftHitBypass_name = "chocobo_shift_to_hit_bypass";
-    public static Boolean OwnChocoboHittable;
+    private static Boolean OwnChocoboHittable;
     public static final String OwnChocoboHittable_name = "chocobo_allow_own_hit";
-    public static Boolean TamedChocoboHittable;
+    private static Boolean TamedChocoboHittable;
     public static final String TamedChocoboHittable_name = "chocobo_allow_tamed_hit";
-    public static Integer EggHatchTimeTicks;
+    private static Integer EggHatchTimeTicks;
     public static final String EggHatchTimeTicks_name = "chocobo_egg_hatch_time_ticks";
-    public static Double PossLoss;
+    private static Double PossLoss;
     public static final String PossLoss_name = "chocobo_potential_stat_loss_breeding";
-    public static Double PossGain;
+    private static Double PossGain;
     public static final String PossGain_name = "chocobo_potential_stat_gain_breeding";
-    public static Integer MaxHealth;
+    private static Integer MaxHealth;
     public static final String MaxHealth_name = "chocobo_max_health_limit";
-    public static Integer MaxSpeed;
+    private static Integer MaxSpeed;
     public static final String MaxSpeed_name = "chocobo_max_speed_limit";
-    public static Double MaxStamina;
+    private static Double MaxStamina;
     public static final String MaxStamina_name = "chocobo_max_stamina_limit";
-    public static Double MaxStrength;
+    private static Double MaxStrength;
     public static final String MaxStrength_name = "chocobo_max_attack_damage_limit";
-    public static Double MaxArmor;
+    private static Double MaxArmor;
     public static final String MaxArmor_name = "chocobo_max_armor_limit";
-    public static Double MaxArmorToughness;
+    private static Double MaxArmorToughness;
     public static final String MaxArmorToughness_name = "chocobo_max_armor_toughness_limit";
-    public static Float ArmorAlpha;
+    private static Float ArmorAlpha;
     public static final String ArmorAlpha_name = "chocobo_layer_armor_alpha";
-    public static Float WeaponAlpha;
+    private static Float WeaponAlpha;
     public static final String WeaponAlpha_name = "chocobo_layer_weapon_alpha";
-    public static Float CollarAlpha;
+    private static Float CollarAlpha;
     public static final String CollarAlpha_name = "chocobo_layer_collar_alpha";
-    public static Float SaddleAlpha;
+    private static Float SaddleAlpha;
     public static final String SaddleAlpha_name = "chocobo_layer_saddle_alpha";
-    public static Integer ChocoboMinPack;
+    private static Integer ChocoboMinPack;
     public static final String ChocoboMinPack_name = "chocobo_pack_min_size";
-    public static Integer ChocoboMaxPack;
+    private static Integer ChocoboMaxPack;
     public static final String ChocoboMaxPack_name = "chocobo_pack_max_size";
-    public static Integer OverWorldSpawnWeight;
+    private static Integer OverWorldSpawnWeight;
     public static final String OverWorldSpawnWeight_name = "chocobo_spawn_weight_overworld";
-    public static Integer MushroomSpawnWeight;
+    private static Integer MushroomSpawnWeight;
     public static final String MushroomSpawnWeight_name = "chocobo_spawn_weight_mushroom_island";
-    public static Integer NetherSpawnWeight;
+    private static Integer NetherSpawnWeight;
     public static final String NetherSpawnWeight_name = "chocobo_spawn_weight_nether";
-    public static Integer EndSpawnWeight;
+    private static Integer EndSpawnWeight;
     public static final String EndSpawnWeight_name = "chocobo_spawn_weight_end";
-    public static Double GysahlGreenSpawnChance;
+    private static Double GysahlGreenSpawnChance;
     public static final String GysahlGreenSpawnChance_name = "gysahl_green_spawn_chance";
-    public static Integer GysahlGreenPatchSize;
+    private static Integer GysahlGreenPatchSize;
     public static final String GysahlGreenPatchSize_name = "gysahl_green_spawn_patch_size";
-    public static Boolean OverworldSpawn;
+    private static Boolean OverworldSpawn;
     public static final String OverworldSpawn_name = "chocobo_spawn_enable_overworld";
-    public static Boolean NetherSpawn;
+    private static Boolean NetherSpawn;
     public static final String NetherSpawn_name = "chocobo_spawn_enable_nether";
-    public static Boolean EndSpawn;
+    private static Boolean EndSpawn;
     public static final String  EndSpawn_name = "chocobo_spawn_enable_nether";
     public StaticGlobalVariables() { }
     public static Integer getStamina() { return Stamina; }
@@ -129,7 +129,7 @@ public class StaticGlobalVariables {
     public static Double getGysahlGreenSpawnChance() { return GysahlGreenSpawnChance; }
     public static void setGysahlGreenSpawnChance(double gysahlGreenSpawnChance) { StaticGlobalVariables.GysahlGreenSpawnChance = gysahlGreenSpawnChance; }
     public static Double getStaminaRegen() { return StaminaRegen; }
-    public static void getStaminaRegen(double staminaRegen) { StaticGlobalVariables.StaminaRegen = staminaRegen; }
+    public static void setStaminaRegen(double staminaRegen) { StaticGlobalVariables.StaminaRegen = staminaRegen; }
     public static Double getTame() { return Tame; }
     public static void setTame(double tame) { StaticGlobalVariables.Tame = tame; }
     public static Double getStaminaCost() { return StaminaCost; }

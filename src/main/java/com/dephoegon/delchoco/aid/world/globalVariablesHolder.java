@@ -51,24 +51,22 @@ public class globalVariablesHolder {
     private boolean NetherSpawn;
     private boolean EndSpawn;
     public globalVariablesHolder() { }
-    public globalVariablesHolder(NbtCompound nbt, boolean isWorld) {
-        if (isWorld) { worldFromNbt(nbt); } else { chocoboFromNbt(nbt); }
-    }
+    public globalVariablesHolder(NbtCompound nbt, boolean isWorld) { if (isWorld) { worldFromNbt(nbt); } else { chocoboFromNbt(nbt); } }
 
     // NBT functions TODO: Sort toNbtS' for cleanliness in config File
     public NbtCompound worldToNbt(@NotNull NbtCompound nbt) {
+        nbt.putBoolean(CanSpawn_name, CanSpawn);
+        nbt.putBoolean(OverworldSpawn_name, OverworldSpawn);
+        nbt.putBoolean(NetherSpawn_name, NetherSpawn);
+        nbt.putBoolean(EndSpawn_name, EndSpawn);
+        nbt.putInt(GysahlGreenPatchSize_name, GysahlGreenPatchSize);
+        nbt.putDouble(GysahlGreenSpawnChance_name, GysahlGreenSpawnChance);
         nbt.putInt(ChocoboMinPack_name, ChocoboMinPack);
         nbt.putInt(ChocoboMaxPack_name, ChocoboMaxPack);
         nbt.putInt(OverWorldSpawnWeight_name, OverWorldSpawnWeight);
         nbt.putInt(MushroomSpawnWeight_name, MushroomSpawnWeight);
         nbt.putInt(NetherSpawnWeight_name, NetherSpawnWeight);
         nbt.putInt(EndSpawnWeight_name, EndSpawnWeight);
-        nbt.putInt(GysahlGreenPatchSize_name, GysahlGreenPatchSize);
-        nbt.putDouble(GysahlGreenSpawnChance_name, GysahlGreenSpawnChance);
-        nbt.putBoolean(CanSpawn_name, CanSpawn);
-        nbt.putBoolean(OverworldSpawn_name, OverworldSpawn);
-        nbt.putBoolean(NetherSpawn_name, NetherSpawn);
-        nbt.putBoolean(EndSpawn_name, EndSpawn);
         return nbt;
     }
     public void worldFromNbt(@NotNull NbtCompound nbt) {
@@ -86,38 +84,38 @@ public class globalVariablesHolder {
         EndSpawn = nbt.getBoolean(EndSpawn_name);
     }
     public NbtCompound chocoboToNbt(@NotNull NbtCompound nbt) {
-        nbt.putInt(Stamina_name, Stamina);
-        nbt.putInt(Speed_name, Speed);
-        nbt.putInt(Health_name, Health);
-        nbt.putInt(Armor_name, Armor);
-        nbt.putInt(ArmorTough_name, ArmorTough);
-        nbt.putInt(Attack_name, Attack);
-        nbt.putInt(WeaponModifier_name, WeaponModifier);
-        nbt.putInt(HealAmount_name, HealAmount);
-        nbt.putInt(EggHatchTimeTicks_name, EggHatchTimeTicks);
-        nbt.putInt(MaxHealth_name, MaxHealth);
-        nbt.putInt(MaxSpeed_name, MaxSpeed);
-        nbt.putDouble(StaminaRegen_name, StaminaRegen);
         nbt.putDouble(Tame_name, Tame);
+        nbt.putInt(Stamina_name, Stamina);
+        nbt.putDouble(MaxStamina_name, MaxStamina);
+        nbt.putDouble(StaminaRegen_name, StaminaRegen);
         nbt.putDouble(StaminaCost_name, StaminaCost);
         nbt.putDouble(StaminaGlide_name, StaminaGlide);
         nbt.putDouble(StaminaJump_name, StaminaJump);
+        nbt.putInt(Speed_name, Speed);
+        nbt.putInt(MaxSpeed_name, MaxSpeed);
+        nbt.putInt(Health_name, Health);
+        nbt.putInt(MaxHealth_name, MaxHealth);
+        nbt.putInt(Armor_name, Armor);
+        nbt.putDouble(MaxArmor_name, MaxArmor);
+        nbt.putInt(ArmorTough_name, ArmorTough);
+        nbt.putDouble(MaxArmorToughness_name, MaxArmorToughness);
+        nbt.putInt(Attack_name, Attack);
+        nbt.putDouble(MaxStrength_name, MaxStrength);
+        nbt.putInt(WeaponModifier_name, WeaponModifier);
+        nbt.putInt(HealAmount_name, HealAmount);
+        nbt.putInt(EggHatchTimeTicks_name, EggHatchTimeTicks);
         nbt.putDouble(PossLoss_name, PossLoss);
         nbt.putDouble(PossGain_name, PossGain);
-        nbt.putDouble(MaxStamina_name, MaxStamina);
-        nbt.putDouble(MaxStrength_name, MaxStrength);
-        nbt.putDouble(MaxArmor_name, MaxArmor);
-        nbt.putDouble(MaxArmorToughness_name, MaxArmorToughness);
-        nbt.putFloat(ArmorAlpha_name, ArmorAlpha);
-        nbt.putFloat(WeaponAlpha_name, WeaponAlpha);
-        nbt.putFloat(CollarAlpha_name, CollarAlpha);
-        nbt.putFloat(SaddleAlpha_name, SaddleAlpha);
         nbt.putBoolean(ExtraChocoboEffects_name, ExtraChocoboEffects);
         nbt.putBoolean(ExtraChocoboResourcesOnHit_name, ExtraChocoboResourcesOnHit);
         nbt.putBoolean(ExtraChocoboResourcesOnKill_name, ExtraChocoboResourcesOnKill);
         nbt.putBoolean(ShiftHitBypass_name, ShiftHitBypass);
         nbt.putBoolean(OwnChocoboHittable_name, OwnChocoboHittable);
         nbt.putBoolean(TamedChocoboHittable_name, TamedChocoboHittable);
+        nbt.putFloat(ArmorAlpha_name, ArmorAlpha);
+        nbt.putFloat(WeaponAlpha_name, WeaponAlpha);
+        nbt.putFloat(CollarAlpha_name, CollarAlpha);
+        nbt.putFloat(SaddleAlpha_name, SaddleAlpha);
         return nbt;
     }
 

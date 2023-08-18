@@ -16,11 +16,6 @@ public class defaultBooleans {
     public static final boolean dShiftHitBypass = true;
     public static final boolean dOwnChocoboHittable = false;
     public static final boolean dTamedChocoboHittable = false;
-
-    public static Integer ChocoConfigGet(Integer value, Integer FallBack) { return value == null ? FallBack : value; }
-    public static Double ChocoConfigGet(Double value, Double FallBack) { return value == null ? FallBack : value; }
-    public static Float ChocoConfigGet(Float value, Float FallBack) { return value == null ? FallBack : value; }
-    public static Boolean ChocoConfigGet(Boolean config, Boolean FallBack) { return config == null ? FallBack : config; }
     public static void setDefaultValues(boolean isWorld) {
         if (isWorld) {
             // World Configs

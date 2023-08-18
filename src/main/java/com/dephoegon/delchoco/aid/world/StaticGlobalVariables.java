@@ -1,5 +1,10 @@
 package com.dephoegon.delchoco.aid.world;
 
+import com.dephoegon.delchoco.aid.world.dValues.defaultDoubles;
+import com.dephoegon.delchoco.aid.world.dValues.defaultFloats;
+import com.dephoegon.delchoco.aid.world.dValues.defaultInts;
+import org.jetbrains.annotations.NotNull;
+
 public class StaticGlobalVariables {
     private static Integer Stamina;
     public static final String Stamina_name = "default_stamina";
@@ -179,8 +184,20 @@ public class StaticGlobalVariables {
     public static Boolean getEndSpawn() { return EndSpawn; }
     public static void setEndSpawn(boolean endSpawn) { StaticGlobalVariables.EndSpawn = endSpawn; }
 
-    public static int getValueOrDefault(Integer value, int defaultValue) { return value != null ? value : defaultValue; }
-    public static double getValueOrDefault(Double value, double defaultValue) { return value != null ? value : defaultValue; }
-    public static boolean getValueOrDefault(Boolean value, boolean defaultValue) { return value != null ? value : defaultValue; }
-    public static float getValueOrDefault(Float value, float defaultValue) { return value != null ? value : defaultValue; }
+    public static int ChocoConfigGet(Integer value, int defaultValue) { return value != null ? value : defaultValue; }
+    public static double ChocoConfigGet(Double value, double defaultValue) { return value != null ? value : defaultValue; }
+    public static boolean ChocoConfigGet(Boolean value, boolean defaultValue) { return value != null ? value : defaultValue; }
+    public static float ChocoConfigGet(Float value, float defaultValue) { return value != null ? value : defaultValue; }
+    public static int getValueInBounds(@NotNull defaultInts Holder, Integer inValue) {
+        int value = ChocoConfigGet(inValue, Holder.getDefault());
+        return  Math.max(Holder.getMin(), Math.min(Holder.getMax(), value));
+    }
+    public static double getValueInBounds(@NotNull defaultDoubles Holder, Double inValue) {
+        double value = ChocoConfigGet(inValue, Holder.getDefault());
+        return  Math.max(Holder.getMin(), Math.min(Holder.getMax(), value));
+    }
+    public static float getValueInBounds(@NotNull defaultFloats Holder, Float inValue) {
+        float value = ChocoConfigGet(inValue, Holder.getDefault());
+        return  Math.max(Holder.getMin(), Math.min(Holder.getMax(), value));
+    }
 }

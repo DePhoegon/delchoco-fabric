@@ -109,52 +109,47 @@ public class serverVariableAccess {
             DelChoco.LOGGER.warn("Failure to save global Variables data : "+ e.getMessage());
         }
     }
-    // TODO: Triple Check
-    //  Triple Check Variables are identical in type & name
-    //  have the same intent are the same across all 3 Holders [defaults, global, static]
-    //  Defaults have correct Getters
-    //  GlobalVariableHolder & StaticGlobalVariables have correct setters & getters.
     private void setDelchocoConfigVariables(globalVariablesHolder variables, boolean isWorld) {
         if (isWorld) {
-            setChocoboMinPack(variables.getChocoboMinPack());
-            setChocoboMaxPack(variables.getChocoboMaxPack());
-            setOverWorldSpawnWeight(variables.getOverWorldSpawnWeight());
-            setMushroomSpawnWeight(variables.getMushroomSpawnWeight());
-            setNetherSpawnWeight(variables.getNetherSpawnWeight());
-            setEndSpawnWeight(variables.getEndSpawnWeight());
-            setGysahlGreenPatchSize(variables.getGysahlGreenPatchSize());
-            setGysahlGreenSpawnChance(variables.getGysahlGreenSpawnChance());
+            setChocoboMinPack(getValueInBounds(dCHOCOBO_PACK_MIN, variables.getChocoboMinPack()));
+            setChocoboMaxPack(getValueInBounds(dCHOCOBO_PACK_MAX, variables.getChocoboMaxPack()));
+            setOverWorldSpawnWeight(getValueInBounds(dOVERWORLD_SPAWN_WEIGHT, variables.getOverWorldSpawnWeight()));
+            setMushroomSpawnWeight(getValueInBounds(dMUSHROOM_SPAWN_WEIGHT, variables.getMushroomSpawnWeight()));
+            setNetherSpawnWeight(getValueInBounds(dNETHER_SPAWN_WEIGHT, variables.getNetherSpawnWeight()));
+            setEndSpawnWeight(getValueInBounds(dEND_SPAWN_WEIGHT, variables.getEndSpawnWeight()));
+            setGysahlGreenPatchSize(getValueInBounds(dGYSAHL_GREEN_PATCH_SIZE, variables.getGysahlGreenPatchSize()));
+            setGysahlGreenSpawnChance(getValueInBounds(dGYSAHL_GREEN_SPAWN_CHANCE, variables.getGysahlGreenSpawnChance()));
             setCanSpawn(variables.isCanSpawn());
             setOverworldSpawn(variables.isOverworldSpawn());
             setNetherSpawn(variables.isNetherSpawn());
             setEndSpawn(variables.isEndSpawn());
         } else {
-            setStamina(variables.getStamina());
-            setSpeed(variables.getSpeed());
-            setHealth(variables.getHealth());
-            setArmor(variables.getArmor());
-            setArmorTough(variables.getArmorTough());
-            setAttack(variables.getAttack());
-            setWeaponModifier(variables.getWeaponModifier());
-            setHealAmount(variables.getHealAmount());
-            setEggHatchTimeTicks(variables.getEggHatchTimeTicks());
-            setMaxHealth(variables.getMaxHealth());
-            setMaxSpeed(variables.getMaxSpeed());
-            setStaminaRegen(variables.getStaminaRegen());
-            setTame(variables.getTame());
-            setStaminaCost(variables.getStaminaCost());
-            setStaminaGlide(variables.getStaminaGlide());
-            setStaminaJump(variables.getStaminaJump());
-            setPossLoss(variables.getPossLoss());
-            setPossGain(variables.getPossGain());
-            setMaxStamina(variables.getMaxStamina());
-            setMaxStrength(variables.getMaxStrength());
-            setMaxArmor(variables.getMaxArmor());
-            setMaxArmorToughness(variables.getMaxArmorToughness());
-            setArmorAlpha(variables.getArmorAlpha());
-            setWeaponAlpha(variables.getWeaponAlpha());
-            setCollarAlpha(variables.getCollarAlpha());
-            setSaddleAlpha(variables.getSaddleAlpha());
+            setStamina(getValueInBounds(dSTAMINA, variables.getStamina()));
+            setSpeed(getValueInBounds(dSPEED, variables.getSpeed()));
+            setHealth(getValueInBounds(dHEALTH, variables.getHealth()));
+            setArmor(getValueInBounds(dARMOR, variables.getArmor()));
+            setArmorTough(getValueInBounds(dARMOR_TOUGH, variables.getArmorTough()));
+            setAttack(getValueInBounds(dATTACK, variables.getAttack()));
+            setWeaponModifier(getValueInBounds(dWEAPON_MOD, variables.getWeaponModifier()));
+            setHealAmount(getValueInBounds(dHEAL_AMOUNT, variables.getHealAmount()));
+            setEggHatchTimeTicks(getValueInBounds(dEGG_HATCH, variables.getEggHatchTimeTicks()));
+            setMaxHealth(getValueInBounds(dMAX_HEALTH, variables.getMaxHealth()));
+            setMaxSpeed(getValueInBounds(dMAX_SPEED, variables.getMaxSpeed()));
+            setStaminaRegen(getValueInBounds(dSTAMINA_REGEN, variables.getStaminaRegen()));
+            setTame(getValueInBounds(dTAME, variables.getTame()));
+            setStaminaCost(getValueInBounds(dSTAMINA_SPRINT, variables.getStaminaCost()));
+            setStaminaGlide(getValueInBounds(dSTAMINA_GLIDE, variables.getStaminaGlide()));
+            setStaminaJump(getValueInBounds(dSTAMINA_JUMP, variables.getStaminaJump()));
+            setPossLoss(getValueInBounds(dPOS_LOSS, variables.getPossLoss()));
+            setPossGain(getValueInBounds(dPOS_GAIN, variables.getPossGain()));
+            setMaxStamina(getValueInBounds(dMAX_STAMINA, variables.getMaxStamina()));
+            setMaxStrength(getValueInBounds(dMAX_STRENGTH, variables.getMaxStrength()));
+            setMaxArmor(getValueInBounds(dMAX_ARMOR, variables.getMaxArmor()));
+            setMaxArmorToughness(getValueInBounds(dMAX_ARMOR_TOUGH, variables.getMaxArmorToughness()));
+            setArmorAlpha(getValueInBounds(dARMOR_ALPHA, variables.getArmorAlpha()));
+            setWeaponAlpha(getValueInBounds(dWEAPON_ALPHA, variables.getWeaponAlpha()));
+            setCollarAlpha(getValueInBounds(dCOLLAR_ALPHA, variables.getCollarAlpha()));
+            setSaddleAlpha(getValueInBounds(dSADDLE_ALPHA, variables.getSaddleAlpha()));
             setExtraChocoboEffects(variables.isExtraChocoboEffects());
             setExtraChocoboResourcesOnHit(variables.isExtraChocoboResourcesOnHit());
             setExtraChocoboResourcesOnKill(variables.isExtraChocoboResourcesOnKill());
@@ -165,45 +160,45 @@ public class serverVariableAccess {
     }
     private void getCurrentGlobalVariables(globalVariablesHolder variablesHolder, boolean isWorld) {
         if (isWorld) {
-            variablesHolder.setChocoboMinPack(StaticGlobalVariables.getChocoboMinPack());
-            variablesHolder.setChocoboMaxPack(StaticGlobalVariables.getChocoboMaxPack());
-            variablesHolder.setOverworldSpawn(StaticGlobalVariables.getOverworldSpawn());
-            variablesHolder.setMushroomSpawnWeight(StaticGlobalVariables.getMushroomSpawnWeight());
-            variablesHolder.setNetherSpawnWeight(StaticGlobalVariables.getNetherSpawnWeight());
-            variablesHolder.setEndSpawnWeight(StaticGlobalVariables.getEndSpawnWeight());
-            variablesHolder.setGysahlGreenPatchSize(StaticGlobalVariables.getGysahlGreenPatchSize());
-            variablesHolder.setGysahlGreenSpawnChance(StaticGlobalVariables.getGysahlGreenSpawnChance());
+            variablesHolder.setChocoboMinPack(getValueInBounds(dCHOCOBO_PACK_MIN, StaticGlobalVariables.getChocoboMinPack()));
+            variablesHolder.setChocoboMaxPack(getValueInBounds(dCHOCOBO_PACK_MAX, StaticGlobalVariables.getChocoboMaxPack()));
+            variablesHolder.setOverWorldSpawnWeight(getValueInBounds(dOVERWORLD_SPAWN_WEIGHT, StaticGlobalVariables.getOverWorldSpawnWeight()));
+            variablesHolder.setMushroomSpawnWeight(getValueInBounds(dMUSHROOM_SPAWN_WEIGHT, StaticGlobalVariables.getMushroomSpawnWeight()));
+            variablesHolder.setNetherSpawnWeight(getValueInBounds(dNETHER_SPAWN_WEIGHT, StaticGlobalVariables.getNetherSpawnWeight()));
+            variablesHolder.setEndSpawnWeight(getValueInBounds(dEND_SPAWN_WEIGHT, StaticGlobalVariables.getEndSpawnWeight()));
+            variablesHolder.setGysahlGreenPatchSize(getValueInBounds(dGYSAHL_GREEN_PATCH_SIZE, StaticGlobalVariables.getGysahlGreenPatchSize()));
+            variablesHolder.setGysahlGreenSpawnChance(getValueInBounds(dGYSAHL_GREEN_SPAWN_CHANCE, StaticGlobalVariables.getGysahlGreenSpawnChance()));
             variablesHolder.setCanSpawn(StaticGlobalVariables.getCanSpawn());
             variablesHolder.setOverworldSpawn(StaticGlobalVariables.getOverworldSpawn());
             variablesHolder.setNetherSpawn(StaticGlobalVariables.getNetherSpawn());
             variablesHolder.setEndSpawn(StaticGlobalVariables.getEndSpawn());
         } else  {
-            variablesHolder.setStamina(StaticGlobalVariables.getStamina());
-            variablesHolder.setSpeed(StaticGlobalVariables.getSpeed());
-            variablesHolder.setHealth(StaticGlobalVariables.getHealth());
-            variablesHolder.setArmor(StaticGlobalVariables.getArmor());
-            variablesHolder.setArmorTough(StaticGlobalVariables.getArmorTough());
-            variablesHolder.setAttack(StaticGlobalVariables.getAttack());
-            variablesHolder.setWeaponModifier(StaticGlobalVariables.getWeaponModifier());
-            variablesHolder.setHealAmount(StaticGlobalVariables.getHealAmount());
-            variablesHolder.setEggHatchTimeTicks(StaticGlobalVariables.getEggHatchTimeTicks());
-            variablesHolder.setMaxHealth(StaticGlobalVariables.getMaxHealth());
-            variablesHolder.setMaxSpeed(StaticGlobalVariables.getMaxSpeed());
-            variablesHolder.setStaminaRegen(StaticGlobalVariables.getStaminaRegen());
-            variablesHolder.setTame(StaticGlobalVariables.getTame());
-            variablesHolder.setStaminaCost(StaticGlobalVariables.getStaminaCost());
-            variablesHolder.setStaminaGlide(StaticGlobalVariables.getStaminaGlide());
-            variablesHolder.setStaminaJump(StaticGlobalVariables.getStaminaJump());
-            variablesHolder.setPossLoss(StaticGlobalVariables.getPossLoss());
-            variablesHolder.setPossGain(StaticGlobalVariables.getPossGain());
-            variablesHolder.setMaxStamina(StaticGlobalVariables.getMaxStamina());
-            variablesHolder.setMaxStrength(StaticGlobalVariables.getMaxStrength());
-            variablesHolder.setMaxArmor(StaticGlobalVariables.getMaxArmor());
-            variablesHolder.setMaxArmorToughness(StaticGlobalVariables.getMaxArmorToughness());
-            variablesHolder.setArmorAlpha(StaticGlobalVariables.getArmorAlpha());
-            variablesHolder.setWeaponAlpha(StaticGlobalVariables.getWeaponAlpha());
-            variablesHolder.setCollarAlpha(StaticGlobalVariables.getCollarAlpha());
-            variablesHolder.setSaddleAlpha(StaticGlobalVariables.getSaddleAlpha());
+            variablesHolder.setStamina(getValueInBounds(dSTAMINA, StaticGlobalVariables.getStamina()));
+            variablesHolder.setSpeed(getValueInBounds(dSPEED, StaticGlobalVariables.getSpeed()));
+            variablesHolder.setHealth(getValueInBounds(dHEALTH, StaticGlobalVariables.getHealth()));
+            variablesHolder.setArmor(getValueInBounds(dARMOR, StaticGlobalVariables.getArmor()));
+            variablesHolder.setArmorTough(getValueInBounds(dARMOR_TOUGH, StaticGlobalVariables.getArmorTough()));
+            variablesHolder.setAttack(getValueInBounds(dATTACK, StaticGlobalVariables.getAttack()));
+            variablesHolder.setWeaponModifier(getValueInBounds(dWEAPON_MOD, StaticGlobalVariables.getWeaponModifier()));
+            variablesHolder.setHealAmount(getValueInBounds(dHEAL_AMOUNT, StaticGlobalVariables.getHealAmount()));
+            variablesHolder.setEggHatchTimeTicks(getValueInBounds(dEGG_HATCH, StaticGlobalVariables.getEggHatchTimeTicks()));
+            variablesHolder.setMaxHealth(getValueInBounds(dMAX_HEALTH, StaticGlobalVariables.getMaxHealth()));
+            variablesHolder.setMaxSpeed(getValueInBounds(dMAX_SPEED, StaticGlobalVariables.getMaxSpeed()));
+            variablesHolder.setStaminaRegen(getValueInBounds(dSTAMINA_REGEN, StaticGlobalVariables.getStaminaRegen()));
+            variablesHolder.setTame(getValueInBounds(dTAME, StaticGlobalVariables.getTame()));
+            variablesHolder.setStaminaCost(getValueInBounds(dSTAMINA_SPRINT, StaticGlobalVariables.getStaminaCost()));
+            variablesHolder.setStaminaGlide(getValueInBounds(dSTAMINA_GLIDE, StaticGlobalVariables.getStaminaGlide()));
+            variablesHolder.setStaminaJump(getValueInBounds(dSTAMINA_JUMP, StaticGlobalVariables.getStaminaJump()));
+            variablesHolder.setPossLoss(getValueInBounds(dPOS_LOSS, StaticGlobalVariables.getPossLoss()));
+            variablesHolder.setPossGain(getValueInBounds(dPOS_GAIN, StaticGlobalVariables.getPossGain()));
+            variablesHolder.setMaxStamina(getValueInBounds(dMAX_STAMINA, StaticGlobalVariables.getMaxStamina()));
+            variablesHolder.setMaxStrength(getValueInBounds(dMAX_STRENGTH, StaticGlobalVariables.getMaxStrength()));
+            variablesHolder.setMaxArmor(getValueInBounds(dMAX_ARMOR, StaticGlobalVariables.getMaxArmor()));
+            variablesHolder.setMaxArmorToughness(getValueInBounds(dMAX_ARMOR_TOUGH, StaticGlobalVariables.getMaxArmorToughness()));
+            variablesHolder.setArmorAlpha(getValueInBounds(dARMOR_ALPHA, StaticGlobalVariables.getArmorAlpha()));
+            variablesHolder.setWeaponAlpha(getValueInBounds(dWEAPON_ALPHA, StaticGlobalVariables.getWeaponAlpha()));
+            variablesHolder.setCollarAlpha(getValueInBounds(dCOLLAR_ALPHA, StaticGlobalVariables.getCollarAlpha()));
+            variablesHolder.setSaddleAlpha(getValueInBounds(dSADDLE_ALPHA, StaticGlobalVariables.getSaddleAlpha()));
             variablesHolder.setExtraChocoboEffects(StaticGlobalVariables.getExtraChocoboEffects());
             variablesHolder.setExtraChocoboResourcesOnHit(StaticGlobalVariables.getExtraChocoboResourcesOnHit());
             variablesHolder.setExtraChocoboResourcesOnKill(StaticGlobalVariables.getExtraChocoboResourcesOnKill());
@@ -262,51 +257,50 @@ public class serverVariableAccess {
         }
     }
     private void globalChocoboVariableNullCheck() {
-        if (StaticGlobalVariables.getStamina() == null) { StaticGlobalVariables.setStamina(dSTAMINA.getDefault()); }
-        if (StaticGlobalVariables.getSpeed() == null) { StaticGlobalVariables.setSpeed(dSPEED.getDefault()); }
-        if (StaticGlobalVariables.getHealth() == null) { StaticGlobalVariables.setHealth(dHEALTH.getDefault()); }
-        if (StaticGlobalVariables.getArmor() == null) { StaticGlobalVariables.setArmor(dARMOR.getDefault()); }
-        if (StaticGlobalVariables.getArmorTough() == null) { StaticGlobalVariables.setArmorTough(dARMOR_TOUGH.getDefault()); }
-        if (StaticGlobalVariables.getAttack() == null) { StaticGlobalVariables.setAttack(dATTACK.getDefault()); }
-        if (StaticGlobalVariables.getWeaponModifier() == null) { StaticGlobalVariables.setWeaponModifier(dWEAPON_MOD.getDefault()); }
-        if (StaticGlobalVariables.getHealAmount() == null) { StaticGlobalVariables.setHealAmount(dHEAL_AMOUNT.getDefault()); }
-        if (StaticGlobalVariables.getEggHatchTimeTicks() == null) { StaticGlobalVariables.setEggHatchTimeTicks(dEGG_HATCH.getDefault()); }
-        if (StaticGlobalVariables.getMaxHealth() == null) { StaticGlobalVariables.setMaxHealth(dMAX_HEALTH.getDefault()); }
-        if (StaticGlobalVariables.getMaxSpeed() == null) { StaticGlobalVariables.setMaxSpeed(dMAX_SPEED.getDefault()); }
-        if (StaticGlobalVariables.getStaminaRegen() == null) { StaticGlobalVariables.setStaminaRegen(dSTAMINA_REGEN.getDefault()); }
-        if (StaticGlobalVariables.getTame() == null) { StaticGlobalVariables.setTame(dTAME.getDefault()); }
-        if (StaticGlobalVariables.getStaminaCost() == null) { StaticGlobalVariables.setStaminaCost(dSTAMINA_SPRINT.getDefault()); }
-        if (StaticGlobalVariables.getStaminaGlide() == null) { StaticGlobalVariables.setStaminaGlide(dSTAMINA_GLIDE.getDefault()); }
-        if (StaticGlobalVariables.getStaminaJump() == null) { StaticGlobalVariables.setStaminaJump(dSTAMINA_JUMP.getDefault()); }
-        if (StaticGlobalVariables.getPossLoss() == null) { StaticGlobalVariables.setPossLoss(dPOS_LOSS.getDefault()); }
-        if (StaticGlobalVariables.getPossGain() == null) { StaticGlobalVariables.setPossGain(dPOS_GAIN.getDefault()); }
-        if (StaticGlobalVariables.getMaxStamina() == null) { StaticGlobalVariables.setMaxStamina(dMAX_STAMINA.getDefault()); }
-        if (StaticGlobalVariables.getMaxStrength() == null) { StaticGlobalVariables.setMaxStrength(dMAX_STRENGTH.getDefault()); }
-        if (StaticGlobalVariables.getMaxArmor() == null) { StaticGlobalVariables.setMaxArmor(dMAX_ARMOR.getDefault()); }
-        if (StaticGlobalVariables.getMaxArmorToughness() == null) { StaticGlobalVariables.setMaxArmorToughness(dMAX_ARMOR_TOUGH.getDefault()); }
-        if (StaticGlobalVariables.getArmorAlpha() == null) { StaticGlobalVariables.setArmorAlpha(dARMOR_ALPHA.getDefault()); }
-        if (StaticGlobalVariables.getWeaponAlpha() == null) { StaticGlobalVariables.setWeaponAlpha(dWEAPON_ALPHA.getDefault()); }
-        if (StaticGlobalVariables.getCollarAlpha() == null) { StaticGlobalVariables.setCollarAlpha(dCOLLAR_ALPHA.getDefault()); }
-        if (StaticGlobalVariables.getSaddleAlpha() == null) { StaticGlobalVariables.setCollarAlpha(dCOLLAR_ALPHA.getDefault()); }
-        if (StaticGlobalVariables.getSaddleAlpha() == null) { StaticGlobalVariables.setSaddleAlpha(dSADDLE_ALPHA.getDefault()); }
-        if (StaticGlobalVariables.getExtraChocoboEffects() == null) { StaticGlobalVariables.setExtraChocoboEffects(dExtraChocoboEffects); }
-        if (StaticGlobalVariables.getExtraChocoboResourcesOnHit() == null) { StaticGlobalVariables.setExtraChocoboResourcesOnHit(dExtraChocoboResourcesOnHit); }
-        if (StaticGlobalVariables.getExtraChocoboResourcesOnKill() == null) { StaticGlobalVariables.setExtraChocoboResourcesOnKill(dExtraChocoboResourcesOnKill); }
-        if (StaticGlobalVariables.getShiftHitBypass() == null) { StaticGlobalVariables.setShiftHitBypass(dShiftHitBypass); }
-        if (StaticGlobalVariables.getOwnChocoboHittable() == null) { StaticGlobalVariables.setOwnChocoboHittable(dOwnChocoboHittable); }
-        if (StaticGlobalVariables.getTamedChocoboHittable() == null) { StaticGlobalVariables.setTamedChocoboHittable(dTamedChocoboHittable); }
+        StaticGlobalVariables.setStamina(ChocoConfigGet(StaticGlobalVariables.getStamina(), dSTAMINA.getDefault()));
+                StaticGlobalVariables.setSpeed(ChocoConfigGet(StaticGlobalVariables.getSpeed(), dSPEED.getDefault()));
+                StaticGlobalVariables.setHealth(ChocoConfigGet(StaticGlobalVariables.getHealth(), dHEALTH.getDefault()));
+                StaticGlobalVariables.setArmor(ChocoConfigGet(StaticGlobalVariables.getArmor(), dARMOR.getDefault()));
+                StaticGlobalVariables.setArmorTough(ChocoConfigGet(StaticGlobalVariables.getArmorTough(), dARMOR_TOUGH.getDefault()));
+                StaticGlobalVariables.setAttack(ChocoConfigGet(StaticGlobalVariables.getAttack(), dATTACK.getDefault()));
+                StaticGlobalVariables.setWeaponModifier(ChocoConfigGet(StaticGlobalVariables.getWeaponModifier(), dWEAPON_MOD.getDefault()));
+                StaticGlobalVariables.setHealAmount(ChocoConfigGet(StaticGlobalVariables.getHealAmount(), dHEAL_AMOUNT.getDefault()));
+                StaticGlobalVariables.setEggHatchTimeTicks(ChocoConfigGet(StaticGlobalVariables.getEggHatchTimeTicks(), dEGG_HATCH.getDefault()));
+                StaticGlobalVariables.setMaxHealth(ChocoConfigGet(StaticGlobalVariables.getMaxHealth(), dMAX_HEALTH.getDefault()));
+                StaticGlobalVariables.setMaxSpeed(ChocoConfigGet(StaticGlobalVariables.getMaxSpeed(), dMAX_SPEED.getDefault()));
+                StaticGlobalVariables.setStaminaRegen(ChocoConfigGet(StaticGlobalVariables.getStaminaRegen(), dSTAMINA_REGEN.getDefault()));
+                StaticGlobalVariables.setTame(ChocoConfigGet(StaticGlobalVariables.getTame(), dTAME.getDefault()));
+                StaticGlobalVariables.setStaminaCost(ChocoConfigGet(StaticGlobalVariables.getStaminaCost(), dSTAMINA_SPRINT.getDefault()));
+                StaticGlobalVariables.setStaminaGlide(ChocoConfigGet(StaticGlobalVariables.getStaminaGlide(), dSTAMINA_GLIDE.getDefault()));
+                StaticGlobalVariables.setStaminaJump(ChocoConfigGet(StaticGlobalVariables.getStaminaJump(), dSTAMINA_JUMP.getDefault()));
+                StaticGlobalVariables.setPossLoss(ChocoConfigGet(StaticGlobalVariables.getPossLoss(), dPOS_LOSS.getDefault()));
+                StaticGlobalVariables.setPossGain(ChocoConfigGet(StaticGlobalVariables.getPossGain(), dPOS_GAIN.getDefault()));
+                StaticGlobalVariables.setMaxStamina(ChocoConfigGet(StaticGlobalVariables.getMaxStamina(), dMAX_STAMINA.getDefault()));
+                StaticGlobalVariables.setMaxStrength(ChocoConfigGet(StaticGlobalVariables.getMaxStrength(), dMAX_STRENGTH.getDefault()));
+                StaticGlobalVariables.setMaxArmor(ChocoConfigGet(StaticGlobalVariables.getMaxArmor(), dMAX_STAMINA.getDefault()));
+                StaticGlobalVariables.setMaxArmorToughness(ChocoConfigGet(StaticGlobalVariables.getMaxArmorToughness(), dMAX_ARMOR_TOUGH.getDefault()));
+                StaticGlobalVariables.setArmorAlpha(ChocoConfigGet(StaticGlobalVariables.getArmorAlpha(), dARMOR_ALPHA.getDefault()));
+                StaticGlobalVariables.setWeaponAlpha(ChocoConfigGet(StaticGlobalVariables.getWeaponAlpha(), dWEAPON_ALPHA.getDefault()));
+                StaticGlobalVariables.setCollarAlpha(ChocoConfigGet(StaticGlobalVariables.getCollarAlpha(), dCOLLAR_ALPHA.getDefault()));
+                StaticGlobalVariables.setSaddleAlpha(ChocoConfigGet(StaticGlobalVariables.getSaddleAlpha(), dSADDLE_ALPHA.getDefault()));
+                StaticGlobalVariables.setExtraChocoboEffects(ChocoConfigGet(StaticGlobalVariables.getExtraChocoboEffects(), dExtraChocoboEffects));
+                StaticGlobalVariables.setExtraChocoboResourcesOnHit(ChocoConfigGet(StaticGlobalVariables.getExtraChocoboResourcesOnHit(), dExtraChocoboResourcesOnHit));
+                StaticGlobalVariables.setExtraChocoboResourcesOnKill(ChocoConfigGet(StaticGlobalVariables.getExtraChocoboResourcesOnKill(), dExtraChocoboResourcesOnKill));
+                StaticGlobalVariables.setShiftHitBypass(ChocoConfigGet(StaticGlobalVariables.getShiftHitBypass(), dShiftHitBypass));
+                StaticGlobalVariables.setOwnChocoboHittable(ChocoConfigGet(StaticGlobalVariables.getOwnChocoboHittable(), dOwnChocoboHittable));
+                StaticGlobalVariables.setTamedChocoboHittable(ChocoConfigGet(StaticGlobalVariables.getTamedChocoboHittable(), dTamedChocoboHittable));
     }
     private void globalWorldVariableNullCheck() {
-        if (StaticGlobalVariables.getChocoboMinPack() == null) { StaticGlobalVariables.setChocoboMinPack(dCHOCOBO_PACK_MIN.getDefault()); }
-        if (StaticGlobalVariables.getChocoboMaxPack() == null) { StaticGlobalVariables.setChocoboMaxPack(dCHOCOBO_PACK_MAX.getDefault()); }
-        if (StaticGlobalVariables.getOverWorldSpawnWeight() == null) { StaticGlobalVariables.setOverWorldSpawnWeight(dOVERWORLD_SPAWN_WEIGHT.getDefault()); }
-        if (StaticGlobalVariables.getNetherSpawnWeight() == null) { StaticGlobalVariables.setNetherSpawnWeight(dNETHER_SPAWN_WEIGHT.getDefault()); }
-        if (StaticGlobalVariables.getEndSpawnWeight() == null) { StaticGlobalVariables.setNetherSpawnWeight(dEND_SPAWN_WEIGHT.getDefault()); }
-        if (StaticGlobalVariables.getGysahlGreenPatchSize() == null) { StaticGlobalVariables.setGysahlGreenPatchSize(dGYSAHL_GREEN_PATCH_SIZE.getDefault()); }
-        if (StaticGlobalVariables.getGysahlGreenSpawnChance() == null) { StaticGlobalVariables.setGysahlGreenSpawnChance(dGYSAHL_GREEN_SPAWN_CHANCE.getDefault()); }
-        if (StaticGlobalVariables.getCanSpawn() == null) { StaticGlobalVariables.setCanSpawn(dCanSpawn); }
-        if (StaticGlobalVariables.getOverworldSpawn() == null) { StaticGlobalVariables.setOverworldSpawn(dOverworldSpawn); }
-        if (StaticGlobalVariables.getNetherSpawn() == null) { StaticGlobalVariables.setNetherSpawn(dNetherSpawn); }
-        if (StaticGlobalVariables.getEndSpawn() == null) { StaticGlobalVariables.setEndSpawn(dEndSpawn); }
+        StaticGlobalVariables.setChocoboMinPack(ChocoConfigGet(StaticGlobalVariables.getChocoboMinPack(), dCHOCOBO_PACK_MIN.getDefault()));
+        StaticGlobalVariables.setChocoboMaxPack(ChocoConfigGet(StaticGlobalVariables.getChocoboMaxPack(), dCHOCOBO_PACK_MAX.getDefault()));
+        StaticGlobalVariables.setOverWorldSpawnWeight(ChocoConfigGet(StaticGlobalVariables.getOverWorldSpawnWeight(), dOVERWORLD_SPAWN_WEIGHT.getDefault()));
+        StaticGlobalVariables.setNetherSpawnWeight(ChocoConfigGet(StaticGlobalVariables.getNetherSpawnWeight(), dNETHER_SPAWN_WEIGHT.getDefault()));
+        StaticGlobalVariables.setEndSpawnWeight(ChocoConfigGet(StaticGlobalVariables.getEndSpawnWeight(), dEND_SPAWN_WEIGHT.getDefault()));
+        StaticGlobalVariables.setGysahlGreenPatchSize(ChocoConfigGet(StaticGlobalVariables.getGysahlGreenPatchSize(), dGYSAHL_GREEN_PATCH_SIZE.getDefault()));
+        StaticGlobalVariables.setGysahlGreenSpawnChance(ChocoConfigGet(StaticGlobalVariables.getGysahlGreenSpawnChance(), dGYSAHL_GREEN_SPAWN_CHANCE.getDefault()));
+        StaticGlobalVariables.setCanSpawn(ChocoConfigGet(StaticGlobalVariables.getCanSpawn(), dCanSpawn));
+        StaticGlobalVariables.setOverworldSpawn(ChocoConfigGet(StaticGlobalVariables.getOverworldSpawn(), dOverworldSpawn));
+        StaticGlobalVariables.setNetherSpawn(ChocoConfigGet(StaticGlobalVariables.getNetherSpawn(), dNetherSpawn));
+        StaticGlobalVariables.setEndSpawn(ChocoConfigGet(StaticGlobalVariables.getEndSpawn(), dEndSpawn));
     }
 }

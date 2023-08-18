@@ -12,6 +12,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import static com.dephoegon.delchoco.aid.ChocoList.clientRegOrder;
+import static com.dephoegon.delchoco.aid.ChocoList.commonRegOrder;
 import static net.minecraft.item.Items.BONE_MEAL;
 
 public class DelChoco implements ModInitializer, ClientModInitializer {
@@ -22,9 +23,7 @@ public class DelChoco implements ModInitializer, ClientModInitializer {
 
 	@Override
 	public void onInitialize() {
-		// This code runs as soon as Minecraft is in a mod-load-ready state.
-		// However, some things (like resources) may still be uninitialized.
-		// Proceed with mild caution.
+		commonRegOrder();
 
 		LOGGER.info("Hello Fabric world!");
 	}

@@ -16,6 +16,7 @@ public class defaultBooleans {
     public static final boolean dShiftHitBypass = true;
     public static final boolean dOwnChocoboHittable = false;
     public static final boolean dTamedChocoboHittable = false;
+    public static final boolean dOwnerOnlyInventoryAccess = false;
     public static void setDefaultValues(boolean isWorld) {
         if (isWorld) {
             // World Configs
@@ -65,6 +66,7 @@ public class defaultBooleans {
             setShiftHitBypass(dShiftHitBypass);
             setOwnChocoboHittable(dOwnChocoboHittable);
             setTamedChocoboHittable(dTamedChocoboHittable);
+            setOwnerOnlyInventory(dOwnerOnlyInventoryAccess);
         }
     } // Use StaticGlobalVariables set Methods
 }

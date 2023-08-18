@@ -1,4 +1,5 @@
 package com.dephoegon.delchoco.common.entities.properties;
 
-public class MovementType {
+public enum MovementType {
+    WANDER, FOLLOW_OWNER, STANDSTILL, FOLLOW_LURE
 }

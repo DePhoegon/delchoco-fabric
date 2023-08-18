@@ -94,6 +94,8 @@ public class StaticGlobalVariables {
     public static final String NetherSpawn_name = "chocobo_spawn_enable_nether";
     private static Boolean EndSpawn;
     public static final String  EndSpawn_name = "chocobo_spawn_enable_nether";
+    private static Boolean OwnerOnlyInventory;
+    public static final String OwnerOnlyInventory_name = "chocobo_inventory_owner_only";
     public StaticGlobalVariables() { }
     public static Integer getStamina() { return Stamina; }
     public static void setStamina(int stamina) { StaticGlobalVariables.Stamina = stamina; }
@@ -183,6 +185,8 @@ public class StaticGlobalVariables {
     public static void setNetherSpawn(boolean netherSpawn) { StaticGlobalVariables.NetherSpawn = netherSpawn; }
     public static Boolean getEndSpawn() { return EndSpawn; }
     public static void setEndSpawn(boolean endSpawn) { StaticGlobalVariables.EndSpawn = endSpawn; }
+    public static Boolean getOwnerOnlyInventory() { return OwnerOnlyInventory; }
+    public static void setOwnerOnlyInventory(boolean ownerOnlyInventory) { StaticGlobalVariables.OwnerOnlyInventory = ownerOnlyInventory; }
 
     public static int ChocoConfigGet(Integer value, int defaultValue) { return value != null ? value : defaultValue; }
     public static double ChocoConfigGet(Double value, double defaultValue) { return value != null ? value : defaultValue; }

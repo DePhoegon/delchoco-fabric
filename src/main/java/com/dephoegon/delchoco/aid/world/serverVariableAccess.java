@@ -156,6 +156,7 @@ public class serverVariableAccess {
             setShiftHitBypass(variables.isShiftHitBypass());
             setOwnChocoboHittable(variables.isOwnChocoboHittable());
             setTamedChocoboHittable(variables.isTamedChocoboHittable());
+            setOwnerOnlyInventory(variables.isOwnerOnlyInventory());
         }
     }
     private void getCurrentGlobalVariables(globalVariablesHolder variablesHolder, boolean isWorld) {
@@ -205,6 +206,7 @@ public class serverVariableAccess {
             variablesHolder.setShiftHitBypass(StaticGlobalVariables.getShiftHitBypass());
             variablesHolder.setOwnChocoboHittable(StaticGlobalVariables.getOwnChocoboHittable());
             variablesHolder.setTamedChocoboHittable(StaticGlobalVariables.getTamedChocoboHittable());
+            variablesHolder.setOwnerOnlyInventory(StaticGlobalVariables.getOwnerOnlyInventory());
         }
     }
     private boolean globalVariablesChanged(globalVariablesHolder currentVariables, boolean isWorld) {
@@ -253,6 +255,7 @@ public class serverVariableAccess {
             if (currentVariables.isExtraChocoboResourcesOnKill() != StaticGlobalVariables.getExtraChocoboResourcesOnKill()) { return true; }
             if (currentVariables.isShiftHitBypass() != StaticGlobalVariables.getShiftHitBypass()) { return true; }
             if (currentVariables.isOwnChocoboHittable() != StaticGlobalVariables.getOwnChocoboHittable()) { return true; }
+            if (currentVariables.isOwnerOnlyInventory() != StaticGlobalVariables.getOwnerOnlyInventory()) { return true; }
             return currentVariables.isTamedChocoboHittable() != StaticGlobalVariables.getTamedChocoboHittable();
         }
     }
@@ -289,6 +292,7 @@ public class serverVariableAccess {
                 StaticGlobalVariables.setShiftHitBypass(ChocoConfigGet(StaticGlobalVariables.getShiftHitBypass(), dShiftHitBypass));
                 StaticGlobalVariables.setOwnChocoboHittable(ChocoConfigGet(StaticGlobalVariables.getOwnChocoboHittable(), dOwnChocoboHittable));
                 StaticGlobalVariables.setTamedChocoboHittable(ChocoConfigGet(StaticGlobalVariables.getTamedChocoboHittable(), dTamedChocoboHittable));
+                StaticGlobalVariables.setOwnerOnlyInventory(ChocoConfigGet(StaticGlobalVariables.getOwnerOnlyInventory(), dOwnerOnlyInventoryAccess));
     }
     private void globalWorldVariableNullCheck() {
         StaticGlobalVariables.setChocoboMinPack(ChocoConfigGet(StaticGlobalVariables.getChocoboMinPack(), dCHOCOBO_PACK_MIN.getDefault()));

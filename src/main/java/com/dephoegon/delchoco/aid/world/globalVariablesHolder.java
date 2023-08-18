@@ -50,6 +50,7 @@ public class globalVariablesHolder {
     private boolean OverworldSpawn;
     private boolean NetherSpawn;
     private boolean EndSpawn;
+    private boolean OwnerOnlyInventory;
     public globalVariablesHolder() { }
     public globalVariablesHolder(NbtCompound nbt, boolean isWorld) { if (isWorld) { worldFromNbt(nbt); } else { chocoboFromNbt(nbt); } }
 
@@ -116,6 +117,7 @@ public class globalVariablesHolder {
         nbt.putFloat(WeaponAlpha_name, WeaponAlpha);
         nbt.putFloat(CollarAlpha_name, CollarAlpha);
         nbt.putFloat(SaddleAlpha_name, SaddleAlpha);
+        nbt.putBoolean(OwnerOnlyInventory_name, OwnerOnlyInventory);
         return nbt;
     }
 
@@ -152,6 +154,7 @@ public class globalVariablesHolder {
         ShiftHitBypass = nbt.getBoolean(ShiftHitBypass_name);
         OwnChocoboHittable = nbt.getBoolean(OwnChocoboHittable_name);
         TamedChocoboHittable = nbt.getBoolean(TamedChocoboHittable_name);
+        OwnerOnlyInventory = nbt.getBoolean(OwnerOnlyInventory_name);
     }
 
     //setters/getters
@@ -243,4 +246,6 @@ public class globalVariablesHolder {
     public void setNetherSpawn(boolean value) { this.NetherSpawn = value; }
     public boolean isEndSpawn() { return this.EndSpawn; }
     public void setEndSpawn(boolean value) { this.EndSpawn = value; }
+    public boolean isOwnerOnlyInventory() { return this.OwnerOnlyInventory; }
+    public void setOwnerOnlyInventory(boolean value) { this.OwnerOnlyInventory = value; }
 }

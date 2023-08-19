@@ -192,6 +192,7 @@ public class StaticGlobalVariables {
     public static double ChocoConfigGet(Double value, double defaultValue) { return value != null ? value : defaultValue; }
     public static boolean ChocoConfigGet(Boolean value, boolean defaultValue) { return value != null ? value : defaultValue; }
     public static float ChocoConfigGet(Float value, float defaultValue) { return value != null ? value : defaultValue; }
+    public static float FloatChocoConfigGet(Integer value, int defaultValue) { return value != null ? value : defaultValue; }
     public static int getValueInBounds(@NotNull defaultInts Holder, Integer inValue) {
         int value = ChocoConfigGet(inValue, Holder.getDefault());
         return  Math.max(Holder.getMin(), Math.min(Holder.getMax(), value));

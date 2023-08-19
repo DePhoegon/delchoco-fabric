@@ -1,5 +1,6 @@
 package com.dephoegon.delchoco.common.entities;
 
+import com.dephoegon.delchoco.DelChoco;
 import com.dephoegon.delchoco.aid.world.StaticGlobalVariables;
 import com.dephoegon.delchoco.common.entities.breeding.ChocoboMateGoal;
 import com.dephoegon.delchoco.common.entities.properties.*;
@@ -7,8 +8,16 @@ import com.dephoegon.delchoco.common.entities.properties.ChocoboGoals.ChocoboLoc
 import com.dephoegon.delchoco.common.entities.properties.MovementType;
 import com.dephoegon.delchoco.common.entities.properties.ChocoboGoals.ChocoboRandomStrollGoal;
 import com.dephoegon.delchoco.common.init.ModAttributes;
+import com.dephoegon.delchoco.common.init.ModSounds;
 import com.dephoegon.delchoco.common.items.ChocoboArmorItems;
+import com.dephoegon.delchoco.common.items.ChocoboLeashPointer;
+import com.dephoegon.delchoco.common.items.ChocoboSaddleItem;
+import com.dephoegon.delchoco.common.network.PacketManager;
+import com.dephoegon.delchoco.common.network.packets.OpenChocoboGuiMessage;
 import com.dephoegon.delchoco.utils.WorldUtils;
+import com.google.common.collect.Maps;
+import net.minecraft.block.Block;
+import net.minecraft.block.Blocks;
 import net.minecraft.block.FluidBlock;
 import net.minecraft.block.ShapeContext;
 import net.minecraft.client.MinecraftClient;
@@ -17,6 +26,7 @@ import net.minecraft.entity.ai.goal.*;
 import net.minecraft.entity.ai.pathing.LandPathNodeMaker;
 import net.minecraft.entity.ai.pathing.PathNodeType;
 import net.minecraft.entity.attribute.*;
+import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.entity.data.DataTracker;
 import net.minecraft.entity.data.TrackedData;
 import net.minecraft.entity.data.TrackedDataHandlerRegistry;
@@ -33,45 +43,51 @@ import net.minecraft.entity.passive.TameableEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.inventory.Inventory;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.item.Items;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtHelper;
 import net.minecraft.recipe.Ingredient;
 import net.minecraft.screen.NamedScreenHandlerFactory;
 import net.minecraft.screen.ScreenHandler;
+import net.minecraft.screen.SimpleNamedScreenHandlerFactory;
+import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
+import net.minecraft.sound.SoundEvent;
 import net.minecraft.tag.FluidTags;
-import net.minecraft.util.ItemScatterer;
-import net.minecraft.util.TimeHelper;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.math.Position;
-import net.minecraft.util.math.Vec3d;
+import net.minecraft.text.LiteralText;
+import net.minecraft.text.TranslatableText;
+import net.minecraft.util.*;
+import net.minecraft.util.math.*;
 import net.minecraft.util.math.intprovider.UniformIntProvider;
 import net.minecraft.util.registry.RegistryEntry;
 import net.minecraft.util.registry.RegistryKey;
-import net.minecraft.world.LocalDifficulty;
-import net.minecraft.world.ServerWorldAccess;
-import net.minecraft.world.World;
-import net.minecraft.world.WorldView;
+import net.minecraft.world.*;
 import net.minecraft.world.biome.Biome;
 import net.minecraft.world.biome.BiomeKeys;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
+import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
 
+import static com.dephoegon.delbase.item.ShiftingDyes.*;
 import static com.dephoegon.delchoco.aid.chocoKB.isChocoShiftDown;
 import static com.dephoegon.delchoco.aid.chocoKB.isChocoboWaterGlide;
+import static com.dephoegon.delchoco.aid.dyeList.getDyeList;
 import static com.dephoegon.delchoco.aid.world.StaticGlobalVariables.ChocoConfigGet;
 import static com.dephoegon.delchoco.aid.world.StaticGlobalVariables.FloatChocoConfigGet;
+import static com.dephoegon.delchoco.aid.world.dValues.defaultBooleans.dOwnerOnlyInventoryAccess;
 import static com.dephoegon.delchoco.aid.world.dValues.defaultDoubles.*;
 import static com.dephoegon.delchoco.aid.world.dValues.defaultInts.*;
 import static com.dephoegon.delchoco.common.entities.breeding.ChocoboSnap.setChocoScale;
 import static com.dephoegon.delchoco.common.init.ModItems.GYSAHL_GREEN_ITEM;
-import static net.minecraft.item.Items.ENDER_PEARL;
+import static com.dephoegon.delchoco.common.init.ModSounds.AMBIENT_SOUND;
+import static net.minecraft.entity.SpawnGroup.CREATURE;
+import static net.minecraft.item.Items.*;
 import static net.minecraft.tag.BiomeTags.*;
 
 public class Chocobo extends TameableEntity implements Angerable, NamedScreenHandlerFactory {
@@ -185,15 +201,16 @@ public class Chocobo extends TameableEntity implements Angerable, NamedScreenHan
             return false; // holder, replace with saddleItemCheck
         }
     };
-    protected void dropInventory() {
-        dropInventory(this.chocoboBackboneInv);
-        dropInventory(this.chocoboSaddleInv);
-        dropInventory(this.chocoboWeaponInv);
-        dropInventory(this.chocoboArmorInv);
+    protected void dropLoot(DamageSource source, boolean causedByPlayer)  {
+        super.dropLoot(source, causedByPlayer);
+        inventoryDropClear(this.chocoboBackboneInv);
+        inventoryDropClear(this.chocoboSaddleInv);
+        inventoryDropClear(this.chocoboWeaponInv);
+        inventoryDropClear(this.chocoboArmorInv);
         this.chocoboTierOneInv.clear();
         this.chocoboTierTwoInv.clear();
     }
-    protected void dropInventory(Inventory inventory) {
+    protected void inventoryDropClear(Inventory inventory) {
         ItemScatterer.spawn(this.world, this, inventory);
         inventory.clear();
     }
@@ -415,14 +432,19 @@ public class Chocobo extends TameableEntity implements Angerable, NamedScreenHan
         out.add(BiomeKeys.MUSHROOM_FIELDS);
         return out;
     }
-    private @NotNull ArrayList<RegistryKey<Biome>> IS_END() {
-        ArrayList<RegistryKey<Biome>> out = new ArrayList<>();
-        out.add(BiomeKeys.THE_END);
-        out.add(BiomeKeys.SMALL_END_ISLANDS);
-        out.add(BiomeKeys.END_MIDLANDS);
-        out.add(BiomeKeys.END_HIGHLANDS);
-        out.add(BiomeKeys.END_BARRENS);
-        return out;
+    public boolean isOverworld(ServerWorldAccess world) {
+        if (world == null) { return false; }
+        return world.toServerWorld().getRegistryKey().equals(World.OVERWORLD);
+    }
+
+    public boolean isNether(ServerWorldAccess world) {
+        if (world == null) { return false; }
+        return world.toServerWorld().getRegistryKey().equals(World.NETHER);
+    }
+
+    public boolean isEnd(ServerWorldAccess world) {
+        if (world == null) { return false; }
+        return world.toServerWorld().getRegistryKey().equals(World.END);
     }
     public int ChocoboShaker(@NotNull String stat) {
         return switch (stat) {
@@ -452,8 +474,8 @@ public class Chocobo extends TameableEntity implements Angerable, NamedScreenHan
         final RegistryKey<Biome> BiomesKey = currentBiomes.getKey().get();
         if (!fromEgg()) {
             setChocoboSpawnCheck(ChocoboColor.YELLOW);
-            if (currentBiomes.isIn(IS_NETHER)) { setChocoboSpawnCheck(ChocoboColor.FLAME); }
-            if (IS_END().contains(BiomesKey)){ setChocoboSpawnCheck(ChocoboColor.PURPLE); }
+            if (isNether(worldIn)) { setChocoboSpawnCheck(ChocoboColor.FLAME); }
+            if (isEnd(worldIn)){ setChocoboSpawnCheck(ChocoboColor.PURPLE); }
             if (IS_MUSHROOM().contains(BiomesKey)) { setChocoboSpawnCheck(ChocoboColor.PINK); }
             if (IS_SNOWY().contains(BiomesKey) || whiteChocobo().contains(BiomesKey)) { setChocoboSpawnCheck(ChocoboColor.WHITE); }
             if (blueChocobo().contains(BiomesKey)) { setChocoboSpawnCheck(ChocoboColor.BLUE); }
@@ -467,7 +489,7 @@ public class Chocobo extends TameableEntity implements Angerable, NamedScreenHan
         chocoboStatShake(EntityAttributes.GENERIC_ARMOR, "defense");
         chocoboStatShake(EntityAttributes.GENERIC_ARMOR_TOUGHNESS, "toughness");
         if (getChocoboColor() == ChocoboColor.PURPLE) {
-            int chance = IS_END().contains(BiomesKey) ? 60 : 15;
+            int chance = isEnd(worldIn) ? 60 : 15;
             if (random.nextInt(100)+1 < chance) {
                 this.chocoboBackboneInv.setStack(random.nextInt(18), new ItemStack(ENDER_PEARL.getDefaultStack().split(random.nextInt(3) + 1).getItem()));
             }
@@ -856,7 +878,381 @@ public class Chocobo extends TameableEntity implements Angerable, NamedScreenHan
         this.dropStack(new ItemStack(CHOCOBO_FEATHER, 1), 0.0F);
     }
     protected boolean canStartRiding(@NotNull Entity entityIn) { return !this.getSaddle().isEmpty() && super.canStartRiding(entityIn); }
+    public void tickMovement() {
+        super.tickMovement();
+        this.setRotation(this.getYaw(), this.getPitch());
+        this.regenerateStamina();
+        this.stepHeight = maxStepUp;
+        this.fallDistance = 0f;
 
+        if (this.TimeSinceFeatherChance == 3000) {
+            this.TimeSinceFeatherChance = 0;
+            if ((float) Math.random() < .25) { this.dropFeather(); }
+        } else { this.TimeSinceFeatherChance++; }
+
+        //Change effects to chocobo colors
+        if (!this.getEntityWorld().isClient()) {
+            if (this.age % 60 == 0) {
+                if (this.fireImmune()) {
+                    this.addStatusEffect(new StatusEffectInstance(StatusEffects.FIRE_RESISTANCE, 100, 0, true, false));
+                    if (this.hasPassengers()) {
+                        Entity controller = this.getPrimaryPassenger();
+                        if (controller instanceof PlayerEntity) { ((PlayerEntity) controller).addStatusEffect(new StatusEffectInstance(StatusEffects.FIRE_RESISTANCE, 100, 0, true, false)); }
+                    }
+                }
+                if (this.isWaterBreather()) {
+                    this.addStatusEffect(new StatusEffectInstance(StatusEffects.WATER_BREATHING, 100, 0, true, false));
+                    if (this.hasPassengers()) {
+                        Entity controller = this.getPrimaryPassenger();
+                        if (controller instanceof PlayerEntity) { ((PlayerEntity) controller).addStatusEffect(new StatusEffectInstance(StatusEffects.WATER_BREATHING, 100, 0, true, false)); }
+                    }
+                }
+            }
+        } else {
+            // Wing rotations, control packet
+            // Client side
+            this.destPos += (float) ((double) (this.onGround ? -1 : 4) * 0.3D);
+            this.destPos = MathHelper.clamp(destPos, 0f, 1f);
+
+            if (!this.onGround) { this.wingRotDelta = Math.min(wingRotation, 1f); }
+            this.wingRotDelta *= 0.9F;
+            this.wingRotation += this.wingRotDelta * 2.0F;
+
+            if (this.onGround) {
+                this.lastLimbDistance = this.limbDistance;
+                double d1 = this.getX() - this.prevX;
+                double d0 = this.getZ() - this.prevZ;
+                float f4 = ((float)Math.sqrt(d1 * d1 + d0 * d0)) * 4.0F;
+                if (f4 > 1.0F) { f4 = 1.0F; }
+                this.limbDistance += (f4 - this.limbDistance) * 0.4F;
+                this.limbAngle += this.limbDistance;
+            } else {
+                this.limbAngle = 0;
+                this.limbDistance = 0;
+                this.lastLimbDistance = 0;
+            }
+        }
+    }
+    private void regenerateStamina() {
+        if (!this.onGround && !this.isSprinting()) { return; }
+        float regen = FloatChocoConfigGet(StaticGlobalVariables.getStaminaRegen(), dSTAMINA_REGEN.getDefault());
+
+        // half the amount of regeneration while moving
+        Vec3d motion = getVelocity();
+        if (motion.x != 0 || motion.z != 0) { regen *= 0.85F; }
+
+        // TODO: implement regen bonus (another IAttribute?)
+        this.useStamina(-regen);
+    }
+    public boolean isBreedingItem(@NotNull ItemStack stack) { return false; }
+    private final Map<Item, Integer> COLLAR_COLOR = Util.make(Maps.newHashMap(), (map) ->{
+        map.put(CLEANSE_SHIFT_DYE.asItem(), 0);
+        map.put(RED_SHIFT_DYE.asItem(), 16);
+        map.put(RED_DYE.asItem(), 16);
+        map.put(BLOOD_SHIFT_DYE.asItem(), 16);
+        map.put(WHITE_SHIFT_DYE.asItem(), 15);
+        map.put(WHITE_DYE.asItem(), 15);
+        map.put(ORANGE_SHIFT_DYE.asItem(), 14);
+        map.put(ORANGE_DYE.asItem(), 14);
+        map.put(MAGENTA_SHIFT_DYE.asItem(), 13);
+        map.put(MAGENTA_DYE.asItem(), 13);
+        map.put(LIGHT_BLUE_SHIFT_DYE.asItem(), 12);
+        map.put(LIGHT_BLUE_DYE.asItem(), 12);
+        map.put(YELLOW_SHIFT_DYE.asItem(), 11);
+        map.put(YELLOW_DYE.asItem(), 11);
+        map.put(LIME_SHIFT_DYE.asItem(), 10);
+        map.put(LIME_DYE.asItem(), 10);
+        map.put(PINK_SHIFT_DYE.asItem(), 9);
+        map.put(PINK_DYE.asItem(), 9);
+        map.put(GRAY_SHIFT_DYE.asItem(), 8);
+        map.put(GRAY_DYE.asItem(), 8);
+        map.put(LIGHT_GRAY_SHIFT_DYE.asItem(), 7);
+        map.put(LIGHT_GRAY_DYE.asItem(), 7);
+        map.put(CYAN_SHIFT_DYE.asItem(), 6);
+        map.put(CYAN_DYE.asItem(), 6);
+        map.put(PURPLE_SHIFT_DYE.asItem(), 5);
+        map.put(PURPLE_DYE.asItem(), 5);
+        map.put(BLUE_SHIFT_DYE.asItem(), 4);
+        map.put(BLUE_DYE.asItem(), 4);
+        map.put(GREEN_SHIFT_DYE.asItem(), 3);
+        map.put(GREEN_DYE.asItem(), 3);
+        map.put(BROWN_SHIFT_DYE.asItem(), 2);
+        map.put(BROWN_DYE.asItem(), 2);
+        map.put(BLACK_SHIFT_DYE.asItem(), 1);
+        map.put(BLACK_DYE.asItem(), 1);
+    });
+    private void clearWonders() {
+        if (this.goalSelector.getRunningGoals().anyMatch(t -> t.getGoal() == localWonder)) { this.goalSelector.remove(localWonder); }
+        if (this.goalSelector.getRunningGoals().anyMatch(t -> t.getGoal() == localWonderWB)) { this.goalSelector.remove(localWonderWB); }
+        if (this.goalSelector.getRunningGoals().anyMatch(t -> t.getGoal() == roamAround)) { this.goalSelector.remove(roamAround); }
+        if (this.goalSelector.getRunningGoals().anyMatch(t -> t.getGoal() == roamAroundWB)) { this.goalSelector.remove(roamAroundWB); }
+        if (this.goalSelector.getRunningGoals().anyMatch(t -> t.getGoal() == follow)) { this.goalSelector.remove(follow); }
+    }
+    public ActionResult interactAt(@NotNull PlayerEntity player, Vec3d vec, Hand hand) {
+        ItemStack heldItemStack = player.getStackInHand(hand);
+        Item defaultHand = heldItemStack.getItem();
+        if (this.isTamed()) {
+            if (getDyeList().contains(defaultHand)) {
+                if (!Objects.equals(this.getCollarColor(), COLLAR_COLOR.get(defaultHand))) {
+                    this.setCollarColor(COLLAR_COLOR.get(defaultHand));
+                    this.eat(player, hand, heldItemStack);
+                }
+            }
+            if (defaultHand == GYSAHL_CAKE.get().asItem() && this.isBaby()) {
+                this.eat(player, hand, heldItemStack);
+                onGrowUp();
+                return ActionResult.SUCCESS;
+            }
+            if (player.isSneaking() && !this.isBaby()) {
+                if (player instanceof ServerPlayerEntity) { this.displayChocoboInventory((ServerPlayerEntity) player); }
+                return ActionResult.SUCCESS;
+            }
+            if (heldItemStack.isEmpty() && !player.isSneaking() && !this.isBaby() && this.isSaddled()) {
+                if (ChocoConfigGet(StaticGlobalVariables.getOwnerOnlyInventory(), dOwnerOnlyInventoryAccess)) {
+                    if (isOwner(player)) { player.startRiding(this); }
+                    else { player.sendMessage(new TranslatableText(DelChoco.Mod_ID + ".entity_chocobo.not_owner"), true); }
+                } else { player.startRiding(this); }
+                return ActionResult.SUCCESS;
+            }
+            if (defaultHand == GYSAHL_GREEN_ITEM.get()) {
+                if (getHealth() != getMaxHealth()) {
+                    this.eat(player, hand, player.getInventory().getMainHandStack());
+                    heal(ChocoConfigGet(StaticGlobalVariables.getHealAmount(), dHEAL_AMOUNT.getDefault()));
+                } else { player.sendMessage(new TranslatableText(DelChoco.Mod_ID + ".entity_chocobo.heal_fail"), true); }
+            }
+            if (defaultHand == CHOCOBO_WHISTLE.get() && !this.isBaby()) {
+                if (isOwner(player)) {
+                    if (this.followingMrHuman == 3) {
+                        this.playSound(ModSounds.WHISTLE_SOUND_FOLLOW, 1.0F, 1.0F);
+                        this.setAiDisabled(false);
+                        this.setMovementType(MovementType.FOLLOW_OWNER);
+                        if (noRoam) {
+                            this.clearWonders();
+                            this.setLeashSpot(0,50000,0);
+                            this.setLeashedDistance(0D);
+                            if (this.isWaterBreather() && !this.world.getBiome(this.getLandingPos()).isIn(IS_NETHER)) {
+                                this.goalSelector.add(7, roamAroundWB);
+                            } else {
+                                this.goalSelector.add(7, roamAround);
+                            }
+                            if (this.goalSelector.getRunningGoals().noneMatch(t -> t.getGoal() == avoidBlocks)) {
+                                this.goalSelector.add(10, avoidBlocks);
+                            }
+                            noRoam = false;
+                        }
+                        this.goalSelector.add(4, this.follow);
+                        followingMrHuman = 1;
+                        this.clearWonders();
+                        player.sendMessage(new TranslatableText(DelChoco.Mod_ID + ".entity_chocobo.chocobo_follow_cmd"), true);
+                    } else if (this.followingMrHuman == 1) {
+                        this.playSound(ModSounds.WHISTLE_SOUND_WANDER, 1.0F, 1.0F);
+                        this.goalSelector.remove(this.follow);
+                        this.setMovementType(MovementType.WANDER);
+                        followingMrHuman = 2;
+                        this.clearWonders();
+                        if (this.isWaterBreather() && !this.world.getBiome(this.getLandingPos()).isIn(IS_NETHER)) {
+                            this.goalSelector.add(7, roamAroundWB);
+                        } else {
+                            this.goalSelector.add(7, roamAround);
+                        }
+                        player.sendMessage(new TranslatableText(DelChoco.Mod_ID + ".entity_chocobo.chocobo_wander_cmd"), true);
+                    } else if (this.followingMrHuman == 2) {
+                        this.playSound(ModSounds.WHISTLE_SOUND_STAY, 1.0F, 1.0F);
+                        this.setMovementType(MovementType.STANDSTILL);
+                        if (!noRoam) {
+                            BlockPos leashPoint = this.getLandingPos();
+                            double distance = 10D;
+                            this.clearWonders();
+                            this.setLeashedDistance(distance);
+                            this.setLeashSpot(leashPoint);
+                            if (this.isWaterBreather() && !this.world.getBiome(this.getLandingPos()).isIn(IS_NETHER)) {
+                                this.localWonderWB = new ChocoboRandomStrollGoal(this, 1D, leashPoint, distance);
+                                this.goalSelector.add(7, this.localWonderWB);
+                            } else {
+                                this.localWonder = new ChocoboLocalizedWonder(this, 1D, leashPoint, distance);
+                                this.goalSelector.add(7, this.localWonder);
+                            }
+                            noRoam = true;
+                        }
+                        followingMrHuman = 3;
+                        player.sendMessage(new TranslatableText(DelChoco.Mod_ID + ".entity_chocobo.chocobo_stay_cmd"), true);
+                    }
+                } else { player.sendMessage(new TranslatableText(DelChoco.Mod_ID + ".entity_chocobo.not_owner"), true); }
+                return ActionResult.SUCCESS;
+            }
+            if (!this.isInLove() && defaultHand == LOVELY_GYSAHL_GREEN.get() && !this.isBaby()) {
+                this.eat(player, hand, player.getInventory().getMainHandStack());
+                this.lovePlayer(player);
+                return ActionResult.SUCCESS;
+            }
+            if (defaultHand instanceof ChocoboSaddleItem && !this.isSaddled() && !this.isBaby()) {
+                this.setSaddleType(heldItemStack);
+                this.chocoboSaddleInv.setStack(0, heldItemStack.copy().split(1));
+                this.eat(player, hand, heldItemStack);
+                return ActionResult.SUCCESS;
+            }
+            if (defaultHand instanceof ChocoboArmorItems && !this.isArmored() && !this.isBaby()) {
+                if (this.chocoboArmorInv.getStack(0).isEmpty()) {
+                    this.chocoboArmorInv.setStack(0, heldItemStack.copy().split(1));
+                    this.eat(player, hand, heldItemStack);
+                }
+                return ActionResult.SUCCESS;
+            }
+            if (defaultHand instanceof ChocoboWeaponItems && !this.isArmed() && !this.isBaby()) {
+                if (this.chocoboWeaponInv.getStack(0).isEmpty()) {
+                    this.chocoboWeaponInv.setStack(0, heldItemStack.copy().split(1));
+                    this.eat(player, hand, heldItemStack);
+                }
+                return ActionResult.SUCCESS;
+            }
+            if (defaultHand == Items.NAME_TAG) {
+                if (ChocoConfigGet(StaticGlobalVariables.getOwnerOnlyInventory(), dOwnerOnlyInventoryAccess)) {
+                    if (isOwner(player)) {
+                        this.setCustomName(heldItemStack.getName());
+                        this.setCustomNameVisible(true);
+                        this.eat(player, hand, heldItemStack);
+                    } else { player.sendMessage(new TranslatableText(DelChoco.Mod_ID + ".entity_chocobo.not_owner"), true); }
+                } else {
+                    this.setCustomName(heldItemStack.getName());
+                    this.setCustomNameVisible(true);
+                    this.eat(player, hand, heldItemStack);
+                }
+                return ActionResult.SUCCESS;
+            }
+            if (defaultHand == CHOCOBO_FEATHER.get().asItem()) {
+                if (isOwner(player)) { this.setCustomNameVisible(!this.isCustomNameVisible()); }
+                else { player.sendMessage(new TranslatableText(DelChoco.Mod_ID + ".entity_chocobo.not_owner"), true); }
+                return ActionResult.SUCCESS;
+            }
+            if (defaultHand instanceof ChocoboLeashPointer item) {
+                BlockPos center = item.getCenterPoint();
+                BlockPos leash = item.getLeashPoint();
+                double dist = (double) Math.max(Math.min(item.getLeashDistance(), 40), 6) /2;
+                if (leash == null || center == null) { return ActionResult.FAIL; }
+                this.clearWonders();
+                if (this.isWaterBreather() && !this.world.getBiome(this.getLandingPos()).isIn(IS_NETHER)) {
+                    this.localWonderWB = new ChocoboRandomStrollGoal(this, 1D, center, dist);
+                    this.goalSelector.add(7, this.localWonderWB);
+                } else {
+                    this.localWonder = new ChocoboLocalizedWonder(this, 1D, center, dist);
+                    this.goalSelector.add(7, this.localWonder);
+                }
+                String name = this.getCustomName() == null ? this.getName().getString() : this.getCustomName().getString();
+                player.sendMessage(new LiteralText(name + " Area Set: "+dist+ " around X: " + center.getX() + " Z: " + center.getZ()), true);
+                this.setLeashSpot(center);
+                this.setLeashedDistance(dist);
+                return ActionResult.SUCCESS;
+            }
+        } else {
+            if (defaultHand == GYSAHL_GREEN_ITEM) {
+                this.eat(player, hand, player.getInventory().getMainHandStack());
+                if ((float) Math.random() < ChocoConfigGet(StaticGlobalVariables.getTame(), dTAME.getDefault()) || player.isCreative()) {
+                    this.setOwnerUuid(player.getUuid());
+                    this.setTamed(true);
+                    this.setCollarColor(16);
+                    player.sendMessage(new TranslatableText(DelChoco.Mod_ID + ".entity_chocobo.tame_success"), true);
+                } else { player.sendMessage(new TranslatableText(DelChoco.Mod_ID + ".entity_chocobo.tame_fail"), true); }
+                return ActionResult.SUCCESS;
+            }
+            if (defaultHand == Items.NAME_TAG) {
+                this.setCustomName(heldItemStack.getName());
+                this.setCustomNameVisible(true);
+                this.eat(player, hand, heldItemStack);
+                return ActionResult.SUCCESS;
+            }
+        }
+        if (this.getEntityWorld().isClient()) return ActionResult.SUCCESS;
+        return super.interactAt(player, vec, hand);
+    }
+    private void displayChocoboInventory(@NotNull ServerPlayerEntity player) {
+        if (player.currentScreenHandler != player.playerScreenHandler) {
+            player.closeHandledScreen();
+        }
+
+        int syncId = player.currentScreenHandler.syncId + 1;
+        PacketManager.sendToClient(player, new OpenChocoboGuiMessage(this, syncId));
+        player.openHandledScreen(new SimpleNamedScreenHandlerFactory((i, playerInventory, playerEntity) -> new SaddleBagContainer(i, playerInventory, this), this.getDisplayName()));
+    }
+    private void chocoboFeatherPick(@NotNull Inventory sendingInv, @NotNull Inventory receivingInv, int slot) {
+        boolean isReverseTierOne = sendingInv.size() > receivingInv.size();
+        boolean isTierOne = sendingInv.size() < receivingInv.size();
+        boolean pick = true;
+        int slotAdjust = slot;
+        if (isTierOne) {
+            if (slot < 5) { slotAdjust = slot + 11; }
+            if (slot > 4 && slot < 10) { slotAdjust = slot + 15; }
+            if (slot > 9) { slotAdjust = slot + 19; }
+        }
+        if (isReverseTierOne) {
+            if (slot > 10 && slot < 16) { slotAdjust = slot-11; }
+            if (slot > 19 && slot < 25) { slotAdjust = slot-15; }
+            if (slot > 28 && slot < 34) { slotAdjust = slot-19; }
+            pick = slotAdjust != slot;
+        }
+        if (pick) { if (receivingInv.getStack(slotAdjust) != sendingInv.getStack(slot)) { receivingInv.setStack(slotAdjust, sendingInv.getStack(slot)); } }
+    }
+    protected SoundEvent getAmbientSound() { return AMBIENT_SOUND; }
+    protected SoundEvent getHurtSound(@NotNull DamageSource damageSourceIn) { return AMBIENT_SOUND; }
+    protected SoundEvent getDeathSound() { return AMBIENT_SOUND; }
+    protected float getSoundVolume() { return .6f; }
+    public int getMinAmbientSoundDelay() { return (24 * (int) (Math.random() * 100)); }
+    public boolean canSpawn(@NotNull WorldAccess worldIn, @NotNull SpawnReason spawnReasonIn) {
+        ServerWorldAccess theWorld = Objects.requireNonNull(worldIn.getServer()).getWorld(this.world.getRegistryKey());
+        if (!isOverworld(theWorld) && theWorld != null) {
+            if (isEnd(theWorld)) { return !this.world.getBlockState(getBlockPos().down()).isAir();}
+            else { return true; }
+        }
+        return super.canSpawn(worldIn, spawnReasonIn);
+    }
+    protected void onTamedChanged() {
+        super.onTamedChanged();
+        if(chocoboAvoidPlayerGoal == null) { chocoboAvoidPlayerGoal = new ChocoboGoals.ChocoboAvoidPlayer(this); }
+        if (roamAround == null) { roamAround = new WanderAroundFarGoal(this, 1D); }
+        if (roamAroundWB == null) { roamAroundWB = new WanderAroundGoal(this, 1D); }
+        if (avoidBlocks == null) { avoidBlocks = new ChocoboGoals.ChocoboAvoidBlockGoal(this,  avoidBlocks()); }
+        if (follow == null) { follow = new FollowOwnerGoal(this, followSpeedModifier, 10.0F, 1000.0F, false); }
+        this.clearWonders();
+        if(this.isTamed()) {
+            this.goalSelector.remove(chocoboAvoidPlayerGoal);
+            BlockPos leashPoint = this.getLeashSpot();
+            double length = Math.max(2D, Math.min(this.getLeashDistance(), 21D));
+            boolean skip = leashPoint.getY() > 4000;
+            if (skip) {
+                if (this.isWaterBreather() && !this.world.getBiome(this.getLandingPos()).isIn(IS_NETHER)) {
+                    this.goalSelector.add(7, roamAroundWB);
+                } else {
+                    this.goalSelector.add(7, roamAround);
+                }
+            }
+            else {
+                if (this.isWaterBreather() && !this.world.getBiome(this.getLandingPos()).isIn(IS_NETHER)) {
+                    this.localWonderWB = new ChocoboRandomStrollGoal(this, 1D, leashPoint, length);
+                    this.goalSelector.add(7, this.localWonderWB);
+                } else {
+                    this.localWonder = new ChocoboLocalizedWonder(this, 1D, leashPoint, length);
+                    this.goalSelector.add(7, this.localWonder);
+                }
+            }
+        } else {
+            this.goalSelector.add(6, chocoboAvoidPlayerGoal);
+            if (this.isWaterBreather() && !this.world.getBiome(this.getLandingPos()).isIn(IS_NETHER)) {
+                this.goalSelector.add(7, roamAroundWB);
+            } else {
+                this.goalSelector.add(7, roamAround);
+            }
+        }
+        if (this.goalSelector.getRunningGoals().noneMatch(t -> t.getGoal() == avoidBlocks)) {
+            this.goalSelector.add(10, avoidBlocks);
+        }
+        noRoam = false;
+    }
+    private static @NotNull ArrayList<Class<? extends Block>> avoidBlocks() {
+        ArrayList<Class<? extends Block>> chk = new ArrayList<>();
+        chk.add(Blocks.COBBLESTONE_WALL.getClass());
+        chk.add(Blocks.WARPED_FENCE.getClass());
+        chk.add(Blocks.WARPED_FENCE_GATE.getClass());
+        return chk;
+    }
     @Override
     public int getAngerTime() { return this.remainingPersistentAngerTime; }
     public void setAngerTime(int angerTime) { this.remainingPersistentAngerTime = angerTime; }
@@ -866,6 +1262,47 @@ public class Chocobo extends TameableEntity implements Angerable, NamedScreenHan
     public void setAngryAt(@Nullable UUID angryAt) { this.persistentAngerTarget = angryAt; }
     @Override
     public void chooseRandomAngerTime() { this.setAngerTime(PERSISTENT_ANGER_TIME.get(this.random)); }
+    protected void mobTick() {
+        this.tickAngerLogic((ServerWorld) this.world, true);
+        if (this.getTarget() != null) { this.maybeAlertOthers(); }
+        if (this.hasAngerTime()) { this.playerHitTimer = this.age; }
+    }
+    private void maybeAlertOthers() {
+        if (this.ticksUntilNextAlert > 0) { --this.ticksUntilNextAlert; }
+        else {
+            if (this.getVisibilityCache().canSee(this.getTarget())) { this.alertOthers(); }
+            this.ticksUntilNextAlert = ALERT_INTERVAL.get(this.random);
+        }
+    }
+    private void alertOthers() {
+        double d0 = this.getAttributeValue(EntityAttributes.GENERIC_FOLLOW_RANGE);
+        Box aabb = Box.from(this.getPos()).expand(d0, 10.0D, d0);
+        this.world.getNonSpectatingEntities(Chocobo.class, aabb).stream()
+                .filter((p_34463_) -> p_34463_ != this)
+                .filter((p_34461_) -> p_34461_.getTarget() == null)
+                .filter((p_34456_) -> !p_34456_.isTeamPlayer(Objects.requireNonNull(this.getTarget()).getScoreboardTeam()))
+                .forEach((p_34440_) -> p_34440_.setTarget(this.getTarget()));
+    }
+    public boolean isPersistent() { return this.isTamed() || this.fromEgg() || this.isCustomNameVisible(); }
+    protected boolean isDisallowedInPeaceful() { return super.isDisallowedInPeaceful(); }
+    public boolean canImmediatelyDespawn(double pDistanceToClosestPlayer) { return true; }
+    public void checkDespawn() {
+        if (this.world.getDifficulty() == Difficulty.PEACEFUL && this.isDisallowedInPeaceful()) { this.discard(); }
+        else if (!this.isPersistent() && !this.cannotDespawn()) {
+            Entity entity = this.world.getClosestPlayer(this, -1.0D);
+            if (entity != null) {
+                double d0 = entity.squaredDistanceTo(this);
+                int i = CREATURE.getImmediateDespawnRange()*5;
+                int j = i * i;
+                if (d0 > (double)j && this.canImmediatelyDespawn(d0)) { this.discard(); }
+
+                int k = (CREATURE.getImmediateDespawnRange()*2);
+                int l = k * k;
+                if (this.despawnCounter > 600 && this.random.nextInt(800) == 0 && d0 > (double)l && this.canImmediatelyDespawn(d0)) { this.discard();}
+                else if (d0 < (double)l) { this.despawnCounter = 0; }
+            }
+        } else { this.despawnCounter = 0; }
+    }
 
     // Ride Related
     public int getRideTickDelay() { return this.rideTickDelay; }

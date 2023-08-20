@@ -9,11 +9,11 @@ import com.dephoegon.delchoco.common.entities.properties.MovementType;
 import com.dephoegon.delchoco.common.entities.properties.ChocoboGoals.ChocoboRandomStrollGoal;
 import com.dephoegon.delchoco.common.init.ModAttributes;
 import com.dephoegon.delchoco.common.init.ModSounds;
+import com.dephoegon.delchoco.common.inventory.SaddlebagContainer;
 import com.dephoegon.delchoco.common.items.ChocoboArmorItems;
 import com.dephoegon.delchoco.common.items.ChocoboLeashPointer;
 import com.dephoegon.delchoco.common.items.ChocoboSaddleItem;
-import com.dephoegon.delchoco.common.network.PacketManager;
-import com.dephoegon.delchoco.common.network.packets.OpenChocoboGuiMessage;
+import com.dephoegon.delchoco.common.items.ChocoboWeaponItems;
 import com.dephoegon.delchoco.utils.WorldUtils;
 import com.google.common.collect.Maps;
 import net.minecraft.block.Block;
@@ -51,12 +51,12 @@ import net.minecraft.nbt.NbtHelper;
 import net.minecraft.recipe.Ingredient;
 import net.minecraft.screen.NamedScreenHandlerFactory;
 import net.minecraft.screen.ScreenHandler;
-import net.minecraft.screen.SimpleNamedScreenHandlerFactory;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.sound.SoundEvent;
 import net.minecraft.tag.FluidTags;
 import net.minecraft.text.LiteralText;
+import net.minecraft.text.Text;
 import net.minecraft.text.TranslatableText;
 import net.minecraft.util.*;
 import net.minecraft.util.math.*;
@@ -95,6 +95,7 @@ public class Chocobo extends TameableEntity implements Angerable, NamedScreenHan
     private int remainingPersistentAngerTime;
     private int ticksUntilNextAlert;
     private int timeToRecalculatePath;
+    @SuppressWarnings("rawtypes")
     private FleeEntityGoal chocoboAvoidPlayerGoal;
     private WanderAroundFarGoal roamAround;
     private WanderAroundGoal roamAroundWB;
@@ -169,36 +170,49 @@ public class Chocobo extends TameableEntity implements Angerable, NamedScreenHan
     public static final int tier_one_chocobo_inv_slot_count = 15; // 3*5
     public static final int tier_two_chocobo_inv_slot_count = 45; //5*9
     private final int top_tier_chocobo_inv_slot_count = tier_two_chocobo_inv_slot_count;
-    public final Inventory chocoboBackboneInv = new ChocoboInventory(top_tier_chocobo_inv_slot_count, this) {
+    public final ChocoboInventory chocoboBackboneInv = new ChocoboInventory(top_tier_chocobo_inv_slot_count, this) {
         public boolean isValid(int slot, ItemStack stack) { return false; }
         public boolean canPlayerUse(PlayerEntity player) { return false; }
         public void setStack(int var1, ItemStack var2) {
-            // BackboneLogic
+            super.setStack(var1, var2);
+            chocoboFeatherPick(this, this.getChocobo().chocoboTierOneInv, var1);
+            chocoboFeatherPick(this, this.getChocobo().chocoboTierTwoInv, var1);
         }
     };
-    public final Inventory chocoboTierOneInv = new ChocoboInventory(tier_one_chocobo_inv_slot_count, this) {
+    public final ChocoboInventory chocoboTierOneInv = new ChocoboInventory(tier_one_chocobo_inv_slot_count, this) {
         public void setStack(int var1, ItemStack var2) {
-            // Tier One Logic
+            super.setStack(var1, var2);
+            chocoboFeatherPick(this, this.getChocobo().chocoboBackboneInv, var1);
         }
     };
-    public final Inventory chocoboTierTwoInv = new ChocoboInventory(tier_two_chocobo_inv_slot_count, this) {
+    public final ChocoboInventory chocoboTierTwoInv = new ChocoboInventory(tier_two_chocobo_inv_slot_count, this) {
         public void setStack(int var1, ItemStack var2) {
-            // Tier Two Logic
+            super.setStack(var1, var2);
+            chocoboFeatherPick(this, this.getChocobo().chocoboBackboneInv, var1);
         }
     };
-    public final Inventory chocoboArmorInv = new ChocoboInventory(1, this) {
-        public boolean isValid(int slot, ItemStack stack) {
-            return false; // holder, replace with armorItemCheck
+    public final ChocoboInventory chocoboArmorInv = new ChocoboInventory(1, this) {
+        public boolean isValid(int slot, @NotNull ItemStack stack) { return stack.isEmpty() || stack.getItem() instanceof ChocoboArmorItems; }
+        public void setStack(int slot, ItemStack itemStack) {
+            super.setStack(slot, itemStack);
+            this.getChocobo().setArmorType(itemStack);
+            this.getChocobo().setChocoboArmorStats(itemStack);
         }
     };
-    public final Inventory chocoboWeaponInv = new ChocoboInventory(1, this) {
-        public boolean isValid(int slot, ItemStack stack) {
-            return false; // holder, replace with weaponItemCheck
+    public final ChocoboInventory chocoboWeaponInv = new ChocoboInventory(1, this) {
+        public boolean isValid(int slot, @NotNull ItemStack stack) { return stack.isEmpty() || stack.getItem() instanceof ChocoboWeaponItems; }
+        public void setStack(int slot, ItemStack itemStack) {
+            super.setStack(slot, itemStack);
+            this.getChocobo().setWeaponType(itemStack);
+            this.getChocobo().setChocoboWeaponStats(itemStack);
         }
     };
-    public final Inventory chocoboSaddleInv = new ChocoboInventory(1, this) {
-        public boolean isValid(int slot, ItemStack stack) {
-            return false; // holder, replace with saddleItemCheck
+    public final ChocoboInventory chocoboSaddleInv = new ChocoboInventory(1, this) {
+        public boolean isValid(int slot, @NotNull ItemStack stack) { return stack.isEmpty() || stack.getItem() instanceof ChocoboSaddleItem; }
+        public void setStack(int slot, ItemStack itemStack) {
+            super.setStack(slot, itemStack);
+            inventoryDropClear(this.getChocobo().chocoboBackboneInv);
+            this.getChocobo().setSaddleType(itemStack);
         }
     };
     protected void dropLoot(DamageSource source, boolean causedByPlayer)  {
@@ -222,7 +236,7 @@ public class Chocobo extends TameableEntity implements Angerable, NamedScreenHan
         this.goalSelector.add(1, new ChocoboGoals.ChocoPanicGoal(this,1.5D));
         this.goalSelector.add(2, new MeleeAttackGoal(this,2F, true));
         this.goalSelector.add(3, new ChocoboMateGoal(this, 1.0D));
-        // toggleable Goal 4, - Follow owner (whistle [tamed])
+        // toggleable Goal 4, - Follow an owner (whistle [tamed])
         this.goalSelector.add(5, new ChocoboGoals.ChocoboLavaEscape(this));
         // toggleable Goal 5, - Avoid Player Goal (non-tamed goal)
         // toggleable Goal 6, - Roam Around Goal (whistle toggle [tamed/non-tamed])
@@ -234,7 +248,7 @@ public class Chocobo extends TameableEntity implements Angerable, NamedScreenHan
         this.targetSelector.add(1, new ChocoboGoals.ChocoboOwnerHurtByGoal(this));
         this.targetSelector.add(2, new ChocoboGoals.ChocoboOwnerHurtGoal(this));
         this.targetSelector.add(3, (new ChocoboGoals.ChocoboHurtByTargetGoal(this, Chocobo.class)).setGroupRevenge(Chocobo.class));
-        this.targetSelector.add(4, new ActiveTargetGoal<>(this, PlayerEntity.class, 10, true, false, this::isAngryAt));
+        this.targetSelector.add(4, new ActiveTargetGoal<>(this, PlayerEntity.class, 10, true, false, this::shouldAngerAt));
         this.targetSelector.add(5, new UniversalAngerGoal<>(this, true));
         this.targetSelector.add(6, new ActiveTargetGoal<>(this, EndermiteEntity.class, false));
         this.targetSelector.add(7, new ActiveTargetGoal<>(this, SilverfishEntity.class, false));
@@ -281,10 +295,10 @@ public class Chocobo extends TameableEntity implements Angerable, NamedScreenHan
         this.setMale(compound.getBoolean(NBTKEY_CHOCOBO_IS_MALE));
         this.setFromEgg(compound.getBoolean(NBTKEY_CHOCOBO_FROM_EGG));
         this.setMovementType(MovementType.values()[compound.getByte(NBTKEY_MOVEMENT_TYPE)]);
-        this.saddleItemStackHandler.deserializeNBT(compound.getCompound(NBTKEY_SADDLE_ITEM));
-        this.chocoboWeaponHandler.deserializeNBT(compound.getCompound(NBTKEY_WEAPON_ITEM));
-        this.chocoboArmorHandler.deserializeNBT(compound.getCompound(NBTKEY_ARMOR_ITEM));
-        this.chocoboInventory.deserializeNBT(compound.getCompound(NBTKEY_INVENTORY));
+        this.chocoboSaddleInv.load(compound.getCompound(NBTKEY_SADDLE_ITEM));
+        this.chocoboWeaponInv.load(compound.getCompound(NBTKEY_WEAPON_ITEM));
+        this.chocoboArmorInv.load(compound.getCompound(NBTKEY_ARMOR_ITEM));
+        this.chocoboBackboneInv.load(compound.getCompound(NBTKEY_INVENTORY));
         if (compound.contains(NBTKEY_NEST_POSITION)) { this.nestPos = NbtHelper.toBlockPos(compound.getCompound(NBTKEY_NEST_POSITION)); }
         this.setGeneration(compound.getInt(NBTKEY_CHOCOBO_GENERATION));
         this.setStamina(compound.getFloat(NBTKEY_CHOCOBO_STAMINA));
@@ -304,13 +318,13 @@ public class Chocobo extends TameableEntity implements Angerable, NamedScreenHan
         compound.putBoolean(NBTKEY_CHOCOBO_IS_MALE, this.isMale());
         compound.putBoolean(NBTKEY_CHOCOBO_FROM_EGG, this.fromEgg());
         compound.putByte(NBTKEY_MOVEMENT_TYPE, (byte) this.getMovementType().ordinal());
-        compound.put(NBTKEY_SADDLE_ITEM, this.saddleItemStackHandler.serializeNBT());
-        compound.put(NBTKEY_ARMOR_ITEM, this.chocoboArmorHandler.serializeNBT());
-        compound.put(NBTKEY_WEAPON_ITEM, this.chocoboWeaponHandler.serializeNBT());
-        compound.put(NBTKEY_INVENTORY, this.chocoboInventory.serializeNBT());
+        compound.put(NBTKEY_SADDLE_ITEM, this.chocoboSaddleInv.save());
+        compound.put(NBTKEY_ARMOR_ITEM, this.chocoboArmorInv.save());
+        compound.put(NBTKEY_WEAPON_ITEM, this.chocoboWeaponInv.save());
+        compound.put(NBTKEY_INVENTORY, this.chocoboBackboneInv.save());
         if (this.nestPos != null) { compound.put(NBTKEY_NEST_POSITION, NbtHelper.fromBlockPos(this.nestPos)); }
         compound.putInt(NBTKEY_CHOCOBO_GENERATION, this.getGeneration());
-        compound.putBoolean(NBTKEY_CHOCOBO_FLAME_BLOOD, this.fireImmune());
+        compound.putBoolean(NBTKEY_CHOCOBO_FLAME_BLOOD, this.isFireImmune());
         compound.putBoolean(NBTKEY_CHOCOBO_WATER_BREATH, this.isWaterBreather());
         compound.putBoolean(NBTKEY_CHOCOBO_WITHER_IMMUNE, this.isWitherImmune());
         compound.putBoolean(NBTKEY_CHOCOBO_POISON_IMMUNE, this.isPoisonImmune());
@@ -436,12 +450,10 @@ public class Chocobo extends TameableEntity implements Angerable, NamedScreenHan
         if (world == null) { return false; }
         return world.toServerWorld().getRegistryKey().equals(World.OVERWORLD);
     }
-
     public boolean isNether(ServerWorldAccess world) {
         if (world == null) { return false; }
         return world.toServerWorld().getRegistryKey().equals(World.NETHER);
     }
-
     public boolean isEnd(ServerWorldAccess world) {
         if (world == null) { return false; }
         return world.toServerWorld().getRegistryKey().equals(World.END);
@@ -471,17 +483,17 @@ public class Chocobo extends TameableEntity implements Angerable, NamedScreenHan
 
         final RegistryEntry<Biome> currentBiomes = this.world.getBiome(getBlockPos().down());
         //noinspection OptionalGetWithoutIsPresent
-        final RegistryKey<Biome> BiomesKey = currentBiomes.getKey().get();
+        final RegistryKey<Biome> biomeRegistryKey = currentBiomes.getKey().get();
         if (!fromEgg()) {
             setChocoboSpawnCheck(ChocoboColor.YELLOW);
             if (isNether(worldIn)) { setChocoboSpawnCheck(ChocoboColor.FLAME); }
             if (isEnd(worldIn)){ setChocoboSpawnCheck(ChocoboColor.PURPLE); }
-            if (IS_MUSHROOM().contains(BiomesKey)) { setChocoboSpawnCheck(ChocoboColor.PINK); }
-            if (IS_SNOWY().contains(BiomesKey) || whiteChocobo().contains(BiomesKey)) { setChocoboSpawnCheck(ChocoboColor.WHITE); }
-            if (blueChocobo().contains(BiomesKey)) { setChocoboSpawnCheck(ChocoboColor.BLUE); }
+            if (IS_MUSHROOM().contains(biomeRegistryKey)) { setChocoboSpawnCheck(ChocoboColor.PINK); }
+            if (IS_SNOWY().contains(biomeRegistryKey) || whiteChocobo().contains(biomeRegistryKey)) { setChocoboSpawnCheck(ChocoboColor.WHITE); }
+            if (blueChocobo().contains(biomeRegistryKey)) { setChocoboSpawnCheck(ChocoboColor.BLUE); }
             if (currentBiomes.isIn(IS_FOREST) || currentBiomes.isIn(IS_BADLANDS)) { setChocoboSpawnCheck(ChocoboColor.RED); }
-            if (greenChocobo().contains(BiomesKey)) { setChocoboSpawnCheck(ChocoboColor.GREEN); }
-            if (IS_HOT_OVERWORLD().contains(BiomesKey) && !IS_SAVANNA().contains(BiomesKey)) { setChocoboSpawnCheck(ChocoboColor.BLACK); }
+            if (greenChocobo().contains(biomeRegistryKey)) { setChocoboSpawnCheck(ChocoboColor.GREEN); }
+            if (IS_HOT_OVERWORLD().contains(biomeRegistryKey) && !IS_SAVANNA().contains(biomeRegistryKey)) { setChocoboSpawnCheck(ChocoboColor.BLACK); }
             this.setChocoboScale(this.isMale(), 0, false);
         }
         chocoboStatShake(EntityAttributes.GENERIC_MAX_HEALTH, "health");
@@ -546,7 +558,7 @@ public class Chocobo extends TameableEntity implements Angerable, NamedScreenHan
             Objects.requireNonNull(this.getAttributeInstance(EntityAttributes.GENERIC_ATTACK_DAMAGE)).removeModifier(CHOCOBO_WEAPON_DAM_MOD_UUID);
             Objects.requireNonNull(this.getAttributeInstance(EntityAttributes.GENERIC_ATTACK_SPEED)).removeModifier(CHOCOBO_WEAPON_SPD_MOD_UUID);
             if (this.isChocoWeapon(pStack)) {
-                double a = ((ChocoboWeaponItems)pStack.getItem()).getDamage()*chocoStatMod();
+                double a = ((ChocoboWeaponItems)pStack.getItem()).getAttackDamage()*chocoStatMod();
                 float s = ((ChocoboWeaponItems)pStack.getItem()).getAttackSpeed()*chocoStatMod();
                 if (a != 0) { Objects.requireNonNull(this.getAttributeInstance(EntityAttributes.GENERIC_ATTACK_DAMAGE)).addPersistentModifier(new EntityAttributeModifier(CHOCOBO_WEAPON_DAM_MOD_UUID, "Chocobo Attack Bonus", a, EntityAttributeModifier.Operation.ADDITION)); }
                 if (s != 0) { Objects.requireNonNull(this.getAttributeInstance(EntityAttributes.GENERIC_ATTACK_SPEED)).addPersistentModifier(new EntityAttributeModifier(CHOCOBO_WEAPON_SPD_MOD_UUID, "Chocobo Attack Speed Bonus", s, EntityAttributeModifier.Operation.ADDITION)); }
@@ -558,8 +570,7 @@ public class Chocobo extends TameableEntity implements Angerable, NamedScreenHan
     public void setChocoboColor(ChocoboColor color) { this.dataTracker.set(PARAM_COLOR, color); }
     public void setCollarColor(Integer color) { this.dataTracker.set(PARAM_COLLAR_COLOR, color); }
     public Integer getCollarColor() { return this.dataTracker.get(PARAM_COLLAR_COLOR); }
-    public boolean fireImmune() { return this.dataTracker.get(PARAM_IS_FLAME_BLOOD); }
-    public boolean isFireImmune() { return this.fireImmune(); } // TODO: Nameswpaw fire immune after pieces are in
+    public boolean isFireImmune() { return this.dataTracker.get(PARAM_IS_FLAME_BLOOD); }
     public void setFlame(boolean flame) { this.dataTracker.set(PARAM_IS_FLAME_BLOOD, flame); }
     public void setWaterBreath(boolean waterBreath) { this.dataTracker.set(PARAM_IS_WATER_BREATH, waterBreath); }
     public void setWitherImmune(boolean witherImmune) { this.dataTracker.set(PARAM_WITHER_IMMUNE, witherImmune); }
@@ -571,7 +582,7 @@ public class Chocobo extends TameableEntity implements Angerable, NamedScreenHan
         this.dataTracker.set(PARAM_SCALE, scale);
     }
     public void setChocoboScaleMod(float value) { this.dataTracker.set(PARAM_SCALE_MOD, value); }
-    public boolean nonFlameFireImmune() { return fireImmune() && ChocoboColor.FLAME != getChocoboColor(); }
+    public boolean nonFlameFireImmune() { return isFireImmune() && ChocoboColor.FLAME != getChocoboColor(); }
     public boolean isWaterBreather() { return this.dataTracker.get(PARAM_IS_WATER_BREATH); }
     public boolean isWitherImmune() { return this.dataTracker.get(PARAM_WITHER_IMMUNE); }
     public boolean isPoisonImmune() { return this.dataTracker.get(PARAM_POISON_IMMUNE); }
@@ -751,7 +762,7 @@ public class Chocobo extends TameableEntity implements Angerable, NamedScreenHan
                 if (rider.isInLava()) {
                     Vec3d motion = getVelocity();
                     if (MinecraftClient.getInstance().options.jumpKey.isPressed()) { setVelocity(new Vec3d(motion.x, .5f, motion.z)); }
-                    else if (this.fireImmune() && this.getVelocity().y < 0) {
+                    else if (this.isFireImmune() && this.getVelocity().y < 0) {
                         int distance = WorldUtils.getDistanceToSurface(this.getBlockPos(), this.getEntityWorld());
                         if (distance > 0) { setVelocity(new Vec3d(motion.x, .05f, motion.z)); }
                     }
@@ -893,7 +904,7 @@ public class Chocobo extends TameableEntity implements Angerable, NamedScreenHan
         //Change effects to chocobo colors
         if (!this.getEntityWorld().isClient()) {
             if (this.age % 60 == 0) {
-                if (this.fireImmune()) {
+                if (this.isFireImmune()) {
                     this.addStatusEffect(new StatusEffectInstance(StatusEffects.FIRE_RESISTANCE, 100, 0, true, false));
                     if (this.hasPassengers()) {
                         Entity controller = this.getPrimaryPassenger();
@@ -998,7 +1009,7 @@ public class Chocobo extends TameableEntity implements Angerable, NamedScreenHan
                     this.eat(player, hand, heldItemStack);
                 }
             }
-            if (defaultHand == GYSAHL_CAKE.get().asItem() && this.isBaby()) {
+            if (defaultHand == GYSAHL_CAKE.asItem() && this.isBaby()) {
                 this.eat(player, hand, heldItemStack);
                 onGrowUp();
                 return ActionResult.SUCCESS;
@@ -1014,13 +1025,13 @@ public class Chocobo extends TameableEntity implements Angerable, NamedScreenHan
                 } else { player.startRiding(this); }
                 return ActionResult.SUCCESS;
             }
-            if (defaultHand == GYSAHL_GREEN_ITEM.get()) {
+            if (defaultHand == GYSAHL_GREEN_ITEM) {
                 if (getHealth() != getMaxHealth()) {
                     this.eat(player, hand, player.getInventory().getMainHandStack());
                     heal(ChocoConfigGet(StaticGlobalVariables.getHealAmount(), dHEAL_AMOUNT.getDefault()));
                 } else { player.sendMessage(new TranslatableText(DelChoco.Mod_ID + ".entity_chocobo.heal_fail"), true); }
             }
-            if (defaultHand == CHOCOBO_WHISTLE.get() && !this.isBaby()) {
+            if (defaultHand == CHOCOBO_WHISTLE && !this.isBaby()) {
                 if (isOwner(player)) {
                     if (this.followingMrHuman == 3) {
                         this.playSound(ModSounds.WHISTLE_SOUND_FOLLOW, 1.0F, 1.0F);
@@ -1080,7 +1091,7 @@ public class Chocobo extends TameableEntity implements Angerable, NamedScreenHan
                 } else { player.sendMessage(new TranslatableText(DelChoco.Mod_ID + ".entity_chocobo.not_owner"), true); }
                 return ActionResult.SUCCESS;
             }
-            if (!this.isInLove() && defaultHand == LOVELY_GYSAHL_GREEN.get() && !this.isBaby()) {
+            if (!this.isInLove() && defaultHand == LOVELY_GYSAHL_GREEN && !this.isBaby()) {
                 this.eat(player, hand, player.getInventory().getMainHandStack());
                 this.lovePlayer(player);
                 return ActionResult.SUCCESS;
@@ -1119,7 +1130,7 @@ public class Chocobo extends TameableEntity implements Angerable, NamedScreenHan
                 }
                 return ActionResult.SUCCESS;
             }
-            if (defaultHand == CHOCOBO_FEATHER.get().asItem()) {
+            if (defaultHand == CHOCOBO_FEATHER.asItem()) {
                 if (isOwner(player)) { this.setCustomNameVisible(!this.isCustomNameVisible()); }
                 else { player.sendMessage(new TranslatableText(DelChoco.Mod_ID + ".entity_chocobo.not_owner"), true); }
                 return ActionResult.SUCCESS;
@@ -1165,13 +1176,13 @@ public class Chocobo extends TameableEntity implements Angerable, NamedScreenHan
         return super.interactAt(player, vec, hand);
     }
     private void displayChocoboInventory(@NotNull ServerPlayerEntity player) {
-        if (player.currentScreenHandler != player.playerScreenHandler) {
-            player.closeHandledScreen();
-        }
-
-        int syncId = player.currentScreenHandler.syncId + 1;
-        PacketManager.sendToClient(player, new OpenChocoboGuiMessage(this, syncId));
-        player.openHandledScreen(new SimpleNamedScreenHandlerFactory((i, playerInventory, playerEntity) -> new SaddleBagContainer(i, playerInventory, this), this.getDisplayName()));
+        Chocobo chocobo = this;
+        player.openHandledScreen(new NamedScreenHandlerFactory() {
+            @Override
+            public Text getDisplayName() { return new LiteralText("Chocobo Inventory"); }
+            @Override
+            public ScreenHandler createMenu(int syncId, PlayerInventory playerInventory, PlayerEntity player) { return new SaddlebagContainer(syncId, playerInventory, chocobo); }
+        });
     }
     private void chocoboFeatherPick(@NotNull Inventory sendingInv, @NotNull Inventory receivingInv, int slot) {
         boolean isReverseTierOne = sendingInv.size() > receivingInv.size();
@@ -1303,8 +1314,6 @@ public class Chocobo extends TameableEntity implements Angerable, NamedScreenHan
             }
         } else { this.despawnCounter = 0; }
     }
-
     // Ride Related
     public int getRideTickDelay() { return this.rideTickDelay; }
-
 }

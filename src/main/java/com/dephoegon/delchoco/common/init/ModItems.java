@@ -4,7 +4,7 @@ import com.dephoegon.delchoco.DelChoco;
 import com.dephoegon.delchoco.common.blocks.GysahlGreenBlock;
 import com.dephoegon.delchoco.common.items.ChocoboArmorItems;
 import com.dephoegon.delchoco.common.items.ChocoboSaddleItem;
-import com.dephoegon.delchoco.common.items.ChocoboWeaponItem;
+import com.dephoegon.delchoco.common.items.ChocoboWeaponItems;
 import com.dephoegon.delchoco.common.items.CustomBlockNamedItem;
 import net.fabricmc.fabric.api.item.v1.FabricItemSettings;
 import net.minecraft.block.AbstractBlock;
@@ -17,7 +17,7 @@ import net.minecraft.sound.BlockSoundGroup;
 import static com.dephoegon.delchoco.common.entities.Chocobo.tier_one_chocobo_inv_slot_count;
 import static com.dephoegon.delchoco.common.entities.Chocobo.tier_two_chocobo_inv_slot_count;
 import static com.dephoegon.delchoco.common.items.ChocoboArmorItems.CHOCOBO_ARMOR_MATERIALS;
-import static com.dephoegon.delchoco.common.items.ChocoboWeaponItem.CHOCOBO_WEAPON_TIERS;
+import static com.dephoegon.delchoco.common.items.ChocoboWeaponItems.CHOCOBO_WEAPON_TIERS;
 
 
 public class ModItems extends BaseReg {
@@ -36,10 +36,10 @@ public class ModItems extends BaseReg {
 
 
     // Chocobo Gear
-    public static final Item STONE_CHOCO_WEAPON = registerItem("chocobo_weapon_stone", new ChocoboWeaponItem(CHOCOBO_WEAPON_TIERS.get(1), -3f, new FabricItemSettings().group(DelChoco.DELCHOCO_ITEMS).maxCount(1)));
-    public static final Item IRON_CHOCO_WEAPON = registerItem("chocobo_weapon_iron", new ChocoboWeaponItem(CHOCOBO_WEAPON_TIERS.get(2), -3f, new FabricItemSettings().group(DelChoco.DELCHOCO_ITEMS).maxCount(1)));
-    public static final Item DIAMOND_CHOCO_WEAPON = registerItem("chocobo_weapon_diamond", new ChocoboWeaponItem(CHOCOBO_WEAPON_TIERS.get(3), -2.4f, new FabricItemSettings().group(DelChoco.DELCHOCO_ITEMS).maxCount(1)));
-    public static final Item NETHERITE_CHOCO_WEAPON = registerItem("chocobo_weapon_netherite", new ChocoboWeaponItem(CHOCOBO_WEAPON_TIERS.get(4), -2.4f, new FabricItemSettings().group(DelChoco.DELCHOCO_ITEMS).maxCount(1).fireproof()));
+    public static final Item STONE_CHOCO_WEAPON = registerItem("chocobo_weapon_stone", new ChocoboWeaponItems(CHOCOBO_WEAPON_TIERS.get(1), -3f, new FabricItemSettings().group(DelChoco.DELCHOCO_ITEMS).maxCount(1)));
+    public static final Item IRON_CHOCO_WEAPON = registerItem("chocobo_weapon_iron", new ChocoboWeaponItems(CHOCOBO_WEAPON_TIERS.get(2), -3f, new FabricItemSettings().group(DelChoco.DELCHOCO_ITEMS).maxCount(1)));
+    public static final Item DIAMOND_CHOCO_WEAPON = registerItem("chocobo_weapon_diamond", new ChocoboWeaponItems(CHOCOBO_WEAPON_TIERS.get(3), -2.4f, new FabricItemSettings().group(DelChoco.DELCHOCO_ITEMS).maxCount(1)));
+    public static final Item NETHERITE_CHOCO_WEAPON = registerItem("chocobo_weapon_netherite", new ChocoboWeaponItems(CHOCOBO_WEAPON_TIERS.get(4), -2.4f, new FabricItemSettings().group(DelChoco.DELCHOCO_ITEMS).maxCount(1).fireproof()));
     public static final Item CHAIN_CHOCO_CHEST = registerItem("chocobo_armor_chain", new ChocoboArmorItems(CHOCOBO_ARMOR_MATERIALS.get(1), EquipmentSlot.CHEST, new FabricItemSettings().group(DelChoco.DELCHOCO_ITEMS).maxCount(1)));
     public static final Item IRON_CHOCO_CHEST = registerItem("chocobo_armor_iron", new ChocoboArmorItems(CHOCOBO_ARMOR_MATERIALS.get(2), EquipmentSlot.CHEST, new FabricItemSettings().group(DelChoco.DELCHOCO_ITEMS).maxCount(1)));
     public static final Item DIAMOND_CHOCO_CHEST = registerItem("chocobo_armor_diamond", new ChocoboArmorItems(CHOCOBO_ARMOR_MATERIALS.get(3), EquipmentSlot.CHEST, new FabricItemSettings().group(DelChoco.DELCHOCO_ITEMS).maxCount(1)));

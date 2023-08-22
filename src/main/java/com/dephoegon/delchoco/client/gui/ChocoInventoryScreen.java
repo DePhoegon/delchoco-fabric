@@ -55,7 +55,7 @@ public class ChocoInventoryScreen extends HandledScreen<SaddlebagContainer> {
     public void render(MatrixStack matrices, int mouseX, int mouseY, float delta) {
         this.renderBackground(matrices);
         super.render(matrices, mouseX, mouseY, delta);
-        this.renderTooltip(matrices, chocobo.getDisplayName(), mouseX, mouseY);
+        this.drawMouseoverTooltip(matrices, mouseX, mouseY);
     }
     protected void drawForeground(@NotNull MatrixStack matrixStack, int x, int y) {
         this.textRenderer.draw(matrixStack, this.chocobo.getDisplayName().getString(), xAdjust-16, 6, 0x888888);

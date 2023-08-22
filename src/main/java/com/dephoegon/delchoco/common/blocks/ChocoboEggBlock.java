@@ -81,9 +81,9 @@ public class ChocoboEggBlock extends BlockWithEntity {
             final ChocoboBreedInfo info = new ChocoboBreedInfo(nbtBreedInfo);
             final ChocoboStatSnapshot mother = info.getMother();
             final ChocoboStatSnapshot father = info.getFather();
-            tooltip.add(new TranslatableText("item." + DelChoco.Mod_ID + ".chocobo_egg.tooltip.mother_info", (int) mother.health, (int) (mother.speed * 100), (int) mother.stamina, mother.color.getEggText()));
-            tooltip.add(new TranslatableText("item." + DelChoco.Mod_ID + ".chocobo_egg.tooltip.father_info", (int) father.health, (int) (father.speed * 100), (int) father.stamina, father.color.getEggText()));
-        } else { tooltip.add(new TranslatableText("item." + DelChoco.Mod_ID + ".chocobo_egg.tooltip.invalid_egg")); }
+            tooltip.add(new TranslatableText("item." + DelChoco.DELCHOCO_ID + ".chocobo_egg.tooltip.mother_info", (int) mother.health, (int) (mother.speed * 100), (int) mother.stamina, mother.color.getEggText()));
+            tooltip.add(new TranslatableText("item." + DelChoco.DELCHOCO_ID + ".chocobo_egg.tooltip.father_info", (int) father.health, (int) (father.speed * 100), (int) father.stamina, father.color.getEggText()));
+        } else { tooltip.add(new TranslatableText("item." + DelChoco.DELCHOCO_ID + ".chocobo_egg.tooltip.invalid_egg")); }
     }
     @Nullable
     public <T extends BlockEntity> BlockEntityTicker<T> getTicker(World world, BlockState state, BlockEntityType<T> type) {

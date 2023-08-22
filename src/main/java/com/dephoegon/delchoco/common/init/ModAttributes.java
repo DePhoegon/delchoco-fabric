@@ -9,7 +9,7 @@ import net.minecraft.util.registry.Registry;
 public class ModAttributes {
     public static final EntityAttribute CHOCOBO_MAX_STAMINA = Registry.register(
             Registry.ATTRIBUTE,
-            new Identifier(DelChoco.Mod_ID, "chocobo_max_stamina"),
+            new Identifier(DelChoco.DELCHOCO_ID, "chocobo_max_stamina"),
             new ClampedEntityAttribute("chocobo.maxStamina", 10.0D, 10D, 1024.0D).setTracked(true)
     );
 }

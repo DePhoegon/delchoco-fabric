@@ -12,7 +12,7 @@ public class ModSounds {
     public static final SoundEvent WHISTLE_SOUND_WANDER = register("entity.chocobo.kwehwhistlewander");
 
     private static SoundEvent register(String id) {
-        Identifier identifier = new Identifier(DelChoco.Mod_ID, id);
+        Identifier identifier = new Identifier(DelChoco.DELCHOCO_ID, id);
         return Registry.register(Registry.SOUND_EVENT, identifier, new SoundEvent(identifier));
     }
 }

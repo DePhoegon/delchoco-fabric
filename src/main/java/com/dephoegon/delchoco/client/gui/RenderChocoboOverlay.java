@@ -11,7 +11,7 @@ import net.minecraft.entity.Entity;
 import net.minecraft.util.Identifier;
 
 public class RenderChocoboOverlay {
-    private static final Identifier ICONS = new Identifier(DelChoco.Mod_ID, "textures/gui/icons.png");
+    private static final Identifier ICONS = new Identifier(DelChoco.DELCHOCO_ID, "textures/gui/icons.png");
     public static void onGuiInGameOverlayRender() {
         HudRenderCallback.EVENT.register((matrixStack, tickDelta) -> {
             MinecraftClient minecraft = MinecraftClient.getInstance();

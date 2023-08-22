@@ -28,7 +28,7 @@ public enum ChocoboColor {
     ChocoboColor(TagKey<Item> colorIngredient, int CustomModelData) {
         this.colorTag = colorIngredient;
         this.customModelData = CustomModelData;
-        this.eggText = new TranslatableText("item." + DelChoco.Mod_ID + ".chocobo_egg.tooltip." + this.name().toLowerCase());
+        this.eggText = new TranslatableText("item." + DelChoco.DELCHOCO_ID + ".chocobo_egg.tooltip." + this.name().toLowerCase());
     }
     public int getCustomModelData() { return this.customModelData; }
     public static ChocoboColor getRandomColor() { return values()[rand.nextInt(values().length)]; }

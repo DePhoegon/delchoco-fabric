@@ -12,8 +12,8 @@ import net.minecraft.util.Identifier;
 import org.jetbrains.annotations.NotNull;
 
 public class NestScreen extends HandledScreen<NestContainer> {
-    private final static Identifier TEXTURE = new Identifier(DelChoco.Mod_ID, "textures/gui/chocobo_nest.png");
-    private final static Identifier TEXTURE_SHELTERED = new Identifier(DelChoco.Mod_ID, "textures/gui/chocobo_nest_sheltered.png");
+    private final static Identifier TEXTURE = new Identifier(DelChoco.DELCHOCO_ID, "textures/gui/chocobo_nest.png");
+    private final static Identifier TEXTURE_SHELTERED = new Identifier(DelChoco.DELCHOCO_ID, "textures/gui/chocobo_nest_sheltered.png");
     public NestScreen(NestContainer handler, PlayerInventory inventory, Text title) {
         super(handler, inventory, title);
         this.backgroundWidth = 176;

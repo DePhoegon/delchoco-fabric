@@ -3,6 +3,8 @@ package com.dephoegon.delchoco.aid.world;
 import com.dephoegon.delbase.Delbase;
 import com.dephoegon.delchoco.DelChoco;
 import com.dephoegon.delchoco.aid.composables;
+import com.dephoegon.delchoco.client.ChocoboSprintingEventHandler;
+import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerWorldEvents;
 import net.minecraft.nbt.NbtCompound;
@@ -21,12 +23,12 @@ import static com.dephoegon.delchoco.aid.world.dValues.defaultFloats.*;
 import static com.dephoegon.delchoco.aid.world.dValues.defaultInts.*;
 
 public class serverVariableAccess {
-    public static final Identifier DELCHOCO_CHOCOBO_VARIABLES = new Identifier(DelChoco.Mod_ID, "chocobo-variables");
-    public static final Identifier DELCHOCO_WORLD_VARIABLES = new Identifier(DelChoco.Mod_ID, "world-variables");
-    private long lastEventTime = 0;
-    private long lastUnloadEventTime = 0;
-    private final long COOL_DOWN = 5000; // 5 seconds
-    public void init() {
+    public static final Identifier DELCHOCO_CHOCOBO_VARIABLES = new Identifier(DelChoco.DELCHOCO_ID, "chocobo-variables");
+    public static final Identifier DELCHOCO_WORLD_VARIABLES = new Identifier(DelChoco.DELCHOCO_ID, "world-variables");
+    private static long lastEventTime = 0;
+    private static long lastUnloadEventTime = 0;
+    private static final long COOL_DOWN = 5000; // 5 seconds
+    public static void init() {
         ServerLifecycleEvents.SERVER_STARTED.register(server -> {
             lastEventTime = System.currentTimeMillis();
             File choco_load_file = new File(server.getSavePath(WorldSavePath.ROOT).toFile(), DELCHOCO_CHOCOBO_VARIABLES.toString().replace(':', '_'));
@@ -70,6 +72,9 @@ public class serverVariableAccess {
                     }
                 }
             });
+            ClientTickEvents.END_CLIENT_TICK.register(client -> {
+                ChocoboSprintingEventHandler.onKeyPress();
+            });
             composables.addToList();
         });
 
@@ -83,7 +88,7 @@ public class serverVariableAccess {
             }
         });
     }
-    private void saveFile(@NotNull ServerWorld world) {
+    private static void saveFile(@NotNull ServerWorld world) {
         File choco_file = new File(world.getServer().getSavePath(WorldSavePath.ROOT).toFile(), DELCHOCO_CHOCOBO_VARIABLES.toString().replace(':', '_'));
         File world_file = new File(world.getServer().getSavePath(WorldSavePath.ROOT).toFile(), DELCHOCO_WORLD_VARIABLES.toString().replace(':', '_'));
         try (DataOutputStream choco_output = new DataOutputStream(new FileOutputStream(choco_file))) {
@@ -111,7 +116,7 @@ public class serverVariableAccess {
             DelChoco.LOGGER.warn("Failure to save global Variables data : "+ e.getMessage());
         }
     }
-    private void setDelchocoConfigVariables(globalVariablesHolder variables, boolean isWorld) {
+    private static void setDelchocoConfigVariables(globalVariablesHolder variables, boolean isWorld) {
         if (isWorld) {
             setChocoboMinPack(getValueInBounds(dCHOCOBO_PACK_MIN, variables.getChocoboMinPack()));
             setChocoboMaxPack(getValueInBounds(dCHOCOBO_PACK_MAX, variables.getChocoboMaxPack()));
@@ -161,7 +166,7 @@ public class serverVariableAccess {
             setOwnerOnlyInventory(variables.isOwnerOnlyInventory());
         }
     }
-    private void getCurrentGlobalVariables(globalVariablesHolder variablesHolder, boolean isWorld) {
+    private static void getCurrentGlobalVariables(globalVariablesHolder variablesHolder, boolean isWorld) {
         if (isWorld) {
             variablesHolder.setChocoboMinPack(getValueInBounds(dCHOCOBO_PACK_MIN, StaticGlobalVariables.getChocoboMinPack()));
             variablesHolder.setChocoboMaxPack(getValueInBounds(dCHOCOBO_PACK_MAX, StaticGlobalVariables.getChocoboMaxPack()));
@@ -211,7 +216,7 @@ public class serverVariableAccess {
             variablesHolder.setOwnerOnlyInventory(StaticGlobalVariables.getOwnerOnlyInventory());
         }
     }
-    private boolean globalVariablesChanged(globalVariablesHolder currentVariables, boolean isWorld) {
+    private static boolean globalVariablesChanged(globalVariablesHolder currentVariables, boolean isWorld) {
         if (isWorld) {
             globalWorldVariableNullCheck();
             if (currentVariables.getChocoboMinPack() != StaticGlobalVariables.getChocoboMinPack()) { return true; }
@@ -261,7 +266,7 @@ public class serverVariableAccess {
             return currentVariables.isTamedChocoboHittable() != StaticGlobalVariables.getTamedChocoboHittable();
         }
     }
-    private void globalChocoboVariableNullCheck() {
+    private static void globalChocoboVariableNullCheck() {
         StaticGlobalVariables.setStamina(ChocoConfigGet(StaticGlobalVariables.getStamina(), dSTAMINA.getDefault()));
                 StaticGlobalVariables.setSpeed(ChocoConfigGet(StaticGlobalVariables.getSpeed(), dSPEED.getDefault()));
                 StaticGlobalVariables.setHealth(ChocoConfigGet(StaticGlobalVariables.getHealth(), dHEALTH.getDefault()));
@@ -296,7 +301,7 @@ public class serverVariableAccess {
                 StaticGlobalVariables.setTamedChocoboHittable(ChocoConfigGet(StaticGlobalVariables.getTamedChocoboHittable(), dTamedChocoboHittable));
                 StaticGlobalVariables.setOwnerOnlyInventory(ChocoConfigGet(StaticGlobalVariables.getOwnerOnlyInventory(), dOwnerOnlyInventoryAccess));
     }
-    private void globalWorldVariableNullCheck() {
+    private static void globalWorldVariableNullCheck() {
         StaticGlobalVariables.setChocoboMinPack(ChocoConfigGet(StaticGlobalVariables.getChocoboMinPack(), dCHOCOBO_PACK_MIN.getDefault()));
         StaticGlobalVariables.setChocoboMaxPack(ChocoConfigGet(StaticGlobalVariables.getChocoboMaxPack(), dCHOCOBO_PACK_MAX.getDefault()));
         StaticGlobalVariables.setOverWorldSpawnWeight(ChocoConfigGet(StaticGlobalVariables.getOverWorldSpawnWeight(), dOVERWORLD_SPAWN_WEIGHT.getDefault()));

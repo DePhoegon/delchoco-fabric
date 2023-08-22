@@ -17,9 +17,9 @@ import net.minecraft.util.Identifier;
 import org.jetbrains.annotations.NotNull;
 
 public class ChocoInventoryScreen extends HandledScreen<SaddlebagContainer> {
-    private static final Identifier INV_TEXTURE_NULL = new Identifier(DelChoco.Mod_ID, "textures/gui/chocobo_inventory_null.png");
-    private static final Identifier INV_TEXTURE_SMALL = new Identifier(DelChoco.Mod_ID, "textures/gui/chocobo_inventory_small.png");
-    private static final Identifier INV_TEXTURE_LARGE = new Identifier(DelChoco.Mod_ID, "textures/gui/chocobo_inventory_large.png");
+    private static final Identifier INV_TEXTURE_NULL = new Identifier(DelChoco.DELCHOCO_ID, "textures/gui/chocobo_inventory_null.png");
+    private static final Identifier INV_TEXTURE_SMALL = new Identifier(DelChoco.DELCHOCO_ID, "textures/gui/chocobo_inventory_small.png");
+    private static final Identifier INV_TEXTURE_LARGE = new Identifier(DelChoco.DELCHOCO_ID, "textures/gui/chocobo_inventory_large.png");
     private static final int xAdjust = (4*18+16)+5; // (Additional Sizes for slots) + Border buffer
     private final Chocobo chocobo;
 

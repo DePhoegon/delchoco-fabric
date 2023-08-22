@@ -41,7 +41,7 @@ import static com.dephoegon.delchoco.common.entities.breeding.ChocoboBreedInfo.g
 
 public class ChocoboNestBlockEntity extends BlockEntity implements NamedScreenHandlerFactory {
     public ChocoboNestBlockEntity(BlockPos pos, BlockState state) { super(ModItems.STRAW_NEST_TILE.getType(), pos, state); }
-    public static final Identifier UPDATE_PACKET_ID = new Identifier(DelChoco.Mod_ID, "block_entity_update");
+    public static final Identifier UPDATE_PACKET_ID = new Identifier(DelChoco.DELCHOCO_ID, "block_entity_update");
     private static class CheckOffset {
         Vec3i offset;
         boolean shouldBeAir;
@@ -178,7 +178,7 @@ public class ChocoboNestBlockEntity extends BlockEntity implements NamedScreenHa
     }
     public ScreenHandler createMenu(int id, PlayerInventory playerInventory, PlayerEntity player) { return new NestContainer(id, playerInventory, this); } // Nest Container
     // to be done
-    public Text getDisplayName() { return new TranslatableText(DelChoco.Mod_ID + ".container.nest"); }
+    public Text getDisplayName() { return new TranslatableText(DelChoco.DELCHOCO_ID + ".container.nest"); }
     public void onInventoryChanged() {
         this.markDirty();
         BlockState newState = ModItems.STRAW_NEST.defaultBlockState().setValue(StrawNestBlock.HAS_EGG, !this.getEggItemStack().isEmpty());

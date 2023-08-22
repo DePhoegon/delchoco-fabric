@@ -23,6 +23,7 @@ public class ChocoboInventory extends SimpleInventory {
     public Chocobo getChocobo() { return this.entity; }
     public boolean canPlayerUse(PlayerEntity player) {
         if (player == null) { return false; }
+        if (entity == null) { return true; }
         if (entity.isTamed()) {
             boolean isPlayer = entity.isOwner(player);
             if (ChocoConfigGet(StaticGlobalVariables.getOwnerOnlyInventory(), dOwnerOnlyInventoryAccess)) { return isPlayer; } else { return true; }

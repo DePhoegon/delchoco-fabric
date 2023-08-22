@@ -1,6 +1,7 @@
 package com.dephoegon.delchoco.common.entities;
 
 import com.dephoegon.delchoco.DelChoco;
+import com.dephoegon.delchoco.aid.chocoboChecks;
 import com.dephoegon.delchoco.aid.world.StaticGlobalVariables;
 import com.dephoegon.delchoco.common.entities.breeding.ChocoboMateGoal;
 import com.dephoegon.delchoco.common.entities.properties.*;
@@ -65,7 +66,6 @@ import net.minecraft.util.registry.RegistryEntry;
 import net.minecraft.util.registry.RegistryKey;
 import net.minecraft.world.*;
 import net.minecraft.world.biome.Biome;
-import net.minecraft.world.biome.BiomeKeys;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -77,6 +77,7 @@ import java.util.UUID;
 import static com.dephoegon.delbase.item.ShiftingDyes.*;
 import static com.dephoegon.delchoco.aid.chocoKB.isChocoShiftDown;
 import static com.dephoegon.delchoco.aid.chocoKB.isChocoboWaterGlide;
+import static com.dephoegon.delchoco.aid.chocoboChecks.*;
 import static com.dephoegon.delchoco.aid.dyeList.getDyeList;
 import static com.dephoegon.delchoco.aid.world.StaticGlobalVariables.ChocoConfigGet;
 import static com.dephoegon.delchoco.aid.world.StaticGlobalVariables.FloatChocoConfigGet;
@@ -365,99 +366,6 @@ public class Chocobo extends TameableEntity implements Angerable, NamedScreenHan
     private void setLeashedDistance(double distance) { this.dataTracker.set(PARAM_LEASH_LENGTH, (int) distance); }
     private double getLeashDistance() { return (double) this.dataTracker.get(PARAM_LEASH_LENGTH); }
 
-    // Chocobo Arrays - Biomes & Color Checks
-    public static @NotNull ArrayList<ChocoboColor> wbChocobos() {
-        ArrayList<ChocoboColor> out = new ArrayList<>();
-        out.add(ChocoboColor.BLUE);
-        out.add(ChocoboColor.GOLD);
-        return out;
-    }
-    public static @NotNull ArrayList<ChocoboColor> wiChocobos() {
-        ArrayList<ChocoboColor> out = new ArrayList<>();
-        out.add(ChocoboColor.BLACK);
-        out.add(ChocoboColor.GOLD);
-        return out;
-    }
-    public static @NotNull ArrayList<ChocoboColor> piChocobos() {
-        ArrayList<ChocoboColor> out = new ArrayList<>();
-        out.add(ChocoboColor.GREEN);
-        out.add(ChocoboColor.GOLD);
-        return out;
-    }
-    private @NotNull ArrayList<RegistryKey<Biome>> whiteChocobo() {
-        ArrayList<RegistryKey<Biome>> out = new ArrayList<>();
-        out.add(BiomeKeys.BIRCH_FOREST);
-        out.add(BiomeKeys.OLD_GROWTH_BIRCH_FOREST);
-        return out;
-    }
-    private @NotNull ArrayList<RegistryKey<Biome>> blueChocobo() {
-        ArrayList<RegistryKey<Biome>> out = new ArrayList<>();
-        out.add(BiomeKeys.LUKEWARM_OCEAN);
-        out.add(BiomeKeys.DEEP_LUKEWARM_OCEAN);
-        out.add(BiomeKeys.WARM_OCEAN);
-        out.add(BiomeKeys.RIVER);
-        return out;
-    }
-    private @NotNull ArrayList<RegistryKey<Biome>> greenChocobo() {
-        ArrayList<RegistryKey<Biome>> out = new ArrayList<>();
-        out.add(BiomeKeys.JUNGLE);
-        out.add(BiomeKeys.BAMBOO_JUNGLE);
-        out.add(BiomeKeys.SWAMP);
-        out.add(BiomeKeys.LUSH_CAVES);
-        out.add(BiomeKeys.DRIPSTONE_CAVES);
-        return out;
-    }
-    private @NotNull ArrayList<RegistryKey<Biome>> IS_HOT_OVERWORLD() {
-        ArrayList<RegistryKey<Biome>> out = new ArrayList<>();
-        out.add(BiomeKeys.DESERT);
-        out.add(BiomeKeys.JUNGLE);
-        out.add(BiomeKeys.SPARSE_JUNGLE);
-        out.add(BiomeKeys.SAVANNA);
-        out.add(BiomeKeys.SAVANNA_PLATEAU);
-        out.add(BiomeKeys.STONY_PEAKS);
-        out.add(BiomeKeys.WINDSWEPT_SAVANNA);
-        out.add(BiomeKeys.ERODED_BADLANDS);
-        out.add(BiomeKeys.BAMBOO_JUNGLE);
-        return out;
-    }
-    private @NotNull ArrayList<RegistryKey<Biome>> IS_SAVANNA() {
-        ArrayList<RegistryKey<Biome>> out = new ArrayList<>();
-        out.add(BiomeKeys.SAVANNA);
-        out.add(BiomeKeys.SAVANNA_PLATEAU);
-        out.add(BiomeKeys.WINDSWEPT_SAVANNA);
-        return out;
-    }
-    private @NotNull ArrayList<RegistryKey<Biome>> IS_SNOWY() {
-        ArrayList<RegistryKey<Biome>> out = new ArrayList<>();
-        out.add(BiomeKeys.FROZEN_OCEAN);
-        out.add(BiomeKeys.FROZEN_RIVER);
-        out.add(BiomeKeys.SNOWY_PLAINS);
-        out.add(BiomeKeys.SNOWY_BEACH);
-        out.add(BiomeKeys.SNOWY_TAIGA);
-        out.add(BiomeKeys.GROVE);
-        out.add(BiomeKeys.SNOWY_SLOPES);
-        out.add(BiomeKeys.JAGGED_PEAKS);
-        out.add(BiomeKeys.FROZEN_PEAKS);
-        out.add(BiomeKeys.ICE_SPIKES);
-        return out;
-    }
-    private @NotNull ArrayList<RegistryKey<Biome>> IS_MUSHROOM() {
-        ArrayList<RegistryKey<Biome>> out = new ArrayList<>();
-        out.add(BiomeKeys.MUSHROOM_FIELDS);
-        return out;
-    }
-    public boolean isOverworld(ServerWorldAccess world) {
-        if (world == null) { return false; }
-        return world.toServerWorld().getRegistryKey().equals(World.OVERWORLD);
-    }
-    public boolean isNether(ServerWorldAccess world) {
-        if (world == null) { return false; }
-        return world.toServerWorld().getRegistryKey().equals(World.NETHER);
-    }
-    public boolean isEnd(ServerWorldAccess world) {
-        if (world == null) { return false; }
-        return world.toServerWorld().getRegistryKey().equals(World.END);
-    }
     public int ChocoboShaker(@NotNull String stat) {
         return switch (stat) {
             case "health" -> boundedRangeModifier(5, 10);
@@ -489,11 +397,11 @@ public class Chocobo extends TameableEntity implements Angerable, NamedScreenHan
             if (isNether(worldIn)) { setChocoboSpawnCheck(ChocoboColor.FLAME); }
             if (isEnd(worldIn)){ setChocoboSpawnCheck(ChocoboColor.PURPLE); }
             if (IS_MUSHROOM().contains(biomeRegistryKey)) { setChocoboSpawnCheck(ChocoboColor.PINK); }
-            if (IS_SNOWY().contains(biomeRegistryKey) || whiteChocobo().contains(biomeRegistryKey)) { setChocoboSpawnCheck(ChocoboColor.WHITE); }
-            if (blueChocobo().contains(biomeRegistryKey)) { setChocoboSpawnCheck(ChocoboColor.BLUE); }
+            if (isSnowy(biomeRegistryKey) || isWhiteChocoboBiomes(biomeRegistryKey)) { setChocoboSpawnCheck(ChocoboColor.WHITE); }
+            if (isBlueChocoboBiomes(biomeRegistryKey)) { setChocoboSpawnCheck(ChocoboColor.BLUE); }
             if (currentBiomes.isIn(IS_FOREST) || currentBiomes.isIn(IS_BADLANDS)) { setChocoboSpawnCheck(ChocoboColor.RED); }
-            if (greenChocobo().contains(biomeRegistryKey)) { setChocoboSpawnCheck(ChocoboColor.GREEN); }
-            if (IS_HOT_OVERWORLD().contains(biomeRegistryKey) && !IS_SAVANNA().contains(biomeRegistryKey)) { setChocoboSpawnCheck(ChocoboColor.BLACK); }
+            if (isGreenChocoboBiomes(biomeRegistryKey)) { setChocoboSpawnCheck(ChocoboColor.GREEN); }
+            if (isHotOverWorld(biomeRegistryKey) && !isSavanna(biomeRegistryKey)) { setChocoboSpawnCheck(ChocoboColor.BLACK); }
             this.setChocoboScale(this.isMale(), 0, false);
         }
         chocoboStatShake(EntityAttributes.GENERIC_MAX_HEALTH, "health");
@@ -517,9 +425,9 @@ public class Chocobo extends TameableEntity implements Angerable, NamedScreenHan
     public void setChocobo(ChocoboColor color) {
         this.setChocoboColor(color);
         this.setFlame(color == ChocoboColor.FLAME);
-        this.setWaterBreath(wbChocobos().contains(color));
-        this.setWitherImmune(wiChocobos().contains(color));
-        this.setPoisonImmune(piChocobos().contains(color));
+        this.setWaterBreath(isWaterBreathingChocobo(color));
+        this.setWitherImmune(isWitherImmuneChocobo(color));
+        this.setPoisonImmune(chocoboChecks.isPoisonImmuneChocobo(color));
     }
     private void setChocoboSpawnCheck(ChocoboColor color) {
         ChocoboColor chocobo = this.getChocoboColor();

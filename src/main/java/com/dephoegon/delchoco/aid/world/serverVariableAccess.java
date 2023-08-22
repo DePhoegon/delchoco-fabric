@@ -2,6 +2,7 @@ package com.dephoegon.delchoco.aid.world;
 
 import com.dephoegon.delbase.Delbase;
 import com.dephoegon.delchoco.DelChoco;
+import com.dephoegon.delchoco.aid.composables;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerWorldEvents;
 import net.minecraft.nbt.NbtCompound;
@@ -69,6 +70,7 @@ public class serverVariableAccess {
                     }
                 }
             });
+            composables.addToList();
         });
 
         ServerWorldEvents.UNLOAD.register((server, world) -> {

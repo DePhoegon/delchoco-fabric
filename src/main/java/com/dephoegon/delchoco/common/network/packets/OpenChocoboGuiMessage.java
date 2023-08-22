@@ -1,6 +1,7 @@
 package com.dephoegon.delchoco.common.network.packets;
 
 import com.dephoegon.delchoco.DelChoco;
+import com.dephoegon.delchoco.client.gui.ChocoInventoryScreen;
 import com.dephoegon.delchoco.common.entities.Chocobo;
 import com.dephoegon.delchoco.common.items.ChocoboSaddleItem;
 import net.fabricmc.fabric.api.network.PacketContext;
@@ -22,11 +23,11 @@ public class OpenChocoboGuiMessage {
         this.entityId = chocobo.getId();
         this.windowId = windowId;
 
-        this.saddle = chocobo.saddleItemStackHandler.serializeNBT();
+        this.saddle = chocobo.chocoboSaddleInv.save();
         ItemStack saddleStack = chocobo.getSaddle();
         if(!saddleStack.isEmpty() && saddleStack.getItem() instanceof ChocoboSaddleItem saddleItem) {
             if(saddleItem.getInventorySize() > 0) {
-                this.inventory = chocobo.chocoboInventory.serializeNBT();
+                this.inventory = chocobo.chocoboBackboneInv.save();
             }
         }
     }
@@ -56,16 +57,17 @@ public class OpenChocoboGuiMessage {
 
     public static void handle(@NotNull OpenChocoboGuiMessage message, PacketContext context) {
         MinecraftClient mc = MinecraftClient.getInstance();
+        assert mc.world != null;
         Entity entity = mc.world.getEntityById(message.entityId);
         if (!(entity instanceof Chocobo chocobo)) {
             DelChoco.LOGGER.warn("Server send OpenGUI for chocobo with id {}, but this entity does not exist on my side", message.entityId);
             return;
         }
 
-        ChocoboInventoryScreen.openInventory(message.windowId, chocobo);
-        chocobo.saddleItemStackHandler.deserializeNBT(message.saddle);
+        ChocoInventoryScreen.openInventory(message.windowId, chocobo);
+        chocobo.chocoboSaddleInv.load(message.saddle);
         if (message.inventory != null) {
-            chocobo.chocoboInventory.deserializeNBT(message.inventory);
+            chocobo.chocoboBackboneInv.load(message.inventory);
         }
     }
 }

@@ -13,5 +13,6 @@ public class ChocoList {
         ModDataSerializers.init();
         ModEntities.registerAttributes();
         ModItems.registerModItems();
+        tradeAdds.addTrades();
     }
 }

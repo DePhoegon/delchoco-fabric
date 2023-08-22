@@ -2,9 +2,9 @@ package com.dephoegon.delchoco.common.entities.breeding;
 
 import com.dephoegon.delchoco.aid.world.StaticGlobalVariables;
 
+import static com.dephoegon.delchoco.aid.chocoboChecks.*;
 import static com.dephoegon.delchoco.aid.world.StaticGlobalVariables.ChocoConfigGet;
 import static com.dephoegon.delchoco.aid.world.dValues.defaultInts.*;
-import static com.dephoegon.delchoco.common.entities.Chocobo.*;
 import static com.dephoegon.delchoco.common.entities.properties.ChocoboColor.FLAME;
 import static com.dephoegon.delchoco.common.entities.properties.ChocoboColor.getRandomColor;
 import static com.dephoegon.delchoco.utils.RandomHelper.random;
@@ -22,9 +22,9 @@ public class ChocoboSnap {
         this.TWEAKED_DEFAULT.toughness = boundedIntRange(1, 3, ChocoConfigGet(StaticGlobalVariables.getArmorTough(), dARMOR_TOUGH.getDefault()));
         this.TWEAKED_DEFAULT.color = getRandomColor();
         this.TWEAKED_DEFAULT.flameBlood = TWEAKED_DEFAULT.color == FLAME;
-        this.TWEAKED_DEFAULT.waterBreath = wbChocobos().contains(this.TWEAKED_DEFAULT.color);
-        this.TWEAKED_DEFAULT.witherImmune = wiChocobos().contains(this.TWEAKED_DEFAULT.color);
-        this.TWEAKED_DEFAULT.poisonImmune = piChocobos().contains(this.TWEAKED_DEFAULT.color);
+        this.TWEAKED_DEFAULT.waterBreath = isWaterBreathingChocobo(this.TWEAKED_DEFAULT.color);
+        this.TWEAKED_DEFAULT.witherImmune = isWitherImmuneChocobo(this.TWEAKED_DEFAULT.color);
+        this.TWEAKED_DEFAULT.poisonImmune = isPoisonImmuneChocobo(this.TWEAKED_DEFAULT.color);
         this.TWEAKED_DEFAULT.scale = setChocoScale(.50f > (float) Math.random());
     }
     public ChocoboSnap() { setTWEAKED(); }

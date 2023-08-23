@@ -117,7 +117,7 @@ public class ChocoboNestBlockEntity extends BlockEntity implements NamedScreenHa
         if (baby == null) { return false; }
         baby.updatePositionAndAngles(this.getPos().getX() + 0.5, this.getPos().getY() + 0.2, this.getPos().getZ() + 0.5, 0.0F, 0.0F);
         assert this.world != null;
-        this.level.addFreshEntity(baby);
+        this.world.spawnEntity(baby);
 
         Random random = baby.getRandom();
         for (int i = 0; i < 7; ++i) {

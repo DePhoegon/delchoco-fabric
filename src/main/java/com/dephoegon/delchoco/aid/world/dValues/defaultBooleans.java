@@ -52,6 +52,12 @@ public class defaultBooleans {
             setStaminaJump(dSTAMINA_JUMP.getDefault());
             setPossLoss(dPOS_LOSS.getDefault());
             setPossGain(dPOS_GAIN.getDefault());
+            setPossLossHealth(dPOS_LOSS.getDefault());
+            setPossGainHealth(dPOS_GAIN.getDefault());
+            setPossLossSpeed(dPOS_LOSS.getDefault());
+            setPossGainSpeed(dPOS_GAIN.getDefault());
+            setPossLossStamina(dPOS_LOSS.getDefault());
+            setPossGainStamina(dPOS_GAIN.getDefault());
             setMaxStamina(dMAX_STAMINA.getDefault());
             setMaxStrength(dMAX_STRENGTH.getDefault());
             setMaxArmor(dMAX_ARMOR.getDefault());

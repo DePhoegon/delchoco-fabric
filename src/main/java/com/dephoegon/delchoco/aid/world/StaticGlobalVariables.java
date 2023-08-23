@@ -52,6 +52,18 @@ public class StaticGlobalVariables {
     public static final String PossLoss_name = "chocobo_potential_stat_loss_breeding";
     private static Double PossGain;
     public static final String PossGain_name = "chocobo_potential_stat_gain_breeding";
+    private static Double PossLossHealth;
+    public static final String PossLossHealth_name = "chocobo_potential_health_loss_breeding";
+    private static Double PossGainHealth;
+    public static final String PossGainHealth_name = "chocobo_potential_health_gain_breeding";
+    private static Double PossLossSpeed;
+    public static final String PossLossSpeed_name = "chocobo_potential_speed_loss_breeding";
+    private static Double PossGainSpeed;
+    public static final String PossGainSpeed_name = "chocobo_potential_speed_gain_breeding";
+    private static Double PossLossStamina;
+    public static final String PossLossStamina_name = "chocobo_potential_stamina_loss_breeding";
+    private static Double PossGainStamina;
+    public static final String PossGainStamina_name = "chocobo_potential_stamina_gain_breeding";
     private static Integer MaxHealth;
     public static final String MaxHealth_name = "chocobo_max_health_limit";
     private static Integer MaxSpeed;
@@ -149,6 +161,18 @@ public class StaticGlobalVariables {
     public static void setPossLoss(double possLoss) { StaticGlobalVariables.PossLoss = possLoss; }
     public static Double getPossGain() { return PossGain; }
     public static void setPossGain(double possGain) { StaticGlobalVariables.PossGain = possGain; }
+    public static Double getPossLossHealth() { return PossLossHealth; }
+    public static void setPossLossHealth(double possLossHealth) { StaticGlobalVariables.PossLossHealth = possLossHealth; }
+    public static Double getPossGainHealth() { return PossGainHealth; }
+    public static void setPossGainHealth(double possGainHealth) { StaticGlobalVariables.PossGainHealth = possGainHealth; }
+    public static Double getPossLossSpeed() { return PossLossSpeed; }
+    public static void setPossLossSpeed(double possLossSpeed) { StaticGlobalVariables.PossLossSpeed = possLossSpeed; }
+    public static Double getPossGainSpeed() { return PossGainSpeed; }
+    public static void setPossGainSpeed(double possGainSpeed) { StaticGlobalVariables.PossGainSpeed = possGainSpeed; }
+    public static Double getPossLossStamina() { return PossLossStamina; }
+    public static void setPossLossStamina(double possLossStamina) { StaticGlobalVariables.PossLossStamina = possLossStamina; }
+    public static Double getPossGainStamina() { return PossGainStamina; }
+    public static void setPossGainStamina(double possGainStamina) { StaticGlobalVariables.PossGainStamina = possGainStamina; }
     public static Double getMaxStamina() { return MaxStamina; }
     public static void setMaxStamina(double maxStamina) { StaticGlobalVariables.MaxStamina = maxStamina; }
     public static Double getMaxStrength() { return MaxStrength; }

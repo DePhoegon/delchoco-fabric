@@ -11,7 +11,7 @@ import org.jetbrains.annotations.NotNull;
 public class ChocoboEggBlockEntity extends BlockEntity {
     public final static String NBTKEY_BREEDINFO = "BreedInfo";
     private ChocoboBreedInfo breedInfo;
-    public ChocoboEggBlockEntity(BlockPos pos, BlockState state) { super(ModItems.CHOCOBO_EGG_TILE.get(), pos, state); }
+    public ChocoboEggBlockEntity(BlockPos pos, BlockState state) { super(ModItems.CHOCOBO_EGG_TILE, pos, state); }
     public void readNbt(@NotNull NbtCompound compound) {
         super.readNbt(compound);
         this.breedInfo = new ChocoboBreedInfo(compound.getCompound(NBTKEY_BREEDINFO));
@@ -25,7 +25,6 @@ public class ChocoboEggBlockEntity extends BlockEntity {
         this.writeNbt(nbt);
         return nbt;
     }
-    public void handleUpdateTag(NbtCompound tag) { super.readNbt(tag); }
     public ChocoboBreedInfo getBreedInfo() { return this.breedInfo; }
     public void setBreedInfo(ChocoboBreedInfo breedInfo) { this.breedInfo = breedInfo; }
 }

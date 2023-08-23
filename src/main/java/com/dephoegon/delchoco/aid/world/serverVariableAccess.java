@@ -149,6 +149,12 @@ public class serverVariableAccess {
             setStaminaJump(getValueInBounds(dSTAMINA_JUMP, variables.getStaminaJump()));
             setPossLoss(getValueInBounds(dPOS_LOSS, variables.getPossLoss()));
             setPossGain(getValueInBounds(dPOS_GAIN, variables.getPossGain()));
+            setPossLossStamina(getValueInBounds(dPOS_LOSS, variables.getPossLossStamina()));
+            setPossGainStamina(getValueInBounds(dPOS_GAIN, variables.getPossGainStamina()));
+            setPossLossSpeed(getValueInBounds(dPOS_LOSS, variables.getPossLossSpeed()));
+            setPossGainSpeed(getValueInBounds(dPOS_GAIN, variables.getPossGainSpeed()));
+            setPossLossHealth(getValueInBounds(dPOS_LOSS, variables.getPossLossHealth()));
+            setPossGainHealth(getValueInBounds(dPOS_GAIN, variables.getPossGainHealth()));
             setMaxStamina(getValueInBounds(dMAX_STAMINA, variables.getMaxStamina()));
             setMaxStrength(getValueInBounds(dMAX_STRENGTH, variables.getMaxStrength()));
             setMaxArmor(getValueInBounds(dMAX_ARMOR, variables.getMaxArmor()));
@@ -199,6 +205,12 @@ public class serverVariableAccess {
             variablesHolder.setStaminaJump(getValueInBounds(dSTAMINA_JUMP, StaticGlobalVariables.getStaminaJump()));
             variablesHolder.setPossLoss(getValueInBounds(dPOS_LOSS, StaticGlobalVariables.getPossLoss()));
             variablesHolder.setPossGain(getValueInBounds(dPOS_GAIN, StaticGlobalVariables.getPossGain()));
+            variablesHolder.setPossLossStamina(getValueInBounds(dPOS_LOSS, StaticGlobalVariables.getPossLossStamina()));
+            variablesHolder.setPossGainStamina(getValueInBounds(dPOS_GAIN, StaticGlobalVariables.getPossGainStamina()));
+            variablesHolder.setPossLossSpeed(getValueInBounds(dPOS_LOSS, StaticGlobalVariables.getPossLossSpeed()));
+            variablesHolder.setPossGainSpeed(getValueInBounds(dPOS_GAIN, StaticGlobalVariables.getPossGainSpeed()));
+            variablesHolder.setPossLossHealth(getValueInBounds(dPOS_LOSS, StaticGlobalVariables.getPossLossHealth()));
+            variablesHolder.setPossGainHealth(getValueInBounds(dPOS_GAIN, StaticGlobalVariables.getPossGainHealth()));
             variablesHolder.setMaxStamina(getValueInBounds(dMAX_STAMINA, StaticGlobalVariables.getMaxStamina()));
             variablesHolder.setMaxStrength(getValueInBounds(dMAX_STRENGTH, StaticGlobalVariables.getMaxStrength()));
             variablesHolder.setMaxArmor(getValueInBounds(dMAX_ARMOR, StaticGlobalVariables.getMaxArmor()));
@@ -250,6 +262,12 @@ public class serverVariableAccess {
             if (currentVariables.getStaminaJump() != StaticGlobalVariables.getStaminaJump()) { return true; }
             if (currentVariables.getPossLoss() != StaticGlobalVariables.getPossLoss()) { return true; }
             if (currentVariables.getPossGain() != StaticGlobalVariables.getPossGain()) { return true; }
+            if (currentVariables.getPossLossStamina() != StaticGlobalVariables.getPossLossStamina()) { return true; }
+            if (currentVariables.getPossGainStamina() != StaticGlobalVariables.getPossGainStamina()) { return true; }
+            if (currentVariables.getPossLossSpeed() != StaticGlobalVariables.getPossLossSpeed()) { return true; }
+            if (currentVariables.getPossGainSpeed() != StaticGlobalVariables.getPossGainSpeed()) { return true; }
+            if (currentVariables.getPossLossHealth() != StaticGlobalVariables.getPossLossHealth()) { return true; }
+            if (currentVariables.getPossGainHealth() != StaticGlobalVariables.getPossGainHealth()) { return true; }
             if (currentVariables.getMaxStamina() != StaticGlobalVariables.getMaxStamina()) { return true; }
             if (currentVariables.getMaxArmor() != StaticGlobalVariables.getMaxArmor()) { return true; }
             if (currentVariables.getMaxArmorToughness() != StaticGlobalVariables.getMaxArmorToughness()) { return true; }
@@ -285,6 +303,12 @@ public class serverVariableAccess {
                 StaticGlobalVariables.setStaminaJump(ChocoConfigGet(StaticGlobalVariables.getStaminaJump(), dSTAMINA_JUMP.getDefault()));
                 StaticGlobalVariables.setPossLoss(ChocoConfigGet(StaticGlobalVariables.getPossLoss(), dPOS_LOSS.getDefault()));
                 StaticGlobalVariables.setPossGain(ChocoConfigGet(StaticGlobalVariables.getPossGain(), dPOS_GAIN.getDefault()));
+                StaticGlobalVariables.setPossLossHealth(ChocoConfigGet(StaticGlobalVariables.getPossLossHealth(), dPOS_LOSS.getDefault()));
+                StaticGlobalVariables.setPossGainHealth(ChocoConfigGet(StaticGlobalVariables.getPossGainHealth(), dPOS_GAIN.getDefault()));
+                StaticGlobalVariables.setPossLossSpeed(ChocoConfigGet(StaticGlobalVariables.getPossLossSpeed(), dPOS_LOSS.getDefault()));
+                StaticGlobalVariables.setPossGainSpeed(ChocoConfigGet(StaticGlobalVariables.getPossGainSpeed(), dPOS_GAIN.getDefault()));
+                StaticGlobalVariables.setPossLossStamina(ChocoConfigGet(StaticGlobalVariables.getPossLossStamina(), dPOS_LOSS.getDefault()));
+                StaticGlobalVariables.setPossGainStamina(ChocoConfigGet(StaticGlobalVariables.getPossGainStamina(), dPOS_GAIN.getDefault()));
                 StaticGlobalVariables.setMaxStamina(ChocoConfigGet(StaticGlobalVariables.getMaxStamina(), dMAX_STAMINA.getDefault()));
                 StaticGlobalVariables.setMaxStrength(ChocoConfigGet(StaticGlobalVariables.getMaxStrength(), dMAX_STRENGTH.getDefault()));
                 StaticGlobalVariables.setMaxArmor(ChocoConfigGet(StaticGlobalVariables.getMaxArmor(), dMAX_STAMINA.getDefault()));

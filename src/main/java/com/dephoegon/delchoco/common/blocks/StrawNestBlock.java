@@ -73,19 +73,14 @@ public class StrawNestBlock extends BlockWithEntity {
         return ActionResult.FAIL;
     }
     @Nullable
-    @Override
     public BlockEntity createBlockEntity(BlockPos pos, BlockState state) {
         return null;
-    } AbstractBlock.getOutlineShape
-
+    }
     @Nullable
-    @Override
     public <T extends BlockEntity> BlockEntityTicker<T> getTicker(World world, BlockState state, BlockEntityType<T> type) {
         return super.getTicker(world, state, type);
     }
-
     @Nullable
-    @Override
     public <T extends BlockEntity> GameEventListener getGameEventListener(World world, T blockEntity) {
         return super.getGameEventListener(world, blockEntity);
     }

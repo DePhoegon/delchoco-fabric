@@ -29,6 +29,12 @@ public class globalVariablesHolder {
     private int EggHatchTimeTicks;
     private double PossLoss;
     private double PossGain;
+    private double PossLossHealth;
+    private double PossGainHealth;
+    private double PossLossSpeed;
+    private double PossGainSpeed;
+    private double PossLossStamina;
+    private double PossGainStamina;
     private int MaxHealth;
     private int MaxSpeed;
     private double MaxStamina;
@@ -107,6 +113,12 @@ public class globalVariablesHolder {
         nbt.putInt(EggHatchTimeTicks_name, EggHatchTimeTicks);
         nbt.putDouble(PossLoss_name, PossLoss);
         nbt.putDouble(PossGain_name, PossGain);
+        nbt.putDouble(PossLossHealth_name, PossLossHealth);
+        nbt.putDouble(PossGainHealth_name, PossGainHealth);
+        nbt.putDouble(PossLossSpeed_name, PossLossSpeed);
+        nbt.putDouble(PossGainSpeed_name, PossGainSpeed);
+        nbt.putDouble(PossLossStamina_name, PossLossStamina);
+        nbt.putDouble(PossGainStamina_name, PossGainStamina);
         nbt.putBoolean(ExtraChocoboEffects_name, ExtraChocoboEffects);
         nbt.putBoolean(ExtraChocoboResourcesOnHit_name, ExtraChocoboResourcesOnHit);
         nbt.putBoolean(ExtraChocoboResourcesOnKill_name, ExtraChocoboResourcesOnKill);
@@ -140,6 +152,12 @@ public class globalVariablesHolder {
         StaminaJump = nbt.getDouble(StaminaJump_name);
         PossLoss = nbt.getDouble(PossLoss_name);
         PossGain = nbt.getDouble(PossGain_name);
+        PossLossHealth = nbt.getDouble(PossLossHealth_name);
+        PossGainHealth = nbt.getDouble(PossGainHealth_name);
+        PossLossSpeed = nbt.getDouble(PossLossSpeed_name);
+        PossGainSpeed = nbt.getDouble(PossGainSpeed_name);
+        PossLossStamina = nbt.getDouble(PossLossStamina_name);
+        PossGainStamina = nbt.getDouble(PossGainStamina_name);
         MaxStamina = nbt.getDouble(MaxStamina_name);
         MaxStrength = nbt.getDouble(MaxStrength_name);
         MaxArmor = nbt.getDouble(MaxArmor_name);
@@ -208,6 +226,18 @@ public class globalVariablesHolder {
     public void setPossLoss(double value) { this.PossLoss = value; }
     public double getPossGain() { return this.PossGain; }
     public void setPossGain(double value) { this.PossGain = value; }
+    public double getPossLossHealth() { return this.PossLossHealth; }
+    public void setPossLossHealth(double value) { this.PossLossHealth = value; }
+    public double getPossGainHealth() { return this.PossGainHealth; }
+    public void setPossGainHealth(double value) { this.PossGainHealth = value; }
+    public double getPossLossSpeed() { return this.PossLossSpeed; }
+    public void setPossLossSpeed(double value) { this.PossLossSpeed = value; }
+    public double getPossGainSpeed() { return this.PossGainSpeed; }
+    public void setPossGainSpeed(double value) { this.PossGainSpeed = value; }
+    public double getPossLossStamina() { return this.PossLossStamina; }
+    public void setPossLossStamina(double value) { this.PossLossStamina = value; }
+    public double getPossGainStamina() { return this.PossGainStamina; }
+    public void setPossGainStamina(double value) { this.PossGainStamina = value; }
     public double getMaxStamina() { return this.MaxStamina; }
     public void setMaxStamina(double value) { this.MaxStamina = value; }
     public double getMaxStrength() { return this.MaxStrength; }

@@ -65,7 +65,7 @@ public class ChocoboEggBlock extends BlockWithEntity {
         if (te instanceof ChocoboEggBlockEntity) {
             player.incrementStat(Stats.MINED.getOrCreateStat(this));
             player.addExhaustion(0.005F);
-            ItemStack itemStack = new ItemStack(ModItems.CHOCOBO_EGG.get());
+            ItemStack itemStack = new ItemStack(ModItems.CHOCOBO_EGG);
             ChocoboBreedInfo breedInfo = ((ChocoboEggBlockEntity) te).getBreedInfo();
             if (breedInfo == null) { breedInfo = getFromNbtOrDefault(null); }
             itemStack.setSubNbt(NBTKEY_BREEDINFO, breedInfo.serialize());

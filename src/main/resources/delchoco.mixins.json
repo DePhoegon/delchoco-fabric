@@ -3,7 +3,10 @@
 	"package": "com.dephoegon.mixin",
 	"compatibilityLevel": "JAVA_17",
 	"mixins": [
-
+		"MixinEntity",
+		"MixinLivingEntity",
+		"PlayerEntityMixin",
+		"PlayerEntityRendererMixin"
 	],
 	"injectors": {
 		"defaultRequire": 1

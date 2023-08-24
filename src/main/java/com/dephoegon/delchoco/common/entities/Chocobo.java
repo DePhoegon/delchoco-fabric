@@ -489,6 +489,27 @@ public class Chocobo extends TameableEntity implements Angerable, NamedScreenHan
         this.setChocoboScaleMod(ScaleMod(scale));
         this.dataTracker.set(PARAM_SCALE, scale);
     }
+    public boolean isInvulnerableTo(DamageSource source) {
+        if (source == DamageSource.FALL) { return true; }
+        if (source == DamageSource.SWEET_BERRY_BUSH) { return true; }
+        if (source == DamageSource.CACTUS) { return true; }
+        if (source == DamageSource.DRAGON_BREATH) {
+            ChocoboColor color = this.getChocoboColor();
+            return color == ChocoboColor.GOLD || color == ChocoboColor.PURPLE;
+        }
+        if (source == DamageSource.FREEZE) {
+            ChocoboColor color = this.getChocoboColor();
+            return color == ChocoboColor.GOLD || color == ChocoboColor.WHITE;
+        }
+        if (source == DamageSource.DROWN) { return this.isWaterBreather(); }
+        if (source == DamageSource.WITHER) { return this.isWitherImmune(); }
+        return super.isInvulnerableTo(source);
+    }
+    public boolean canHaveStatusEffect(@NotNull StatusEffectInstance potionEffect) {
+        if (potionEffect.getEffectType() == StatusEffects.WITHER) return !this.isWitherImmune();
+        if (potionEffect.getEffectType() == StatusEffects.POISON) return !this.isPoisonImmune();
+        return super.canHaveStatusEffect(potionEffect);
+    }
     public void setChocoboScaleMod(float value) { this.dataTracker.set(PARAM_SCALE_MOD, value); }
     public boolean nonFlameFireImmune() { return isFireImmune() && ChocoboColor.FLAME != getChocoboColor(); }
     public boolean isWaterBreather() { return this.dataTracker.get(PARAM_IS_WATER_BREATH); }
@@ -497,11 +518,6 @@ public class Chocobo extends TameableEntity implements Angerable, NamedScreenHan
     public int getChocoboScale() { return this.dataTracker.get(PARAM_SCALE); }
     public float getChocoboScaleMod() { return this.dataTracker.get(PARAM_SCALE_MOD); }
     public float ScaleMod(int scale) { return (scale == 0) ? 0 : ((scale < 0) ? (((float) ((scale * -1) - 100) / 100) * -1) : (1f + ((float) scale / 100))); }
-    public boolean canHaveStatusEffect(@NotNull StatusEffectInstance potionEffect) {
-        if (potionEffect.getEffectType() == StatusEffects.WITHER) return !this.isWitherImmune();
-        if (potionEffect.getEffectType() == StatusEffects.POISON) return !this.isPoisonImmune();
-        return super.canHaveStatusEffect(potionEffect);
-    }
     public boolean isMale() { return this.dataTracker.get(PARAM_IS_MALE); }
     public boolean fromEgg() { return this.dataTracker.get(PARAM_FROM_EGG); }
     public void setMale(boolean isMale) { this.dataTracker.set(PARAM_IS_MALE, isMale); }

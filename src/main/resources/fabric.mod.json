@@ -33,6 +33,6 @@
 		"delbase": ">=1.5.1"
 	},
 	"suggests": {
-		"another-mod": "*"
+		"another-mod": "delbase"
 	}
 }

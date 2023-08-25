@@ -26,9 +26,7 @@ public class OpenChocoboGuiMessage {
         this.saddle = chocobo.chocoboSaddleInv.save();
         ItemStack saddleStack = chocobo.getSaddle();
         if(!saddleStack.isEmpty() && saddleStack.getItem() instanceof ChocoboSaddleItem saddleItem) {
-            if(saddleItem.getInventorySize() > 0) {
-                this.inventory = chocobo.chocoboBackboneInv.save();
-            }
+            if(saddleItem.getInventorySize() > 0) { this.inventory = chocobo.chocoboBackboneInv.save(); }
         }
     }
 

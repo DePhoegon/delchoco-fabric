@@ -4,7 +4,7 @@ import com.dephoegon.delbase.Delbase;
 import com.dephoegon.delchoco.DelChoco;
 import com.dephoegon.delchoco.aid.composables;
 import com.dephoegon.delchoco.client.ChocoboSprintingEventHandler;
-import com.dephoegon.delchoco.common.effects.ModCommonEvents;
+import com.dephoegon.delchoco.common.commands.chocoboTeams;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.command.v1.CommandRegistrationCallback;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
@@ -79,7 +79,7 @@ public class serverVariableAccess {
             });
             composables.addToList();
             CommandRegistrationCallback.EVENT.register((dispatcher, dedicated) -> {
-                ModCommonEvents.registerCommands(dispatcher);
+                chocoboTeams.commands(dispatcher);
             });
         });
 

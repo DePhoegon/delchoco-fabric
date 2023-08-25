@@ -15,10 +15,6 @@ import java.util.EnumSet;
 import java.util.List;
 
 public class ChocoboMateGoal extends Goal {
-    @Override
-    public boolean canStart() {
-        return false;
-    }
     private final static Vec3i[] LAY_EGG_CHECK_OFFSETS = {
             new Vec3i(0, 0, 0), new Vec3i(-1, 0, 0), new Vec3i(-1, 0, -1),
             new Vec3i(0, 0, -1), new Vec3i(+1, 0, -1), new Vec3i(+1, 0, 0),
@@ -40,8 +36,8 @@ public class ChocoboMateGoal extends Goal {
         this.moveSpeed = moveSpeed;
         this.setControls(EnumSet.of(Goal.Control.MOVE, Goal.Control.LOOK));
     }
-    public boolean canUse() { return this.chocobo.isInLove() && (this.targetMate = this.getNearbyMate()) != null; }
-    public boolean canContinueToUse() { return this.targetMate.isAlive() && this.targetMate.isInLove() && this.spawnBabyDelay < 60; }
+    public boolean canStart() { return this.chocobo.isInLove() && (this.targetMate = this.getNearbyMate()) != null; }
+    public boolean shouldContinue() { return this.targetMate.isAlive() && this.targetMate.isInLove() && this.spawnBabyDelay < 60; }
     public void stop() {
         this.targetMate = null;
         this.spawnBabyDelay = 0;
@@ -57,7 +53,7 @@ public class ChocoboMateGoal extends Goal {
         double dist = Double.MAX_VALUE;
         Chocobo closestMate = null;
         for (Chocobo entry : list) {
-            if (this.chocobo.canMate(entry) && this.chocobo.squaredDistanceTo(entry) < dist) {
+            if (this.chocobo.canBreedWith(entry) && this.chocobo.squaredDistanceTo(entry) < dist) {
                 closestMate = entry;
                 dist = this.chocobo.squaredDistanceTo(entry);
             }
@@ -66,14 +62,14 @@ public class ChocoboMateGoal extends Goal {
     }
     private void spawnEgg() {
         if (this.chocobo.isMale()) return;
-        this.chocobo.setAge(6000);
-        this.targetMate.setAge(6000);
-        this.chocobo.resetLove();
-        this.targetMate.resetLove();
+        this.chocobo.setBreedingAge(6000);
+        this.targetMate.setBreedingAge(6000);
+        this.chocobo.resetLoveTicks();
+        this.targetMate.resetLoveTicks();
 
         BlockPos pos = this.chocobo.getBlockPos();
         for (Vec3i offset : LAY_EGG_CHECK_OFFSETS) {
-            BlockPos offsetPos = pos.offset(offset);
+            BlockPos offsetPos = pos.add(offset);
             BlockState state = this.world.getBlockState(offsetPos);
             if (state.getMaterial().isReplaceable() && !state.getMaterial().isLiquid() && ModItems.CHOCOBO_EGG.get().canSurvive(state, this.world, offsetPos)) {
                 if (!this.world.setBlockState(offsetPos, ModItems.CHOCOBO_EGG.get().defaultBlockState())) { return; }

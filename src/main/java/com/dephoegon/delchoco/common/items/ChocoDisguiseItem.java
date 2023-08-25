@@ -1,14 +1,8 @@
 package com.dephoegon.delchoco.common.items;
 
 import com.dephoegon.delchoco.DelChoco;
-import com.dephoegon.delchoco.client.clientHandler;
-import com.dephoegon.delchoco.client.models.armor.ChocoDisguiseModel;
 import com.dephoegon.delchoco.common.entities.properties.ChocoboColor;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.loader.api.FabricLoader;
-import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.item.TooltipContext;
-import net.minecraft.client.render.entity.model.BipedEntityModel;
 import net.minecraft.enchantment.Enchantment;
 import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.entity.EquipmentSlot;
@@ -21,7 +15,6 @@ import net.minecraft.text.Text;
 import net.minecraft.text.TranslatableText;
 import net.minecraft.util.Hand;
 import net.minecraft.util.Identifier;
-import net.minecraft.util.Lazy;
 import net.minecraft.util.TypedActionResult;
 import net.minecraft.world.World;
 import org.jetbrains.annotations.NotNull;
@@ -35,7 +28,6 @@ import static com.dephoegon.delchoco.aid.dyeList.CHOCO_COLOR_ITEMS;
 import static com.dephoegon.delchoco.common.init.ModArmorMaterial.*;
 
 public class ChocoDisguiseItem extends ArmorItem {
-    private final Lazy<BipedEntityModel<?>> model;
     public final static String NBTKEY_COLOR = "Color";
     public final static String yellow = "yellow"; // default
     public final static String green = "green";
@@ -47,10 +39,10 @@ public class ChocoDisguiseItem extends ArmorItem {
     public final static String flame = "flame";
     public final static String white = "white";
     public final static String purple = "purple";
-    public ChocoDisguiseItem(ArmorMaterial material, EquipmentSlot slot, Settings settings, Lazy<BipedEntityModel<?>> model) {
+    public ChocoDisguiseItem(ArmorMaterial material, EquipmentSlot slot, Settings settings) {
         super(material, slot, settings);
-        if (FabricLoader.getInstance().getEnvironmentType() == EnvType.CLIENT) { this.model = new Lazy<>(() -> this.provideArmorModelForSlot(this.slot));}
-        else { this.model = null; }
+        ItemStack stack = new ItemStack(this);
+        stack.setNbt(serialize(NBTKEY_COLOR, yellow));
     }
     public Identifier setCustomModel(String customModelData) {
         ArmorMaterial armor = this.getMaterial();
@@ -153,8 +145,6 @@ public class ChocoDisguiseItem extends ArmorItem {
         }
         return TypedActionResult.success(outHand);
     }
-    public BipedEntityModel<?> provideArmorModelForSlot(EquipmentSlot slot) { return new ChocoDisguiseModel(MinecraftClient.getInstance().getEntityModelLoader().getModelPart(clientHandler.CHOCO_DISGUISE_LAYER), slot); }
-
     public void appendTooltip(@NotNull ItemStack stack, @Nullable World level, @NotNull List<Text> tooltip, @NotNull TooltipContext flagIn) {
         super.appendTooltip(stack, level, tooltip, flagIn);
         tooltip.add(new TranslatableText("item." + DelChoco.DELCHOCO_ID + ".choco_disguise_"+ getCustomModelColor(stack)));
@@ -167,7 +157,8 @@ public class ChocoDisguiseItem extends ArmorItem {
     }
     public boolean isFireproof() {
         String color = getNBTKEY_COLOR();
-        if (color.equals(gold) || color.equals(flame)) { return true; }
+        boolean netherite = this.getMaterial() == NETHERITE_CHOCO_DISGUISE;
+        if (color.equals(gold) || color.equals(flame) || netherite) { return true; }
         return super.isFireproof();
     }
 }

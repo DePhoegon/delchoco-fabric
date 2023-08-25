@@ -1,5 +1,6 @@
 package com.dephoegon.delchoco.mixin;
 
+import com.dephoegon.delchoco.common.effects.ChocoboCombatEvents;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.entity.LivingEntity;
@@ -14,8 +15,6 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-import static com.dephoegon.delchoco.common.effects.ChocoboCombatEvents.playerDamageImmunityCheck;
-
 @Mixin(PlayerEntity.class)
 public abstract class PlayerEntityMixin extends LivingEntity {
     @Shadow
@@ -27,7 +26,7 @@ public abstract class PlayerEntityMixin extends LivingEntity {
         ItemStack chestplate = getEquippedStack(EquipmentSlot.CHEST);
         ItemStack leggings = getEquippedStack(EquipmentSlot.LEGS);
         ItemStack boots = getEquippedStack(EquipmentSlot.FEET);
-        boolean damageImmune = playerDamageImmunityCheck(helmet, chestplate, leggings, boots, source);
+        boolean damageImmune = ChocoboCombatEvents.playerDamageImmunityCheck(helmet, chestplate, leggings, boots, source);
         if (damageImmune) { cir.setReturnValue(true); }
     }
 

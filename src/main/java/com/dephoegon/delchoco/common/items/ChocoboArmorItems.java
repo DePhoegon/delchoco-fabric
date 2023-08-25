@@ -25,7 +25,7 @@ public class ChocoboArmorItems extends Item implements Wearable {
     protected final EquipmentSlot slot;
     private final int defense;
     private final float toughness;
-    protected final float knockbackResistance;
+    protected final float knockBackResistance;
     protected final ArmorMaterial material;
     private final int enchantmentValue;
     private final Multimap<EntityAttribute, EntityAttributeModifier> defaultModifiers;
@@ -60,12 +60,12 @@ public class ChocoboArmorItems extends Item implements Wearable {
         this.defense = totalArmorMaterialDefence(pMaterial, pSlot, 0, true);
         this.toughness = totalArmorMaterialToughness(pMaterial, 0, true);
         this.enchantmentValue = pMaterial.getEnchantability();
-        this.knockbackResistance = totalArmorMaterialKnockBackResistance(pMaterial, 0);
+        this.knockBackResistance = totalArmorMaterialKnockBackResistance(pMaterial, 0);
         ImmutableMultimap.Builder<EntityAttribute, EntityAttributeModifier> builder = ImmutableMultimap.builder();
         UUID uuid = CHOCO_ARMOR_SLOT;
         builder.put(EntityAttributes.GENERIC_ARMOR, new EntityAttributeModifier(uuid, "Armor modifier", this.defense, EntityAttributeModifier.Operation.ADDITION));
         builder.put(EntityAttributes.GENERIC_ARMOR_TOUGHNESS, new EntityAttributeModifier("Armor toughness", this.toughness, EntityAttributeModifier.Operation.ADDITION));
-        if (this.knockbackResistance > 0) { builder.put(EntityAttributes.GENERIC_KNOCKBACK_RESISTANCE, new EntityAttributeModifier(uuid, "Armor knockback resistance", this.knockbackResistance, EntityAttributeModifier.Operation.ADDITION)); }
+        if (this.knockBackResistance > 0) { builder.put(EntityAttributes.GENERIC_KNOCKBACK_RESISTANCE, new EntityAttributeModifier(uuid, "Armor knockback resistance", this.knockBackResistance, EntityAttributeModifier.Operation.ADDITION)); }
         this.defaultModifiers = builder.build();
     }
     public EquipmentSlot getSlotType() { return this.slot; }

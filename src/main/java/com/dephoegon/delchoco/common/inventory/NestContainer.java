@@ -1,7 +1,7 @@
 package com.dephoegon.delchoco.common.inventory;
 
 import com.dephoegon.delchoco.common.blockentities.ChocoboNestBlockEntity;
-import com.dephoegon.delchoco.common.init.ModItems;
+import com.dephoegon.delchoco.common.init.ModContainers;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
@@ -17,7 +17,17 @@ import java.util.Objects;
 public class NestContainer extends ScreenHandler {
     private final ChocoboNestBlockEntity tile;
 
-    public NestContainer(final int windowId, final PlayerInventory playerInventory, final PacketByteBuf data) { this(windowId, playerInventory, getTileEntity(playerInventory, data)); }
+    public NestContainer(int syncId, PlayerInventory playerInventory, PacketByteBuf buf) {
+        this(syncId, playerInventory, getTileEntity(playerInventory, buf));
+    }
+
+    public NestContainer(int syncId, PlayerInventory playerInventory, ChocoboNestBlockEntity chocoboNest) {
+        super(ModContainers.NEST, syncId);
+        this.tile = chocoboNest;
+        this.addSlot(new Slot(tile.getInventory(), 0, 80, 35));
+        this.bindPlayerInventory(playerInventory);
+    }
+
     private static @NotNull ChocoboNestBlockEntity getTileEntity(final PlayerInventory playerInventory, final PacketByteBuf data) {
         Objects.requireNonNull(playerInventory, "playerInventory cannot be null!");
         Objects.requireNonNull(data, "data cannot be null!");
@@ -25,12 +35,6 @@ public class NestContainer extends ScreenHandler {
 
         if (tileAtPos instanceof ChocoboNestBlockEntity) {return (ChocoboNestBlockEntity) tileAtPos; }
         throw new IllegalStateException("Tile entity is not correct! " + tileAtPos);
-    }
-    public NestContainer(int id, Inventory playerInventoryIn, ChocoboNestBlockEntity chocoboNest) {
-        super(ModItems.NEST.get(), id);
-        this.tile = chocoboNest;
-        this.addSlot(new Slot(tile.getInventory(), 0, 80, 35));
-        this.bindPlayerInventory(playerInventoryIn);
     }
     private void bindPlayerInventory(Inventory inventory) {
         for (int row = 0; row < 3; ++row) { for (int col = 0; col < 9; ++col) {

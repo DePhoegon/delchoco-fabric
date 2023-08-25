@@ -8,7 +8,7 @@ public enum defaultDoubles {
     dSTAMINA_JUMP(0D, 0D, 1D),
     dPOS_GAIN(0D, .1D, 1D),
     dPOS_LOSS(0D, 1D, 1D),
-    dMAX_STAMINA(20D, 35D, 80D),
+    dMAX_STAMINA(10D, 15D, 1024D),
     dMAX_STRENGTH(8D, 60D, 100D),
     dMAX_ARMOR(20D, 200D, 500D),
     dMAX_ARMOR_TOUGH(8D, 20D, 100D),

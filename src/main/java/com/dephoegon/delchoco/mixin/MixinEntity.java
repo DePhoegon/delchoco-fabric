@@ -10,11 +10,11 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import static com.dephoegon.delchoco.common.effects.ChocoboCombatEvents.onChocoboCombatAttack;
 
-@Mixin
+@Mixin(Entity.class)
 public class MixinEntity {
     @Inject(at = @At("HEAD"), method = "applyDamageEffects(Lnet/minecraft/world/entity/LivingEntity;Lnet/minecraft/world/entity/Entity;)V", cancellable = true)
     private void onApplyDamageEffects(@NotNull LivingEntity attacker, Entity target, CallbackInfo ci) {
-        boolean result = onChocoboCombatAttack(attacker, target, attacker.getRecentDamageSource());
+        boolean result = onChocoboCombatAttack(attacker, target);
         if (result) { ci.cancel(); }
     }
 }

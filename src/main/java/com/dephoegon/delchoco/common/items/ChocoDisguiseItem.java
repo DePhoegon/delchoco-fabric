@@ -10,9 +10,8 @@ import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.item.TooltipContext;
 import net.minecraft.client.render.entity.model.BipedEntityModel;
 import net.minecraft.enchantment.Enchantment;
-import net.minecraft.entity.Entity;
+import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.entity.EquipmentSlot;
-import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ArmorItem;
 import net.minecraft.item.ArmorMaterial;
@@ -30,7 +29,6 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 import java.util.Map;
-import java.util.function.Consumer;
 
 import static com.dephoegon.delbase.item.ShiftingDyes.CLEANSE_SHIFT_DYE;
 import static com.dephoegon.delchoco.aid.dyeList.CHOCO_COLOR_ITEMS;
@@ -54,7 +52,6 @@ public class ChocoDisguiseItem extends ArmorItem {
         if (FabricLoader.getInstance().getEnvironmentType() == EnvType.CLIENT) { this.model = new Lazy<>(() -> this.provideArmorModelForSlot(this.slot));}
         else { this.model = null; }
     }
-    public static String staticSetCustomModel(String customData) { return setCustomModel(customData); }
     public Identifier setCustomModel(String customModelData) {
         ArmorMaterial armor = this.getMaterial();
         String folder = "textures/models/armor/leather/";
@@ -89,11 +86,6 @@ public class ChocoDisguiseItem extends ArmorItem {
             case PURPLE -> purple;
         };
     }
-    public Identifier getArmorTexture(@NotNull ItemStack stack, Entity entity, EquipmentSlot slot, String type) {
-        NbtCompound color = stack.getNbt();
-        if (color != null && color.contains(NBTKEY_COLOR)) { return setCustomModel(color.getString(NBTKEY_COLOR)); }
-        return setCustomModel(yellow);
-    }
     private String getCustomModelColor(@NotNull ItemStack stack) {
         NbtCompound color = stack.getNbt();
         if (color != null && color.contains(NBTKEY_COLOR)) { return color.getString(NBTKEY_COLOR); }
@@ -106,7 +98,7 @@ public class ChocoDisguiseItem extends ArmorItem {
     }
     private void setNBT(@NotNull ItemStack itemStack, @NotNull ItemStack shrinkMe, String colorValue, @NotNull ChocoboColor chocoboColor) {
         // Will Refresh & remove Tags not in use
-        Map<Enchantment, Integer> enchantments = EnchantmentHelper.getEnchantments(itemStack);
+        Map<Enchantment, Integer> enchantments = EnchantmentHelper.get(itemStack);
         NbtCompound tempTag = itemStack.getNbt();
         NbtCompound display = null;
         int damage = 0;
@@ -116,15 +108,15 @@ public class ChocoDisguiseItem extends ArmorItem {
             if (tempTag.contains("display")) { display = tempTag.getCompound("display"); }
             if (tempTag.contains("RepairCost")) { repairCost = Math.max(0, Math.min(tempTag.getInt("RepairCost")-1, 5)); }
         }
-        itemStack.setTag(serialize(NBTKEY_COLOR, colorValue));
+        itemStack.setNbt(serialize(NBTKEY_COLOR, colorValue));
         NbtCompound tag = itemStack.getNbt();
         assert tag != null;
         tag.putDouble("CustomModelData", chocoboColor.getCustomModelData());
         if (damage != 0) { tag.putInt("Damage", damage); }
         if (display != null) { tag.put("display", display); }
         tag.putInt("RepairCost", repairCost);
-        EnchantmentHelper.setEnchantments(enchantments, itemStack);
-        shrinkMe.shrink(1);
+        EnchantmentHelper.set(enchantments, itemStack);
+        shrinkMe.decrement(1);
     }
     public TypedActionResult<ItemStack> use(@NotNull World pLevel, @NotNull PlayerEntity pPlayer, @NotNull Hand pUsedHand) {
         ItemStack mainHand = pPlayer.getStackInHand(Hand.MAIN_HAND);
@@ -163,10 +155,6 @@ public class ChocoDisguiseItem extends ArmorItem {
     }
     public BipedEntityModel<?> provideArmorModelForSlot(EquipmentSlot slot) { return new ChocoDisguiseModel(MinecraftClient.getInstance().getEntityModelLoader().getModelPart(clientHandler.CHOCO_DISGUISE_LAYER), slot); }
 
-    // Forge Method
-    public void initializeClient(@NotNull Consumer<IItemRenderProperties> consumer) { consumer.accept(new IItemRenderProperties() {
-        public BipedEntityModel<?> getArmorModel(LivingEntity entityLiving, ItemStack itemStack, EquipmentSlot armorSlot, BipedEntityModel<?> _default) { return model.get(); }
-    }); }
     public void appendTooltip(@NotNull ItemStack stack, @Nullable World level, @NotNull List<Text> tooltip, @NotNull TooltipContext flagIn) {
         super.appendTooltip(stack, level, tooltip, flagIn);
         tooltip.add(new TranslatableText("item." + DelChoco.DELCHOCO_ID + ".choco_disguise_"+ getCustomModelColor(stack)));
@@ -177,9 +165,9 @@ public class ChocoDisguiseItem extends ArmorItem {
             return stack.getNbt().getString(NBTKEY_COLOR);
         } else { return yellow; }
     }
-    public boolean isFireResistant() {
+    public boolean isFireproof() {
         String color = getNBTKEY_COLOR();
         if (color.equals(gold) || color.equals(flame)) { return true; }
-        return super.isFireResistant();
+        return super.isFireproof();
     }
 }

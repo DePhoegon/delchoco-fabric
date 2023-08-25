@@ -38,7 +38,6 @@ public class ChocoDisguiseFeatureRenderer extends FeatureRenderer<LivingEntity, 
                         // Render the armor with the custom texture
                         ModelPart root = this.modelLoader.getModelPart(clientHandler.CHOCO_DISGUISE_LAYER);
                         ChocoDisguiseModel model = new ChocoDisguiseModel(root, slot);
-                        model.setAttributes(this.getContextModel());
                         model.render(matrices, vertexConsumers.getBuffer(RenderLayer.getEntityTranslucent(texture)), light, OverlayTexture.DEFAULT_UV, 1.0F, 1.0F, 1.0F, 1.0F);
                     }
                 }

@@ -35,13 +35,13 @@ public class ChocoboInventory extends SimpleInventory {
         if(!stack.isEmpty()) {
             NbtCompound itemTag = new NbtCompound();
             stack.writeNbt(itemTag);
-            tag.put("Item", itemTag);
+            tag.put("Items", itemTag);
         }
         return tag;
     }
     private void loadFirstItemStack(@NotNull NbtCompound tag) {
-        if(tag.contains("Item", NbtType.COMPOUND)) {
-            NbtCompound itemTag = tag.getCompound("Item");
+        if(tag.contains("Items", NbtType.COMPOUND)) {
+            NbtCompound itemTag = tag.getCompound("Items");
             this.setStack(0, ItemStack.fromNbt(itemTag));
         }
     }

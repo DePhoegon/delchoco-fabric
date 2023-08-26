@@ -7,6 +7,7 @@ import net.minecraft.village.TradeOffer;
 import net.minecraft.village.VillagerProfession;
 
 import static com.dephoegon.delchoco.common.init.ModItems.GYSAHL_GREEN_ITEM;
+import static com.dephoegon.delchoco.common.init.ModItems.LOVELY_GYSAHL_GREEN;
 
 public class tradeAdds {
     public static void addTrades() {

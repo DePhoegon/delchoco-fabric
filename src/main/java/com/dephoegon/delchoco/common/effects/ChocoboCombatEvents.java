@@ -24,6 +24,7 @@ import org.jetbrains.annotations.NotNull;
 
 import static com.dephoegon.delchoco.aid.world.StaticGlobalVariables.ChocoConfigGet;
 import static com.dephoegon.delchoco.aid.world.dValues.defaultBooleans.*;
+import static com.dephoegon.delchoco.common.init.ModItems.*;
 import static com.dephoegon.delchoco.common.items.ChocoDisguiseItem.*;
 import static com.dephoegon.delchoco.utils.RandomHelper.random;
 import static net.minecraft.item.Items.*;
@@ -157,18 +158,18 @@ public class ChocoboCombatEvents {
         }
         if (chocoboDie != null) {
             @NotNull ItemStack egg = switch (chocoboDie.getChocoboColor()) {
-                case YELLOW -> new ItemStack(YELLOW_CHOCOBO_SPAWN_EGG.get());
-                case WHITE -> new ItemStack(WHITE_CHOCOBO_SPAWN_EGG.get());
-                case GREEN -> new ItemStack(GREEN_CHOCOBO_SPAWN_EGG.get());
-                case FLAME -> new ItemStack(FLAME_CHOCOBO_SPAWN_EGG.get());
-                case BLACK -> new ItemStack(BLACK_CHOCOBO_SPAWN_EGG.get());
-                case GOLD -> new ItemStack(GOLD_CHOCOBO_SPAWN_EGG.get());
-                case BLUE -> new ItemStack(BLUE_CHOCOBO_SPAWN_EGG.get());
-                case RED -> new ItemStack(RED_CHOCOBO_SPAWN_EGG.get());
-                case PINK -> new ItemStack(PINK_CHOCOBO_SPAWN_EGG.get());
-                case PURPLE -> new ItemStack(PURPLE_CHOCOBO_SPAWN_EGG.get());
+                case YELLOW -> new ItemStack(YELLOW_CHOCOBO_SPAWN_EGG);
+                case WHITE -> new ItemStack(WHITE_CHOCOBO_SPAWN_EGG);
+                case GREEN -> new ItemStack(GREEN_CHOCOBO_SPAWN_EGG);
+                case FLAME -> new ItemStack(FLAME_CHOCOBO_SPAWN_EGG);
+                case BLACK -> new ItemStack(BLACK_CHOCOBO_SPAWN_EGG);
+                case GOLD -> new ItemStack(GOLD_CHOCOBO_SPAWN_EGG);
+                case BLUE -> new ItemStack(BLUE_CHOCOBO_SPAWN_EGG);
+                case RED -> new ItemStack(RED_CHOCOBO_SPAWN_EGG);
+                case PINK -> new ItemStack(PINK_CHOCOBO_SPAWN_EGG);
+                case PURPLE -> new ItemStack(PURPLE_CHOCOBO_SPAWN_EGG);
             };
-            if (random.nextInt(1000)+1 < 85) { chocoboDie.dropItem(egg); }
+            if (random.nextInt(1000)+1 < 85) { chocoboDie.dropStack(egg); }
         }
     }
     private static boolean flowerChance() { return random.nextInt(100)+1 < 45; }

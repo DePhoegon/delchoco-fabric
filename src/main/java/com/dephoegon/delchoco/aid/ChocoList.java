@@ -7,6 +7,7 @@ import com.dephoegon.delchoco.common.entities.properties.ModDataSerializers;
 import com.dephoegon.delchoco.common.init.ModEntities;
 import com.dephoegon.delchoco.common.init.ModItems;
 import com.dephoegon.delchoco.common.network.PacketManager;
+import com.dephoegon.delchoco.common.world.worldgen.ModWorldGen;
 
 public class ChocoList {
     public static void clientRegOrder() {
@@ -20,5 +21,6 @@ public class ChocoList {
         serverVariableAccess.init();
         ModItems.registerModItems();
         tradeAdds.addTrades();
+        ModWorldGen.generateGysahl();
     }
 }

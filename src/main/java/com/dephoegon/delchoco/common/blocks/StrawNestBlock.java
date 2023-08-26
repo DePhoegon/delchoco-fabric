@@ -45,7 +45,7 @@ public class StrawNestBlock extends BlockWithEntity {
             Block.createCuboidShape(0, 1, 14, 16, 3, 16),
             Block.createCuboidShape(0, 1, 2, 2, 3, 14)
     ).reduce((v1, v2) -> VoxelShapes.combineAndSimplify(v1, v2, BooleanBiFunction.OR)).get();
-    protected StrawNestBlock(Settings settings) {
+    public StrawNestBlock(Settings settings) {
         super(settings);
         this.setDefaultState(this.stateManager.getDefaultState().with(HAS_EGG, false));
     }
@@ -60,7 +60,7 @@ public class StrawNestBlock extends BlockWithEntity {
         if(!(tile instanceof ChocoboNestBlockEntity nest)) { return ActionResult.FAIL; }
 
         ItemStack heldItem = playerIn.getStackInHand(handIn);
-        if (ChocoboEggBlock.isChocoboEgg(heldItem)) {
+        if (!ChocoboEggBlock.isNotChocoboEgg(heldItem)) {
             if (!nest.getEggItemStack().isEmpty()) { return ActionResult.FAIL; }
             if (worldIn.isClient()) { return ActionResult.SUCCESS; }
             nest.setEggItemStack(playerIn.getStackInHand(handIn).copy().split(1));

@@ -40,7 +40,7 @@ import static com.dephoegon.delchoco.common.blocks.ChocoboEggBlock.NBTKEY_BREEDI
 import static com.dephoegon.delchoco.common.entities.breeding.ChocoboBreedInfo.getFromNbtOrDefault;
 
 public class ChocoboNestBlockEntity extends BlockEntity implements NamedScreenHandlerFactory {
-    public ChocoboNestBlockEntity(BlockPos pos, BlockState state) { super(ModItems.STRAW_NEST_TILE.getType(), pos, state); }
+    public ChocoboNestBlockEntity(BlockPos pos, BlockState state) { super(ModItems.STRAW_NEST_BLOCK_ENTITY, pos, state); }
     public static final Identifier UPDATE_PACKET_ID = new Identifier(DelChoco.DELCHOCO_ID, "block_entity_update");
     private static class CheckOffset {
         Vec3i offset;
@@ -103,7 +103,7 @@ public class ChocoboNestBlockEntity extends BlockEntity implements NamedScreenHa
     }
     private boolean updateEgg() {
         ItemStack egg = this.getEggItemStack();
-        if (!ChocoboEggBlock.isChocoboEgg(egg)) { return false; }
+        if (ChocoboEggBlock.isNotChocoboEgg(egg)) { return false; }
         if (!egg.hasNbt()) { egg.setSubNbt(NBTKEY_BREEDINFO, getFromNbtOrDefault(null).serialize()); }
         NbtCompound nbt = egg.getOrCreateSubNbt(ChocoboEggBlock.NBTKEY_HATCHINGSTATE);
         int time = nbt.getInt(ChocoboEggBlock.NBTKEY_HATCHINGSTATE_TIME);
@@ -144,7 +144,7 @@ public class ChocoboNestBlockEntity extends BlockEntity implements NamedScreenHa
     public ItemStack getEggItemStack() { return this.inventory.getStack(0); }
     public void setEggItemStack(@NotNull ItemStack itemStack) {
         if (itemStack.isEmpty()) { this.inventory.setStack(0, ItemStack.EMPTY); }
-        else if (ChocoboEggBlock.isChocoboEgg(itemStack)) {
+        else if (!ChocoboEggBlock.isNotChocoboEgg(itemStack)) {
             this.inventory.setStack(0, itemStack);
             if (itemStack.hasNbt()) {
                 NbtCompound nbt = itemStack.getOrCreateSubNbt(ChocoboEggBlock.NBTKEY_HATCHINGSTATE);
@@ -181,7 +181,7 @@ public class ChocoboNestBlockEntity extends BlockEntity implements NamedScreenHa
     public Text getDisplayName() { return new TranslatableText(DelChoco.DELCHOCO_ID + ".container.nest"); }
     public void onInventoryChanged() {
         this.markDirty();
-        BlockState newState = ModItems.STRAW_NEST.defaultBlockState().setValue(StrawNestBlock.HAS_EGG, !this.getEggItemStack().isEmpty());
+        BlockState newState = ModItems.STRAW_NEST.getDefaultState().with(StrawNestBlock.HAS_EGG, !this.getEggItemStack().isEmpty());
         Objects.requireNonNull(this.getWorld()).setBlockState(this.getPos(), newState);
     }
     public boolean isSheltered() {

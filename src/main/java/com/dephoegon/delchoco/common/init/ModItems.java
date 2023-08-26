@@ -1,18 +1,25 @@
 package com.dephoegon.delchoco.common.init;
 
 import com.dephoegon.delchoco.DelChoco;
+import com.dephoegon.delchoco.common.blockentities.ChocoboEggBlockEntity;
+import com.dephoegon.delchoco.common.blockentities.ChocoboNestBlockEntity;
+import com.dephoegon.delchoco.common.blocks.ChocoboEggBlock;
 import com.dephoegon.delchoco.common.blocks.GysahlGreenBlock;
-import com.dephoegon.delchoco.common.items.ChocoboArmorItems;
-import com.dephoegon.delchoco.common.items.ChocoboSaddleItem;
-import com.dephoegon.delchoco.common.items.ChocoboWeaponItems;
-import com.dephoegon.delchoco.common.items.CustomBlockNamedItem;
+import com.dephoegon.delchoco.common.blocks.StrawNestBlock;
+import com.dephoegon.delchoco.common.entities.properties.ChocoboColor;
+import com.dephoegon.delchoco.common.items.*;
 import net.fabricmc.fabric.api.item.v1.FabricItemSettings;
+import net.fabricmc.fabric.api.object.builder.v1.block.entity.FabricBlockEntityTypeBuilder;
 import net.minecraft.block.AbstractBlock;
 import net.minecraft.block.Block;
 import net.minecraft.block.Material;
+import net.minecraft.block.entity.BlockEntityType;
 import net.minecraft.entity.EquipmentSlot;
+import net.minecraft.item.AliasedBlockItem;
 import net.minecraft.item.Item;
 import net.minecraft.sound.BlockSoundGroup;
+import net.minecraft.util.Identifier;
+import net.minecraft.util.registry.Registry;
 
 import static com.dephoegon.delchoco.common.entities.Chocobo.tier_one_chocobo_inv_slot_count;
 import static com.dephoegon.delchoco.common.entities.Chocobo.tier_two_chocobo_inv_slot_count;
@@ -29,10 +36,33 @@ public class ModItems extends BaseReg {
     public static final Item PICKLED_GYSAHL_RAW = registerItem("pickled_gysahl_raw", new Item(new FabricItemSettings().group(DelChoco.DELCHOCO_ITEMS).maxCount(64).food(ModFoods.PICKLED_GYSAHL_RAW)));
 
     // Plantish
-    public static final Block GYSAHL_GREEN = registerBlock("gysahl_green", new GysahlGreenBlock(AbstractBlock.Settings.of(Material.PLANT).noCollision().ticksRandomly().breakInstantly().sounds(BlockSoundGroup.CROP)));
-    public static final Item GYSAHL_GREEN_SEEDS = registerItem("gysahl_green_seeds", new CustomBlockNamedItem(GYSAHL_GREEN, new FabricItemSettings().group(DelChoco.DELCHOCO_ITEMS).maxCount(64)));
+    public static final Block GYSAHL_GREEN = registerBlockWithoutBlockItem("gysahl_green", new GysahlGreenBlock(AbstractBlock.Settings.of(Material.PLANT).noCollision().ticksRandomly().breakInstantly().sounds(BlockSoundGroup.CROP)), DelChoco.DELCHOCO_ITEMS);
+    public static final Item GYSAHL_GREEN_SEEDS = registerItem("gysahl_green_seeds", new AliasedBlockItem(GYSAHL_GREEN, new FabricItemSettings().group(DelChoco.DELCHOCO_ITEMS).maxCount(64)));
+    public static final Item LOVELY_GYSAHL_GREEN = registerItem("lovely_gysahl_green", new Item(new FabricItemSettings().group(DelChoco.DELCHOCO_ITEMS).maxCount(64)));
 
     // Spawn Eggs
+    public static final Item YELLOW_CHOCOBO_SPAWN_EGG = registerItem("yellow_chocobo_spawn_egg", new ChocoboSpawnEggItem(new FabricItemSettings().group(DelChoco.DELCHOCO_ITEMS).maxCount(64), ChocoboColor.YELLOW));
+    public static final Item GREEN_CHOCOBO_SPAWN_EGG = registerItem("green_chocobo_spawn_egg", new ChocoboSpawnEggItem(new FabricItemSettings().group(DelChoco.DELCHOCO_ITEMS).maxCount(64), ChocoboColor.GREEN));
+    public static final Item BLUE_CHOCOBO_SPAWN_EGG = registerItem("blue_chocobo_spawn_egg", new ChocoboSpawnEggItem(new FabricItemSettings().group(DelChoco.DELCHOCO_ITEMS).maxCount(64), ChocoboColor.BLUE));
+    public static final Item WHITE_CHOCOBO_SPAWN_EGG = registerItem("white_chocobo_spawn_egg", new ChocoboSpawnEggItem(new FabricItemSettings().group(DelChoco.DELCHOCO_ITEMS).maxCount(64), ChocoboColor.WHITE));
+    public static final Item BLACK_CHOCOBO_SPAWN_EGG = registerItem("black_chocobo_spawn_egg", new ChocoboSpawnEggItem(new FabricItemSettings().group(DelChoco.DELCHOCO_ITEMS).maxCount(64), ChocoboColor.BLACK));
+    public static final Item GOLD_CHOCOBO_SPAWN_EGG = registerItem("gold_chocobo_spawn_egg", new ChocoboSpawnEggItem(new FabricItemSettings().group(DelChoco.DELCHOCO_ITEMS).maxCount(64), ChocoboColor.GOLD));
+    public static final Item PINK_CHOCOBO_SPAWN_EGG = registerItem("pink_chocobo_spawn_egg", new ChocoboSpawnEggItem(new FabricItemSettings().group(DelChoco.DELCHOCO_ITEMS).maxCount(64), ChocoboColor.PINK));
+    public static final Item RED_CHOCOBO_SPAWN_EGG = registerItem("red_chocobo_spawn_egg", new ChocoboSpawnEggItem(new FabricItemSettings().group(DelChoco.DELCHOCO_ITEMS).maxCount(64), ChocoboColor.RED));
+    public static final Item PURPLE_CHOCOBO_SPAWN_EGG = registerItem("purple_chocobo_spawn_egg", new ChocoboSpawnEggItem(new FabricItemSettings().group(DelChoco.DELCHOCO_ITEMS).maxCount(64), ChocoboColor.PURPLE));
+    public static final Item FLAME_CHOCOBO_SPAWN_EGG = registerItem("silver_chocobo_spawn_egg", new ChocoboSpawnEggItem(new FabricItemSettings().group(DelChoco.DELCHOCO_ITEMS).maxCount(64), ChocoboColor.FLAME));
+
+    // Chocobo MISCELLANEOUS
+    public static final Item CHOCOBO_FEATHER = registerItem("chocobo_feather", new Item(new FabricItemSettings().group(DelChoco.DELCHOCO_ITEMS).maxCount(64)));
+    public static final Block CHOCOBO_EGG = registerBlock("chocobo_egg", new ChocoboEggBlock(AbstractBlock.Settings.of(Material.EGG).noCollision().ticksRandomly().sounds(BlockSoundGroup.GRASS).nonOpaque()));
+    public static final Item CHOCOBO_EGG_ITEM = registerItem("chocobo_egg", new AliasedBlockItem(CHOCOBO_EGG, new FabricItemSettings().group(DelChoco.DELCHOCO_ITEMS).maxCount(64)));
+    public static final Block STRAW_NEST = registerBlock("straw_nest", new StrawNestBlock(AbstractBlock.Settings.of(Material.WOOL).noCollision().sounds(BlockSoundGroup.GRASS).nonOpaque()));
+    public static final Item STRAW_NEST_ITEM = registerItem("straw_nest", new AliasedBlockItem(STRAW_NEST, new FabricItemSettings().group(DelChoco.DELCHOCO_ITEMS).maxCount(64)));
+    public static BlockEntityType<ChocoboNestBlockEntity> STRAW_NEST_BLOCK_ENTITY;
+    public static BlockEntityType<ChocoboEggBlockEntity> CHOCOBO_EGG_BLOCK_ENTITY;
+    public static final Item CHOCOBO_WHISTLE = registerItem("chocobo_whistle", new Item(new FabricItemSettings().group(DelChoco.DELCHOCO_ITEMS).maxCount(1)));
+    public static final Item GYSAHL_CAKE = registerItem("gysahl_cake", new Item(new FabricItemSettings().group(DelChoco.DELCHOCO_ITEMS).maxCount(8)));
+    public static final Item CHOCOBO_LEASH_STICK = registerItem("chocobo_leash_stick", new ChocoboLeashPointer(new FabricItemSettings().group(DelChoco.DELCHOCO_ITEMS).maxCount(1)));
 
 
     // Chocobo Gear
@@ -50,4 +80,9 @@ public class ModItems extends BaseReg {
 
     // ChocoGuise Gear
 
+
+    public static void registerBlockEntities() {
+        STRAW_NEST_BLOCK_ENTITY = Registry.register(Registry.BLOCK_ENTITY_TYPE, new Identifier(DelChoco.DELCHOCO_ID, "chocobo_nest"), FabricBlockEntityTypeBuilder.create(ChocoboNestBlockEntity::new, STRAW_NEST).build(null));
+        CHOCOBO_EGG_BLOCK_ENTITY = Registry.register(Registry.BLOCK_ENTITY_TYPE, new Identifier(DelChoco.DELCHOCO_ID, "chocobo_egg"), FabricBlockEntityTypeBuilder.create(ChocoboEggBlockEntity::new, CHOCOBO_EGG).build(null));
+    }
 }

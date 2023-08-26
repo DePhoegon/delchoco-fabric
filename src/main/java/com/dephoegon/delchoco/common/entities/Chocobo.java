@@ -85,7 +85,7 @@ import static com.dephoegon.delchoco.aid.world.dValues.defaultBooleans.dOwnerOnl
 import static com.dephoegon.delchoco.aid.world.dValues.defaultDoubles.*;
 import static com.dephoegon.delchoco.aid.world.dValues.defaultInts.*;
 import static com.dephoegon.delchoco.common.entities.breeding.ChocoboSnap.setChocoScale;
-import static com.dephoegon.delchoco.common.init.ModItems.GYSAHL_GREEN_ITEM;
+import static com.dephoegon.delchoco.common.init.ModItems.*;
 import static com.dephoegon.delchoco.common.init.ModSounds.AMBIENT_SOUND;
 import static net.minecraft.entity.SpawnGroup.CREATURE;
 import static net.minecraft.item.Items.*;

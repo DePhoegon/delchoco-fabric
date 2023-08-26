@@ -7,6 +7,7 @@ import net.fabricmc.fabric.api.registry.FuelRegistry;
 import net.minecraft.block.Block;
 import net.minecraft.item.BlockItem;
 import net.minecraft.item.Item;
+import net.minecraft.item.ItemGroup;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.registry.Registry;
 
@@ -20,6 +21,9 @@ public class BaseReg {
         if (burnable) { FlammableBlockRegistry.getDefaultInstance().add(hold, burnChance, burnSpread); }
         return hold;
     }
+    public static Block registerBlockWithoutBlockItem(String name, Block block, ItemGroup group) {
+        return Registry.register(Registry.BLOCK, new Identifier(DelChoco.DELCHOCO_ID, name), block);
+    }
     private static Item registerBlockItem(String name, Block block) {
         return Registry.register(Registry.ITEM, new Identifier(DelChoco.DELCHOCO_ID, name), new BlockItem(block, new FabricItemSettings().group(DelChoco.DELCHOCO_ITEMS)));
     }
@@ -30,5 +34,8 @@ public class BaseReg {
     protected static Item registerItem(String name, Item item) {
         return Registry.register(Registry.ITEM, new Identifier(DelChoco.DELCHOCO_ID, name), item);
     }
-    public static void registerModItems() { DelChoco.LOGGER.info("Registering "+DelChoco.DELCHOCO_ID +" Items"); }
+    public static void registerModItems() {
+        ModItems.registerBlockEntities();
+        DelChoco.LOGGER.info("Registering "+DelChoco.DELCHOCO_ID +" Items");
+    }
 }

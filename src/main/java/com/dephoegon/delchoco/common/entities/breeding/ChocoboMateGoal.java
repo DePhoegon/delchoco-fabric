@@ -71,8 +71,8 @@ public class ChocoboMateGoal extends Goal {
         for (Vec3i offset : LAY_EGG_CHECK_OFFSETS) {
             BlockPos offsetPos = pos.add(offset);
             BlockState state = this.world.getBlockState(offsetPos);
-            if (state.getMaterial().isReplaceable() && !state.getMaterial().isLiquid() && ModItems.CHOCOBO_EGG.get().canSurvive(state, this.world, offsetPos)) {
-                if (!this.world.setBlockState(offsetPos, ModItems.CHOCOBO_EGG.get().defaultBlockState())) { return; }
+            if (state.getMaterial().isReplaceable() && !state.getMaterial().isLiquid() && ModItems.CHOCOBO_EGG.canPlaceAt(state, this.world, offsetPos)) {
+                if (!this.world.setBlockState(offsetPos, ModItems.CHOCOBO_EGG.getDefaultState())) { return; }
                 BlockEntity tile = this.world.getBlockEntity(offsetPos);
                 if(tile instanceof ChocoboEggBlockEntity eggTile) { eggTile.setBreedInfo(new ChocoboBreedInfo(new ChocoboStatSnapshot(this.chocobo), new ChocoboStatSnapshot(this.targetMate))); }
                 return;

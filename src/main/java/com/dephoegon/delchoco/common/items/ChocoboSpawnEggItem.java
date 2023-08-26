@@ -7,13 +7,11 @@ import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.block.entity.MobSpawnerBlockEntity;
-import net.minecraft.entity.EntityType;
 import net.minecraft.entity.SpawnReason;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.ItemUsageContext;
-import net.minecraft.nbt.NbtCompound;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.text.Text;
 import net.minecraft.util.ActionResult;
@@ -22,13 +20,11 @@ import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.MobSpawnerLogic;
 import net.minecraft.world.World;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 import static com.dephoegon.delchoco.common.init.ModEntities.CHOCOBO_ENTITY;
 import static java.lang.Math.random;
 
 public class ChocoboSpawnEggItem extends Item {
-    private final EntityType<?> type = CHOCOBO_ENTITY;
     private final ChocoboColor color;
     public ChocoboSpawnEggItem(Settings settings, ChocoboColor color) {
         super(settings);
@@ -71,12 +67,5 @@ public class ChocoboSpawnEggItem extends Item {
             }
         }
         return ActionResult.SUCCESS;
-    }
-    public EntityType<?> getEntityType(@Nullable NbtCompound nbt) {
-        NbtCompound nbtCompound;
-        if (nbt != null && nbt.contains("EntityTag", 10) && (nbtCompound = nbt.getCompound("EntityTag")).contains("id", 8)) {
-            return EntityType.get(nbtCompound.getString("id")).orElse(this.type);
-        }
-        return this.type;
     }
 }

@@ -28,4 +28,9 @@ public class ChocoboWeaponItems extends SwordItem {
         this.attackSpeed = attackSpeed + toolMaterial.getMiningSpeedMultiplier();
     }
     public float getAttackSpeed() { return this.attackSpeed; }
+    public boolean isFireproof() {
+        boolean netherite = this.getMaterial() == ToolMaterials.NETHERITE;
+        if (netherite) { return true; }
+        return super.isFireproof();
+    }
 }

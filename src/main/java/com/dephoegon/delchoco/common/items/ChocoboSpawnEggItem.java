@@ -68,4 +68,9 @@ public class ChocoboSpawnEggItem extends Item {
         }
         return ActionResult.SUCCESS;
     }
+    public boolean isFireproof() {
+        boolean netherite = color == ChocoboColor.FLAME || ChocoboColor.GOLD == color;
+        if (netherite) { return true; }
+        return super.isFireproof();
+    }
 }

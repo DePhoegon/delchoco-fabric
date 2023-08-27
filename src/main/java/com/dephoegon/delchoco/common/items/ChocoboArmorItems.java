@@ -88,4 +88,9 @@ public class ChocoboArmorItems extends Item implements Wearable {
     public SoundEvent getEquipSound() {
         return this.getMaterial().getEquipSound();
     }
+    public boolean isFireproof() {
+        boolean netherite = this.getMaterial() == ArmorMaterials.NETHERITE;
+        if (netherite) { return true; }
+        return super.isFireproof();
+    }
 }

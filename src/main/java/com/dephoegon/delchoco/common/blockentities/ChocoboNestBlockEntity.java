@@ -1,6 +1,7 @@
 package com.dephoegon.delchoco.common.blockentities;
 
 import com.dephoegon.delchoco.DelChoco;
+import com.dephoegon.delchoco.aid.ChocoList;
 import com.dephoegon.delchoco.aid.world.StaticGlobalVariables;
 import com.dephoegon.delchoco.common.blocks.ChocoboEggBlock;
 import com.dephoegon.delchoco.common.blocks.StrawNestBlock;
@@ -40,16 +41,10 @@ import static com.dephoegon.delchoco.common.blocks.ChocoboEggBlock.NBTKEY_BREEDI
 import static com.dephoegon.delchoco.common.entities.breeding.ChocoboBreedInfo.getFromNbtOrDefault;
 
 public class ChocoboNestBlockEntity extends BlockEntity implements NamedScreenHandlerFactory {
-    public ChocoboNestBlockEntity(BlockPos pos, BlockState state) { super(ModItems.STRAW_NEST_BLOCK_ENTITY, pos, state); }
+    public ChocoboNestBlockEntity(BlockPos pos, BlockState state) { super(ChocoList.STRAW_NEST_BLOCK_ENTITY, pos, state); }
     public static final Identifier UPDATE_PACKET_ID = new Identifier(DelChoco.DELCHOCO_ID, "block_entity_update");
-    private static class CheckOffset {
-        Vec3i offset;
-        boolean shouldBeAir;
 
-        CheckOffset(Vec3i offset, boolean shouldBeAir) {
-            this.offset = offset;
-            this.shouldBeAir = shouldBeAir;
-        }
+    private record CheckOffset(Vec3i offset, boolean shouldBeAir) {
     }
     private final static CheckOffset[] SHELTER_CHECK_OFFSETS = new CheckOffset[] {
             new CheckOffset(new Vec3i(0, 1, 0), true),

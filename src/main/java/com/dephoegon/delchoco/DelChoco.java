@@ -25,9 +25,8 @@ public class DelChoco implements ModInitializer, ClientModInitializer {
 			() -> new ItemStack(BONE_MEAL));
 
 	public void onInitialize() {
-		ChocoList.commonRegOrder();
-
 		LOGGER.info("Hello Fabric world!");
+		ChocoList.commonRegOrder();
 	}
 	@Environment(EnvType.CLIENT)
 	public void onInitializeClient() {

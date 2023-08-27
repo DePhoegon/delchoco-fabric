@@ -37,6 +37,7 @@ public class PacketManager {
     }
 
     public static void init() {
+        DelChoco.LOGGER.info("PacketManager init");
         // Register client-side packet handlers
         ClientPlayNetworking.registerGlobalReceiver(OPEN_CHOCOBO_GUI_PACKET_ID, (client, handler, buf, responseSender) -> {
             OpenChocoboGuiMessage message = OpenChocoboGuiMessage.decode(buf);

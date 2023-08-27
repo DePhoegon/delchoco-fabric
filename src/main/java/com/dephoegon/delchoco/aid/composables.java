@@ -25,7 +25,7 @@ public class composables {
         add(f4, STRAW_NEST_ITEM);
         add(f4, GYSAHL_CAKE);
         add(f4, LEATHER_CHOCO_DISGUISE_LEGS);
-        add(f4, LEATHER_CHOCO_DISGUISE_FEET);
+        add(f4, LEATHER_CHOCO_DISGUISE_BOOTS);
         add(f4, LEATHER_CHOCO_DISGUISE_CHEST);
         add(f4, LEATHER_CHOCO_DISGUISE_HELMET);
     }

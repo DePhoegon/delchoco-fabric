@@ -102,8 +102,8 @@ public class ChocoboGoals {
         return (int) (random.nextDouble(upper)-lower);
     }
     public static class ChocoboRandomStrollGoal extends WanderAroundGoal {
-        BlockPos blockPos;
-        double limit;
+        final BlockPos blockPos;
+        final double limit;
         double xSpot;
         double zSpot;
         public ChocoboRandomStrollGoal(Chocobo pMob, double pSpeedModifier, BlockPos position, Double RangeLimit) {
@@ -128,8 +128,8 @@ public class ChocoboGoals {
         }
     }
     public static class ChocoboLocalizedWonder extends WanderAroundFarGoal {
-        BlockPos blockPos;
-        double limit;
+        final BlockPos blockPos;
+        final double limit;
         double xSpot;
         double zSpot;
         public ChocoboLocalizedWonder(Chocobo pMob, double pSpeedModifier, BlockPos position, Double RangeLimit) {
@@ -252,7 +252,7 @@ public class ChocoboGoals {
         }
     }
     public static class ChocoPanicGoal extends EscapeDangerGoal {
-        PathAwareEntity entity;
+        final PathAwareEntity entity;
 
         public ChocoPanicGoal(PathAwareEntity mob, double pSpeed) {
             super(mob, pSpeed);

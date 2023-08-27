@@ -13,10 +13,10 @@ import static com.dephoegon.delchoco.aid.world.StaticGlobalVariables.ChocoConfig
 import static com.dephoegon.delchoco.aid.world.dValues.defaultDoubles.dGYSAHL_GREEN_SPAWN_CHANCE;
 
 public class ModPlacements {
-    static RarityFilterPlacementModifier normRarity = RarityFilterPlacementModifier.of(getSpawnChance(10));
-    static RarityFilterPlacementModifier underGroundRarity = RarityFilterPlacementModifier.of(getSpawnChance(30));
+    static final RarityFilterPlacementModifier normRarity = RarityFilterPlacementModifier.of(getSpawnChance(10));
+    static final RarityFilterPlacementModifier underGroundRarity = RarityFilterPlacementModifier.of(getSpawnChance(30));
     public static final RegistryEntry<PlacedFeature> PATCH_GYSAHL_ALL_BIOMES = PlacedFeatures.register("patch_gysahl_all_biomes", ModFeatureConfigs.PATCH_GYSAHL_GRASS, normRarity, CountPlacementModifier.of(UniformIntProvider.create(0, 5)), SquarePlacementModifier.of(), PlacedFeatures.BOTTOM_TO_TOP_RANGE);
-    public static final RegistryEntry<PlacedFeature> PATCH_GYSAHL_UNDERGROUND = PlacedFeatures.register("patch_gysahl_underGround", ModFeatureConfigs.PATCH_GYSAHL_GRASS, underGroundRarity, CountPlacementModifier.of(UniformIntProvider.create(0, 5)), SquarePlacementModifier.of(), PlacedFeatures.BOTTOM_TO_TOP_RANGE);
+    public static final RegistryEntry<PlacedFeature> PATCH_GYSAHL_UNDERGROUND = PlacedFeatures.register("patch_gysahl_underground", ModFeatureConfigs.PATCH_GYSAHL_GRASS, underGroundRarity, CountPlacementModifier.of(UniformIntProvider.create(0, 5)), SquarePlacementModifier.of(), PlacedFeatures.BOTTOM_TO_TOP_RANGE);
 
     private static int getSpawnChance(int MultipleFactor) { return (int) (ChocoConfigGet(StaticGlobalVariables.getGysahlGreenSpawnChance(), dGYSAHL_GREEN_SPAWN_CHANCE.getDefault()) * MultipleFactor); }
 }

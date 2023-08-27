@@ -1,6 +1,7 @@
 package com.dephoegon.delchoco.mixin;
 
 import com.dephoegon.delchoco.common.effects.ChocoboCombatEvents;
+import com.dephoegon.delchoco.common.entities.Chocobo;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import org.jetbrains.annotations.NotNull;
@@ -13,7 +14,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 public class MixinEntity {
     @Inject(at = @At("HEAD"), method = "applyDamageEffects(Lnet/minecraft/world/entity/LivingEntity;Lnet/minecraft/world/entity/Entity;)V", cancellable = true)
     private void onApplyDamageEffects(@NotNull LivingEntity attacker, Entity target, CallbackInfo ci) {
-        boolean result = ChocoboCombatEvents.onChocoboCombatAttack(attacker, target);
-        if (result) { ci.cancel(); }
+        Chocobo chocobo = attacker instanceof Chocobo ? (Chocobo) attacker : null;
+        ChocoboCombatEvents.onChocoboCombatHit(chocobo, target);
     }
 }

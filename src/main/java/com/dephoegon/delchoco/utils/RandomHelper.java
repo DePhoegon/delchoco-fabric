@@ -4,7 +4,7 @@ import java.util.InputMismatchException;
 import java.util.Random;
 
 public class RandomHelper {
-    public static Random random = new Random();
+    final public static Random random = new Random();
 
     //returns true if random returns a value that is under or equal to the percentage required for success
     public static boolean getChanceResult(int percentageForSuccess) {

@@ -31,6 +31,7 @@ public class serverVariableAccess {
     private static long lastUnloadEventTime = 0;
     private static final long COOL_DOWN = 5000; // 5 seconds
     public static void init() {
+        DelChoco.LOGGER.info("(DelChoco Mod) - Server Variable Access Initialized");
         ServerLifecycleEvents.SERVER_STARTED.register(server -> {
             lastEventTime = System.currentTimeMillis();
             File choco_load_file = new File(server.getSavePath(WorldSavePath.ROOT).toFile(), DELCHOCO_CHOCOBO_VARIABLES.toString().replace(':', '_'));
@@ -187,10 +188,10 @@ public class serverVariableAccess {
             variablesHolder.setEndSpawnWeight(getValueInBounds(dEND_SPAWN_WEIGHT, StaticGlobalVariables.getEndSpawnWeight()));
             variablesHolder.setGysahlGreenPatchSize(getValueInBounds(dGYSAHL_GREEN_PATCH_SIZE, StaticGlobalVariables.getGysahlGreenPatchSize()));
             variablesHolder.setGysahlGreenSpawnChance(getValueInBounds(dGYSAHL_GREEN_SPAWN_CHANCE, StaticGlobalVariables.getGysahlGreenSpawnChance()));
-            variablesHolder.setCanSpawn(StaticGlobalVariables.getCanSpawn());
-            variablesHolder.setOverworldSpawn(StaticGlobalVariables.getOverworldSpawn());
-            variablesHolder.setNetherSpawn(StaticGlobalVariables.getNetherSpawn());
-            variablesHolder.setEndSpawn(StaticGlobalVariables.getEndSpawn());
+            variablesHolder.setCanSpawn(StaticGlobalVariables.ChocoConfigGet(StaticGlobalVariables.getCanSpawn(), dCanSpawn));
+            variablesHolder.setOverworldSpawn(StaticGlobalVariables.ChocoConfigGet(StaticGlobalVariables.getOverworldSpawn(), dOverworldSpawn));
+            variablesHolder.setNetherSpawn(StaticGlobalVariables.ChocoConfigGet(StaticGlobalVariables.getNetherSpawn(), dNetherSpawn));
+            variablesHolder.setEndSpawn(StaticGlobalVariables.ChocoConfigGet(StaticGlobalVariables.getEndSpawn(), dEndSpawn));
         } else  {
             variablesHolder.setStamina(getValueInBounds(dSTAMINA, StaticGlobalVariables.getStamina()));
             variablesHolder.setSpeed(getValueInBounds(dSPEED, StaticGlobalVariables.getSpeed()));
@@ -224,13 +225,13 @@ public class serverVariableAccess {
             variablesHolder.setWeaponAlpha(getValueInBounds(dWEAPON_ALPHA, StaticGlobalVariables.getWeaponAlpha()));
             variablesHolder.setCollarAlpha(getValueInBounds(dCOLLAR_ALPHA, StaticGlobalVariables.getCollarAlpha()));
             variablesHolder.setSaddleAlpha(getValueInBounds(dSADDLE_ALPHA, StaticGlobalVariables.getSaddleAlpha()));
-            variablesHolder.setExtraChocoboEffects(StaticGlobalVariables.getExtraChocoboEffects());
-            variablesHolder.setExtraChocoboResourcesOnHit(StaticGlobalVariables.getExtraChocoboResourcesOnHit());
-            variablesHolder.setExtraChocoboResourcesOnKill(StaticGlobalVariables.getExtraChocoboResourcesOnKill());
-            variablesHolder.setShiftHitBypass(StaticGlobalVariables.getShiftHitBypass());
-            variablesHolder.setOwnChocoboHittable(StaticGlobalVariables.getOwnChocoboHittable());
-            variablesHolder.setTamedChocoboHittable(StaticGlobalVariables.getTamedChocoboHittable());
-            variablesHolder.setOwnerOnlyInventory(StaticGlobalVariables.getOwnerOnlyInventory());
+            variablesHolder.setExtraChocoboEffects(StaticGlobalVariables.ChocoConfigGet(StaticGlobalVariables.getExtraChocoboEffects(), dExtraChocoboEffects));
+            variablesHolder.setExtraChocoboResourcesOnHit(StaticGlobalVariables.ChocoConfigGet(StaticGlobalVariables.getExtraChocoboResourcesOnHit(), dExtraChocoboResourcesOnHit));
+            variablesHolder.setExtraChocoboResourcesOnKill(StaticGlobalVariables.ChocoConfigGet(StaticGlobalVariables.getExtraChocoboResourcesOnKill(), dExtraChocoboResourcesOnKill));
+            variablesHolder.setShiftHitBypass(StaticGlobalVariables.ChocoConfigGet(StaticGlobalVariables.getShiftHitBypass(), dShiftHitBypass));
+            variablesHolder.setOwnChocoboHittable(StaticGlobalVariables.ChocoConfigGet(StaticGlobalVariables.getOwnChocoboHittable(), dOwnChocoboHittable));
+            variablesHolder.setTamedChocoboHittable(StaticGlobalVariables.ChocoConfigGet(StaticGlobalVariables.getTamedChocoboHittable(), dTamedChocoboHittable));
+            variablesHolder.setOwnerOnlyInventory(StaticGlobalVariables.ChocoConfigGet(StaticGlobalVariables.getOwnerOnlyInventory(), dOwnerOnlyInventoryAccess));
         }
     }
     private static boolean globalVariablesChanged(globalVariablesHolder currentVariables, boolean isWorld) {

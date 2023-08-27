@@ -14,9 +14,9 @@ import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 
 public class OpenChocoboGuiMessage {
-    public int entityId;
-    public int windowId;
-    public NbtCompound saddle;
+    final public int entityId;
+    final public int windowId;
+    final public NbtCompound saddle;
     public NbtCompound inventory;
 
     public OpenChocoboGuiMessage(@NotNull Chocobo chocobo, int windowId) {

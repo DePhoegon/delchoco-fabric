@@ -3,6 +3,7 @@ package com.dephoegon.delchoco.common.entities;
 import com.dephoegon.delchoco.DelChoco;
 import com.dephoegon.delchoco.aid.chocoboChecks;
 import com.dephoegon.delchoco.aid.world.StaticGlobalVariables;
+import com.dephoegon.delchoco.common.effects.ChocoboCombatEvents;
 import com.dephoegon.delchoco.common.entities.breeding.ChocoboMateGoal;
 import com.dephoegon.delchoco.common.entities.properties.*;
 import com.dephoegon.delchoco.common.entities.properties.ChocoboGoals.ChocoboLocalizedWonder;
@@ -1219,8 +1220,16 @@ public class Chocobo extends TameableEntity implements Angerable, NamedScreenHan
                 .forEach((p_34440_) -> p_34440_.setTarget(this.getTarget()));
     }
     public boolean isPersistent() { return this.isTamed() || this.fromEgg() || this.isCustomNameVisible(); }
-    protected boolean isDisallowedInPeaceful() { return super.isDisallowedInPeaceful(); }
+    public boolean isDisallowedInPeaceful() { return super.isDisallowedInPeaceful(); }
     public boolean canImmediatelyDespawn(double pDistanceToClosestPlayer) { return true; }
+    public void applyDamageEffects(LivingEntity attacker, Entity target) {
+        boolean result = ChocoboCombatEvents.onChocoboCombatGetHit(attacker, this);
+        if (result) { super.applyDamageEffects(attacker, target); }
+    }
+    public void onDeath(DamageSource source) {
+        ChocoboCombatEvents.onChocoboDeath(this);
+        super.onDeath(source);
+    }
     public void checkDespawn() {
         if (this.world.getDifficulty() == Difficulty.PEACEFUL && this.isDisallowedInPeaceful()) { this.discard(); }
         else if (!this.isPersistent() && !this.cannotDespawn()) {

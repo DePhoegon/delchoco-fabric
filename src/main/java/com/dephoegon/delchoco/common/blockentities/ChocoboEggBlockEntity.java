@@ -1,7 +1,7 @@
 package com.dephoegon.delchoco.common.blockentities;
 
+import com.dephoegon.delchoco.aid.ChocoList;
 import com.dephoegon.delchoco.common.entities.breeding.ChocoboBreedInfo;
-import com.dephoegon.delchoco.common.init.ModItems;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.nbt.NbtCompound;
@@ -11,7 +11,7 @@ import org.jetbrains.annotations.NotNull;
 public class ChocoboEggBlockEntity extends BlockEntity {
     public final static String NBTKEY_BREEDINFO = "BreedInfo";
     private ChocoboBreedInfo breedInfo;
-    public ChocoboEggBlockEntity(BlockPos pos, BlockState state) { super(ModItems.CHOCOBO_EGG_TILE, pos, state); }
+    public ChocoboEggBlockEntity(BlockPos pos, BlockState state) { super(ChocoList.CHOCOBO_EGG_BLOCK_ENTITY, pos, state); }
     public void readNbt(@NotNull NbtCompound compound) {
         super.readNbt(compound);
         this.breedInfo = new ChocoboBreedInfo(compound.getCompound(NBTKEY_BREEDINFO));

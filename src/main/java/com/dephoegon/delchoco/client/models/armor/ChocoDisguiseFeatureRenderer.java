@@ -44,5 +44,4 @@ public class ChocoDisguiseFeatureRenderer extends FeatureRenderer<LivingEntity, 
             }
         }
     }
-
 }

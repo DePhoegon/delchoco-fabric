@@ -25,6 +25,7 @@ import java.util.Objects;
 
 import static com.dephoegon.delchoco.DelChoco.DELCHOCO_ID;
 
+@SuppressWarnings("SameReturnValue")
 public class chocoboTeams {
     public static void commands(CommandDispatcher<ServerCommandSource> dispatcher) {
         final LiteralArgumentBuilder<ServerCommandSource> delChocobo = CommandManager.literal("DelChoco");

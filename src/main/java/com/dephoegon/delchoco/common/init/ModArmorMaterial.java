@@ -27,6 +27,7 @@ public enum ModArmorMaterial implements ArmorMaterial {
     private final float knockBackResistance;
     private final Lazy<Ingredient> repairIngredient;
 
+    @SuppressWarnings("SameParameterValue")
     ModArmorMaterial(String pName, int pDurabilityMultiplier, int[] pSlotProtections, int pEnchantmentValue, SoundEvent soundEvent, float pToughness, float pKnockBackResistance, Supplier<Ingredient> pRepairIngredient) {
         this.name = pName;
         this.durabilityMultiplier = pDurabilityMultiplier;

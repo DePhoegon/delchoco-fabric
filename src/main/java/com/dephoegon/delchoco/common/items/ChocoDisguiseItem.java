@@ -25,20 +25,21 @@ import java.util.Map;
 
 import static com.dephoegon.delbase.item.ShiftingDyes.CLEANSE_SHIFT_DYE;
 import static com.dephoegon.delchoco.aid.dyeList.CHOCO_COLOR_ITEMS;
+import static com.dephoegon.delchoco.common.entities.properties.ChocoboColor.*;
 import static com.dephoegon.delchoco.common.init.ModArmorMaterial.*;
 
 public class ChocoDisguiseItem extends ArmorItem {
     public final static String NBTKEY_COLOR = "Color";
-    public final static String yellow = "yellow"; // default
-    public final static String green = "green";
-    public final static String pink = "pink";
-    public final static String red = "red";
-    public final static String blue = "blue";
-    public final static String gold = "gold";
-    public final static String black = "black";
-    public final static String flame = "flame";
-    public final static String white = "white";
-    public final static String purple = "purple";
+    public final static String yellow = YELLOW.getColorName(); // default
+    public final static String green = GREEN.getColorName();
+    public final static String pink = PINK.getColorName();
+    public final static String red = RED.getColorName();
+    public final static String blue = BLUE.getColorName();
+    public final static String gold = GOLD.getColorName();
+    public final static String black = BLACK.getColorName();
+    public final static String flame = FLAME.getColorName();
+    public final static String white = WHITE.getColorName();
+    public final static String purple = PURPLE.getColorName();
     public ChocoDisguiseItem(ArmorMaterial material, EquipmentSlot slot, Settings settings) {
         super(material, slot, settings);
         ItemStack stack = new ItemStack(this);
@@ -50,33 +51,18 @@ public class ChocoDisguiseItem extends ArmorItem {
         if (armor == IRON_CHOCO_DISGUISE) { folder = "textures/models/armor/iron/"; }
         if (armor == DIAMOND_CHOCO_DISGUISE) { folder = "textures/models/armor/diamond/"; }
         if (armor == NETHERITE_CHOCO_DISGUISE) { folder = "textures/models/armor/netherite/"; }
-        folder = switch (customModelData) {
-            default -> folder + "yellow.png";
-            case green -> folder + "green.png";
-            case pink -> folder + "pink.png";
-            case red -> folder + "red.png";
-            case blue -> folder + "blue.png";
-            case gold -> folder + "gold.png";
-            case black -> folder + "black.png";
-            case flame -> folder + "flame.png";
-            case white -> folder + "white.png";
-            case purple -> folder + "purple.png";
-        };
+        String check = folder;
+        if (customModelData.equals(green)) { folder = folder + "green.png"; }
+        if (customModelData.equals(pink)) { folder = folder + "pink.png"; }
+        if (customModelData.equals(red)) { folder = folder + "red.png"; }
+        if (customModelData.equals(blue)) { folder = folder + "blue.png"; }
+        if (customModelData.equals(gold)) { folder = folder + "gold.png"; }
+        if (customModelData.equals(black)) { folder = folder + "black.png"; }
+        if (customModelData.equals(flame)) { folder = folder + "flame.png"; }
+        if (customModelData.equals(white)) { folder = folder + "white.png"; }
+        if (customModelData.equals(purple)) { folder = folder + "purple.png"; }
+        if (check.equals(folder)) { folder = folder + "yellow.png"; }
         return new Identifier(DelChoco.DELCHOCO_ID, folder);
-    }
-    private String itemColor(@NotNull ChocoboColor chocoboColor) {
-        return switch (chocoboColor) {
-            default -> yellow;
-            case GREEN -> green;
-            case PINK -> pink;
-            case RED -> red;
-            case BLUE -> blue;
-            case GOLD -> gold;
-            case BLACK -> black;
-            case FLAME -> flame;
-            case WHITE -> white;
-            case PURPLE -> purple;
-        };
     }
     private String getCustomModelColor(@NotNull ItemStack stack) {
         NbtCompound color = stack.getNbt();
@@ -88,7 +74,7 @@ public class ChocoDisguiseItem extends ArmorItem {
         nbt.putString(key, string);
         return nbt;
     }
-    private void setNBT(@NotNull ItemStack itemStack, @NotNull ItemStack shrinkMe, String colorValue, @NotNull ChocoboColor chocoboColor) {
+    private void setNBT(@NotNull ItemStack itemStack, @NotNull ItemStack shrinkMe, @NotNull ChocoboColor chocoboColor) {
         // Will Refresh & remove Tags not in use
         Map<Enchantment, Integer> enchantments = EnchantmentHelper.get(itemStack);
         NbtCompound tempTag = itemStack.getNbt();
@@ -100,7 +86,7 @@ public class ChocoDisguiseItem extends ArmorItem {
             if (tempTag.contains("display")) { display = tempTag.getCompound("display"); }
             if (tempTag.contains("RepairCost")) { repairCost = Math.max(0, Math.min(tempTag.getInt("RepairCost")-1, 5)); }
         }
-        itemStack.setNbt(serialize(NBTKEY_COLOR, colorValue));
+        itemStack.setNbt(serialize(NBTKEY_COLOR, chocoboColor.getColorName()));
         NbtCompound tag = itemStack.getNbt();
         assert tag != null;
         tag.putDouble("CustomModelData", chocoboColor.getCustomModelData());
@@ -120,12 +106,12 @@ public class ChocoDisguiseItem extends ArmorItem {
                 NbtCompound coloring = mainHand.getNbt();
                 if (coloring != null && coloring.contains(NBTKEY_COLOR)) {
                     String armorColor = coloring.getString(NBTKEY_COLOR);
-                    if ((armorColor.equals(yellow) || itemColor(chocoboColor).equals(yellow)) && !itemColor(chocoboColor).equals(armorColor)) { setNBT(mainHand, offHand, itemColor(chocoboColor), chocoboColor); }
-                } else if (!itemColor(chocoboColor).equals(yellow)) { setNBT(mainHand, offHand, itemColor(chocoboColor),chocoboColor); }
+                    if ((armorColor.equals(yellow) || chocoboColor.getColorName().equals(yellow)) && !chocoboColor.getColorName().equals(armorColor)) { setNBT(mainHand, offHand, chocoboColor); }
+                } else if (!chocoboColor.getColorName().equals(yellow)) { setNBT(mainHand, offHand,chocoboColor); }
             }
             if (offHand.getItem().getDefaultStack() == CLEANSE_SHIFT_DYE.getDefaultStack()) {
                 NbtCompound coloring = mainHand.getNbt();
-                if (coloring != null && coloring.contains(NBTKEY_COLOR) && !coloring.getString(NBTKEY_COLOR).equals(yellow)) { setNBT(mainHand, offHand, yellow, ChocoboColor.YELLOW); }
+                if (coloring != null && coloring.contains(NBTKEY_COLOR) && !coloring.getString(NBTKEY_COLOR).equals(yellow)) { setNBT(mainHand, offHand, YELLOW); }
             }
         }
         if (offHand.getItem() instanceof ChocoDisguiseItem) {
@@ -134,12 +120,12 @@ public class ChocoDisguiseItem extends ArmorItem {
                 NbtCompound coloring = offHand.getNbt();
                 if (coloring != null && coloring.contains(NBTKEY_COLOR)) {
                     String armorColor = coloring.getString(NBTKEY_COLOR);
-                    if ((armorColor.equals(yellow) || itemColor(chocoboColor).equals(yellow)) && !itemColor(chocoboColor).equals(armorColor)) { setNBT(offHand, mainHand, itemColor(chocoboColor), chocoboColor); }
-                } else if (!itemColor(chocoboColor).equals(yellow)) { setNBT(offHand, mainHand, itemColor(chocoboColor), chocoboColor); }
+                    if ((armorColor.equals(yellow) || chocoboColor.getColorName().equals(yellow)) && !chocoboColor.getColorName().equals(armorColor)) { setNBT(offHand, mainHand, chocoboColor); }
+                } else if (!chocoboColor.getColorName().equals(yellow)) { setNBT(offHand, mainHand, chocoboColor); }
             }
             if (mainHand.getItem().getDefaultStack() == CLEANSE_SHIFT_DYE.getDefaultStack()) {
                 NbtCompound coloring = mainHand.getNbt();
-                if (coloring != null && coloring.contains(NBTKEY_COLOR) && !coloring.getString(NBTKEY_COLOR).equals(yellow)) { setNBT(offHand, mainHand, yellow, ChocoboColor.YELLOW); }
+                if (coloring != null && coloring.contains(NBTKEY_COLOR) && !coloring.getString(NBTKEY_COLOR).equals(yellow)) { setNBT(offHand, mainHand, YELLOW); }
             }
             outHand = offHand;
         }

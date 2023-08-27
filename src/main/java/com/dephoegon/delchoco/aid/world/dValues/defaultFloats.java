@@ -8,6 +8,7 @@ public enum defaultFloats {
     private final Float Min;
     private final Float Default;
     private final Float Max;
+    @SuppressWarnings("SameParameterValue")
     defaultFloats(Float Minimum, Float Default, Float Maximum) {
         this.Min = Minimum;
         this.Default = Default;

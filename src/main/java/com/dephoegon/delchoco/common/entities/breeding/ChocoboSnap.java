@@ -10,7 +10,7 @@ import static com.dephoegon.delchoco.common.entities.properties.ChocoboColor.get
 import static com.dephoegon.delchoco.utils.RandomHelper.random;
 
 public class ChocoboSnap {
-    public ChocoboStatSnapshot TWEAKED_DEFAULT = new ChocoboStatSnapshot();
+    final public ChocoboStatSnapshot TWEAKED_DEFAULT = new ChocoboStatSnapshot();
 
     private void setTWEAKED() {
         this.TWEAKED_DEFAULT.generation = 1;

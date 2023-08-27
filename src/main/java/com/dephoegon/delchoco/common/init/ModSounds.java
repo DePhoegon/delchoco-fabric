@@ -15,4 +15,7 @@ public class ModSounds {
         Identifier identifier = new Identifier(DelChoco.DELCHOCO_ID, id);
         return Registry.register(Registry.SOUND_EVENT, identifier, new SoundEvent(identifier));
     }
+    public static void registerSounds() {
+        DelChoco.LOGGER.info("Registering Sounds");
+    }
 }

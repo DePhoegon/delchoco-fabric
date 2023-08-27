@@ -5,10 +5,12 @@ import com.dephoegon.delchoco.aid.chocoboChecks;
 import com.dephoegon.delchoco.aid.world.StaticGlobalVariables;
 import com.dephoegon.delchoco.common.effects.ChocoboCombatEvents;
 import com.dephoegon.delchoco.common.entities.breeding.ChocoboMateGoal;
-import com.dephoegon.delchoco.common.entities.properties.*;
+import com.dephoegon.delchoco.common.entities.properties.ChocoboColor;
+import com.dephoegon.delchoco.common.entities.properties.ChocoboGoals;
 import com.dephoegon.delchoco.common.entities.properties.ChocoboGoals.ChocoboLocalizedWonder;
-import com.dephoegon.delchoco.common.entities.properties.MovementType;
 import com.dephoegon.delchoco.common.entities.properties.ChocoboGoals.ChocoboRandomStrollGoal;
+import com.dephoegon.delchoco.common.entities.properties.ChocoboInventory;
+import com.dephoegon.delchoco.common.entities.properties.MovementType;
 import com.dephoegon.delchoco.common.init.ModAttributes;
 import com.dephoegon.delchoco.common.init.ModSounds;
 import com.dephoegon.delchoco.common.inventory.SaddlebagContainer;
@@ -146,12 +148,12 @@ public class Chocobo extends TameableEntity implements Angerable, NamedScreenHan
     private static final UUID CHOCOBO_SPRINTING_BOOST_ID = UUID.fromString("03ba3167-393e-4362-92b8-909841047640");
     private static final UniformIntProvider PERSISTENT_ANGER_TIME = TimeHelper.betweenSeconds(20, 39);
     private static final TrackedData<Integer> DATA_REMAINING_ANGER_TIME = DataTracker.registerData(Chocobo.class, TrackedDataHandlerRegistry.INTEGER);
-    private static final TrackedData<ChocoboColor> PARAM_COLOR = DataTracker.registerData(Chocobo.class, ModDataSerializers.CHOCOBO_COLOR.getType());
+    private static final TrackedData<Integer> PARAM_COLOR = DataTracker.registerData(Chocobo.class, TrackedDataHandlerRegistry.INTEGER);
     private static final TrackedData<Boolean> PARAM_IS_MALE = DataTracker.registerData(Chocobo.class, TrackedDataHandlerRegistry.BOOLEAN);
     private static final TrackedData<Boolean> PARAM_FROM_EGG = DataTracker.registerData(Chocobo.class, TrackedDataHandlerRegistry.BOOLEAN);
     private static final TrackedData<Boolean> PARAM_IS_FLAME_BLOOD = DataTracker.registerData(Chocobo.class, TrackedDataHandlerRegistry.BOOLEAN);
     private static final TrackedData<Boolean> PARAM_IS_WATER_BREATH = DataTracker.registerData(Chocobo.class, TrackedDataHandlerRegistry.BOOLEAN);
-    private static final TrackedData<MovementType> PARAM_MOVEMENT_TYPE = DataTracker.registerData(Chocobo.class, ModDataSerializers.MOVEMENT_TYPE.getType());
+    private static final TrackedData<Integer> PARAM_MOVEMENT_TYPE = DataTracker.registerData(Chocobo.class, TrackedDataHandlerRegistry.INTEGER);
     private static final TrackedData<ItemStack> PARAM_SADDLE_ITEM = DataTracker.registerData(Chocobo.class, TrackedDataHandlerRegistry.ITEM_STACK);
     private static final TrackedData<ItemStack> PARAM_WEAPON_ITEM = DataTracker.registerData(Chocobo.class, TrackedDataHandlerRegistry.ITEM_STACK);
     private static final TrackedData<ItemStack> PARAM_ARMOR_ITEM = DataTracker.registerData(Chocobo.class, TrackedDataHandlerRegistry.ITEM_STACK);
@@ -273,10 +275,10 @@ public class Chocobo extends TameableEntity implements Angerable, NamedScreenHan
         this.dataTracker.startTracking(PARAM_WITHER_IMMUNE, false);
         this.dataTracker.startTracking(PARAM_POISON_IMMUNE, false);
         this.dataTracker.startTracking(PARAM_COLLAR_COLOR, 0);
-        this.dataTracker.startTracking(PARAM_COLOR, ChocoboColor.YELLOW);
+        this.dataTracker.startTracking(PARAM_COLOR, ChocoboColor.YELLOW.ordinal());
         this.dataTracker.startTracking(PARAM_IS_MALE, false);
         this.dataTracker.startTracking(PARAM_FROM_EGG, false);
-        this.dataTracker.startTracking(PARAM_MOVEMENT_TYPE, MovementType.WANDER);
+        this.dataTracker.startTracking(PARAM_MOVEMENT_TYPE, MovementType.WANDER.ordinal());
         this.dataTracker.startTracking(PARAM_SADDLE_ITEM, ItemStack.EMPTY);
         this.dataTracker.startTracking(PARAM_ARMOR_ITEM, ItemStack.EMPTY);
         this.dataTracker.startTracking(PARAM_WEAPON_ITEM, ItemStack.EMPTY);
@@ -475,8 +477,8 @@ public class Chocobo extends TameableEntity implements Angerable, NamedScreenHan
             }
         }
     }
-    public ChocoboColor getChocoboColor() { return this.dataTracker.get(PARAM_COLOR); }
-    public void setChocoboColor(ChocoboColor color) { this.dataTracker.set(PARAM_COLOR, color); }
+    public ChocoboColor getChocoboColor() { return ChocoboColor.values()[this.dataTracker.get(PARAM_COLOR)]; }
+    public void setChocoboColor(ChocoboColor color) { this.dataTracker.set(PARAM_COLOR, color.ordinal()); }
     public void setCollarColor(Integer color) { this.dataTracker.set(PARAM_COLLAR_COLOR, color); }
     public Integer getCollarColor() { return this.dataTracker.get(PARAM_COLLAR_COLOR); }
     public boolean isFireImmune() { return this.dataTracker.get(PARAM_IS_FLAME_BLOOD); }
@@ -523,8 +525,8 @@ public class Chocobo extends TameableEntity implements Angerable, NamedScreenHan
     public boolean fromEgg() { return this.dataTracker.get(PARAM_FROM_EGG); }
     public void setMale(boolean isMale) { this.dataTracker.set(PARAM_IS_MALE, isMale); }
     public void setFromEgg(boolean fromEgg) { this.dataTracker.set(PARAM_FROM_EGG, fromEgg); }
-    public MovementType getMovementType() { return this.dataTracker.get(PARAM_MOVEMENT_TYPE); }
-    public void setMovementType(MovementType type) { this.dataTracker.set(PARAM_MOVEMENT_TYPE, type); setMovementAiByType(type); }
+    public MovementType getMovementType() { return MovementType.values()[this.dataTracker.get(PARAM_MOVEMENT_TYPE)]; }
+    public void setMovementType(MovementType type) { this.dataTracker.set(PARAM_MOVEMENT_TYPE, type.ordinal()); setMovementAiByType(type); }
     private void setMovementAiByType(@NotNull MovementType type) {
         BlockPos leashPoint = this.getLeashSpot();
         double length = this.getLeashDistance();
@@ -557,7 +559,7 @@ public class Chocobo extends TameableEntity implements Angerable, NamedScreenHan
             case 2 -> MovementType.STANDSTILL;
             default -> MovementType.WANDER;
         };
-        this.dataTracker.set(PARAM_MOVEMENT_TYPE, type);
+        this.dataTracker.set(PARAM_MOVEMENT_TYPE, type.ordinal());
     }
     public boolean isSaddled() { return !this.getSaddle().isEmpty(); }
     public boolean isArmored() { return !this.getArmorItemStack().isEmpty(); }

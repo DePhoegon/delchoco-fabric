@@ -6,9 +6,9 @@ import com.dephoegon.delchoco.client.gui.RenderChocoboOverlay;
 import com.dephoegon.delchoco.client.keybind.KeyBindManager;
 import com.dephoegon.delchoco.common.blockentities.ChocoboEggBlockEntity;
 import com.dephoegon.delchoco.common.blockentities.ChocoboNestBlockEntity;
-import com.dephoegon.delchoco.common.entities.properties.ModDataSerializers;
 import com.dephoegon.delchoco.common.init.ModEntities;
 import com.dephoegon.delchoco.common.init.ModItems;
+import com.dephoegon.delchoco.common.init.ModSounds;
 import com.dephoegon.delchoco.common.network.PacketManager;
 import com.dephoegon.delchoco.common.world.worldgen.ModWorldGen;
 import net.fabricmc.fabric.api.object.builder.v1.block.entity.FabricBlockEntityTypeBuilder;
@@ -25,8 +25,8 @@ public class ChocoList {
         RenderChocoboOverlay.onGuiInGameOverlayRender();
     }
     public static void commonRegOrder() {
-        ModDataSerializers.init();
         ModEntities.registerAttributes();
+        ModSounds.registerSounds();
         PacketManager.init();
         serverVariableAccess.init();
         ModItems.registerModItems();

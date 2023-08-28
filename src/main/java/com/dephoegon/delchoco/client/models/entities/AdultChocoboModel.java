@@ -154,17 +154,17 @@ public class AdultChocoboModel<T extends Chocobo> extends EntityModel<Chocobo> {
                         .uv(60, 113).cuboid(-6.0F, 0.0F, -1.0F, 4.0F, 9.0F, 5.0F, new Dilation(0.25F)),
                 ModelTransform.of(0.0F, 0.0F, 0.0F, 0.2618F, 0.0F, 0.0F));
 
-        ModelPartData foot_left = leg_left.addChild("foot_left", ModelPartBuilder.create()
+        ModelPartData left_back_claw = leg_left.addChild("foot_left", ModelPartBuilder.create()
                         .uv(104, 53).cuboid(-5.0F, -2.0F, 1.5F, 2.0F, 2.0F, 5.0F),
-                ModelTransform.of(0.0F, 19.0F, -2.0F, 0.0F, -0.2182F, 0.0F));
+                ModelTransform.of(1.0F, 17.75F, -2.5F, -0.4182F, -0.2182F, 0.0F));
 
-        ModelPartData toe_right_r1 = foot_left.addChild("toe_right_r1", ModelPartBuilder.create()
+        ModelPartData left_outside_claw = left_back_claw.addChild("toe_right_r1", ModelPartBuilder.create()
                         .uv(92, 54).cuboid(-6.0F, -3.0F, -5.0F, 2.0F, 2.0F, 7.0F),
-                ModelTransform.of(0.0F, 0.0F, 0.0F, 0.2182F, 0.2618F, 0.0F));
+                ModelTransform.of(-1.25F, 0.5F, -1.5F, 0.6364F, 0.7382F, 0.0F));
 
-        ModelPartData toe_left_r1 = foot_left.addChild("toe_left_r1", ModelPartBuilder.create()
+        ModelPartData left_inside_claw = left_back_claw.addChild("toe_left_r1", ModelPartBuilder.create()
                         .uv(92, 54).cuboid(-4.0F, -3.0F, -5.0F, 2.0F, 2.0F, 7.0F),
-                ModelTransform.of(0.0F, 0.0F, 0.0F, 0.2182F, -0.2618F, 0.0F));
+                ModelTransform.of(-1.25F, 0.5F, 2.25F, 0.6364F, -0.2618F, 0.0F));
 
         ModelPartData leg_right = body.addChild("leg_right", ModelPartBuilder.create(),
                 ModelTransform.pivot(-3.5F, 3.0F, 1.0F));
@@ -186,18 +186,18 @@ public class AdultChocoboModel<T extends Chocobo> extends EntityModel<Chocobo> {
         ModelPartData armor_leg_right_upper_r1 = leg_right.addChild("armor_leg_right_upper_r1", ModelPartBuilder.create()
                         .uv(60, 113).cuboid(1.5F, 0.0F, -1.0F, 4.0F, 9.0F, 5.0F, new Dilation(0.25F)),
                 ModelTransform.of(0.0F, 0.0F, 0.0F, 0.2618F, 0.0F, 0.0F));
-
-        ModelPartData foot_right = leg_right.addChild("foot_right", ModelPartBuilder.create()
+        // back toe
+        ModelPartData right_back_claw = leg_right.addChild("foot_right", ModelPartBuilder.create()
                         .uv(104, 53).cuboid(2.0F, -2.0F, 1.5F, 2.0F, 2.0F, 5.0F),
-                ModelTransform.of(0.0F, 19.0F, -2.0F, 0.0F, 0.2182F, 0.0F));
-
-        ModelPartData toe_right_r2 = foot_right.addChild("toe_right_r2", ModelPartBuilder.create()
+                ModelTransform.of(1.0F, 18.25F, -2.5F, -0.4182F, -0.2182F, 0.0F));
+        // inside toe
+        ModelPartData right_inside_claw = right_back_claw.addChild("toe_right_r2", ModelPartBuilder.create()
                         .uv(92, 54).cuboid(1.0F, -3.0F, -5.0F, 2.0F, 2.0F, 7.0F),
-                ModelTransform.of(0.0F, 0.0F, 0.0F, 0.2182F, 0.2618F, 0.0F));
-
-        ModelPartData toe_left_r2 = foot_right.addChild("toe_left_r2", ModelPartBuilder.create()
+                ModelTransform.of(0.25F, 2.0F, 1F, 0.6364F, 0.3382F, 0.0F));
+        // outside toe
+        ModelPartData right_outside_claw = right_back_claw.addChild("toe_left_r2", ModelPartBuilder.create()
                         .uv(92, 54).cuboid(3.0F, -3.0F, -5.0F, 2.0F, 2.0F, 7.0F),
-                ModelTransform.of(0.0F, 0.0F, 0.0F, 0.2182F, -0.2618F, 0.0F));
+                ModelTransform.of(-0.5F, 2.0F, -2.25F, 0.6364F, -0.4618F, 0.0F));
 
         return TexturedModelData.of(meshDefinition, 128, 128);
     }

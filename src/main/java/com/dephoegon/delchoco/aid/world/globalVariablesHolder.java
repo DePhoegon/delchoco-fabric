@@ -137,7 +137,7 @@ public class globalVariablesHolder {
         Stamina = nbt.getInt(Stamina_name);
         Speed = nbt.getInt(Speed_name);
         Health = nbt.getInt(Health_name);
-        Armor = nbt.getInt(Attack_name);
+        Armor = nbt.getInt(Armor_name);
         ArmorTough = nbt.getInt(ArmorTough_name);
         Attack = nbt.getInt(Attack_name);
         WeaponModifier = nbt.getInt(WeaponModifier_name);

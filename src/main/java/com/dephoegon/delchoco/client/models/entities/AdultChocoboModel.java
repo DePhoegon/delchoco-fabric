@@ -197,7 +197,7 @@ public class AdultChocoboModel<T extends Chocobo> extends EntityModel<Chocobo> {
         // outside toe
         ModelPartData right_outside_claw = right_back_claw.addChild("toe_left_r2", ModelPartBuilder.create()
                         .uv(92, 54).cuboid(3.0F, -3.0F, -5.0F, 2.0F, 2.0F, 7.0F),
-                ModelTransform.of(-0.5F, 2.0F, -2.25F, 0.6364F, -0.4618F, 0.0F));
+                ModelTransform.of(-0.5F, 2.25F, -2.25F, 0.6364F, -0.4618F, 0.0F));
 
         return TexturedModelData.of(meshDefinition, 128, 128);
     }

@@ -5,6 +5,11 @@ import com.dephoegon.delchoco.aid.world.dValues.defaultFloats;
 import com.dephoegon.delchoco.aid.world.dValues.defaultInts;
 import org.jetbrains.annotations.NotNull;
 
+import static com.dephoegon.delchoco.aid.world.dValues.defaultBooleans.*;
+import static com.dephoegon.delchoco.aid.world.dValues.defaultDoubles.*;
+import static com.dephoegon.delchoco.aid.world.dValues.defaultFloats.*;
+import static com.dephoegon.delchoco.aid.world.dValues.defaultInts.*;
+
 public class StaticGlobalVariables {
     private static Integer Stamina;
     public static final String Stamina_name = "default_stamina";
@@ -109,107 +114,107 @@ public class StaticGlobalVariables {
     private static Boolean OwnerOnlyInventory;
     public static final String OwnerOnlyInventory_name = "chocobo_inventory_owner_only";
     public StaticGlobalVariables() { }
-    public static Integer getStamina() { return Stamina; }
+    public static Integer getStamina() { return Stamina == null ? dSTAMINA.getDefault() : Stamina; }
     public static void setStamina(int stamina) { StaticGlobalVariables.Stamina = stamina; }
-    public static Integer getSpeed() { return Speed; }
+    public static Integer getSpeed() { return Speed == null ? dSPEED.getDefault() : Speed; }
     public static void setSpeed(int stamina) { StaticGlobalVariables.Speed = stamina; }
-    public static Integer getHealth() { return Health; }
+    public static Integer getHealth() { return Health == null ? dHEALTH.getDefault() : Health; }
     public static void setHealth(int health) { StaticGlobalVariables.Health = health; }
-    public static Integer getArmor() { return Armor; }
+    public static Integer getArmor() { return Armor == null ? dARMOR.getDefault() : Armor; }
     public static void setArmor(int armor) { StaticGlobalVariables.Armor = armor; }
-    public static Integer getArmorTough() { return ArmorTough; }
+    public static Integer getArmorTough() { return ArmorTough == null ? dARMOR_TOUGH.getDefault() : ArmorTough; }
     public static void setArmorTough(int armorTough) { StaticGlobalVariables.ArmorTough = armorTough; }
-    public static Integer getAttack() { return Attack; }
+    public static Integer getAttack() { return Attack == null ? dATTACK.getDefault() : Attack; }
     public static void setAttack(int attack) { StaticGlobalVariables.Attack = attack; }
-    public static Integer getWeaponModifier() { return WeaponModifier; }
+    public static Integer getWeaponModifier() { return WeaponModifier == null ? dWEAPON_MOD.getDefault() : WeaponModifier; }
     public static void setWeaponModifier(int weaponModifier) { StaticGlobalVariables.WeaponModifier = weaponModifier; }
-    public static Integer getHealAmount() { return HealAmount; }
+    public static Integer getHealAmount() { return HealAmount == null ? dHEAL_AMOUNT.getDefault() : HealAmount; }
     public static void setHealAmount(int healAmount) { StaticGlobalVariables.HealAmount = healAmount; }
-    public static Integer getEggHatchTimeTicks() { return EggHatchTimeTicks; }
+    public static Integer getEggHatchTimeTicks() { return EggHatchTimeTicks == null ? dEGG_HATCH.getDefault() : EggHatchTimeTicks; }
     public static void setEggHatchTimeTicks(int eggHatchTimeTicks) { StaticGlobalVariables.EggHatchTimeTicks = eggHatchTimeTicks; }
-    public static Integer getMaxHealth() { return MaxHealth; }
+    public static Integer getMaxHealth() { return MaxHealth == null ? dMAX_HEALTH.getDefault() : MaxHealth; }
     public static void setMaxHealth(int maxHealth) { StaticGlobalVariables.MaxHealth = maxHealth; }
-    public static Integer getMaxSpeed() { return MaxSpeed; }
+    public static Integer getMaxSpeed() { return MaxSpeed == null ? dMAX_SPEED.getDefault() : MaxSpeed; }
     public static void setMaxSpeed(int maxSpeed) { StaticGlobalVariables.MaxSpeed = maxSpeed; }
-    public static Integer getChocoboMinPack() { return ChocoboMinPack; }
+    public static Integer getChocoboMinPack() { return ChocoboMinPack == null ? dCHOCOBO_PACK_MIN.getDefault() : ChocoboMinPack; }
     public static void setChocoboMinPack(int chocoboMinPack) { StaticGlobalVariables.ChocoboMinPack = chocoboMinPack; }
-    public static Integer getChocoboMaxPack() { return ChocoboMaxPack; }
+    public static Integer getChocoboMaxPack() { return ChocoboMaxPack == null ? dCHOCOBO_PACK_MAX.getDefault() : ChocoboMaxPack; }
     public static void setChocoboMaxPack(int chocoboMaxPack) { StaticGlobalVariables.ChocoboMaxPack = chocoboMaxPack; }
-    public static Integer getOverWorldSpawnWeight() { return OverWorldSpawnWeight; }
+    public static Integer getOverWorldSpawnWeight() { return OverWorldSpawnWeight == null ? dOVERWORLD_SPAWN_WEIGHT.getDefault() : OverWorldSpawnWeight; }
     public static void setOverWorldSpawnWeight(int overWorldSpawnWeight) { StaticGlobalVariables.OverWorldSpawnWeight = overWorldSpawnWeight; }
-    public static Integer getMushroomSpawnWeight() { return MushroomSpawnWeight; }
+    public static Integer getMushroomSpawnWeight() { return MushroomSpawnWeight == null ? dMUSHROOM_SPAWN_WEIGHT.getDefault() : MushroomSpawnWeight; }
     public static void setMushroomSpawnWeight(int mushroomSpawnWeight) { StaticGlobalVariables.MushroomSpawnWeight = mushroomSpawnWeight; }
-    public static Integer getNetherSpawnWeight() { return NetherSpawnWeight; }
+    public static Integer getNetherSpawnWeight() { return NetherSpawnWeight == null ? dNETHER_SPAWN_WEIGHT.getDefault() : NetherSpawnWeight; }
     public static void setNetherSpawnWeight(int netherSpawnWeight) { StaticGlobalVariables.NetherSpawnWeight = netherSpawnWeight; }
-    public static Integer getEndSpawnWeight() { return EndSpawnWeight; }
+    public static Integer getEndSpawnWeight() { return EndSpawnWeight == null ? dEND_SPAWN_WEIGHT.getDefault() : EndSpawnWeight; }
     public static void setEndSpawnWeight(int endSpawnWeight) { StaticGlobalVariables.EndSpawnWeight = endSpawnWeight; }
-    public static Integer getGysahlGreenPatchSize() { return GysahlGreenPatchSize; }
+    public static Integer getGysahlGreenPatchSize() { return GysahlGreenPatchSize == null ? dGYSAHL_GREEN_PATCH_SIZE.getDefault() : GysahlGreenPatchSize; }
     public static void setGysahlGreenPatchSize(int gysahlGreenPatchSize) { StaticGlobalVariables.GysahlGreenPatchSize = gysahlGreenPatchSize; }
-    public static Double getGysahlGreenSpawnChance() { return GysahlGreenSpawnChance; }
+    public static Double getGysahlGreenSpawnChance() { return GysahlGreenSpawnChance == null ? dGYSAHL_GREEN_SPAWN_CHANCE.getDefault() : GysahlGreenSpawnChance; }
     public static void setGysahlGreenSpawnChance(double gysahlGreenSpawnChance) { StaticGlobalVariables.GysahlGreenSpawnChance = gysahlGreenSpawnChance; }
-    public static Double getStaminaRegen() { return StaminaRegen; }
+    public static Double getStaminaRegen() { return StaminaRegen == null ? dSTAMINA_REGEN.getDefault() : StaminaRegen; }
     public static void setStaminaRegen(double staminaRegen) { StaticGlobalVariables.StaminaRegen = staminaRegen; }
-    public static Double getTame() { return Tame; }
+    public static Double getTame() { return Tame == null ? dTAME.getDefault() : Tame; }
     public static void setTame(double tame) { StaticGlobalVariables.Tame = tame; }
-    public static Double getStaminaCost() { return StaminaCost; }
+    public static Double getStaminaCost() { return StaminaCost == null ? dSTAMINA_SPRINT.getDefault() : StaminaCost; }
     public static void setStaminaCost(double staminaCost) { StaticGlobalVariables.StaminaCost = staminaCost; }
-    public static Double getStaminaGlide() { return StaminaGlide; }
+    public static Double getStaminaGlide() { return StaminaGlide == null ? dSTAMINA_GLIDE.getDefault() : StaminaGlide; }
     public static void setStaminaGlide(double staminaGlide) { StaticGlobalVariables.StaminaGlide = staminaGlide; }
-    public static Double getStaminaJump() { return StaminaJump; }
+    public static Double getStaminaJump() { return StaminaJump == null ? dSTAMINA_JUMP.getDefault() : StaminaJump; }
     public static void setStaminaJump(double staminaJump) { StaticGlobalVariables.StaminaJump = staminaJump; }
-    public static Double getPossLoss() { return PossLoss; }
+    public static Double getPossLoss() { return PossLoss == null ? dPOS_LOSS.getDefault() : PossLoss; }
     public static void setPossLoss(double possLoss) { StaticGlobalVariables.PossLoss = possLoss; }
-    public static Double getPossGain() { return PossGain; }
+    public static Double getPossGain() { return PossGain == null ? dPOS_GAIN.getDefault() : PossGain; }
     public static void setPossGain(double possGain) { StaticGlobalVariables.PossGain = possGain; }
-    public static Double getPossLossHealth() { return PossLossHealth; }
+    public static Double getPossLossHealth() { return PossLossHealth == null ? dPOS_LOSS.getDefault() : PossLossHealth; }
     public static void setPossLossHealth(double possLossHealth) { StaticGlobalVariables.PossLossHealth = possLossHealth; }
-    public static Double getPossGainHealth() { return PossGainHealth; }
+    public static Double getPossGainHealth() { return PossGainHealth == null ? dPOS_GAIN.getDefault() : PossGainHealth; }
     public static void setPossGainHealth(double possGainHealth) { StaticGlobalVariables.PossGainHealth = possGainHealth; }
-    public static Double getPossLossSpeed() { return PossLossSpeed; }
+    public static Double getPossLossSpeed() { return PossLossSpeed == null ? dPOS_LOSS.getDefault() : PossLossSpeed; }
     public static void setPossLossSpeed(double possLossSpeed) { StaticGlobalVariables.PossLossSpeed = possLossSpeed; }
-    public static Double getPossGainSpeed() { return PossGainSpeed; }
+    public static Double getPossGainSpeed() { return PossGainSpeed == null ? dPOS_GAIN.getDefault() : PossGainSpeed; }
     public static void setPossGainSpeed(double possGainSpeed) { StaticGlobalVariables.PossGainSpeed = possGainSpeed; }
-    public static Double getPossLossStamina() { return PossLossStamina; }
+    public static Double getPossLossStamina() { return PossLossStamina == null ? dPOS_LOSS.getDefault() : PossLossStamina; }
     public static void setPossLossStamina(double possLossStamina) { StaticGlobalVariables.PossLossStamina = possLossStamina; }
-    public static Double getPossGainStamina() { return PossGainStamina; }
+    public static Double getPossGainStamina() { return PossGainStamina == null ? dPOS_GAIN.getDefault() : PossGainStamina; }
     public static void setPossGainStamina(double possGainStamina) { StaticGlobalVariables.PossGainStamina = possGainStamina; }
-    public static Double getMaxStamina() { return MaxStamina; }
+    public static Double getMaxStamina() { return MaxStamina == null ? dMAX_STAMINA.getDefault() : MaxStamina; }
     public static void setMaxStamina(double maxStamina) { StaticGlobalVariables.MaxStamina = maxStamina; }
-    public static Double getMaxStrength() { return MaxStrength; }
+    public static Double getMaxStrength() { return MaxStrength == null ? dMAX_STRENGTH.getDefault() : MaxStrength; }
     public static void setMaxStrength(double maxStrength) { StaticGlobalVariables.MaxStrength = maxStrength; }
-    public static Double getMaxArmor() { return MaxArmor; }
+    public static Double getMaxArmor() { return MaxArmor == null ? dMAX_ARMOR.getDefault() : MaxArmor; }
     public static void setMaxArmor(double maxArmor) { StaticGlobalVariables.MaxArmor = maxArmor; }
-    public static Double getMaxArmorToughness() { return MaxArmorToughness; }
+    public static Double getMaxArmorToughness() { return MaxArmorToughness == null ? dMAX_ARMOR_TOUGH.getDefault() : MaxArmorToughness; }
     public static void setMaxArmorToughness(double maxArmorToughness) { StaticGlobalVariables.MaxArmorToughness = maxArmorToughness; }
-    public static Float getArmorAlpha() { return ArmorAlpha; }
+    public static Float getArmorAlpha() { return ArmorAlpha == null ? dARMOR_ALPHA.getDefault() : ArmorAlpha; }
     public static void setArmorAlpha(float armorAlpha) { StaticGlobalVariables.ArmorAlpha = armorAlpha; }
-    public static Float getWeaponAlpha() { return WeaponAlpha; }
+    public static Float getWeaponAlpha() { return WeaponAlpha == null ? dWEAPON_ALPHA.getDefault() : WeaponAlpha; }
     public static void setWeaponAlpha(float weaponAlpha) { StaticGlobalVariables.WeaponAlpha = weaponAlpha; }
-    public static Float getCollarAlpha() { return CollarAlpha; }
+    public static Float getCollarAlpha() { return CollarAlpha == null ? dCOLLAR_ALPHA.getDefault() : CollarAlpha; }
     public static void setCollarAlpha(float collarAlpha) { StaticGlobalVariables.CollarAlpha = collarAlpha; }
-    public static Float getSaddleAlpha() { return SaddleAlpha; }
+    public static Float getSaddleAlpha() { return SaddleAlpha == null ? dSADDLE_ALPHA.getDefault() : SaddleAlpha; }
     public static void setSaddleAlpha(float saddleAlpha) { StaticGlobalVariables.SaddleAlpha = saddleAlpha; }
-    public static Boolean getCanSpawn() { return CanSpawn; }
+    public static Boolean getCanSpawn() { return CanSpawn == null ? dCanSpawn : CanSpawn; }
     public static void setCanSpawn(boolean canSpawn) { StaticGlobalVariables.CanSpawn = canSpawn; }
-    public static Boolean getExtraChocoboEffects() { return ExtraChocoboEffects; }
+    public static Boolean getExtraChocoboEffects() { return ExtraChocoboEffects == null ? dExtraChocoboEffects : ExtraChocoboEffects; }
     public static void setExtraChocoboEffects(boolean extraChocoboEffects) { StaticGlobalVariables.ExtraChocoboEffects = extraChocoboEffects; }
-    public static Boolean getExtraChocoboResourcesOnHit() { return ExtraChocoboResourcesOnHit; }
+    public static Boolean getExtraChocoboResourcesOnHit() { return ExtraChocoboResourcesOnHit == null ? dExtraChocoboResourcesOnHit : ExtraChocoboResourcesOnHit; }
     public static void setExtraChocoboResourcesOnHit(boolean extraChocoboResourcesOnHit) { StaticGlobalVariables.ExtraChocoboResourcesOnHit = extraChocoboResourcesOnHit; }
-    public static Boolean getExtraChocoboResourcesOnKill() { return ExtraChocoboResourcesOnKill; }
+    public static Boolean getExtraChocoboResourcesOnKill() { return ExtraChocoboResourcesOnKill == null ? dExtraChocoboResourcesOnKill : ExtraChocoboResourcesOnKill; }
     public static void setExtraChocoboResourcesOnKill(boolean extraChocoboResourcesOnKill) { StaticGlobalVariables.ExtraChocoboResourcesOnKill = extraChocoboResourcesOnKill; }
-    public static Boolean getShiftHitBypass() { return ShiftHitBypass; }
+    public static Boolean getShiftHitBypass() { return ShiftHitBypass == null ? dShiftHitBypass : ShiftHitBypass; }
     public static void setShiftHitBypass(boolean shiftHitBypass) { StaticGlobalVariables.ShiftHitBypass = shiftHitBypass; }
-    public static Boolean getOwnChocoboHittable() { return OwnChocoboHittable; }
+    public static Boolean getOwnChocoboHittable() { return OwnChocoboHittable == null ? dOwnChocoboHittable : OwnChocoboHittable; }
     public static void setOwnChocoboHittable(boolean ownChocoboHittable) { StaticGlobalVariables.OwnChocoboHittable = ownChocoboHittable; }
-    public static Boolean getTamedChocoboHittable() { return TamedChocoboHittable; }
+    public static Boolean getTamedChocoboHittable() { return TamedChocoboHittable == null ? dTamedChocoboHittable :  TamedChocoboHittable; }
     public static void setTamedChocoboHittable(boolean tamedChocoboHittable) { StaticGlobalVariables.TamedChocoboHittable = tamedChocoboHittable; }
-    public static Boolean getOverworldSpawn() { return OverworldSpawn; }
+    public static Boolean getOverworldSpawn() { return OverworldSpawn == null ? dOverworldSpawn : OverworldSpawn; }
     public static void setOverworldSpawn(boolean overworldSpawn) { StaticGlobalVariables.OverworldSpawn = overworldSpawn; }
-    public static Boolean getNetherSpawn() { return NetherSpawn; }
+    public static Boolean getNetherSpawn() { return NetherSpawn == null ? dNetherSpawn : NetherSpawn; }
     public static void setNetherSpawn(boolean netherSpawn) { StaticGlobalVariables.NetherSpawn = netherSpawn; }
-    public static Boolean getEndSpawn() { return EndSpawn; }
+    public static Boolean getEndSpawn() { return EndSpawn == null ? dEndSpawn : EndSpawn; }
     public static void setEndSpawn(boolean endSpawn) { StaticGlobalVariables.EndSpawn = endSpawn; }
-    public static Boolean getOwnerOnlyInventory() { return OwnerOnlyInventory; }
+    public static Boolean getOwnerOnlyInventory() { return OwnerOnlyInventory == null ? dOwnerOnlyInventoryAccess : OwnerOnlyInventory; }
     public static void setOwnerOnlyInventory(boolean ownerOnlyInventory) { StaticGlobalVariables.OwnerOnlyInventory = ownerOnlyInventory; }
 
     public static int ChocoConfigGet(Integer value, int defaultValue) { return value != null ? value : defaultValue; }

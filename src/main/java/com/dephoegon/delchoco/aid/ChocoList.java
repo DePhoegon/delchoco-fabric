@@ -32,6 +32,7 @@ public class ChocoList {
         ModItems.registerModItems();
         tradeAdds.addTrades();
         ModWorldGen.generateGysahl();
+        ModWorldGen.spawnChocobos();
         registerBlockEntities();
     }
     public static BlockEntityType<ChocoboNestBlockEntity> STRAW_NEST_BLOCK_ENTITY;

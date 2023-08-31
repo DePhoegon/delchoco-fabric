@@ -16,9 +16,9 @@ import java.util.Objects;
 
 import static com.dephoegon.delchoco.DelChoco.chocoConfigHolder;
 import static com.dephoegon.delchoco.aid.chocoboChecks.*;
+import static com.dephoegon.delchoco.aid.world.WorldConfig.FloatChocoConfigGet;
 import static com.dephoegon.delchoco.aid.world.dValues.defaultDoubles.dPOS_GAIN;
 import static com.dephoegon.delchoco.aid.world.dValues.defaultDoubles.dPOS_LOSS;
-import static com.dephoegon.delchoco.aid.world.worldConfig.FloatChocoConfigGet;
 import static com.dephoegon.delchoco.common.entities.breeding.ChocoboSnap.setChocoScale;
 import static java.lang.Math.*;
 

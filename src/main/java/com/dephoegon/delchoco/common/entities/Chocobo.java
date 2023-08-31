@@ -78,12 +78,13 @@ import java.util.UUID;
 
 import static com.dephoegon.delbase.item.ShiftingDyes.*;
 import static com.dephoegon.delchoco.DelChoco.chocoConfigHolder;
+import static com.dephoegon.delchoco.DelChoco.worldConfigHolder;
 import static com.dephoegon.delchoco.aid.chocoKB.isChocoShiftDown;
 import static com.dephoegon.delchoco.aid.chocoKB.isChocoboWaterGlide;
 import static com.dephoegon.delchoco.aid.chocoboChecks.*;
 import static com.dephoegon.delchoco.aid.dyeList.getDyeList;
+import static com.dephoegon.delchoco.aid.world.WorldConfig.FloatChocoConfigGet;
 import static com.dephoegon.delchoco.aid.world.dValues.defaultDoubles.*;
-import static com.dephoegon.delchoco.aid.world.worldConfig.FloatChocoConfigGet;
 import static com.dephoegon.delchoco.common.entities.breeding.ChocoboSnap.setChocoScale;
 import static com.dephoegon.delchoco.common.init.ModItems.*;
 import static com.dephoegon.delchoco.common.init.ModSounds.AMBIENT_SOUND;
@@ -388,11 +389,15 @@ public class Chocobo extends TameableEntity implements Angerable, NamedScreenHan
     }
     public EntityData initialize(ServerWorldAccess worldIn, LocalDifficulty difficultyIn, SpawnReason reason, @Nullable EntityData spawnDataIn, @Nullable NbtCompound dataTag) {
         this.setMale(this.world.random.nextBoolean());
+        boolean skip;
 
         final RegistryEntry<Biome> currentBiomes = this.world.getBiome(getBlockPos().down());
         //noinspection OptionalGetWithoutIsPresent
         final RegistryKey<Biome> biomeRegistryKey = currentBiomes.getKey().get();
-        if (!fromEgg()) {
+        if (isEnd(worldIn)) { skip = !worldConfigHolder.endSpawn; }
+        else if (isNether(worldIn)) { skip = !worldConfigHolder.netherSpawn; }
+        else if (isOverworld(worldIn)) { skip = !worldConfigHolder.overworldSpawn; } else { skip = false; }
+        if (!fromEgg() && !skip) {
             setChocoboSpawnCheck(ChocoboColor.YELLOW);
             if (isNether(worldIn)) { setChocoboSpawnCheck(ChocoboColor.FLAME); }
             if (isEnd(worldIn)){ setChocoboSpawnCheck(ChocoboColor.PURPLE); }
@@ -747,7 +752,10 @@ public class Chocobo extends TameableEntity implements Angerable, NamedScreenHan
                         this.timeToRecalculatePath = this.randomIntInclusive(10, 40);
                         if (this.squaredDistanceTo(owner) >= 288.0D) { this.teleportToOwner(owner);}
                         else { this.navigation.startMovingTo(owner, this.followSpeedModifier); }
-                    }   }   }   }
+                    }
+                }
+            }
+        }
     }
     private void floatChocobo() {
         if (this.isInLava()) {
@@ -1134,8 +1142,7 @@ public class Chocobo extends TameableEntity implements Angerable, NamedScreenHan
     public boolean canSpawn(@NotNull WorldAccess worldIn, @NotNull SpawnReason spawnReasonIn) {
         ServerWorldAccess theWorld = Objects.requireNonNull(worldIn.getServer()).getWorld(this.world.getRegistryKey());
         if (!isOverworld(theWorld) && theWorld != null) {
-            if (isEnd(theWorld)) { return !this.world.getBlockState(getBlockPos().down()).isAir();}
-            else { return true; }
+            if (isEnd(theWorld)) { return !this.world.getBlockState(getBlockPos().down()).isAir();} else { return true; }
         }
         return super.canSpawn(worldIn, spawnReasonIn);
     }

@@ -12,9 +12,9 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(Entity.class)
 public class MixinEntity {
-    @Inject(at = @At("HEAD"), method = "applyDamageEffects(Lnet/minecraft/world/entity/LivingEntity;Lnet/minecraft/world/entity/Entity;)V", cancellable = true)
+    @Inject(at = @At("HEAD"), method = "applyDamageEffects", cancellable = true)
     private void onApplyDamageEffects(@NotNull LivingEntity attacker, Entity target, CallbackInfo ci) {
         Chocobo chocobo = attacker instanceof Chocobo ? (Chocobo) attacker : null;
-        ChocoboCombatEvents.onChocoboCombatHit(chocobo, target);
+        if (chocobo != null) { ChocoboCombatEvents.onChocoboCombatHit(chocobo, target); }
     }
 }

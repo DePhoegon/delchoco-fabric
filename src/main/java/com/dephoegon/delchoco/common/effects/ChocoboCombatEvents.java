@@ -64,26 +64,24 @@ public class ChocoboCombatEvents {
      * @implNote Chance of dropping items on mob hit, enabled with config setting "extraChocoboResourcesOnHit"
      * Intended to be used in the Entity#applyDamageEffects mixin method
      */
-    public static void onChocoboCombatHit(Chocobo chocoboAttacker, Entity targetEntity) {
-        if (chocoboAttacker != null) {
-            if (chocoConfigHolder.extraChocoboEffects) {
-                LivingEntity target = targetEntity instanceof LivingEntity living ? living : null;
-                if (target instanceof SpiderEntity e) { onHitMobChance(10, STRING, e); }
-                if (target instanceof CaveSpiderEntity e) { onHitMobChance(5, FERMENTED_SPIDER_EYE, e); }
-                if (target instanceof SkeletonEntity e) { onHitMobChance(10, BONE, e); }
-                if (target instanceof WitherSkeletonEntity e) { onHitMobChance(10, CHARCOAL, e); }
-                if (target instanceof IronGolemEntity e) { onHitMobChance(5, POPPY, e); }
-                if (target != null && target.getEquippedStack(EquipmentSlot.MAINHAND) != ItemStack.EMPTY) {
-                    if (onHitMobChance(30)) {
-                        target.dropItem(target.getEquippedStack(EquipmentSlot.MAINHAND).getItem());
-                        target.setStackInHand(Hand.MAIN_HAND, ItemStack.EMPTY);
-                    }
+    public static void onChocoboCombatHit(@NotNull Chocobo chocoboAttacker, Entity targetEntity) {
+        if (chocoConfigHolder.extraChocoboEffects) {
+            LivingEntity target = targetEntity instanceof LivingEntity living ? living : null;
+            if (target instanceof SpiderEntity e) { onHitMobChance(10, STRING, e); }
+            if (target instanceof CaveSpiderEntity e) { onHitMobChance(5, FERMENTED_SPIDER_EYE, e); }
+            if (target instanceof SkeletonEntity e) { onHitMobChance(10, BONE, e); }
+            if (target instanceof WitherSkeletonEntity e) { onHitMobChance(10, CHARCOAL, e); }
+            if (target instanceof IronGolemEntity e) { onHitMobChance(5, POPPY, e); }
+            if (target != null && target.getEquippedStack(EquipmentSlot.MAINHAND) != ItemStack.EMPTY) {
+                if (onHitMobChance(30)) {
+                    target.dropItem(target.getEquippedStack(EquipmentSlot.MAINHAND).getItem());
+                    target.setStackInHand(Hand.MAIN_HAND, ItemStack.EMPTY);
                 }
-                if (target != null && target.getEquippedStack(EquipmentSlot.OFFHAND) != ItemStack.EMPTY) {
-                    if (onHitMobChance(10)) {
-                        target.dropItem(target.getEquippedStack(EquipmentSlot.OFFHAND).getItem());
-                        target.setStackInHand(Hand.OFF_HAND, ItemStack.EMPTY);
-                    }
+            }
+            if (target != null && target.getEquippedStack(EquipmentSlot.OFFHAND) != ItemStack.EMPTY) {
+                if (onHitMobChance(10)) {
+                    target.dropItem(target.getEquippedStack(EquipmentSlot.OFFHAND).getItem());
+                    target.setStackInHand(Hand.OFF_HAND, ItemStack.EMPTY);
                 }
             }
         }

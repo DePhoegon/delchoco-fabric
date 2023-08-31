@@ -2,7 +2,7 @@ package com.dephoegon.delchoco;
 
 import com.dephoegon.delchoco.aid.ChocoList;
 import com.dephoegon.delchoco.aid.world.ChocoboConfig;
-import com.dephoegon.delchoco.aid.world.worldConfig;
+import com.dephoegon.delchoco.aid.world.WorldConfig;
 import com.dephoegon.delchoco.client.clientHandler;
 import com.dephoegon.delchoco.client.renderer.entities.ChocoboRenderer;
 import com.dephoegon.delchoco.common.init.ModEntities;
@@ -28,12 +28,14 @@ public class DelChoco implements ModInitializer, ClientModInitializer {
 	public static final ItemGroup DELCHOCO_ITEMS = FabricItemGroupBuilder.build(new Identifier(DELCHOCO_ID, "dephoegon_chocobos"),
 			() -> new ItemStack(BONE_MEAL));
 	public static ChocoboConfig chocoConfigHolder;
-	public static worldConfig worldConfigHolder;
+	public static WorldConfig worldConfigHolder;
 
 	public void onInitialize() {
-		chocoConfigHolder = Configuration.registerConfig(ChocoboConfig.class, ConfigFormats.yaml()).getConfigInstance();
-		worldConfigHolder = Configuration.registerConfig(worldConfig.class, ConfigFormats.yaml()).getConfigInstance();
+
 		LOGGER.info("Hello Fabric world!");
+		chocoConfigHolder = Configuration.registerConfig(ChocoboConfig.class, ConfigFormats.json()).getConfigInstance();
+		worldConfigHolder = Configuration.registerConfig(WorldConfig.class, ConfigFormats.json()).getConfigInstance();
+		ModEntities.registerAttributes();
 		ChocoList.commonRegOrder();
 	}
 	@Environment(EnvType.CLIENT)

@@ -13,7 +13,7 @@ import static com.dephoegon.delchoco.aid.world.dValues.defaultDoubles.dGYSAHL_GR
 import static com.dephoegon.delchoco.aid.world.dValues.defaultInts.*;
 
 @Config(id = DelChoco.DELCHOCO_ID+"-world_config")
-public class worldConfig {
+public class WorldConfig {
 
     @Configurable.Comment("The Minimum number of Chocobos that spawn in a group")
     @Configurable.Range(min = 1, max = 4)

@@ -13,10 +13,10 @@ public enum defaultDoubles {
     dMAX_ARMOR(20D, 200D, 500D),
     dMAX_ARMOR_TOUGH(8D, 20D, 100D),
     dGYSAHL_GREEN_SPAWN_CHANCE(0.1D, 0.1D, 1D);
-    private final Double Min;
-    private final Double Default;
-    private final Double Max;
-    defaultDoubles(Double Minimum, Double Default, Double Maximum) {
+    private final double Min;
+    private final double Default;
+    private final double Max;
+    defaultDoubles(double Minimum, double Default, double Maximum) {
         this.Min = Minimum;
         this.Default = Default;
         this.Max = Maximum;

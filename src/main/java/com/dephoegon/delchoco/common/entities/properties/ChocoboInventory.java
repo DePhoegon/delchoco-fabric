@@ -1,6 +1,5 @@
 package com.dephoegon.delchoco.common.entities.properties;
 
-import com.dephoegon.delchoco.aid.world.StaticGlobalVariables;
 import com.dephoegon.delchoco.common.entities.Chocobo;
 import net.fabricmc.fabric.api.util.NbtType;
 import net.minecraft.entity.player.PlayerEntity;
@@ -10,8 +9,7 @@ import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtList;
 import org.jetbrains.annotations.NotNull;
 
-import static com.dephoegon.delchoco.aid.world.StaticGlobalVariables.ChocoConfigGet;
-import static com.dephoegon.delchoco.aid.world.dValues.defaultBooleans.dOwnerOnlyInventoryAccess;
+import static com.dephoegon.delchoco.DelChoco.chocoConfigHolder;
 
 public class ChocoboInventory extends SimpleInventory {
     private final Chocobo entity;
@@ -26,7 +24,7 @@ public class ChocoboInventory extends SimpleInventory {
         if (entity == null) { return true; }
         if (entity.isTamed()) {
             boolean isPlayer = entity.isOwner(player);
-            if (ChocoConfigGet(StaticGlobalVariables.getOwnerOnlyInventory(), dOwnerOnlyInventoryAccess)) { return isPlayer; } else { return true; }
+            if (chocoConfigHolder.ownerInventoryAccess) { return isPlayer; } else { return true; }
         } else { return false; }
     }
     private @NotNull NbtCompound saveFirstItemStack() {

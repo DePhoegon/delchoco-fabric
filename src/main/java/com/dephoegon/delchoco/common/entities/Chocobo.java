@@ -2,7 +2,6 @@ package com.dephoegon.delchoco.common.entities;
 
 import com.dephoegon.delchoco.DelChoco;
 import com.dephoegon.delchoco.aid.chocoboChecks;
-import com.dephoegon.delchoco.aid.world.StaticGlobalVariables;
 import com.dephoegon.delchoco.common.effects.ChocoboCombatEvents;
 import com.dephoegon.delchoco.common.entities.breeding.ChocoboMateGoal;
 import com.dephoegon.delchoco.common.entities.properties.ChocoboColor;
@@ -78,15 +77,13 @@ import java.util.Objects;
 import java.util.UUID;
 
 import static com.dephoegon.delbase.item.ShiftingDyes.*;
+import static com.dephoegon.delchoco.DelChoco.chocoConfigHolder;
 import static com.dephoegon.delchoco.aid.chocoKB.isChocoShiftDown;
 import static com.dephoegon.delchoco.aid.chocoKB.isChocoboWaterGlide;
 import static com.dephoegon.delchoco.aid.chocoboChecks.*;
 import static com.dephoegon.delchoco.aid.dyeList.getDyeList;
-import static com.dephoegon.delchoco.aid.world.StaticGlobalVariables.ChocoConfigGet;
-import static com.dephoegon.delchoco.aid.world.StaticGlobalVariables.FloatChocoConfigGet;
-import static com.dephoegon.delchoco.aid.world.dValues.defaultBooleans.dOwnerOnlyInventoryAccess;
 import static com.dephoegon.delchoco.aid.world.dValues.defaultDoubles.*;
-import static com.dephoegon.delchoco.aid.world.dValues.defaultInts.*;
+import static com.dephoegon.delchoco.aid.world.worldConfig.FloatChocoConfigGet;
 import static com.dephoegon.delchoco.common.entities.breeding.ChocoboSnap.setChocoScale;
 import static com.dephoegon.delchoco.common.init.ModItems.*;
 import static com.dephoegon.delchoco.common.init.ModSounds.AMBIENT_SOUND;
@@ -259,13 +256,13 @@ public class Chocobo extends TameableEntity implements Angerable, NamedScreenHan
     }
     public static DefaultAttributeContainer.Builder createAttributes() {
         return MobEntity.createMobAttributes()
-                .add(ModAttributes.CHOCOBO_MAX_STAMINA,  ChocoConfigGet(StaticGlobalVariables.getStamina(), dSTAMINA.getDefault()))
-                .add(EntityAttributes.GENERIC_MOVEMENT_SPEED, ChocoConfigGet(StaticGlobalVariables.getSpeed(), dSPEED.getDefault()) / 100f)
-                .add(EntityAttributes.GENERIC_MAX_HEALTH, ChocoConfigGet(StaticGlobalVariables.getHealth(), dHEALTH.getDefault()))
-                .add(EntityAttributes.GENERIC_ARMOR, ChocoConfigGet(StaticGlobalVariables.getArmor(), dARMOR.getDefault()))
-                .add(EntityAttributes.GENERIC_ARMOR_TOUGHNESS, ChocoConfigGet(StaticGlobalVariables.getArmorTough(), dARMOR_TOUGH.getDefault()))
+                .add(ModAttributes.CHOCOBO_MAX_STAMINA, chocoConfigHolder.chocoboMaxStamina)
+                .add(EntityAttributes.GENERIC_MOVEMENT_SPEED, chocoConfigHolder.chocoboSpeed / 100f)
+                .add(EntityAttributes.GENERIC_MAX_HEALTH, chocoConfigHolder.chocoboHealth)
+                .add(EntityAttributes.GENERIC_ARMOR, chocoConfigHolder.chocoboArmor)
+                .add(EntityAttributes.GENERIC_ARMOR_TOUGHNESS, chocoConfigHolder.chocoboArmorToughness)
                 .add(EntityAttributes.GENERIC_ATTACK_SPEED)
-                .add(EntityAttributes.GENERIC_ATTACK_DAMAGE, ChocoConfigGet(StaticGlobalVariables.getAttack(), dATTACK.getDefault()))
+                .add(EntityAttributes.GENERIC_ATTACK_DAMAGE, chocoConfigHolder.chocoboAttackDamage)
                 .add(EntityAttributes.GENERIC_FOLLOW_RANGE, EntityAttributes.GENERIC_FOLLOW_RANGE.getDefaultValue()*3);
     }
     protected void initDataTracker() {
@@ -282,7 +279,7 @@ public class Chocobo extends TameableEntity implements Angerable, NamedScreenHan
         this.dataTracker.startTracking(PARAM_SADDLE_ITEM, ItemStack.EMPTY);
         this.dataTracker.startTracking(PARAM_ARMOR_ITEM, ItemStack.EMPTY);
         this.dataTracker.startTracking(PARAM_WEAPON_ITEM, ItemStack.EMPTY);
-        this.dataTracker.startTracking(PARAM_STAMINA, FloatChocoConfigGet(StaticGlobalVariables.getStamina(), dSTAMINA.getDefault()));
+        this.dataTracker.startTracking(PARAM_STAMINA, (float)chocoConfigHolder.chocoboStamina);
         this.dataTracker.startTracking(PARAM_GENERATION, 0);
         this.dataTracker.startTracking(PARAM_ABILITY_MASK, (byte) 0);
         this.dataTracker.startTracking(PARAM_SCALE, 0);
@@ -449,7 +446,7 @@ public class Chocobo extends TameableEntity implements Angerable, NamedScreenHan
     }
     public boolean isChocoboArmor(@NotNull ItemStack pStack) { return pStack.getItem() instanceof ChocoboArmorItems; }
     public boolean isChocoWeapon(@NotNull ItemStack pStack) { return pStack.getItem() instanceof ChocoboWeaponItems; }
-    public int chocoStatMod() { return ChocoConfigGet(StaticGlobalVariables.getWeaponModifier(), dWEAPON_MOD.getDefault()); }
+    public int chocoStatMod() { return chocoConfigHolder.chocoboWeaponMod; }
     private void setChocoboArmorStats(ItemStack pStack) {
         if (!this.world.isClient()) {
             Objects.requireNonNull(this.getAttributeInstance(EntityAttributes.GENERIC_ARMOR)).removeModifier(CHOCOBO_CHEST_ARMOR_MOD_UUID);
@@ -669,7 +666,7 @@ public class Chocobo extends TameableEntity implements Angerable, NamedScreenHan
             if (this.isLogicalSideForUpdatingMovement()) {
                 if (MinecraftClient.getInstance().options.jumpKey.isPressed()) {
                     // jump logic
-                    if (!this.isChocoboJumping && this.onGround && this.useStamina(FloatChocoConfigGet(StaticGlobalVariables.getStaminaJump(), dSTAMINA_JUMP.getDefault()))) {
+                    if (!this.isChocoboJumping && this.onGround && this.useStamina(FloatChocoConfigGet(chocoConfigHolder.chocoboStaminaCostJump, dSTAMINA_JUMP.getDefault()))) {
                         Vec3d motion = getVelocity();
                         setVelocity(new Vec3d(motion.x, .6f, motion.z));
                         this.isChocoboJumping = true;
@@ -696,19 +693,19 @@ public class Chocobo extends TameableEntity implements Angerable, NamedScreenHan
                 }
                 // Insert override for slow-fall Option on Chocobo
                 if (!this.onGround && !this.isTouchingWater() && !this.isInLava() && !isChocoShiftDown() && this.getVelocity().y < 0 &&
-                        this.useStamina(FloatChocoConfigGet(StaticGlobalVariables.getStaminaGlide(), dSTAMINA_GLIDE.getDefault()))) {
+                        this.useStamina(FloatChocoConfigGet(chocoConfigHolder.chocoboStaminaCostJump, dSTAMINA_GLIDE.getDefault()))) {
                     if (MinecraftClient.getInstance().options.jumpKey.isPressed()) {
                         Vec3d motion = getVelocity();
                         setVelocity(new Vec3d(motion.x, motion.y * 0.65F, motion.z));
                     }
                 }
-                if ((this.isSprinting() && !this.useStamina(FloatChocoConfigGet(StaticGlobalVariables.getStaminaCost(), dSTAMINA_SPRINT.getDefault())) || (this.isSprinting() && this.isTouchingWater() && this.useStamina(FloatChocoConfigGet(StaticGlobalVariables.getStaminaCost(), dSTAMINA_SPRINT.getDefault()))))) { this.setSprinting(false); }
+                if ((this.isSprinting() && !this.useStamina(FloatChocoConfigGet(chocoConfigHolder.chocoboStaminaCostSprint, dSTAMINA_SPRINT.getDefault())) || (this.isSprinting() && this.isTouchingWater() && this.useStamina(FloatChocoConfigGet(chocoConfigHolder.chocoboStaminaCostSprint, dSTAMINA_SPRINT.getDefault()))))) { this.setSprinting(false); }
 
                 this.setMovementSpeed((float) Objects.requireNonNull(this.getAttributeInstance(EntityAttributes.GENERIC_MOVEMENT_SPEED)).getValue());
                 super.travel(newVector);
             }
         } else {
-            if (!this.onGround && !this.isTouchingWater() && !this.isInLava() && this.getVelocity().y < 0 && this.useStamina(FloatChocoConfigGet(StaticGlobalVariables.getStaminaCost(), dSTAMINA_SPRINT.getDefault()))) {
+            if (!this.onGround && !this.isTouchingWater() && !this.isInLava() && this.getVelocity().y < 0 && this.useStamina(FloatChocoConfigGet(chocoConfigHolder.chocoboStaminaCostSprint, dSTAMINA_SPRINT.getDefault()))) {
                 Vec3d motion = getVelocity();
                 setVelocity(new Vec3d(motion.x, motion.y * 0.65F, motion.z));
             }
@@ -734,7 +731,7 @@ public class Chocobo extends TameableEntity implements Angerable, NamedScreenHan
                     this.setInvulnerable(player.isCreative());
                     if (this.getHealth() != this.getMaxHealth() && player.getOffHandStack().getItem() == GYSAHL_GREEN_ITEM) {
                         player.getOffHandStack().decrement(1);
-                        heal(ChocoConfigGet(StaticGlobalVariables.getHealAmount(), dHEAL_AMOUNT.getDefault()));
+                        heal(chocoConfigHolder.chocoboHealAmount);
                     }
                 } else { this.setInvulnerable(false); }
             } else {
@@ -873,7 +870,7 @@ public class Chocobo extends TameableEntity implements Angerable, NamedScreenHan
     }
     private void regenerateStamina() {
         if (!this.onGround && !this.isSprinting()) { return; }
-        float regen = FloatChocoConfigGet(StaticGlobalVariables.getStaminaRegen(), dSTAMINA_REGEN.getDefault());
+        float regen = FloatChocoConfigGet(chocoConfigHolder.chocoboStaminaRegen, dSTAMINA_REGEN.getDefault());
 
         // half the amount of regeneration while moving
         Vec3d motion = getVelocity();
@@ -946,7 +943,7 @@ public class Chocobo extends TameableEntity implements Angerable, NamedScreenHan
                 return ActionResult.SUCCESS;
             }
             if (heldItemStack.isEmpty() && !player.isSneaking() && !this.isBaby() && this.isSaddled()) {
-                if (ChocoConfigGet(StaticGlobalVariables.getOwnerOnlyInventory(), dOwnerOnlyInventoryAccess)) {
+                if (chocoConfigHolder.ownerInventoryAccess) {
                     if (isOwner(player)) { player.startRiding(this); }
                     else { player.sendMessage(new TranslatableText(DelChoco.DELCHOCO_ID + ".entity_chocobo.not_owner"), true); }
                 } else { player.startRiding(this); }
@@ -955,7 +952,7 @@ public class Chocobo extends TameableEntity implements Angerable, NamedScreenHan
             if (defaultHand == GYSAHL_GREEN_ITEM) {
                 if (getHealth() != getMaxHealth()) {
                     this.eat(player, hand, player.getInventory().getMainHandStack());
-                    heal(ChocoConfigGet(StaticGlobalVariables.getHealAmount(), dHEAL_AMOUNT.getDefault()));
+                    heal(chocoConfigHolder.chocoboHealAmount);
                 } else { player.sendMessage(new TranslatableText(DelChoco.DELCHOCO_ID + ".entity_chocobo.heal_fail"), true); }
             }
             if (defaultHand == CHOCOBO_WHISTLE && !this.isBaby()) {
@@ -1044,7 +1041,7 @@ public class Chocobo extends TameableEntity implements Angerable, NamedScreenHan
                 return ActionResult.SUCCESS;
             }
             if (defaultHand == Items.NAME_TAG) {
-                if (ChocoConfigGet(StaticGlobalVariables.getOwnerOnlyInventory(), dOwnerOnlyInventoryAccess)) {
+                if (chocoConfigHolder.ownerInventoryAccess) {
                     if (isOwner(player)) {
                         this.setCustomName(heldItemStack.getName());
                         this.setCustomNameVisible(true);
@@ -1084,7 +1081,7 @@ public class Chocobo extends TameableEntity implements Angerable, NamedScreenHan
         } else {
             if (defaultHand == GYSAHL_GREEN_ITEM) {
                 this.eat(player, hand, player.getInventory().getMainHandStack());
-                if ((float) Math.random() < ChocoConfigGet(StaticGlobalVariables.getTame(), dTAME.getDefault()) || player.isCreative()) {
+                if ((float) Math.random() < chocoConfigHolder.chocoboTameChance || player.isCreative()) {
                     this.setOwnerUuid(player.getUuid());
                     this.setTamed(true);
                     this.setCollarColor(16);

@@ -1,6 +1,5 @@
 package com.dephoegon.delchoco.common.items;
 
-import com.dephoegon.delchoco.aid.world.StaticGlobalVariables;
 import com.dephoegon.delchoco.common.blocks.ChocoboEggBlock;
 import net.minecraft.block.Block;
 import net.minecraft.item.BlockItem;
@@ -9,8 +8,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
 import org.jetbrains.annotations.NotNull;
 
-import static com.dephoegon.delchoco.aid.world.StaticGlobalVariables.ChocoConfigGet;
-import static com.dephoegon.delchoco.aid.world.dValues.defaultInts.dEGG_HATCH;
+import static com.dephoegon.delchoco.DelChoco.chocoConfigHolder;
 
 public class ChocoboEggBlockItem extends BlockItem {
     public ChocoboEggBlockItem(Block block, Item.Settings builder) { super(block, builder); }
@@ -27,7 +25,7 @@ public class ChocoboEggBlockItem extends BlockItem {
         NbtCompound nbtHatchingState = stack.getSubNbt(ChocoboEggBlock.NBTKEY_HATCHINGSTATE);
         if (nbtHatchingState != null) {
             int time = nbtHatchingState.getInt(ChocoboEggBlock.NBTKEY_HATCHINGSTATE_TIME);
-            return Math.round(time * 13.0F / ChocoConfigGet(StaticGlobalVariables.getEggHatchTimeTicks(), dEGG_HATCH.getDefault()));
+            return Math.round(time * 13.0F / chocoConfigHolder.chocoboEggHatchTime);
         }
         return 1;
     }

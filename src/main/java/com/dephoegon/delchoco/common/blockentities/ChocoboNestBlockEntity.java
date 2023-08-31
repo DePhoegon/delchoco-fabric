@@ -2,7 +2,6 @@ package com.dephoegon.delchoco.common.blockentities;
 
 import com.dephoegon.delchoco.DelChoco;
 import com.dephoegon.delchoco.aid.ChocoList;
-import com.dephoegon.delchoco.aid.world.StaticGlobalVariables;
 import com.dephoegon.delchoco.common.blocks.ChocoboEggBlock;
 import com.dephoegon.delchoco.common.blocks.StrawNestBlock;
 import com.dephoegon.delchoco.common.entities.Chocobo;
@@ -35,8 +34,7 @@ import org.jetbrains.annotations.NotNull;
 import java.util.Objects;
 import java.util.Random;
 
-import static com.dephoegon.delchoco.aid.world.StaticGlobalVariables.ChocoConfigGet;
-import static com.dephoegon.delchoco.aid.world.dValues.defaultInts.dEGG_HATCH;
+import static com.dephoegon.delchoco.DelChoco.chocoConfigHolder;
 import static com.dephoegon.delchoco.common.blocks.ChocoboEggBlock.NBTKEY_BREEDINFO;
 import static com.dephoegon.delchoco.common.entities.breeding.ChocoboBreedInfo.getFromNbtOrDefault;
 
@@ -104,7 +102,7 @@ public class ChocoboNestBlockEntity extends BlockEntity implements NamedScreenHa
         int time = nbt.getInt(ChocoboEggBlock.NBTKEY_HATCHINGSTATE_TIME);
         time += this.isSheltered ? 2 : 1;
         nbt.putInt(ChocoboEggBlock.NBTKEY_HATCHINGSTATE_TIME, time);
-        if (time < ChocoConfigGet(StaticGlobalVariables.getEggHatchTimeTicks(), dEGG_HATCH.getDefault())) { return false; }
+        if (time < chocoConfigHolder.chocoboEggHatchTime) { return false; }
 
         // egg is ready to hatch
         ChocoboBreedInfo breedInfo = ChocoboBreedInfo.getFromNbtOrDefault(egg.getSubNbt(NBTKEY_BREEDINFO));

@@ -9,13 +9,13 @@ public class GenericByteEnumSerializer<E extends Enum<E>> implements TrackedData
     private final E[] values;
 
     public GenericByteEnumSerializer(E[] values) { this.values = values; }
-    public void write(@NotNull PacketByteBuf buf, @NotNull E value) { buf.writeByte(value.ordinal());};
+    public void write(@NotNull PacketByteBuf buf, @NotNull E value) { buf.writeByte(value.ordinal());}
 
-    public E read(@NotNull PacketByteBuf buf) { return values[buf.readByte()]; };
+    public E read(@NotNull PacketByteBuf buf) { return values[buf.readByte()]; }
 
     public TrackedData<E> create(int i) {
         return new TrackedData<>(i, this);
     }
 
-    public E copy(E var1) { return var1; };
+    public E copy(E var1) { return var1; }
 }

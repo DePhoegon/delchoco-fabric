@@ -1,6 +1,5 @@
 package com.dephoegon.delchoco.common.items;
 
-import com.dephoegon.delchoco.aid.world.StaticGlobalVariables;
 import com.dephoegon.delchoco.common.entities.properties.ChocoboColor;
 import com.dephoegon.delchoco.common.handler.ChocoboSummoning;
 import com.google.common.collect.Maps;
@@ -18,14 +17,13 @@ import org.jetbrains.annotations.NotNull;
 import java.util.ArrayList;
 import java.util.Map;
 
-import static com.dephoegon.delchoco.aid.world.StaticGlobalVariables.ChocoConfigGet;
-import static com.dephoegon.delchoco.aid.world.dValues.defaultBooleans.dCanSpawn;
+import static com.dephoegon.delchoco.DelChoco.worldConfigHolder;
 import static net.minecraft.block.Blocks.*;
 
 public class ChocoboSpawnItemHelper extends Item {
     public ChocoboSpawnItemHelper(Settings settings) { super(settings); }
     public ActionResult useOnBlock(@NotNull ItemUsageContext context) {
-        if (ChocoConfigGet(StaticGlobalVariables.getCanSpawn(), dCanSpawn)) {
+        if (worldConfigHolder.canChocoboSpawn) {
             World worldIn = context.getWorld();
             BlockPos alter = context.getBlockPos();
             PlayerEntity player = context.getPlayer();

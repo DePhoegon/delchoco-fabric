@@ -1,6 +1,5 @@
 package com.dephoegon.delchoco.common.entities.breeding;
 
-import com.dephoegon.delchoco.aid.world.StaticGlobalVariables;
 import com.dephoegon.delchoco.common.entities.Chocobo;
 import com.dephoegon.delchoco.common.entities.properties.ChocoboColor;
 import com.dephoegon.delchoco.common.init.ModAttributes;
@@ -15,11 +14,11 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.Objects;
 
+import static com.dephoegon.delchoco.DelChoco.chocoConfigHolder;
 import static com.dephoegon.delchoco.aid.chocoboChecks.*;
-import static com.dephoegon.delchoco.aid.world.StaticGlobalVariables.ChocoConfigGet;
-import static com.dephoegon.delchoco.aid.world.StaticGlobalVariables.FloatChocoConfigGet;
-import static com.dephoegon.delchoco.aid.world.dValues.defaultDoubles.*;
-import static com.dephoegon.delchoco.aid.world.dValues.defaultInts.*;
+import static com.dephoegon.delchoco.aid.world.dValues.defaultDoubles.dPOS_GAIN;
+import static com.dephoegon.delchoco.aid.world.dValues.defaultDoubles.dPOS_LOSS;
+import static com.dephoegon.delchoco.aid.world.worldConfig.FloatChocoConfigGet;
 import static com.dephoegon.delchoco.common.entities.breeding.ChocoboSnap.setChocoScale;
 import static java.lang.Math.*;
 
@@ -33,21 +32,21 @@ public class BreedingHelper {
         final ChocoboStatSnapshot father = breedInfo.getFather();
 
         baby.setGeneration(mother.generation > father.generation ? mother.generation+1 : father.generation+1);
-        float health = round(((mother.health + father.health) / 2) * (ChocoConfigGet(StaticGlobalVariables.getPossLossHealth(), dPOS_LOSS.getDefault()) + ((float) random() * ChocoConfigGet(StaticGlobalVariables.getPossGainHealth(), dPOS_GAIN.getDefault()))));
-        Objects.requireNonNull(baby.getAttributeInstance(EntityAttributes.GENERIC_MAX_HEALTH)).setBaseValue(min(health, ChocoConfigGet(StaticGlobalVariables.getMaxHealth(), dMAX_HEALTH.getDefault())));
-        float speed = ((mother.speed + father.speed) / 2f) * (FloatChocoConfigGet(StaticGlobalVariables.getPossLossSpeed(), dPOS_LOSS.getDefault()) + ((float) random() * FloatChocoConfigGet(StaticGlobalVariables.getPossGainSpeed(), dPOS_GAIN.getDefault())));
-        Objects.requireNonNull(baby.getAttributeInstance(EntityAttributes.GENERIC_MOVEMENT_SPEED)).setBaseValue(min(speed, (ChocoConfigGet(StaticGlobalVariables.getSpeed(), dSPEED.getDefault()) / 100f)));
-        float stamina = round((mother.stamina + father.stamina) / 2) * (FloatChocoConfigGet(StaticGlobalVariables.getPossLossStamina(), dPOS_LOSS.getDefault()) + ((float) random() * FloatChocoConfigGet(StaticGlobalVariables.getPossGainStamina(), dPOS_GAIN.getDefault())));
-        Objects.requireNonNull(baby.getAttributeInstance(ModAttributes.CHOCOBO_MAX_STAMINA)).setBaseValue(min(stamina, ChocoConfigGet(StaticGlobalVariables.getMaxStamina(), dMAX_STAMINA.getDefault())));
-        double attack = minCheck(mother.attack, father.attack) * (ChocoConfigGet(StaticGlobalVariables.getPossLoss(), dPOS_LOSS.getDefault()) + ((float) random() * (ChocoConfigGet(StaticGlobalVariables.getPossGain(), dPOS_GAIN.getDefault())+25D)));
-        attack = Math.max(attack, ChocoConfigGet(StaticGlobalVariables.getAttack(), dATTACK.getDefault()));
-        Objects.requireNonNull(baby.getAttributeInstance(EntityAttributes.GENERIC_ATTACK_DAMAGE)).setBaseValue(min(attack, ChocoConfigGet(StaticGlobalVariables.getMaxStrength(), dMAX_STRENGTH.getDefault())));
-        double defence = minCheck(mother.defense, father.defense) * (ChocoConfigGet(StaticGlobalVariables.getPossLoss(), dPOS_LOSS.getDefault()) + ((float) random() * (ChocoConfigGet(StaticGlobalVariables.getPossGain(), dPOS_GAIN.getDefault())+25D)));
-        defence = Math.max(defence, ChocoConfigGet(StaticGlobalVariables.getArmor(), dARMOR.getDefault()));
-        Objects.requireNonNull(baby.getAttributeInstance(EntityAttributes.GENERIC_ARMOR)).setBaseValue(min(defence, ChocoConfigGet(StaticGlobalVariables.getMaxArmor(), dMAX_ARMOR.getDefault())));
-        double toughness = minCheck(mother.toughness, father.toughness) * (ChocoConfigGet(StaticGlobalVariables.getPossLoss(), dPOS_LOSS.getDefault()) + ((float) random() * (ChocoConfigGet(StaticGlobalVariables.getPossGain(), dPOS_GAIN.getDefault())+25D)));
-        toughness = Math.max(toughness, ChocoConfigGet(StaticGlobalVariables.getArmorTough(), dARMOR_TOUGH.getDefault()));
-        Objects.requireNonNull(baby.getAttributeInstance(EntityAttributes.GENERIC_ARMOR_TOUGHNESS)).setBaseValue(min(toughness, ChocoConfigGet(StaticGlobalVariables.getArmorTough(), dARMOR_TOUGH.getDefault())));
+        float health = round(((mother.health + father.health) / 2) * (chocoConfigHolder.chocoboPossibleLossHealth + ((float) random() * chocoConfigHolder.chocoboPossibleGainHealth)));
+        Objects.requireNonNull(baby.getAttributeInstance(EntityAttributes.GENERIC_MAX_HEALTH)).setBaseValue(min(health, chocoConfigHolder.chocoboMaxHealth));
+        float speed = ((mother.speed + father.speed) / 2f) * (FloatChocoConfigGet(chocoConfigHolder.chocoboPossibleLossSpeed, dPOS_LOSS.getDefault()) + ((float) random() * FloatChocoConfigGet(chocoConfigHolder.chocoboPossibleGainSpeed, dPOS_GAIN.getDefault())));
+        Objects.requireNonNull(baby.getAttributeInstance(EntityAttributes.GENERIC_MOVEMENT_SPEED)).setBaseValue(min(speed, (chocoConfigHolder.chocoboSpeed / 100f)));
+        float stamina = round((mother.stamina + father.stamina) / 2) * (FloatChocoConfigGet(chocoConfigHolder.chocoboPossibleLossStamina, dPOS_LOSS.getDefault()) + ((float) random() * FloatChocoConfigGet(chocoConfigHolder.chocoboPossibleGainStamina, dPOS_GAIN.getDefault())));
+        Objects.requireNonNull(baby.getAttributeInstance(ModAttributes.CHOCOBO_MAX_STAMINA)).setBaseValue(min(stamina, chocoConfigHolder.chocoboMaxStamina));
+        double attack = minCheck(mother.attack, father.attack) * (chocoConfigHolder.chocoboPossibleLoss + ((float) random() * (chocoConfigHolder.chocoboPossibleGain +25D)));
+        attack = Math.max(attack, chocoConfigHolder.chocoboAttackDamage);
+        Objects.requireNonNull(baby.getAttributeInstance(EntityAttributes.GENERIC_ATTACK_DAMAGE)).setBaseValue(min(attack, chocoConfigHolder.chocoboMaxStrength));
+        double defence = minCheck(mother.defense, father.defense) * (chocoConfigHolder.chocoboPossibleLoss + ((float) random() * (chocoConfigHolder.chocoboPossibleGain +25D)));
+        defence = Math.max(defence, chocoConfigHolder.chocoboArmor);
+        Objects.requireNonNull(baby.getAttributeInstance(EntityAttributes.GENERIC_ARMOR)).setBaseValue(min(defence, chocoConfigHolder.chocoboMaxArmor));
+        double toughness = minCheck(mother.toughness, father.toughness) * (chocoConfigHolder.chocoboPossibleLoss + ((float) random() * (chocoConfigHolder.chocoboPossibleGain +25D)));
+        toughness = Math.max(toughness, chocoConfigHolder.chocoboArmorToughness);
+        Objects.requireNonNull(baby.getAttributeInstance(EntityAttributes.GENERIC_ARMOR_TOUGHNESS)).setBaseValue(min(toughness, chocoConfigHolder.chocoboArmorToughness));
 
         ChocoboColor yellow = ChocoboColor.YELLOW;
         ChocoboColor green = ChocoboColor.GREEN;

@@ -39,6 +39,7 @@ dependencies {
 	include "mezz.jei:jei-${project.minecraft_version}-fabric:${project.jei_ver}"
 	modImplementation "vazkii.patchouli:Patchouli:${project.patchouli_ver}"
 	include "vazkii.patchouli:Patchouli:${project.patchouli_ver}"
+	modImplementation "curse.maven:${project.config_project}:${project.config_fileID}"
 }
 
 processResources {

@@ -5,11 +5,11 @@ public enum defaultFloats {
     dWEAPON_ALPHA(0F, 0.1F, 1F),
     dCOLLAR_ALPHA(0F, 0.2F, 1F),
     dSADDLE_ALPHA(0F, 0.1F, 1F);
-    private final Float Min;
-    private final Float Default;
-    private final Float Max;
+    private final float Min;
+    private final float Default;
+    private final float Max;
     @SuppressWarnings("SameParameterValue")
-    defaultFloats(Float Minimum, Float Default, Float Maximum) {
+    defaultFloats(float Minimum, float Default, float Maximum) {
         this.Min = Minimum;
         this.Default = Default;
         this.Max = Maximum;

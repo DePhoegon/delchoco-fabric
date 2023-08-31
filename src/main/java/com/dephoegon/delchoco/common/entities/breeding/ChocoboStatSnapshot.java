@@ -1,6 +1,5 @@
 package com.dephoegon.delchoco.common.entities.breeding;
 
-import com.dephoegon.delchoco.aid.world.StaticGlobalVariables;
 import com.dephoegon.delchoco.common.entities.Chocobo;
 import com.dephoegon.delchoco.common.entities.properties.ChocoboColor;
 import com.dephoegon.delchoco.common.init.ModAttributes;
@@ -10,8 +9,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.Objects;
 
-import static com.dephoegon.delchoco.aid.world.StaticGlobalVariables.ChocoConfigGet;
-import static com.dephoegon.delchoco.aid.world.dValues.defaultInts.*;
+import static com.dephoegon.delchoco.DelChoco.chocoConfigHolder;
 
 public class ChocoboStatSnapshot {
     public static final ChocoboStatSnapshot DEFAULT;
@@ -46,12 +44,12 @@ public class ChocoboStatSnapshot {
     static {
         DEFAULT = new ChocoboStatSnapshot();
         DEFAULT.generation = 1;
-        DEFAULT.health = ChocoConfigGet(StaticGlobalVariables.getHealth(), dHEALTH.getDefault());
-        DEFAULT.stamina = ChocoConfigGet(StaticGlobalVariables.getStamina(), dSTAMINA.getDefault());
-        DEFAULT.speed = ChocoConfigGet(StaticGlobalVariables.getSpeed(), dSPEED.getDefault()) / 100f;
-        DEFAULT.attack = ChocoConfigGet(StaticGlobalVariables.getAttack(), dATTACK.getDefault());
-        DEFAULT.defense = ChocoConfigGet(StaticGlobalVariables.getArmor(), dARMOR.getDefault());
-        DEFAULT.toughness = ChocoConfigGet(StaticGlobalVariables.getArmorTough(), dARMOR_TOUGH.getDefault());
+        DEFAULT.health = chocoConfigHolder.chocoboHealth;
+        DEFAULT.stamina = chocoConfigHolder.chocoboStamina;
+        DEFAULT.speed = chocoConfigHolder.chocoboSpeed / 100f;
+        DEFAULT.attack = chocoConfigHolder.chocoboAttackDamage;
+        DEFAULT.defense = chocoConfigHolder.chocoboArmor;
+        DEFAULT.toughness = chocoConfigHolder.chocoboArmorToughness;
         DEFAULT.flameBlood = false;
         DEFAULT.waterBreath = false;
         DEFAULT.color = ChocoboColor.YELLOW;

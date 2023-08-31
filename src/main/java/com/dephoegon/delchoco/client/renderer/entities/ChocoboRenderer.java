@@ -1,7 +1,6 @@
 package com.dephoegon.delchoco.client.renderer.entities;
 
 import com.dephoegon.delchoco.DelChoco;
-import com.dephoegon.delchoco.aid.world.StaticGlobalVariables;
 import com.dephoegon.delchoco.client.clientHandler;
 import com.dephoegon.delchoco.client.models.entities.AdultChocoboModel;
 import com.dephoegon.delchoco.client.models.entities.ChicoboModel;
@@ -20,9 +19,8 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.Map;
 
+import static com.dephoegon.delchoco.DelChoco.chocoConfigHolder;
 import static com.dephoegon.delchoco.aid.chocoKB.hideChocoboMountInFirstPerson;
-import static com.dephoegon.delchoco.aid.world.StaticGlobalVariables.ChocoConfigGet;
-import static com.dephoegon.delchoco.aid.world.dValues.defaultFloats.*;
 
 public class ChocoboRenderer extends MobEntityRenderer<Chocobo, EntityModel<Chocobo>> {
     private static final Map<ChocoboColor, Identifier> CHOCOBO_PER_COLOR = Util.make(Maps.newHashMap(), (map) -> {
@@ -61,14 +59,14 @@ public class ChocoboRenderer extends MobEntityRenderer<Chocobo, EntityModel<Choc
         super(context, new AdultChocoboModel<>(context.getPart(clientHandler.CHOCOBO_LAYER)), 0.75f);
         this.chicoboModel = new ChicoboModel<>(context.getPart(clientHandler.CHICOBO_LAYER));
 
-        this.addFeature(new LayerCollar(this, collarAlpha, ChocoConfigGet(StaticGlobalVariables.getCollarAlpha(), dCOLLAR_ALPHA.getDefault())));
-        this.addFeature(new LayerCollarTells(this, collarTellAlpha, ChocoConfigGet(StaticGlobalVariables.getCollarAlpha(), dCOLLAR_ALPHA.getDefault())));
+        this.addFeature(new LayerCollar(this, collarAlpha, chocoConfigHolder.chocoboCollarAlpha));
+        this.addFeature(new LayerCollarTells(this, collarTellAlpha, chocoConfigHolder.chocoboCollarAlpha));
         this.addFeature(new LayerMaleTrims(this, .85F));
         this.addFeature(new LayerChocoboTrims(this, .75F, .85F));
         this.addFeature(new LayerBeakClaws(this, true));
-        this.addFeature(new LayerArmor(this, armorAlpha, ChocoConfigGet(StaticGlobalVariables.getArmorAlpha(), dARMOR_ALPHA.getDefault())));
-        this.addFeature(new LayerSaddle(this, saddleAlpha, ChocoConfigGet(StaticGlobalVariables.getSaddleAlpha(), dSADDLE_ALPHA.getDefault())));
-        this.addFeature(new LayerWeapon(this, weaponAlpha, ChocoConfigGet(StaticGlobalVariables.getWeaponAlpha(), dWEAPON_ALPHA.getDefault())));
+        this.addFeature(new LayerArmor(this, armorAlpha, chocoConfigHolder.chocoboArmorAlpha));
+        this.addFeature(new LayerSaddle(this, saddleAlpha, chocoConfigHolder.chocoboSaddleAlpha));
+        this.addFeature(new LayerWeapon(this, weaponAlpha, chocoConfigHolder.chocoboWeaponAlpha));
     }
     public void render(@NotNull Chocobo chocobo, float entityYaw, float partialTicks, MatrixStack matrixStack, VertexConsumerProvider bufferSource, int packedLight) {
         this.model = chocobo.isBaby() ? chicoboModel : chocoboModel;

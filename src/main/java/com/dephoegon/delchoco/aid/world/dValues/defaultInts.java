@@ -1,8 +1,8 @@
 package com.dephoegon.delchoco.aid.world.dValues;
 
 public enum defaultInts {
-    dSTAMINA(0, 10, 60),
-    dSPEED(0, 20, 80),
+    dSTAMINA(5, 10, 60),
+    dSPEED(10, 20, 80),
     dHEALTH(6, 20, 1000),
     dARMOR(0, 4, 20),
     dARMOR_TOUGH(0, 1, 10),
@@ -20,10 +20,10 @@ public enum defaultInts {
     dEND_SPAWN_WEIGHT(75, 100, 200),
     dGYSAHL_GREEN_PATCH_SIZE(0, 64, 128);
 
-    private final Integer Min;
-    private final Integer Default;
-    private final Integer Max;
-    defaultInts(Integer Minimum, Integer Default, Integer Maximum) {
+    private final int Min;
+    private final int Default;
+    private final int Max;
+    defaultInts(int Minimum, int Default, int Maximum) {
         this.Min = Minimum;
         this.Default = Default;
         this.Max = Maximum;

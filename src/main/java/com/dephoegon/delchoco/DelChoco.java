@@ -33,8 +33,8 @@ public class DelChoco implements ModInitializer, ClientModInitializer {
 	public void onInitialize() {
 
 		LOGGER.info("Hello Fabric world!");
-		chocoConfigHolder = Configuration.registerConfig(ChocoboConfig.class, ConfigFormats.json()).getConfigInstance();
-		worldConfigHolder = Configuration.registerConfig(WorldConfig.class, ConfigFormats.json()).getConfigInstance();
+		chocoConfigHolder = Configuration.registerConfig(ChocoboConfig.class, ConfigFormats.yaml()).getConfigInstance();
+		worldConfigHolder = Configuration.registerConfig(WorldConfig.class, ConfigFormats.yaml()).getConfigInstance();
 		ModEntities.registerAttributes();
 		ChocoList.commonRegOrder();
 	}

@@ -15,47 +15,59 @@ import static com.dephoegon.delchoco.aid.world.dValues.defaultInts.*;
 @Config(id = DelChoco.DELCHOCO_ID+"-world_config")
 public class WorldConfig {
 
+    @Configurable
     @Configurable.Comment("The Minimum number of Chocobos that spawn in a group")
     @Configurable.Range(min = 1, max = 4)
     public int minChocoboGroupSize = dCHOCOBO_PACK_MIN.getMin();
 
+    @Configurable
     @Configurable.Comment("The Maximum number of Chocobos that spawn in a group")
     @Configurable.Range(min = 2, max = 10)
     public int maxChocoboGroupSize = dCHOCOBO_PACK_MAX.getMax();
 
+    @Configurable
     @Configurable.Comment("The Weight of Chocobos spawning in the Overworld")
     @Configurable.Range(min = 0, max = 100)
     public int overworldSpawnWeight = dOVERWORLD_SPAWN_WEIGHT.getDefault();
 
+    @Configurable
     @Configurable.Comment("The Weight of Chocobos spawning in Mushroom Islands")
     @Configurable.Range(min = 0, max = 4)
     public int mushroomSpawnWeight = dMUSHROOM_SPAWN_WEIGHT.getDefault();
 
+    @Configurable
     @Configurable.Comment("The Weight of Chocobos spawning in the Nether")
     @Configurable.Range(min = 75, max = 200)
     public int netherSpawnWeight = dNETHER_SPAWN_WEIGHT.getDefault();
 
+    @Configurable
     @Configurable.Comment("The Weight of Chocobos spawning in the End")
     @Configurable.Range(min = 75, max = 200)
     public int endSpawnWeight = dEND_SPAWN_WEIGHT.getDefault();
 
+    @Configurable
     @Configurable.Comment("The Size of Gysahl Green Patches")
     @Configurable.Range(min = 0, max = 128)
     public int gysahlGreenPatchSize = dGYSAHL_GREEN_PATCH_SIZE.getDefault();
 
+    @Configurable
     @Configurable.Comment("The Chance of Gysahl Green spawning in a patch")
     @Configurable.DecimalRange(min = 0.1, max = 1)
     public double gysahlGreenSpawnChance = dGYSAHL_GREEN_SPAWN_CHANCE.getDefault();
 
+    @Configurable
     @Configurable.Comment("Can Chocobo Spawn or be Summoned, master switch")
     public boolean canChocoboSpawn = dCanSpawn;
 
+    @Configurable
     @Configurable.Comment("Can Chocobo Spawn in the Overworld")
     public boolean overworldSpawn = dOverworldSpawn;
 
+    @Configurable
     @Configurable.Comment("Can Chocobo Spawn in the Nether")
     public boolean netherSpawn = dNetherSpawn;
 
+    @Configurable
     @Configurable.Comment("Can Chocobo Spawn in the End")
     public boolean endSpawn = dEndSpawn;
 

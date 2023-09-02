@@ -35,7 +35,7 @@ public class BreedingHelper {
         float health = round(((mother.health + father.health) / 2) * (chocoConfigHolder.chocoboPossibleLossHealth + ((float) random() * chocoConfigHolder.chocoboPossibleGainHealth)));
         Objects.requireNonNull(baby.getAttributeInstance(EntityAttributes.GENERIC_MAX_HEALTH)).setBaseValue(min(health, chocoConfigHolder.chocoboMaxHealth));
         float speed = ((mother.speed + father.speed) / 2f) * (FloatChocoConfigGet(chocoConfigHolder.chocoboPossibleLossSpeed, dPOS_LOSS.getDefault()) + ((float) random() * FloatChocoConfigGet(chocoConfigHolder.chocoboPossibleGainSpeed, dPOS_GAIN.getDefault())));
-        Objects.requireNonNull(baby.getAttributeInstance(EntityAttributes.GENERIC_MOVEMENT_SPEED)).setBaseValue(min(speed, (chocoConfigHolder.chocoboSpeed / 100f)));
+        Objects.requireNonNull(baby.getAttributeInstance(EntityAttributes.GENERIC_MOVEMENT_SPEED)).setBaseValue(max(min(speed, (chocoConfigHolder.chocoboMaxSpeed / 100f)), (chocoConfigHolder.chocoboSpeed / 100f)));
         float stamina = round((mother.stamina + father.stamina) / 2) * (FloatChocoConfigGet(chocoConfigHolder.chocoboPossibleLossStamina, dPOS_LOSS.getDefault()) + ((float) random() * FloatChocoConfigGet(chocoConfigHolder.chocoboPossibleGainStamina, dPOS_GAIN.getDefault())));
         Objects.requireNonNull(baby.getAttributeInstance(ModAttributes.CHOCOBO_MAX_STAMINA)).setBaseValue(min(stamina, chocoConfigHolder.chocoboMaxStamina));
         double attack = minCheck(mother.attack, father.attack) * (chocoConfigHolder.chocoboPossibleLoss + ((float) random() * (chocoConfigHolder.chocoboPossibleGain +25D)));

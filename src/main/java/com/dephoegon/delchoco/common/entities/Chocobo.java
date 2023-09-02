@@ -17,6 +17,8 @@ import com.dephoegon.delchoco.common.items.ChocoboArmorItems;
 import com.dephoegon.delchoco.common.items.ChocoboLeashPointer;
 import com.dephoegon.delchoco.common.items.ChocoboSaddleItem;
 import com.dephoegon.delchoco.common.items.ChocoboWeaponItems;
+import com.dephoegon.delchoco.common.network.PacketManager;
+import com.dephoegon.delchoco.common.network.packets.OpenChocoboGuiMessage;
 import com.dephoegon.delchoco.utils.WorldUtils;
 import com.google.common.collect.Maps;
 import net.minecraft.block.Block;
@@ -92,7 +94,7 @@ import static net.minecraft.entity.SpawnGroup.CREATURE;
 import static net.minecraft.item.Items.*;
 import static net.minecraft.tag.BiomeTags.*;
 
-public class Chocobo extends TameableEntity implements Angerable, NamedScreenHandlerFactory {
+public class Chocobo extends TameableEntity implements Angerable {
     @Nullable private UUID persistentAngerTarget;
     private int remainingPersistentAngerTime;
     private int ticksUntilNextAlert;
@@ -177,6 +179,7 @@ public class Chocobo extends TameableEntity implements Angerable, NamedScreenHan
         public boolean canPlayerUse(PlayerEntity player) { return false; }
         public void setStack(int var1, ItemStack var2) {
             super.setStack(var1, var2);
+            DelChoco.LOGGER.info("Backbone Inv: " + var2);
             chocoboFeatherPick(this, this.getChocobo().chocoboTierOneInv, var1);
             chocoboFeatherPick(this, this.getChocobo().chocoboTierTwoInv, var1);
         }
@@ -184,12 +187,14 @@ public class Chocobo extends TameableEntity implements Angerable, NamedScreenHan
     public final ChocoboInventory chocoboTierOneInv = new ChocoboInventory(tier_one_chocobo_inv_slot_count, this) {
         public void setStack(int var1, ItemStack var2) {
             super.setStack(var1, var2);
+            DelChoco.LOGGER.info("Tier One Inv: " + var2);
             chocoboFeatherPick(this, this.getChocobo().chocoboBackboneInv, var1);
         }
     };
     public final ChocoboInventory chocoboTierTwoInv = new ChocoboInventory(tier_two_chocobo_inv_slot_count, this) {
         public void setStack(int var1, ItemStack var2) {
             super.setStack(var1, var2);
+            DelChoco.LOGGER.info("Tier Two Inv: " + var2);
             chocoboFeatherPick(this, this.getChocobo().chocoboBackboneInv, var1);
         }
     };
@@ -197,6 +202,7 @@ public class Chocobo extends TameableEntity implements Angerable, NamedScreenHan
         public boolean isValid(int slot, @NotNull ItemStack stack) { return stack.isEmpty() || stack.getItem() instanceof ChocoboArmorItems; }
         public void setStack(int slot, ItemStack itemStack) {
             super.setStack(slot, itemStack);
+            DelChoco.LOGGER.info("Armor Inv: " + itemStack);
             this.getChocobo().setArmorType(itemStack);
             this.getChocobo().setChocoboArmorStats(itemStack);
         }
@@ -205,6 +211,7 @@ public class Chocobo extends TameableEntity implements Angerable, NamedScreenHan
         public boolean isValid(int slot, @NotNull ItemStack stack) { return stack.isEmpty() || stack.getItem() instanceof ChocoboWeaponItems; }
         public void setStack(int slot, ItemStack itemStack) {
             super.setStack(slot, itemStack);
+            DelChoco.LOGGER.info("Weapon Inv: " + itemStack);
             this.getChocobo().setWeaponType(itemStack);
             this.getChocobo().setChocoboWeaponStats(itemStack);
         }
@@ -213,7 +220,8 @@ public class Chocobo extends TameableEntity implements Angerable, NamedScreenHan
         public boolean isValid(int slot, @NotNull ItemStack stack) { return stack.isEmpty() || stack.getItem() instanceof ChocoboSaddleItem; }
         public void setStack(int slot, ItemStack itemStack) {
             super.setStack(slot, itemStack);
-            inventoryDropClear(this.getChocobo().chocoboBackboneInv);
+            DelChoco.LOGGER.info("Saddle Inv: " + itemStack);
+            //inventoryDropClear(this.getChocobo().chocoboBackboneInv);
             this.getChocobo().setSaddleType(itemStack);
         }
     };
@@ -338,10 +346,6 @@ public class Chocobo extends TameableEntity implements Angerable, NamedScreenHan
         compound.putInt(NBTKEY_CHOCOBO_LEASH_BLOCK_Y, this.getLeashSpot().getY());
         compound.putInt(NBTKEY_CHOCOBO_LEASH_BLOCK_Z, this.getLeashSpot().getZ());
         compound.putDouble(NBTKEY_CHOCOBO_LEASH_DISTANCE, this.getLeashDistance());
-    }
-    @Nullable
-    public ScreenHandler createMenu(int syncId, PlayerInventory playerInventory, PlayerEntity player) {
-        return null;  // Temporary
     }
     // Leashing
     private void setLeashSpot(int x, int y, int z) {
@@ -1108,18 +1112,26 @@ public class Chocobo extends TameableEntity implements Angerable, NamedScreenHan
         return super.interactAt(player, vec, hand);
     }
     private void displayChocoboInventory(@NotNull ServerPlayerEntity player) {
+        if (player.currentScreenHandler != player.playerScreenHandler) { player.closeHandledScreen(); }
         Chocobo chocobo = this;
+
+        OpenChocoboGuiMessage message = new OpenChocoboGuiMessage(this, player.currentScreenHandler.syncId);
+        PacketManager.sendToClient(player, message);
+
         player.openHandledScreen(new NamedScreenHandlerFactory() {
-            @Override
-            public Text getDisplayName() { return new LiteralText("Chocobo Inventory"); }
-            @Override
-            public ScreenHandler createMenu(int syncId, PlayerInventory playerInventory, PlayerEntity player) { return new SaddlebagContainer(syncId, playerInventory, chocobo); }
+            public Text getDisplayName() {
+                return new LiteralText(chocobo.getName().getString());
+            }
+            public ScreenHandler createMenu(int syncId, PlayerInventory inv, PlayerEntity player) {
+                return new SaddlebagContainer(syncId, inv, chocobo);
+            }
         });
     }
     private void chocoboFeatherPick(@NotNull Inventory sendingInv, @NotNull Inventory receivingInv, int slot) {
         boolean isReverseTierOne = sendingInv.size() > receivingInv.size();
         boolean isTierOne = sendingInv.size() < receivingInv.size();
         boolean pick = true;
+        DelChoco.LOGGER.info("isReverseTierOne: " + isReverseTierOne + " isTierOne: " + isTierOne);
         int slotAdjust = slot;
         if (isTierOne) {
             if (slot < 5) { slotAdjust = slot + 11; }

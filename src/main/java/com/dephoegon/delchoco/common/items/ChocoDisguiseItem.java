@@ -45,6 +45,10 @@ public class ChocoDisguiseItem extends ArmorItem {
         ItemStack stack = new ItemStack(this);
         stack.setNbt(serialize(NBTKEY_COLOR, yellow));
     }
+    public NbtCompound getNbt() {
+        ItemStack stack = new ItemStack(this);
+        return stack.getNbt();
+    }
     public Identifier setCustomModel(String customModelData) {
         ArmorMaterial armor = this.getMaterial();
         String folder = "textures/models/armor/leather/";

@@ -6,6 +6,7 @@ import com.dephoegon.delchoco.client.gui.RenderChocoboOverlay;
 import com.dephoegon.delchoco.client.keybind.KeyBindManager;
 import com.dephoegon.delchoco.common.blockentities.ChocoboEggBlockEntity;
 import com.dephoegon.delchoco.common.blockentities.ChocoboNestBlockEntity;
+import com.dephoegon.delchoco.common.handler.screens;
 import com.dephoegon.delchoco.common.init.ModEntities;
 import com.dephoegon.delchoco.common.init.ModItems;
 import com.dephoegon.delchoco.common.init.ModSounds;
@@ -34,6 +35,7 @@ public class ChocoList {
         ModWorldGen.generateGysahl();
         ModWorldGen.spawnChocobos();
         registerBlockEntities();
+        screens.init();
     }
     public static BlockEntityType<ChocoboNestBlockEntity> STRAW_NEST_BLOCK_ENTITY;
     public static BlockEntityType<ChocoboEggBlockEntity> CHOCOBO_EGG_BLOCK_ENTITY;

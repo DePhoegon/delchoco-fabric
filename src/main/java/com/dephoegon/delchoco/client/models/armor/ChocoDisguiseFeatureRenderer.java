@@ -44,4 +44,20 @@ public class ChocoDisguiseFeatureRenderer extends FeatureRenderer<LivingEntity, 
             }
         }
     }
+    public Identifier getTexture(LivingEntity entity) {
+        for (EquipmentSlot slot : EquipmentSlot.values()) {
+            if (slot.getType() == EquipmentSlot.Type.ARMOR) {
+                ItemStack stack = entity.getEquippedStack(slot);
+                if (stack.getItem() instanceof ChocoDisguiseItem chocoDisguiseItem) {
+                    NbtCompound color = stack.getNbt();
+                    if (color != null && color.contains(NBTKEY_COLOR)) {
+                        return chocoDisguiseItem.setCustomModel(color.getString(NBTKEY_COLOR));
+                    } else {
+                        return chocoDisguiseItem.setCustomModel(ChocoDisguiseItem.yellow);
+                    }
+                }
+            }
+        }
+        return null;
+    }
 }

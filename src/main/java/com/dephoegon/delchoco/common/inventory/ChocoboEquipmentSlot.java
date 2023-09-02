@@ -24,6 +24,9 @@ public class ChocoboEquipmentSlot extends Slot {
             case weaponType -> this.weapon = true;
         }
     }
+    public boolean isSaddle() { return this.saddle; }
+    public boolean isArmor() { return this.armor; }
+    public boolean isWeapon() { return this.weapon; }
     public boolean canInsert(@NotNull ItemStack stack) {
         if (stack.isEmpty()) { return false; } else {
             if (stack.getItem() instanceof ChocoboArmorItems) { return this.armor; }

@@ -3,7 +3,7 @@
 	"package": "com.dephoegon.delchoco.mixin",
 	"compatibilityLevel": "JAVA_17",
 	"mixins": [
-		"PlayerEntityRendererMixin",
+		"LivingEntityRenderMixin",
 		"MixinEntity",
 		"MixinLivingEntity",
 		"PlayerEntityMixin"

@@ -65,7 +65,7 @@ public class ChocoboCombatEvents {
      * Intended to be used in the Entity#applyDamageEffects mixin method
      */
     public static void onChocoboCombatHit(@NotNull Chocobo chocoboAttacker, Entity targetEntity) {
-        if (chocoConfigHolder.extraChocoboEffects) {
+        if (chocoConfigHolder.extraChocoboResourcesOnHit) {
             LivingEntity target = targetEntity instanceof LivingEntity living ? living : null;
             if (target instanceof SpiderEntity e) { onHitMobChance(10, STRING, e); }
             if (target instanceof CaveSpiderEntity e) { onHitMobChance(5, FERMENTED_SPIDER_EYE, e); }

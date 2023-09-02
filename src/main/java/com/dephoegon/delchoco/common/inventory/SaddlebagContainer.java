@@ -10,23 +10,19 @@ import net.minecraft.screen.ScreenHandler;
 import net.minecraft.screen.slot.Slot;
 import org.jetbrains.annotations.NotNull;
 
+import static com.dephoegon.delchoco.common.handler.screens.SADDLEBAG_CONTAINER_TYPE;
 import static com.dephoegon.delchoco.common.inventory.ChocoboEquipmentSlot.*;
 
 public class SaddlebagContainer extends ScreenHandler {
     private final Chocobo chocobo;
-    private final Inventory backBone;
-    private final Inventory tier1;
-    private final Inventory tier2;
     public SaddlebagContainer(int syncId, PlayerInventory playerInventory, Chocobo chocoboEntity) {
-        super(null, syncId);
+        super(SADDLEBAG_CONTAINER_TYPE, syncId);
         this.chocobo = chocoboEntity;
-        this.backBone = chocobo.chocoboBackboneInv;
-        this.tier1 = chocobo.chocoboTierOneInv;
-        this.tier2 = chocobo.chocoboTierTwoInv;
         refreshSlots(chocobo, playerInventory);
     }
     public void refreshSlots(@NotNull Chocobo chocobo, PlayerInventory playerInventory) {
         this.slots.clear();
+
         bindPlayerInventory(playerInventory);
         ItemStack saddleStack = chocobo.getSaddle();
         int slotOneX = -16;
@@ -37,8 +33,8 @@ public class SaddlebagContainer extends ScreenHandler {
         if(!saddleStack.isEmpty() && saddleStack.getItem() instanceof ChocoboSaddleItem saddleItem) {
             int saddleSize = saddleItem.getInventorySize();
             switch (saddleSize) {
-                case 15 -> bindInventorySmall(saddleStack, tier1);
-                case 45 -> bindInventoryBig(saddleStack, tier2);
+                case 15 -> bindInventorySmall(saddleStack, chocobo.chocoboTierOneInv);
+                case 45 -> bindInventoryBig(saddleStack, chocobo.chocoboTierTwoInv);
             }
         }
     }
@@ -47,9 +43,9 @@ public class SaddlebagContainer extends ScreenHandler {
             for (int row = 0; row < 3; row++) {
                 for (int col = 0; col < 5; col++) {
                     this.addSlot(new Slot(inventory, row * 5 + col, 44 + col * 18, 36 + row * 18));
-                    if (row * 5 + col < 5) { inventory.setStack(row * 5 + col, backBone.getStack(row * 5 + col+11)); }
-                    if (row * 5 + col > 4 && row * 5 + col < 10) { inventory.setStack(row * 5 + col, backBone.getStack(row * 5 + col+15)); }
-                    if (row * 5 + col > 9) { inventory.setStack(row * 5 + col, backBone.getStack(row * 5 + col+19)); }
+                    if (row * 5 + col < 5) { inventory.setStack(row * 5 + col, chocobo.chocoboBackboneInv.getStack(row * 5 + col+11)); }
+                    if (row * 5 + col > 4 && row * 5 + col < 10) { inventory.setStack(row * 5 + col, chocobo.chocoboBackboneInv.getStack(row * 5 + col+15)); }
+                    if (row * 5 + col > 9) { inventory.setStack(row * 5 + col, chocobo.chocoboBackboneInv.getStack(row * 5 + col+19)); }
                 }
             }
         }
@@ -59,7 +55,7 @@ public class SaddlebagContainer extends ScreenHandler {
             for (int row = 0; row < 5; row++) {
                 for (int col = 0; col < 9; col++) {
                     this.addSlot(new Slot(inventory, row * 9 + col, 8 + col * 18, 18 + row * 18));
-                    tier2.setStack(row * 9 + col, backBone.getStack(row * 9 + col));
+                    inventory.setStack(row * 9 + col, chocobo.chocoboBackboneInv.getStack(row * 9 + col));
                 }
             }
         }

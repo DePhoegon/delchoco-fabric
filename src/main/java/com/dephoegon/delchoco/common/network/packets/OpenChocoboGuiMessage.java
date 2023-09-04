@@ -14,6 +14,8 @@ import net.minecraft.util.collection.DefaultedList;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 
+// TODO: 2021-10-07 - 10:00:00 - Fix this class,
+//  use a new class for the static methods to treat it as if it was bound to this class and not Static
 public class OpenChocoboGuiMessage {
     public int entityId;
     public int windowId;
@@ -48,11 +50,12 @@ public class OpenChocoboGuiMessage {
         buf.writeNbt(message.saddle);
         buf.writeNbt(message.weapon);
         buf.writeNbt(message.armor);
-        buf.writeNbt(message.inventory);
+        buf.writeBoolean(message.inventory != null);
+        if (message.inventory != null) { buf.writeNbt(message.inventory); }
     }
 
     @Contract("_ -> new")
-    public static @NotNull OpenChocoboGuiMessage decode(@NotNull PacketByteBuf buf) { return new OpenChocoboGuiMessage(buf.readInt(), buf.readInt(), buf.readNbt(), buf.readNbt(), buf.readNbt(), buf.readNbt()); }
+    public static @NotNull OpenChocoboGuiMessage decode(@NotNull PacketByteBuf buf) { return new OpenChocoboGuiMessage(buf.readInt(), buf.readInt(), buf.readNbt(), buf.readNbt(), buf.readNbt(), buf.readBoolean() ? buf.readNbt() : null); }
 
     public static void handle(@NotNull OpenChocoboGuiMessage message, PacketContext context) {
         MinecraftClient mc = MinecraftClient.getInstance();
@@ -67,7 +70,7 @@ public class OpenChocoboGuiMessage {
         chocobo.chocoboWeaponInv.singleSlotFromNBT(message.weapon);
         chocobo.chocoboArmorInv.singleSlotFromNBT(message.armor);
         chocobo.chocoboSaddleInv.singleSlotFromNBT(message.saddle);
-        fromNbt(chocobo.chocoboBackboneInv, message.inventory);
+        if (message.inventory != null)  { fromNbt(chocobo.chocoboBackboneInv, message.inventory); }
     }
     private @NotNull NbtCompound toNbt(@NotNull DefaultedList<ItemStack> inventory) {
         NbtCompound nbt = new NbtCompound();

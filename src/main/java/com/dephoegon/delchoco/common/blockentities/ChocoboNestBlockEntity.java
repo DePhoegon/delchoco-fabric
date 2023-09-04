@@ -151,13 +151,13 @@ public class ChocoboNestBlockEntity extends BlockEntity implements NamedScreenHa
         super.readNbt(nbt);
         this.isSheltered = nbt.getBoolean(NBTKEY_IS_SHELTERED);
         this.ticks = nbt.getInt(NBTKEY_TICKS);
-        this.inventory.load(nbt.getCompound(NBTKEY_NEST_INVENTORY));
+        this.inventory.setStack(0, ItemStack.fromNbt(nbt.getCompound(NBTKEY_NEST_INVENTORY)));
     }
     public void writeNbt(@NotNull NbtCompound nbt) {
         super.writeNbt(nbt);
         nbt.putBoolean(NBTKEY_IS_SHELTERED, this.isSheltered);
         nbt.putInt(NBTKEY_TICKS, this.ticks);
-        nbt.put(NBTKEY_NEST_INVENTORY, this.inventory.save());
+        nbt.put(NBTKEY_NEST_INVENTORY, this.inventory.getStack(0).writeNbt(new NbtCompound()));
     }
     public BlockEntityUpdateS2CPacket toUpdatePacket() {
         NbtCompound nbt = new NbtCompound();

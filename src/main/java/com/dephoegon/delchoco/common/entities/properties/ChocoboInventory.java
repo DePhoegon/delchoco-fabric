@@ -7,16 +7,19 @@ import net.minecraft.inventory.SimpleInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtList;
+import net.minecraft.util.collection.DefaultedList;
 import org.jetbrains.annotations.NotNull;
 
 import static com.dephoegon.delchoco.DelChoco.chocoConfigHolder;
 
 public class ChocoboInventory extends SimpleInventory {
+    protected DefaultedList<ItemStack> stacks;
     private final Chocobo entity;
 
     public ChocoboInventory(int size, Chocobo entity) {
         super(size);
         this.entity = entity;
+        this.stacks = DefaultedList.ofSize(size, ItemStack.EMPTY);
     }
     public Chocobo getChocobo() { return this.entity; }
     public boolean canPlayerUse(PlayerEntity player) {
@@ -27,53 +30,41 @@ public class ChocoboInventory extends SimpleInventory {
             if (chocoConfigHolder.ownerInventoryAccess) { return isPlayer; } else { return true; }
         } else { return false; }
     }
-    private @NotNull NbtCompound saveFirstItemStack() {
-        NbtCompound tag = new NbtCompound();
-        ItemStack stack = this.getStack(0);
-        if(!stack.isEmpty()) {
-            NbtCompound itemTag = new NbtCompound();
-            stack.writeNbt(itemTag);
-            tag.put("Items", itemTag);
-        }
-        return tag;
+    public NbtCompound singleSlotToNBT() {
+        NbtCompound nbt = new NbtCompound();
+        this.getStack(0).writeNbt(nbt);
+        return nbt;
     }
-    private void loadFirstItemStack(@NotNull NbtCompound tag) {
-        if(tag.contains("Items", NbtType.COMPOUND)) {
-            NbtCompound itemTag = tag.getCompound("Items");
-            this.setStack(0, ItemStack.fromNbt(itemTag));
-        }
+    public void singleSlotFromNBT(NbtCompound nbt) {
+        if (nbt == null || ItemStack.fromNbt(nbt) == this.getStack(0)) { return; }
+        this.setStack(0, ItemStack.fromNbt(nbt));
     }
-    public NbtCompound save() {
-        if (this.size() > 1) { return this.saveAll(); }
-        else { return this.saveFirstItemStack(); }
-    }
-    public void load(@NotNull NbtCompound tag) {
-        if (this.size() > 1) { this.loadFirstItemStack(tag); }
-        else { this.loadAll(tag); }
-    }
-    private @NotNull NbtCompound saveAll() {
-        NbtCompound tag = new NbtCompound();
-        NbtList list = new NbtList();
-        for(int i = 0; i < this.size(); ++i) {
-            ItemStack stack = this.getStack(i);
-            if(!stack.isEmpty()) {
+    public NbtCompound serializeNBT() {
+        NbtList nbtTagList = new NbtList();
+        for (int i = 0; i < stacks.size(); i++) {
+            if (!this.getStack(i).isEmpty()) {
                 NbtCompound itemTag = new NbtCompound();
-                itemTag.putByte("Slot", (byte)i);
-                stack.writeNbt(itemTag);
-                list.add(itemTag);
+                itemTag.putInt("Slot", i);
+                this.getStack(i).writeNbt(itemTag);
+                nbtTagList.add(itemTag);
             }
         }
-        tag.put("Items", list);
-        return tag;
+        NbtCompound nbt = new NbtCompound();
+        nbt.put("Items", nbtTagList);
+        nbt.putInt("Size", stacks.size());
+        return nbt;
     }
-    private void loadAll(@NotNull NbtCompound tag) {
-        NbtList list = tag.getList("Items", NbtType.COMPOUND);
-        for(int i = 0; i < list.size(); ++i) {
-            NbtCompound itemTag = list.getCompound(i);
-            int j = itemTag.getByte("Slot") & 255;
-            if(j < this.size()) {
-                this.setStack(j, ItemStack.fromNbt(itemTag));
+    public void deserializeNBT(@NotNull NbtCompound nbt) {
+        setSize(nbt.contains("Size", NbtType.COMPOUND) ? nbt.getInt("Size") : this.size());
+        NbtList tagList = nbt.getList("Items", NbtType.COMPOUND);
+        for (int i = 0; i < tagList.size(); i++) {
+            NbtCompound itemTags = tagList.getCompound(i);
+            int slot = itemTags.getInt("Slot");
+            if (!this.getStack(slot).isEmpty() && ItemStack.fromNbt(itemTags).isEmpty()) { continue; }
+            if (slot >= 0 && slot < stacks.size()) {
+                this.setStack(slot, ItemStack.fromNbt(itemTags));
             }
         }
     }
+    public void setSize(int size) { stacks = DefaultedList.ofSize(size, ItemStack.EMPTY); }
 }

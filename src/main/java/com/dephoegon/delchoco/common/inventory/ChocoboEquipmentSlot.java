@@ -30,7 +30,7 @@ public class ChocoboEquipmentSlot extends Slot {
     public boolean canInsert(@NotNull ItemStack stack) {
         if (stack.isEmpty()) { return false; } else {
             if (stack.getItem() instanceof ChocoboArmorItems) { return this.armor; }
-            if (stack.getItem() instanceof ChocoboSaddleItem) { return this.saddle; }
+            if (stack.getItem() instanceof ChocoboSaddleItem) { return false; }
             if (stack.getItem() instanceof ChocoboWeaponItems) { return this.weapon; }
         }
         return false;

@@ -63,7 +63,11 @@ import net.minecraft.tag.FluidTags;
 import net.minecraft.text.LiteralText;
 import net.minecraft.text.Text;
 import net.minecraft.text.TranslatableText;
-import net.minecraft.util.*;
+import net.minecraft.util.ActionResult;
+import net.minecraft.util.Hand;
+import net.minecraft.util.TimeHelper;
+import net.minecraft.util.Util;
+import net.minecraft.util.collection.DefaultedList;
 import net.minecraft.util.math.*;
 import net.minecraft.util.math.intprovider.UniformIntProvider;
 import net.minecraft.util.registry.RegistryEntry;
@@ -182,6 +186,7 @@ public class Chocobo extends TameableEntity implements Angerable {
             DelChoco.LOGGER.info("Backbone Inv: " + var2);
             chocoboFeatherPick(this, this.getChocobo().chocoboTierOneInv, var1);
             chocoboFeatherPick(this, this.getChocobo().chocoboTierTwoInv, var1);
+            this.getChocobo().chocoboBackBoneList.set(var1, var2);
         }
     };
     public final ChocoboInventory chocoboTierOneInv = new ChocoboInventory(tier_one_chocobo_inv_slot_count, this) {
@@ -200,6 +205,7 @@ public class Chocobo extends TameableEntity implements Angerable {
     };
     public final ChocoboInventory chocoboArmorInv = new ChocoboInventory(1, this) {
         public boolean isValid(int slot, @NotNull ItemStack stack) { return stack.isEmpty() || stack.getItem() instanceof ChocoboArmorItems; }
+        public int getMaxCountPerStack() { return 1; }
         public void setStack(int slot, ItemStack itemStack) {
             super.setStack(slot, itemStack);
             DelChoco.LOGGER.info("Armor Inv: " + itemStack);
@@ -209,6 +215,7 @@ public class Chocobo extends TameableEntity implements Angerable {
     };
     public final ChocoboInventory chocoboWeaponInv = new ChocoboInventory(1, this) {
         public boolean isValid(int slot, @NotNull ItemStack stack) { return stack.isEmpty() || stack.getItem() instanceof ChocoboWeaponItems; }
+        public int getMaxCountPerStack() { return 1; }
         public void setStack(int slot, ItemStack itemStack) {
             super.setStack(slot, itemStack);
             DelChoco.LOGGER.info("Weapon Inv: " + itemStack);
@@ -218,24 +225,30 @@ public class Chocobo extends TameableEntity implements Angerable {
     };
     public final ChocoboInventory chocoboSaddleInv = new ChocoboInventory(1, this) {
         public boolean isValid(int slot, @NotNull ItemStack stack) { return stack.isEmpty() || stack.getItem() instanceof ChocoboSaddleItem; }
+        public int getMaxCountPerStack() { return 1; }
         public void setStack(int slot, ItemStack itemStack) {
             super.setStack(slot, itemStack);
             DelChoco.LOGGER.info("Saddle Inv: " + itemStack);
-            //inventoryDropClear(this.getChocobo().chocoboBackboneInv);
+            inventoryDropClear(this.getChocobo().chocoboBackboneInv, this.getChocobo());
             this.getChocobo().setSaddleType(itemStack);
         }
     };
+    public final DefaultedList<ItemStack> chocoboBackBoneList = DefaultedList.ofSize(top_tier_chocobo_inv_slot_count, ItemStack.EMPTY);
     protected void dropLoot(DamageSource source, boolean causedByPlayer)  {
         super.dropLoot(source, causedByPlayer);
-        inventoryDropClear(this.chocoboBackboneInv);
-        inventoryDropClear(this.chocoboSaddleInv);
-        inventoryDropClear(this.chocoboWeaponInv);
-        inventoryDropClear(this.chocoboArmorInv);
+        Entity entity = source.getAttacker();
+        inventoryDropClear(this.chocoboBackboneInv, entity);
+        inventoryDropClear(this.chocoboSaddleInv, entity);
+        inventoryDropClear(this.chocoboWeaponInv, entity);
+        inventoryDropClear(this.chocoboArmorInv, entity);
         this.chocoboTierOneInv.clear();
         this.chocoboTierTwoInv.clear();
     }
-    protected void inventoryDropClear(Inventory inventory) {
-        ItemScatterer.spawn(this.world, this, inventory);
+    protected void inventoryDropClear(Inventory inventory, Entity entity) {
+        for (int i = 0; i < inventory.size(); ++i) {
+            ItemStack itemStack = inventory.getStack(i);
+            if (!itemStack.isEmpty()) { entity.dropStack(itemStack); }
+        }
         inventory.clear();
     }
     public Chocobo(EntityType<? extends Chocobo> entityType, World world) {
@@ -305,10 +318,10 @@ public class Chocobo extends TameableEntity implements Angerable {
         this.setMale(compound.getBoolean(NBTKEY_CHOCOBO_IS_MALE));
         this.setFromEgg(compound.getBoolean(NBTKEY_CHOCOBO_FROM_EGG));
         this.setMovementType(MovementType.values()[compound.getByte(NBTKEY_MOVEMENT_TYPE)]);
-        this.chocoboSaddleInv.load(compound.getCompound(NBTKEY_SADDLE_ITEM));
-        this.chocoboWeaponInv.load(compound.getCompound(NBTKEY_WEAPON_ITEM));
-        this.chocoboArmorInv.load(compound.getCompound(NBTKEY_ARMOR_ITEM));
-        this.chocoboBackboneInv.load(compound.getCompound(NBTKEY_INVENTORY));
+        this.chocoboSaddleInv.singleSlotFromNBT(compound.getCompound(NBTKEY_SADDLE_ITEM));
+        this.chocoboWeaponInv.singleSlotFromNBT(compound.getCompound(NBTKEY_WEAPON_ITEM));
+        this.chocoboArmorInv.singleSlotFromNBT(compound.getCompound(NBTKEY_ARMOR_ITEM));
+        ChocoboBackboneFromNBT(compound);
         if (compound.contains(NBTKEY_NEST_POSITION)) { this.nestPos = NbtHelper.toBlockPos(compound.getCompound(NBTKEY_NEST_POSITION)); }
         this.setGeneration(compound.getInt(NBTKEY_CHOCOBO_GENERATION));
         this.setStamina(compound.getFloat(NBTKEY_CHOCOBO_STAMINA));
@@ -328,10 +341,10 @@ public class Chocobo extends TameableEntity implements Angerable {
         compound.putBoolean(NBTKEY_CHOCOBO_IS_MALE, this.isMale());
         compound.putBoolean(NBTKEY_CHOCOBO_FROM_EGG, this.fromEgg());
         compound.putByte(NBTKEY_MOVEMENT_TYPE, (byte) this.getMovementType().ordinal());
-        compound.put(NBTKEY_SADDLE_ITEM, this.chocoboSaddleInv.save());
-        compound.put(NBTKEY_ARMOR_ITEM, this.chocoboArmorInv.save());
-        compound.put(NBTKEY_WEAPON_ITEM, this.chocoboWeaponInv.save());
-        compound.put(NBTKEY_INVENTORY, this.chocoboBackboneInv.save());
+        compound.put(NBTKEY_SADDLE_ITEM, this.chocoboSaddleInv.singleSlotToNBT());
+        compound.put(NBTKEY_ARMOR_ITEM, this.chocoboArmorInv.singleSlotToNBT());
+        compound.put(NBTKEY_WEAPON_ITEM, this.chocoboWeaponInv.singleSlotToNBT());
+        ChocoboBackboneToNBT(compound);
         if (this.nestPos != null) { compound.put(NBTKEY_NEST_POSITION, NbtHelper.fromBlockPos(this.nestPos)); }
         compound.putInt(NBTKEY_CHOCOBO_GENERATION, this.getGeneration());
         compound.putBoolean(NBTKEY_CHOCOBO_FLAME_BLOOD, this.isFireImmune());
@@ -346,6 +359,21 @@ public class Chocobo extends TameableEntity implements Angerable {
         compound.putInt(NBTKEY_CHOCOBO_LEASH_BLOCK_Y, this.getLeashSpot().getY());
         compound.putInt(NBTKEY_CHOCOBO_LEASH_BLOCK_Z, this.getLeashSpot().getZ());
         compound.putDouble(NBTKEY_CHOCOBO_LEASH_DISTANCE, this.getLeashDistance());
+    }
+    public void ChocoboBackboneToNBT(NbtCompound compound) {
+        for (int i = 0; i < this.chocoboBackboneInv.size(); ++i) {
+            ItemStack itemStack = this.chocoboBackBoneList.get(i);
+            if (!itemStack.isEmpty()) { compound.put(NBTKEY_INVENTORY+"_slot-"+i, itemStack.writeNbt(new NbtCompound())); }
+        }
+    }
+    public void ChocoboBackboneFromNBT(NbtCompound compound) {
+        for (int i = 0; i < this.chocoboBackboneInv.size(); ++i) {
+            if (compound.contains(NBTKEY_INVENTORY+"_slot-"+i)) {
+                ItemStack itemStack = ItemStack.fromNbt(compound.getCompound(NBTKEY_INVENTORY + "_slot-" + i));
+                this.chocoboBackboneInv.setStack(i, itemStack);
+                this.chocoboBackBoneList.set(i, itemStack);
+            }
+        }
     }
     // Leashing
     private void setLeashSpot(int x, int y, int z) {

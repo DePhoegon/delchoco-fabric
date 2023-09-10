@@ -17,8 +17,7 @@ import com.dephoegon.delchoco.common.items.ChocoboArmorItems;
 import com.dephoegon.delchoco.common.items.ChocoboLeashPointer;
 import com.dephoegon.delchoco.common.items.ChocoboSaddleItem;
 import com.dephoegon.delchoco.common.items.ChocoboWeaponItems;
-import com.dephoegon.delchoco.common.network.PacketManager;
-import com.dephoegon.delchoco.common.network.packets.OpenChocoboGuiMessage;
+import com.dephoegon.delchoco.mixin.ServerPlayerEntityAccessor;
 import com.dephoegon.delchoco.utils.WorldUtils;
 import com.google.common.collect.Maps;
 import net.minecraft.block.Block;
@@ -46,22 +45,19 @@ import net.minecraft.entity.passive.LlamaEntity;
 import net.minecraft.entity.passive.PassiveEntity;
 import net.minecraft.entity.passive.TameableEntity;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.inventory.Inventory;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtHelper;
+import net.minecraft.network.packet.s2c.play.OpenHorseScreenS2CPacket;
 import net.minecraft.recipe.Ingredient;
-import net.minecraft.screen.NamedScreenHandlerFactory;
-import net.minecraft.screen.ScreenHandler;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.sound.SoundEvent;
 import net.minecraft.tag.FluidTags;
 import net.minecraft.text.LiteralText;
-import net.minecraft.text.Text;
 import net.minecraft.text.TranslatableText;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.Hand;
@@ -852,7 +848,7 @@ public class Chocobo extends TameableEntity implements Angerable {
         if (this.isBaby()) { return; }
         this.dropStack(new ItemStack(CHOCOBO_FEATHER, 1), 0.0F);
     }
-    protected boolean canStartRiding(@NotNull Entity entityIn) { return !this.getSaddle().isEmpty() && super.canStartRiding(entityIn); }
+    protected boolean canStartRiding(@NotNull Entity entityIn) { return false; }
     public void tickMovement() {
         super.tickMovement();
         this.setRotation(this.getYaw(), this.getPitch());
@@ -1140,20 +1136,14 @@ public class Chocobo extends TameableEntity implements Angerable {
         return super.interactAt(player, vec, hand);
     }
     private void displayChocoboInventory(@NotNull ServerPlayerEntity player) {
-        if (player.currentScreenHandler != player.playerScreenHandler) { player.closeHandledScreen(); }
-        Chocobo chocobo = this;
-
-        OpenChocoboGuiMessage message = new OpenChocoboGuiMessage(this, player.currentScreenHandler.syncId);
-        PacketManager.sendToClient(player, message);
-
-        player.openHandledScreen(new NamedScreenHandlerFactory() {
-            public Text getDisplayName() {
-                return new LiteralText(chocobo.getName().getString());
-            }
-            public ScreenHandler createMenu(int syncId, PlayerInventory inv, PlayerEntity player) {
-                return new SaddlebagContainer(syncId, inv, chocobo);
-            }
-        });
+        if (player.currentScreenHandler != player.playerScreenHandler) {
+            player.closeHandledScreen();
+        }
+        ((ServerPlayerEntityAccessor) player).callIncrementScreenHandlerSyncId();
+        int syncId = ((ServerPlayerEntityAccessor) player).getScreenHandlerSyncId();
+        player.networkHandler.sendPacket(new OpenHorseScreenS2CPacket(syncId, this.chocoboBackboneInv.size(), this.getId()));
+        player.currentScreenHandler = new SaddlebagContainer(syncId, player.getInventory(), this);
+        ((ServerPlayerEntityAccessor) player).callOnScreenHandlerOpened(player.currentScreenHandler);
     }
     private void chocoboFeatherPick(@NotNull Inventory sendingInv, @NotNull Inventory receivingInv, int slot) {
         boolean isReverseTierOne = sendingInv.size() > receivingInv.size();

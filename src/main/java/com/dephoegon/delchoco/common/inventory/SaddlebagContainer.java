@@ -10,13 +10,12 @@ import net.minecraft.screen.ScreenHandler;
 import net.minecraft.screen.slot.Slot;
 import org.jetbrains.annotations.NotNull;
 
-import static com.dephoegon.delchoco.common.handler.screens.SADDLEBAG_CONTAINER_TYPE;
 import static com.dephoegon.delchoco.common.inventory.ChocoboEquipmentSlot.*;
 
 public class SaddlebagContainer extends ScreenHandler {
     private final Chocobo chocobo;
     public SaddlebagContainer(int syncId, PlayerInventory playerInventory, Chocobo chocoboEntity) {
-        super(SADDLEBAG_CONTAINER_TYPE, syncId);
+        super(null, syncId);
         this.chocobo = chocoboEntity;
         refreshSlots(chocobo, playerInventory);
     }

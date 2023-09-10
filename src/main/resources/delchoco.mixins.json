@@ -3,10 +3,12 @@
 	"package": "com.dephoegon.delchoco.mixin",
 	"compatibilityLevel": "JAVA_17",
 	"mixins": [
+		"ClientPlayNetworkHandlerMixin",
 		"LivingEntityRenderMixin",
 		"MixinEntity",
 		"MixinLivingEntity",
-		"PlayerEntityMixin"
+		"PlayerEntityMixin",
+		"ServerPlayerEntityAccessor"
 	],
 	"injectors": {
 		"defaultRequire": 1

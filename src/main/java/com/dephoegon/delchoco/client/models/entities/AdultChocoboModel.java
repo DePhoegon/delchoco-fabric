@@ -17,6 +17,7 @@ public class AdultChocoboModel<T extends Chocobo> extends EntityModel<Chocobo> {
     private final ModelPart neck;
     private final ModelPart leg_left;
     private final ModelPart leg_right;
+    private float headPitchModifier;
     public AdultChocoboModel(@NotNull ModelPart root) {
         this.root = root.getChild("root");
         ModelPart body = this.root.getChild("body");
@@ -118,133 +119,135 @@ public class AdultChocoboModel<T extends Chocobo> extends EntityModel<Chocobo> {
                 ModelTransform.of(0.0F, 1.0F, 0.0F, 0.1309F, 0.0F, 0.0F));
 
         ModelPartData head = neck.addChild("head", ModelPartBuilder.create()
-                        .uv(0, 0).cuboid(-3.0F, -16.0F, -9.0F, 6.0F, 6.0F, 12.0F)
-                        .uv(100, 0).cuboid(2.25F, -15.0F, -3.0F, 1.0F, 3.0F, 3.0F)
-                        .uv(100, 0).cuboid(-3.25F, -15.0F, -3.0F, 1.0F, 3.0F, 3.0F).mirrored(),
+                        .uv(0, 0).cuboid(-3.0F, -5.0F, -9.0F, 6.0F, 6.0F, 12.0F)
+                        .uv(100, 0).cuboid(2.25F, -4.0F, -3.0F, 1.0F, 3.0F, 3.0F)
+                        .uv(100, 0).cuboid(-3.25F, -4.0F, -3.0F, 1.0F, 3.0F, 3.0F).mirrored(),
                 ModelTransform.pivot(0.0F, -11.0F, -2.0F));
 
         ModelPartData crest_top_r1 = head.addChild("crest_top_r1", ModelPartBuilder.create()
-                        .uv(20, 0).cuboid(-2.5F, -11.0F, 2.0F, 5.0F, 0.0F, 6.0F),
+                        .uv(20, 0).cuboid(-2.5F, 0.0F, 0.0F, 5.0F, 0.0F, 6.0F),
                 ModelTransform.of(0.0F, -5.0F, 3.0F, 0.2618F, 0.0F, 0.0F));
 
         ModelPartData crest_right_r1 = head.addChild("crest_right_r1", ModelPartBuilder.create()
-                .uv(2, 2).mirrored().cuboid(0.0F, -16.0F, 0.0F, 0.0F, 6.0F, 4.0F).mirrored(false), ModelTransform.of(-3.0F, 0.0F, 3.0F, 0.0F, -0.2182F, 0.0F));
+                .uv(2, 2).mirrored().cuboid(0.0F, -5.0F, 0.0F, 0.0F, 6.0F, 4.0F).mirrored(false), ModelTransform.of(-3.0F, 0.0F, 3.0F, 0.0F, -0.2182F, 0.0F));
 
         ModelPartData crest_left_r1 = head.addChild("crest_left_r1", ModelPartBuilder.create()
-                        .uv(2, 2).cuboid(0.0F, -16.0F, 0.0F, 0.0F, 6.0F, 4.0F),
+                        .uv(2, 2).cuboid(0.0F, -5.0F, 0.0F, 0.0F, 6.0F, 4.0F),
                 ModelTransform.of(3.0F, 0.0F, 3.0F, 0.0F, 0.2182F, 0.0F));
 
         ModelPartData leg_left = body.addChild("leg_left", ModelPartBuilder.create(),
                 ModelTransform.pivot(3.5F, 3.0F, 1.0F));
 
         ModelPartData leg_left_lower_r1 = leg_left.addChild("leg_left_lower_r1", ModelPartBuilder.create()
-                        .uv(79, 48).cuboid(-5.5F, -2.0F, 1.0F, 3.0F, 12.0F, 3.0F,
+                        .uv(79, 48).cuboid(-1.5F, -2.0F, 1.0F, 3.0F, 12.0F, 3.0F,
                                 new Dilation(0.1F)),
                 ModelTransform.of(0.0F, 8.0F, 0.0F, -0.3927F, 0.0F, 0.0F));
         ModelPartData armor_leg_left_lower_r1 = leg_left.addChild("armor_leg_left_lower_r1", ModelPartBuilder.create()
-                        .uv(79, 112).cuboid(-5.5F, -2.0F, 1.0F, 3.0F, 12.0F, 3.0F,
+                        .uv(79, 112).cuboid(-1.5F, -2.0F, 1.0F, 3.0F, 12.0F, 3.0F,
                                 new Dilation(0.35F)),
                 ModelTransform.of(0.0F, 8.0F, 0.0F, -0.3927F, 0.0F, 0.0F));
 
         ModelPartData leg_left_upper_r1 = leg_left.addChild("leg_left_upper_r1", ModelPartBuilder.create()
-                        .uv(60, 49).cuboid(-6.0F, 0.0F, -1.0F, 4.0F, 9.0F, 5.0F),
+                        .uv(60, 49).cuboid(-2.0F, 0.0F, -1.0F, 4.0F, 9.0F, 5.0F),
                 ModelTransform.of(0.0F, 0.0F, 0.0F, 0.2618F, 0.0F, 0.0F));
 
         ModelPartData armor_leg_left_upper_r1 = leg_left.addChild("armor_leg_left_upper_r1", ModelPartBuilder.create()
-                        .uv(60, 113).cuboid(-6.0F, 0.0F, -1.0F, 4.0F, 9.0F, 5.0F, new Dilation(0.25F)),
+                        .uv(60, 113).cuboid(-2.0F, 0.0F, -1.0F, 4.0F, 9.0F, 5.0F, new Dilation(0.25F)),
                 ModelTransform.of(0.0F, 0.0F, 0.0F, 0.2618F, 0.0F, 0.0F));
 
-        ModelPartData left_back_claw = leg_left.addChild("foot_left", ModelPartBuilder.create()
-                        .uv(104, 53).cuboid(-5.0F, -2.0F, 1.5F, 2.0F, 2.0F, 5.0F),
-                ModelTransform.of(1.0F, 17.75F, -2.5F, -0.4182F, -0.2182F, 0.0F));
+        ModelPartData foot_left = leg_left.addChild("foot_left", ModelPartBuilder.create()
+                        .uv(104, 53).cuboid(-1.0F, -2.0F, 1.5F, 2.0F, 2.0F, 5.0F),
+                ModelTransform.of(0.0F, 19.0F, -2.0F, 0.0F, -0.2182F, 0.0F));
 
-        ModelPartData left_outside_claw = left_back_claw.addChild("toe_right_r1", ModelPartBuilder.create()
-                        .uv(92, 54).cuboid(-6.0F, -3.0F, -5.0F, 2.0F, 2.0F, 7.0F),
-                ModelTransform.of(-1.25F, 0.5F, -1.5F, 0.6364F, 0.7382F, 0.0F));
+        ModelPartData toe_right_r1 = foot_left.addChild("toe_right_r1", ModelPartBuilder.create()
+                        .uv(92, 54).cuboid(-2.0F, -3.0F, -5.0F, 2.0F, 2.0F, 7.0F),
+                ModelTransform.of(0.0F, 0.0F, 0.0F, 0.2182F, 0.2618F, 0.0F));
 
-        ModelPartData left_inside_claw = left_back_claw.addChild("toe_left_r1", ModelPartBuilder.create()
-                        .uv(92, 54).cuboid(-4.0F, -3.0F, -5.0F, 2.0F, 2.0F, 7.0F),
-                ModelTransform.of(-1.25F, 0.5F, 2.25F, 0.6364F, -0.2618F, 0.0F));
+        ModelPartData toe_left_r1 = foot_left.addChild("toe_left_r1", ModelPartBuilder.create()
+                        .uv(92, 54).cuboid(0.0F, -3.0F, -5.0F, 2.0F, 2.0F, 7.0F),
+                ModelTransform.of(0.0F, 0.0F, 0.0F, 0.2182F, -0.2618F, 0.0F));
 
         ModelPartData leg_right = body.addChild("leg_right", ModelPartBuilder.create(),
                 ModelTransform.pivot(-3.5F, 3.0F, 1.0F));
 
         ModelPartData leg_right_lower_r1 = leg_right.addChild("leg_right_lower_r1", ModelPartBuilder.create()
-                        .uv(79, 48).cuboid(2F, -2.0F, 1.0F, 3.0F, 12.0F, 3.0F,
+                        .uv(79, 48).cuboid(-1.5F, -2.0F, 1.0F, 3.0F, 12.0F, 3.0F,
                                 new Dilation(0.1F)),
                 ModelTransform.of(0.0F, 8.0F, 0.0F, -0.3927F, 0.0F, 0.0F));
 
         ModelPartData armor_leg_right_lower_r1 = leg_right.addChild("armor_leg_right_lower_r1", ModelPartBuilder.create()
-                        .uv(79, 112).cuboid(2F, -2.0F, 1.0F, 3.0F, 12.0F, 3.0F,
+                        .uv(79, 112).cuboid(-1.5F, -2.0F, 1.0F, 3.0F, 12.0F, 3.0F,
                                 new Dilation(0.35F)),
                 ModelTransform.of(0.0F, 8.0F, 0.0F, -0.3927F, 0.0F, 0.0F));
 
         ModelPartData leg_right_upper_r1 = leg_right.addChild("leg_right_upper_r1", ModelPartBuilder.create()
-                        .uv(60, 49).cuboid(1.5F, 0.0F, -1.0F, 4.0F, 9.0F, 5.0F),
+                        .uv(60, 49).cuboid(-2.0F, 0.0F, -1.0F, 4.0F, 9.0F, 5.0F),
                 ModelTransform.of(0.0F, 0.0F, 0.0F, 0.2618F, 0.0F, 0.0F));
 
         ModelPartData armor_leg_right_upper_r1 = leg_right.addChild("armor_leg_right_upper_r1", ModelPartBuilder.create()
-                        .uv(60, 113).cuboid(1.5F, 0.0F, -1.0F, 4.0F, 9.0F, 5.0F, new Dilation(0.25F)),
+                        .uv(60, 113).cuboid(-2.0F, 0.0F, -1.0F, 4.0F, 9.0F, 5.0F, new Dilation(0.25F)),
                 ModelTransform.of(0.0F, 0.0F, 0.0F, 0.2618F, 0.0F, 0.0F));
-        // back toe
-        ModelPartData right_back_claw = leg_right.addChild("foot_right", ModelPartBuilder.create()
-                        .uv(104, 53).cuboid(2.0F, -2.0F, 1.5F, 2.0F, 2.0F, 5.0F),
-                ModelTransform.of(1.0F, 18.25F, -2.5F, -0.4182F, -0.2182F, 0.0F));
-        // inside toe
-        ModelPartData right_inside_claw = right_back_claw.addChild("toe_right_r2", ModelPartBuilder.create()
-                        .uv(92, 54).cuboid(1.0F, -3.0F, -5.0F, 2.0F, 2.0F, 7.0F),
-                ModelTransform.of(0.25F, 2.0F, 1F, 0.6364F, 0.3382F, 0.0F));
-        // outside toe
-        ModelPartData right_outside_claw = right_back_claw.addChild("toe_left_r2", ModelPartBuilder.create()
-                        .uv(92, 54).cuboid(3.0F, -3.0F, -5.0F, 2.0F, 2.0F, 7.0F),
-                ModelTransform.of(-0.5F, 2.25F, -2.25F, 0.6364F, -0.4618F, 0.0F));
+
+        ModelPartData foot_right = leg_right.addChild("foot_right", ModelPartBuilder.create()
+                        .uv(104, 53).cuboid(-1.0F, -2.0F, 1.5F, 2.0F, 2.0F, 5.0F),
+                ModelTransform.of(0.0F, 19.0F, -2.0F, 0.0F, 0.2182F, 0.0F));
+
+        ModelPartData toe_right_r2 = foot_right.addChild("toe_right_r2", ModelPartBuilder.create()
+                        .uv(92, 54).cuboid(-2.0F, -3.0F, -5.0F, 2.0F, 2.0F, 7.0F),
+                ModelTransform.of(0.0F, 0.0F, 0.0F, 0.2182F, 0.2618F, 0.0F));
+
+        ModelPartData toe_left_r2 = foot_right.addChild("toe_left_r2", ModelPartBuilder.create()
+                        .uv(92, 54).cuboid(0.0F, -3.0F, -5.0F, 2.0F, 2.0F, 7.0F),
+                ModelTransform.of(0.0F, 0.0F, 0.0F, 0.2182F, -0.2618F, 0.0F));
 
         return TexturedModelData.of(meshDefinition, 128, 128);
     }
     public void render(@NotNull MatrixStack poseStack, @NotNull VertexConsumer consumer, int packedLightIn, int packedOverlayIn, float red, float green, float blue, float alpha) { this.root.render(poseStack, consumer, packedLightIn, packedOverlayIn, red, green, blue, alpha); }
     private void setRotateAngle(@NotNull ModelPart modelRenderer, float x, float y, float z) {
-        modelRenderer.pivotX = x;
-        modelRenderer.pivotY = y;
-        modelRenderer.pivotZ = z;
+        modelRenderer.pitch = x;
+        modelRenderer.yaw = y;
+        modelRenderer.roll = z;
+    }
+    public void animateModel(@NotNull Chocobo entityIn, float limbSwing, float limbSwingAmount, float partialTick) {
+        super.animateModel(entityIn, limbSwing, limbSwingAmount, partialTick);
     }
     public void setAngles(@NotNull Chocobo entityIn, float limbSwing, float limbSwingAmount, float ageInTicks, float netHeadYaw, float headPitch) {
         // ageInTicks = wing z movement (flutter)
         // netHeadYaw = head y movement
         // headPitch = head x movement
         // cos(limbSwing) and limbSwingAmount = leg movement
-
         float pi = (float) Math.PI;
-
-        // head/neck movement
-        head.pivotX = headPitch * (pi / 180F);
-        head.pivotY = netHeadYaw * (pi / 180F);
-        neck.pivotX = (-0.8F*(netHeadYaw * (pi / 180F)))/8;
-        neck.pivotY = (netHeadYaw * (pi / 180F))/9;
+        head.pitch = headPitch * (pi / 180F);
+        head.yaw = netHeadYaw * (pi / 180F);
+        neck.pitch = (-0.8F*(netHeadYaw * (pi / 180F)))/8;
+        neck.yaw = (netHeadYaw * (pi / 180F))/9;
 
         // walking animation
         this.setRightLegXRotation(MathHelper.cos(limbSwing * 0.6662F) * 0.8F * limbSwingAmount);
         this.setLeftLegXRotation(MathHelper.cos(limbSwing * 0.6662F + pi) * 0.8F * limbSwingAmount);
 
-        // riding animation
+        float right_wing_y = -0.0174533F;
+        float left_wing_y = 0.0174533F;
+        float swing_mod = MathHelper.cos(limbSwing * 0.6662F + pi) * 1.4F * limbSwingAmount;
+
         Vec3d motion = entityIn.getVelocity();
+        if (Math.abs(motion.y) > 0.1F || !entityIn.isOnGround()) {
+            setRotateAngle(this.wing_right, (pi / 2F) - (pi / 12), right_wing_y, -90 + swing_mod);
+            setRotateAngle(this.wing_left, (pi / 2F) - (pi / 12), left_wing_y, 90 + swing_mod);
+            this.setLeftLegXRotation(0.6F);
+            this.setRightLegXRotation(0.6F);
+        } else {
+            // reset wings
+            setRotateAngle(this.wing_right, 0F, right_wing_y, 0F);
+            setRotateAngle(this.wing_left, 0F, left_wing_y, 0F);
+        }
+        // riding animation
 //		if (Math.abs(motion.x) > 0.1F || Math.abs(motion.z) > 0.1F) {
 //			neck.xRot = -0.5F;
 //		} else {
 //			neck.xRot = 0.8F;
 //		}
-
-        // flying animation
-        if (Math.abs(motion.y) > 0.1F || !entityIn.isOnGround()) {
-            setRotateAngle(wing_right, (pi / 2F) - (pi / 12), -0.0174533F, -90 + MathHelper.cos(limbSwing * 0.6662F) * 1.4F * limbSwingAmount);
-            setRotateAngle(wing_left, (pi / 2F) - (pi / 12), 0.0174533F, 90 + MathHelper.cos(limbSwing * 0.6662F + pi) * 1.4F * limbSwingAmount);
-            this.setLeftLegXRotation(0.6F);
-            this.setRightLegXRotation(0.6F);
-        } else {
-            // reset wings
-            setRotateAngle(wing_right, 0F, -0.0174533F, 0F);
-            setRotateAngle(wing_left, 0F, 0.0174533F, 0F);
-        }
     }
-    private void setLeftLegXRotation(float deltaX) { leg_left.pivotX = 0.2094395F + deltaX; }
-    private void setRightLegXRotation(float deltaX) { leg_right.pivotX = 0.2094395F + deltaX; }
+    private void setLeftLegXRotation(float deltaX) { this.leg_left.pitch = 0.2094395F + deltaX; }
+    private void setRightLegXRotation(float deltaX) { this.leg_right.pitch = 0.2094395F + deltaX; }
 }

@@ -100,10 +100,10 @@ public class ChicoboModel<T extends Chocobo> extends EntityModel<Chocobo> {
     }
     @Override
     public void setAngles(Chocobo entity, float limbSwing, float limbSwingAmount, float ageInTicks, float netHeadYaw, float headPitch) {
-        head.pivotX = -(headPitch / 57.29578F);
-        head.pivotY = netHeadYaw / 57.29578F;
-        leg_right.pivotX = MathHelper.cos(limbSwing * 0.6662F) * 1.4F * limbSwingAmount;
-        leg_left.pivotY = MathHelper.cos(limbSwing * 0.6662F + 3.141593F) * 1.4F * limbSwingAmount;
+        head.pitch = -(headPitch / 57.29578F);
+        head.yaw = netHeadYaw / 57.29578F;
+        leg_right.pitch = MathHelper.cos(limbSwing * 0.6662F) * 1.4F * limbSwingAmount;
+        leg_left.yaw = MathHelper.cos(limbSwing * 0.6662F + 3.141593F) * 1.4F * limbSwingAmount;
     }
 
     @Override

@@ -143,26 +143,26 @@ public class ChocoDisguiseModel extends BipedEntityModel<LivingEntity> {
     }
     public void setAngles(@NotNull LivingEntity livingEntity, float limbSwing, float limbSwingAmount, float ageInTicks, float netHeadYaw, float headPitch) {
         if (livingEntity instanceof ArmorStandEntity armorStand) {
-            this.chocobo_head.pivotX = ((float) Math.PI / 180F) * armorStand.getHeadRotation().getPitch();
-            this.chocobo_head.pivotY = ((float) Math.PI / 180F) * armorStand.getHeadRotation().getYaw();
-            this.chocobo_head.pivotZ = ((float) Math.PI / 180F) * armorStand.getHeadRotation().getRoll();
+            this.chocobo_head.pitch = ((float) Math.PI / 180F) * armorStand.getHeadRotation().getPitch();
+            this.chocobo_head.yaw = ((float) Math.PI / 180F) * armorStand.getHeadRotation().getYaw();
+            this.chocobo_head.roll = ((float) Math.PI / 180F) * armorStand.getHeadRotation().getRoll();
             this.chocobo_head.setPivot(0.0F, 1.0F, 0.0F);
-            this.chocobo_body.pivotX = ((float) Math.PI / 180F) * armorStand.getBodyRotation().getPitch();
-            this.chocobo_body.pivotY = ((float) Math.PI / 180F) * armorStand.getBodyRotation().getYaw();
-            this.chocobo_body.pivotZ = ((float) Math.PI / 180F) * armorStand.getBodyRotation().getRoll();
-            this.chocobo_left_arm.pivotX = ((float) Math.PI / 180F) * armorStand.getLeftArmRotation().getPitch();
-            this.chocobo_left_arm.pivotY = ((float) Math.PI / 180F) * armorStand.getLeftArmRotation().getYaw();
-            this.chocobo_left_arm.pivotZ = ((float) Math.PI / 180F) * armorStand.getLeftArmRotation().getRoll();
-            this.chocobo_right_arm.pivotX = ((float) Math.PI / 180F) * armorStand.getRightArmRotation().getPitch();
-            this.chocobo_right_arm.pivotY = ((float) Math.PI / 180F) * armorStand.getRightArmRotation().getYaw();
-            this.chocobo_right_arm.pivotZ = ((float) Math.PI / 180F) * armorStand.getRightArmRotation().getRoll();
-            this.chocobo_leg_left.pivotX = ((float) Math.PI / 180F) * armorStand.getLeftLegRotation().getPitch();
-            this.chocobo_leg_left.pivotY = ((float) Math.PI / 180F) * armorStand.getLeftLegRotation().getYaw();
-            this.chocobo_leg_left.pivotZ = ((float) Math.PI / 180F) * armorStand.getLeftLegRotation().getRoll();
+            this.chocobo_body.pitch = ((float) Math.PI / 180F) * armorStand.getBodyRotation().getPitch();
+            this.chocobo_body.yaw = ((float) Math.PI / 180F) * armorStand.getBodyRotation().getYaw();
+            this.chocobo_body.roll = ((float) Math.PI / 180F) * armorStand.getBodyRotation().getRoll();
+            this.chocobo_left_arm.pitch = ((float) Math.PI / 180F) * armorStand.getLeftArmRotation().getPitch();
+            this.chocobo_left_arm.yaw = ((float) Math.PI / 180F) * armorStand.getLeftArmRotation().getYaw();
+            this.chocobo_left_arm.roll = ((float) Math.PI / 180F) * armorStand.getLeftArmRotation().getRoll();
+            this.chocobo_right_arm.pitch = ((float) Math.PI / 180F) * armorStand.getRightArmRotation().getPitch();
+            this.chocobo_right_arm.yaw = ((float) Math.PI / 180F) * armorStand.getRightArmRotation().getYaw();
+            this.chocobo_right_arm.roll = ((float) Math.PI / 180F) * armorStand.getRightArmRotation().getRoll();
+            this.chocobo_leg_left.pitch = ((float) Math.PI / 180F) * armorStand.getLeftLegRotation().getPitch();
+            this.chocobo_leg_left.yaw = ((float) Math.PI / 180F) * armorStand.getLeftLegRotation().getYaw();
+            this.chocobo_leg_left.roll = ((float) Math.PI / 180F) * armorStand.getLeftLegRotation().getRoll();
             this.chocobo_leg_left.setPivot(1.9F, 11.0F, 0.0F);
-            this.chocobo_leg_right.pivotX = ((float) Math.PI / 180F) * armorStand.getRightLegRotation().getPitch();
-            this.chocobo_leg_right.pivotY = ((float) Math.PI / 180F) * armorStand.getRightLegRotation().getYaw();
-            this.chocobo_leg_right.pivotZ = ((float) Math.PI / 180F) * armorStand.getRightLegRotation().getRoll();
+            this.chocobo_leg_right.pitch = ((float) Math.PI / 180F) * armorStand.getRightLegRotation().getPitch();
+            this.chocobo_leg_right.yaw = ((float) Math.PI / 180F) * armorStand.getRightLegRotation().getYaw();
+            this.chocobo_leg_right.roll = ((float) Math.PI / 180F) * armorStand.getRightLegRotation().getRoll();
             this.chocobo_leg_right.setPivot(-1.9F, 11.0F, 0.0F);
             this.hat.copyTransform(this.chocobo_head);
         } else { super.setAngles(livingEntity, limbSwing, limbSwingAmount, ageInTicks, netHeadYaw, headPitch); }
@@ -205,49 +205,49 @@ public class ChocoDisguiseModel extends BipedEntityModel<LivingEntity> {
         matrixStack.pop();
     }
     public void setHeadRotation() {
-        chocobo_head.pivotX = head.pivotX;
-        chocobo_head.pivotY = head.pivotY;
-        chocobo_head.pivotZ = head.pivotZ;
-        setRotation(chocobo_head, head.pivotX, head.pivotY, head.pivotZ);
+        chocobo_head.pitch = head.pitch;
+        chocobo_head.yaw = head.yaw;
+        chocobo_head.roll = head.roll;
+        setRotation(chocobo_head, head.pitch, head.yaw, head.roll);
     }
     public void setChestRotation() {
         /* if (e instanceof EntityPlayer){ ((EntityPlayer)e).get } */
-        chocobo_body.pivotX = body.pivotX;
-        chocobo_body.pivotY = body.pivotY;
-        chocobo_body.pivotZ = body.pivotZ;
-        chocobo_right_arm.pivotX = rightArm.pivotX;
-        chocobo_right_arm.pivotY = rightArm.pivotY;
-        chocobo_right_arm.pivotZ = rightArm.pivotZ;
-        chocobo_left_arm.pivotX = leftArm.pivotX;
-        chocobo_left_arm.pivotY = leftArm.pivotY;
-        chocobo_left_arm.pivotZ = leftArm.pivotZ;
-        setRotation(chocobo_body, body.pivotX, body.pivotY, body.pivotZ);
-        setRotation(chocobo_right_arm, rightArm.pivotX, rightArm.pivotY, rightArm.pivotZ);
-        setRotation(chocobo_left_arm, leftArm.pivotX, leftArm.pivotY, leftArm.pivotZ);
+        chocobo_body.pitch = body.pitch;
+        chocobo_body.yaw = body.yaw;
+        chocobo_body.roll = body.roll;
+        chocobo_right_arm.pitch = rightArm.pitch;
+        chocobo_right_arm.yaw = rightArm.yaw;
+        chocobo_right_arm.roll = rightArm.roll;
+        chocobo_left_arm.pitch = leftArm.pitch;
+        chocobo_left_arm.yaw = leftArm.yaw;
+        chocobo_left_arm.roll = leftArm.roll;
+        setRotation(chocobo_body, body.pitch, body.yaw, body.roll);
+        setRotation(chocobo_right_arm, rightArm.pitch, rightArm.yaw, rightArm.roll);
+        setRotation(chocobo_left_arm, leftArm.pitch, leftArm.yaw, leftArm.roll);
     }
     public void setLegsRotation() {
-        chocobo_leg_right.pivotX = rightLeg.pivotX;
-        chocobo_leg_right.pivotY = rightLeg.pivotY;
-        chocobo_leg_right.pivotZ = rightLeg.pivotZ;
-        chocobo_leg_left.pivotX = leftLeg.pivotX;
-        chocobo_leg_left.pivotY = leftLeg.pivotY;
-        chocobo_leg_left.pivotZ = leftLeg.pivotZ;
-        setRotation(chocobo_leg_right, rightLeg.pivotX, rightLeg.pivotY, rightLeg.pivotZ);
-        setRotation(chocobo_leg_left, leftLeg.pivotX, leftLeg.pivotY, leftLeg.pivotZ);
+        chocobo_leg_right.pitch = rightLeg.pitch;
+        chocobo_leg_right.yaw = rightLeg.yaw;
+        chocobo_leg_right.roll = rightLeg.roll;
+        chocobo_leg_left.pitch = leftLeg.pitch;
+        chocobo_leg_left.yaw = leftLeg.yaw;
+        chocobo_leg_left.roll = leftLeg.roll;
+        setRotation(chocobo_leg_right, rightLeg.pitch, rightLeg.yaw, rightLeg.roll);
+        setRotation(chocobo_leg_left, leftLeg.pitch, leftLeg.yaw, leftLeg.roll);
     }
     public void setBootRotation() {
-        chocobo_claw_right.pivotX = rightLeg.pivotX;
-        chocobo_claw_right.pivotY = rightLeg.pivotY;
-        chocobo_claw_right.pivotZ = rightLeg.pivotZ;
-        chocobo_claw_left.pivotX = leftLeg.pivotX;
-        chocobo_claw_left.pivotY = leftLeg.pivotY;
-        chocobo_claw_left.pivotZ = leftLeg.pivotZ;
-        setRotation(chocobo_claw_right, rightLeg.pivotX, rightLeg.pivotY, rightLeg.pivotZ);
-        setRotation(chocobo_claw_left, leftLeg.pivotX, leftLeg.pivotY, leftLeg.pivotZ);
+        chocobo_claw_right.pitch = rightLeg.pitch;
+        chocobo_claw_right.yaw = rightLeg.yaw;
+        chocobo_claw_right.roll = rightLeg.roll;
+        chocobo_claw_left.pitch = leftLeg.pitch;
+        chocobo_claw_left.yaw = leftLeg.yaw;
+        chocobo_claw_left.roll = leftLeg.roll;
+        setRotation(chocobo_claw_right, rightLeg.pitch, rightLeg.yaw, rightLeg.roll);
+        setRotation(chocobo_claw_left, leftLeg.pitch, leftLeg.yaw, leftLeg.roll);
     }
     public void setRotation(@NotNull ModelPart modelRenderer, float x, float y, float z) {
-        modelRenderer.pivotX = x;
-        modelRenderer.pivotY = y;
-        modelRenderer.pivotZ = z;
+        modelRenderer.pitch = x;
+        modelRenderer.yaw = y;
+        modelRenderer.roll = z;
     }
 }

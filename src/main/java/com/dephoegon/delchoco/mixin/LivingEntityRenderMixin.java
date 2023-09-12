@@ -12,6 +12,7 @@ import net.minecraft.entity.LivingEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.util.Identifier;
+import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -40,7 +41,7 @@ public abstract class LivingEntityRenderMixin<T extends LivingEntity, M extends 
             }
 
             @Override
-            public Identifier getTexture(LivingEntity entity) {
+            public @Nullable Identifier getTexture(LivingEntity entity) {
                 for (EquipmentSlot slot : EquipmentSlot.values()) {
                     if (slot.getType() == EquipmentSlot.Type.ARMOR) {
                         ItemStack stack = entity.getEquippedStack(slot);
@@ -61,10 +62,5 @@ public abstract class LivingEntityRenderMixin<T extends LivingEntity, M extends 
 
         // Add your custom feature renderer to the features list
         this.features.add(chocoFeature);
-
-
-
-        //noinspection unchecked
-        // this.features.add((FeatureRenderer<T, M>) new ChocoDisguiseFeatureRenderer((FeatureRendererContext<LivingEntity, BipedEntityModel<LivingEntity>>) this));
     }
 }

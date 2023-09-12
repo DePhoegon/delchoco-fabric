@@ -2,6 +2,7 @@ package com.dephoegon.delchoco.client.models.armor;
 
 import com.dephoegon.delchoco.client.clientHandler;
 import com.dephoegon.delchoco.common.items.ChocoDisguiseItem;
+import net.fabricmc.fabric.api.client.rendering.v1.ArmorRenderer;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.model.ModelPart;
 import net.minecraft.client.render.OverlayTexture;
@@ -20,7 +21,7 @@ import net.minecraft.util.Identifier;
 
 import static com.dephoegon.delchoco.common.items.ChocoDisguiseItem.NBTKEY_COLOR;
 
-public class ChocoDisguiseFeatureRenderer extends FeatureRenderer<LivingEntity, BipedEntityModel<LivingEntity>> {
+public class ChocoDisguiseFeatureRenderer extends FeatureRenderer<LivingEntity, BipedEntityModel<LivingEntity>> implements ArmorRenderer {
     private final EntityModelLoader modelLoader;
     public ChocoDisguiseFeatureRenderer(FeatureRendererContext<LivingEntity, BipedEntityModel<LivingEntity>> context) {
         super(context);
@@ -59,5 +60,19 @@ public class ChocoDisguiseFeatureRenderer extends FeatureRenderer<LivingEntity, 
             }
         }
         return null;
+    }
+
+    @Override
+    public void render(MatrixStack matrices, VertexConsumerProvider vertexConsumers, ItemStack stack, LivingEntity entity, EquipmentSlot slot, int light, BipedEntityModel<LivingEntity> contextModel) {
+        if (stack.getItem() instanceof ChocoDisguiseItem chocoDisguiseItem) {
+            NbtCompound color = stack.getNbt();
+            if (color != null && color.contains(NBTKEY_COLOR)) {
+                Identifier texture = chocoDisguiseItem.setCustomModel(color.getString(NBTKEY_COLOR));
+                // Render the armor with the custom texture
+                ModelPart root = this.modelLoader.getModelPart(clientHandler.CHOCO_DISGUISE_LAYER);
+                ChocoDisguiseModel model = new ChocoDisguiseModel(root, slot);
+                model.render(matrices, vertexConsumers.getBuffer(RenderLayer.getEntityTranslucent(texture)), light, OverlayTexture.DEFAULT_UV, 1.0F, 1.0F, 1.0F, 1.0F);
+            }
+        }
     }
 }

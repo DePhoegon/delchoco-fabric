@@ -230,17 +230,16 @@ public class Chocobo extends TameableEntity implements Angerable {
         }
     };
     public final DefaultedList<ItemStack> chocoboBackBoneList = DefaultedList.ofSize(top_tier_chocobo_inv_slot_count, ItemStack.EMPTY);
-    protected void dropLoot(DamageSource source, boolean causedByPlayer)  {
-        super.dropLoot(source, causedByPlayer);
-        Entity entity = source.getAttacker();
-        inventoryDropClear(this.chocoboBackboneInv, entity);
-        inventoryDropClear(this.chocoboSaddleInv, entity);
-        inventoryDropClear(this.chocoboWeaponInv, entity);
-        inventoryDropClear(this.chocoboArmorInv, entity);
+    protected void dropLoot(@NotNull DamageSource source, boolean causedByPlayer)  {
+        inventoryDropClear(this.chocoboBackboneInv, this);
+        inventoryDropClear(this.chocoboSaddleInv, this);
+        inventoryDropClear(this.chocoboWeaponInv, this);
+        inventoryDropClear(this.chocoboArmorInv, this);
         this.chocoboTierOneInv.clear();
         this.chocoboTierTwoInv.clear();
+        super.dropLoot(source, causedByPlayer);
     }
-    protected void inventoryDropClear(Inventory inventory, Entity entity) {
+    protected void inventoryDropClear(@NotNull Inventory inventory, Entity entity) {
         for (int i = 0; i < inventory.size(); ++i) {
             ItemStack itemStack = inventory.getStack(i);
             if (!itemStack.isEmpty()) { entity.dropStack(itemStack); }

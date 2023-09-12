@@ -210,6 +210,27 @@ public class AdultChocoboModel<T extends Chocobo> extends EntityModel<Chocobo> {
     }
     public void animateModel(@NotNull Chocobo entityIn, float limbSwing, float limbSwingAmount, float partialTick) {
         super.animateModel(entityIn, limbSwing, limbSwingAmount, partialTick);
+        float pi = (float) Math.PI;
+        // walking animation
+        this.setRightLegXRotation(MathHelper.cos(limbSwing * 0.6662F) * 0.8F * limbSwingAmount);
+        this.setLeftLegXRotation(MathHelper.cos(limbSwing * 0.6662F + pi) * 0.8F * limbSwingAmount);
+
+        float right_wing_y = -0.0174533F;
+        float left_wing_y = 0.0174533F;
+        float left_swing_mod = 90 + MathHelper.cos(limbSwing * 0.6662F + pi) * 1.4F * limbSwingAmount;
+        float right_swing_mod = -90 + MathHelper.cos(limbSwing * 0.6662F) * 1.4F * limbSwingAmount;
+
+        Vec3d motion = entityIn.getVelocity();
+        if (Math.abs(motion.y) > 0.1F || !entityIn.isOnGround()) {
+            setRotateAngle(this.wing_right, (pi / 2F) - (pi / 12), right_wing_y, right_swing_mod);
+            setRotateAngle(this.wing_left, (pi / 2F) - (pi / 12), left_wing_y, left_swing_mod);
+            this.setLeftLegXRotation(0.6F);
+            this.setRightLegXRotation(0.6F);
+        } else {
+            // reset wings
+            setRotateAngle(this.wing_right, 0F, right_wing_y, 0F);
+            setRotateAngle(this.wing_left, 0F, left_wing_y, 0F);
+        }
     }
     public void setAngles(@NotNull Chocobo entityIn, float limbSwing, float limbSwingAmount, float ageInTicks, float netHeadYaw, float headPitch) {
         // ageInTicks = wing z movement (flutter)
@@ -222,25 +243,7 @@ public class AdultChocoboModel<T extends Chocobo> extends EntityModel<Chocobo> {
         neck.pitch = (-0.8F*(netHeadYaw * (pi / 180F)))/8;
         neck.yaw = (netHeadYaw * (pi / 180F))/9;
 
-        // walking animation
-        this.setRightLegXRotation(MathHelper.cos(limbSwing * 0.6662F) * 0.8F * limbSwingAmount);
-        this.setLeftLegXRotation(MathHelper.cos(limbSwing * 0.6662F + pi) * 0.8F * limbSwingAmount);
 
-        float right_wing_y = -0.0174533F;
-        float left_wing_y = 0.0174533F;
-        float swing_mod = MathHelper.cos(limbSwing * 0.6662F + pi) * 1.4F * limbSwingAmount;
-
-        Vec3d motion = entityIn.getVelocity();
-        if (Math.abs(motion.y) > 0.1F || !entityIn.isOnGround()) {
-            setRotateAngle(this.wing_right, (pi / 2F) - (pi / 12), right_wing_y, -90 + swing_mod);
-            setRotateAngle(this.wing_left, (pi / 2F) - (pi / 12), left_wing_y, 90 + swing_mod);
-            this.setLeftLegXRotation(0.6F);
-            this.setRightLegXRotation(0.6F);
-        } else {
-            // reset wings
-            setRotateAngle(this.wing_right, 0F, right_wing_y, 0F);
-            setRotateAngle(this.wing_left, 0F, left_wing_y, 0F);
-        }
         // riding animation
 //		if (Math.abs(motion.x) > 0.1F || Math.abs(motion.z) > 0.1F) {
 //			neck.xRot = -0.5F;

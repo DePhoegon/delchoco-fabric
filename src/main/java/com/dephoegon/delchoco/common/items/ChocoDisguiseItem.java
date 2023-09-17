@@ -190,6 +190,11 @@ public class ChocoDisguiseItem extends ArmorItem implements IAnimatable {
             return stack.getNbt().getString(NBTKEY_COLOR);
         } else { return yellow; }
     }
+    public static String getNBTKEY_COLOR(@NotNull ItemStack stack) {
+        if (stack.getNbt() != null) {
+            return stack.getNbt().getString(NBTKEY_COLOR);
+        } else { return yellow; }
+    }
     public boolean isFireproof() {
         String color = getNBTKEY_COLOR();
         boolean netherite = this.getMaterial() == NETHERITE_CHOCO_DISGUISE;

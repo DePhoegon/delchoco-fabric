@@ -737,7 +737,7 @@ public class Chocobo extends TameableEntity implements Angerable {
                 super.travel(newVector);
             }
         } else {
-            if (!this.onGround && !this.isTouchingWater() && !this.isInLava() && this.getVelocity().y < 0 && this.useStamina(FloatChocoConfigGet(chocoConfigHolder.chocoboStaminaCostSprint, dSTAMINA_SPRINT.getDefault()))) {
+            if (!this.onGround && !this.isTouchingWater() && !this.isInLava() && this.getVelocity().y < 0 && this.useStamina(FloatChocoConfigGet(chocoConfigHolder.chocoboStaminaCostGlide, dSTAMINA_SPRINT.getDefault()))) {
                 Vec3d motion = getVelocity();
                 setVelocity(new Vec3d(motion.x, motion.y * 0.65F, motion.z));
             }

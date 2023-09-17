@@ -257,7 +257,7 @@ public class ChocoboCombatEvents {
      * False if any are not ChocoDisguiseItems, or if any are not the correct slot type
      * @implNote Requires all armor slot pieces to be ChocoDisguiseItems
      */
-    private static boolean armorColorMatch(@NotNull ItemStack headItemStack, ItemStack chestItemStack, ItemStack legsItemStack, ItemStack bootItemStack) {
+    public static boolean armorColorMatch(@NotNull ItemStack headItemStack, ItemStack chestItemStack, ItemStack legsItemStack, ItemStack bootItemStack) {
         boolean matched = armorMatch(headItemStack, chestItemStack, legsItemStack, bootItemStack);
         if (!matched) { return false; }
         return getNBTKEY_COLOR(headItemStack).equals(getNBTKEY_COLOR(chestItemStack)) && getNBTKEY_COLOR(headItemStack).equals(getNBTKEY_COLOR(legsItemStack)) && getNBTKEY_COLOR(headItemStack).equals(getNBTKEY_COLOR(bootItemStack));
@@ -268,7 +268,7 @@ public class ChocoboCombatEvents {
      * False if any are not ChocoDisguiseItems, or if any are not the correct slot type
      * @implNote Requires all armor slot pieces to be ChocoDisguiseItems
      */
-    private static boolean armorMatch(@NotNull ItemStack headItemStack, @NotNull ItemStack chestItemStack, @NotNull ItemStack legsItemStack, @NotNull ItemStack bootItemStack) {
+    public static boolean armorMatch(@NotNull ItemStack headItemStack, @NotNull ItemStack chestItemStack, @NotNull ItemStack legsItemStack, @NotNull ItemStack bootItemStack) {
         ChocoDisguiseItem headItem = headItemStack.getItem() instanceof ChocoDisguiseItem e ? e.getSlotType() == EquipmentSlot.HEAD ? e : null : null;
         ChocoDisguiseItem chestItem = chestItemStack.getItem() instanceof ChocoDisguiseItem e ? e.getSlotType() == EquipmentSlot.CHEST ? e : null : null;
         ChocoDisguiseItem legsItem = legsItemStack.getItem() instanceof ChocoDisguiseItem e ? e.getSlotType() == EquipmentSlot.LEGS ? e : null : null;

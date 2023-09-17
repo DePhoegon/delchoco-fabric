@@ -2,7 +2,6 @@ package com.dephoegon.delchoco.client;
 
 import com.dephoegon.delchoco.DelChoco;
 import com.dephoegon.delchoco.client.gui.NestScreen;
-import com.dephoegon.delchoco.client.models.armor.ChocoDisguiseModel;
 import com.dephoegon.delchoco.client.models.entities.AdultChocoboModel;
 import com.dephoegon.delchoco.client.models.entities.ChicoboModel;
 import com.dephoegon.delchoco.common.init.ModContainers;
@@ -19,6 +18,7 @@ public class clientHandler {
     public static final EntityModelLayer CHICOBO_LAYER = new EntityModelLayer(new Identifier(DelChoco.DELCHOCO_ID, "main"), "chicobo");
     public static final EntityModelLayer CHOCO_DISGUISE_LAYER = new EntityModelLayer(new Identifier(DelChoco.DELCHOCO_ID, "main"), "choco_disguise");
 
+    @SuppressWarnings("deprecation")
     public static void ChocoboRendering() {
         BlockRenderLayerMap.INSTANCE.putBlock(ModItems.GYSAHL_GREEN, RenderLayer.getCutout());
         ScreenRegistry.register(ModContainers.NEST, NestScreen::new);
@@ -27,6 +27,5 @@ public class clientHandler {
     public static void registerLayerDefinitions() {
         EntityModelLayerRegistry.registerModelLayer(CHOCOBO_LAYER, AdultChocoboModel::createBodyLayer);
         EntityModelLayerRegistry.registerModelLayer(CHICOBO_LAYER, ChicoboModel::createBodyLayer);
-        EntityModelLayerRegistry.registerModelLayer(CHOCO_DISGUISE_LAYER, ChocoDisguiseModel::createArmorDefinition);
     }
 }

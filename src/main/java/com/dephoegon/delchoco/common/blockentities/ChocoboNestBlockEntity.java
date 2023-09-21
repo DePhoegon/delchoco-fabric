@@ -13,6 +13,7 @@ import com.dephoegon.delchoco.common.inventory.NestContainer;
 import com.dephoegon.delchoco.common.items.ChocoboEggBlockItem;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.entity.BlockEntity;
+import net.minecraft.block.entity.BlockEntityTicker;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.inventory.Inventory;
@@ -38,9 +39,14 @@ import static com.dephoegon.delchoco.DelChoco.chocoConfigHolder;
 import static com.dephoegon.delchoco.common.blocks.ChocoboEggBlock.NBTKEY_BREEDINFO;
 import static com.dephoegon.delchoco.common.entities.breeding.ChocoboBreedInfo.getFromNbtOrDefault;
 
-public class ChocoboNestBlockEntity extends BlockEntity implements NamedScreenHandlerFactory {
+public class ChocoboNestBlockEntity extends BlockEntity implements NamedScreenHandlerFactory, BlockEntityTicker {
     public ChocoboNestBlockEntity(BlockPos pos, BlockState state) { super(ChocoList.STRAW_NEST_BLOCK_ENTITY, pos, state); }
     public static final Identifier UPDATE_PACKET_ID = new Identifier(DelChoco.DELCHOCO_ID, "block_entity_update");
+
+    @Override
+    public void tick(World world, BlockPos pos, BlockState state, BlockEntity blockEntity) {
+        serverTick(world, pos, state, (ChocoboNestBlockEntity) blockEntity);
+    }
 
     private record CheckOffset(Vec3i offset, boolean shouldBeAir) {
     }

@@ -25,8 +25,10 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.stream.Stream;
 
+import static com.dephoegon.delchoco.aid.ChocoList.STRAW_NEST_BLOCK_ENTITY;
+
 public class StrawNestBlock extends BlockWithEntity {
-    public static final BooleanProperty HAS_EGG = BooleanProperty.of("has_egg");
+    public static final BooleanProperty HAS_EGG = BooleanProperty.of("egg");
     private static final VoxelShape EMPTY_SHAPE = Stream.of(
             Block.createCuboidShape(1, 0, 1, 15, 1, 15),
             Block.createCuboidShape(0, 1, 0, 16, 3, 2),
@@ -78,7 +80,7 @@ public class StrawNestBlock extends BlockWithEntity {
     }
     @Nullable
     public <T extends BlockEntity> BlockEntityTicker<T> getTicker(World world, BlockState state, BlockEntityType<T> type) {
-        return super.getTicker(world, state, type);
+        return checkType(type, STRAW_NEST_BLOCK_ENTITY, world.isClient ? null : ChocoboNestBlockEntity::serverTick);
     }
     @Nullable
     public <T extends BlockEntity> GameEventListener getGameEventListener(World world, T blockEntity) {

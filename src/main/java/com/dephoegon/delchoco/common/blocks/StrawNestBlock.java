@@ -74,7 +74,7 @@ public class StrawNestBlock extends BlockWithEntity {
     }
     @Nullable
     public BlockEntity createBlockEntity(BlockPos pos, BlockState state) {
-        return null;
+        return new ChocoboNestBlockEntity(pos, state);
     }
     @Nullable
     public <T extends BlockEntity> BlockEntityTicker<T> getTicker(World world, BlockState state, BlockEntityType<T> type) {

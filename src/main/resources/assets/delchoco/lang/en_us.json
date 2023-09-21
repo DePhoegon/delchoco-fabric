@@ -1,12 +1,12 @@
 {
-    "itemGroup.dephoegon_chocobos": "DePhoegons' Chocobos",
+    "itemGroup.delchoco.dephoegon_chocobos": "DePhoegons' Chocobos",
 
     "block.delchoco.gysahl_green": "Gysahl Green",
-    "block.delchoco.chocobo_egg": "Chocobo Egg",
-    "block.delchoco.straw_nest": "Chocobo Nest",
+    "item.delchoco.chocobo_egg": "Chocobo Egg",
+    "item.delchoco.straw_nest": "Chocobo Nest",
 
     "entity.delchoco.chocobo": "Chocobo",
-    "tooltip.delchoco.info.spawn_egg": "Not Compatible with Spawners",
+    "tooltip.delchoco.info.spawn_egg": "Spawners will Spawn Chocobos as if naturally spawn in the world",
 
     "item.delchoco.gysahl_green": "Gysahl Green",
     "item.delchoco.gysahl_green_seeds": "Gysahl Green Seeds",

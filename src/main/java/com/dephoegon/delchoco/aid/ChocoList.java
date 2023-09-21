@@ -39,7 +39,7 @@ public class ChocoList {
     public static BlockEntityType<ChocoboEggBlockEntity> CHOCOBO_EGG_BLOCK_ENTITY;
     public static void registerBlockEntities() {
         DelChoco.LOGGER.info("Registering Block Entities");
-        STRAW_NEST_BLOCK_ENTITY = Registry.register(Registry.BLOCK_ENTITY_TYPE, new Identifier(DelChoco.DELCHOCO_ID, "chocobo_nest"), FabricBlockEntityTypeBuilder.create(ChocoboNestBlockEntity::new, STRAW_NEST).build(null));
+        STRAW_NEST_BLOCK_ENTITY = Registry.register(Registry.BLOCK_ENTITY_TYPE, new Identifier(DelChoco.DELCHOCO_ID, "straw_nest"), FabricBlockEntityTypeBuilder.create(ChocoboNestBlockEntity::new, STRAW_NEST).build(null));
         CHOCOBO_EGG_BLOCK_ENTITY = Registry.register(Registry.BLOCK_ENTITY_TYPE, new Identifier(DelChoco.DELCHOCO_ID, "chocobo_egg"), FabricBlockEntityTypeBuilder.create(ChocoboEggBlockEntity::new, CHOCOBO_EGG).build(null));
     }
 }

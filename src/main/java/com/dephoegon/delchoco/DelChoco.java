@@ -23,19 +23,17 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import software.bernie.geckolib3.renderers.geo.GeoArmorRenderer;
 
-import static net.minecraft.item.Items.BONE_MEAL;
+import static com.dephoegon.delchoco.common.init.ModItems.CHOCOBO_SADDLE;
 
 public class DelChoco implements ModInitializer, ClientModInitializer {
 	public static final String DELCHOCO_ID = "delchoco";
     public static final Logger LOGGER = LoggerFactory.getLogger(DELCHOCO_ID);
 	public static final ItemGroup DELCHOCO_ITEMS = FabricItemGroupBuilder.build(new Identifier(DELCHOCO_ID, "dephoegon_chocobos"),
-			() -> new ItemStack(BONE_MEAL));
+			() -> new ItemStack(CHOCOBO_SADDLE));
 	public static ChocoboConfig chocoConfigHolder;
 	public static WorldConfig worldConfigHolder;
 
 	public void onInitialize() {
-
-		LOGGER.info("Hello Fabric world!");
 		chocoConfigHolder = Configuration.registerConfig(ChocoboConfig.class, ConfigFormats.yaml()).getConfigInstance();
 		worldConfigHolder = Configuration.registerConfig(WorldConfig.class, ConfigFormats.yaml()).getConfigInstance();
 		ModEntities.registerAttributes();

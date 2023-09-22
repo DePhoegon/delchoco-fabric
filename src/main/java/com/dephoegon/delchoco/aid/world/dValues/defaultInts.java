@@ -18,7 +18,9 @@ public enum defaultInts {
     dMUSHROOM_SPAWN_WEIGHT(0, 2, 4),
     dNETHER_SPAWN_WEIGHT(75, 100, 200),
     dEND_SPAWN_WEIGHT(75, 100, 200),
-    dGYSAHL_GREEN_PATCH_SIZE(0, 64, 128);
+    dGYSAHL_GREEN_PATCH_SIZE(0, 64, 128),
+    dGIFTED_WATER_BREATHER_STATUS(300, 1500, 12000),
+    dFRUIT_COOL_DOWN(40, 60, 600);
 
     private final int Min;
     private final int Default;

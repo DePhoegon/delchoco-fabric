@@ -53,22 +53,14 @@ public class GysahlGreenBlock extends PlantBlock
         block_set.add(13, Blocks.TUFF.getDefaultState());
         return block_set;
     }
-    public VoxelShape getOutlineShape(BlockState state, BlockView world, BlockPos pos, ShapeContext context) {
+    public VoxelShape getOutlineShape(@NotNull BlockState state, BlockView world, BlockPos pos, ShapeContext context) {
         return AGE_TO_SHAPE[state.get(this.getAgeProperty())];
     }
-    protected int getAge(BlockState state) {
-        return state.get(this.getAgeProperty());
-    }
-    public BlockState withAge(int age) {
-        return (BlockState)this.getDefaultState().with(this.getAgeProperty(), age);
-    }
-    public boolean isMature(BlockState state) {
-        return state.get(this.getAgeProperty()) >= this.getMaxAge();
-    }
-    public boolean hasRandomTicks(BlockState state) {
-        return !this.isMature(state);
-    }
-    public void randomTick(BlockState state, ServerWorld world, BlockPos pos, Random random) {
+    protected int getAge(@NotNull BlockState state) { return state.get(this.getAgeProperty()); }
+    public BlockState withAge(int age) { return (BlockState)this.getDefaultState().with(this.getAgeProperty(), age); }
+    public boolean isMature(@NotNull BlockState state) { return state.get(this.getAgeProperty()) >= this.getMaxAge(); }
+    public boolean hasRandomTicks(BlockState state) { return !this.isMature(state); }
+    public void randomTick(BlockState state, @NotNull ServerWorld world, BlockPos pos, Random random) {
         float f;
         int i;
         if (world.getBaseLightLevel(pos, 0) >= 9 && (i = this.getAge(state)) < this.getMaxAge() && random.nextInt((int)(25.0f / (f = GysahlGreenBlock.getAvailableMoisture(this, world, pos))) + 1) == 0) {
@@ -78,15 +70,11 @@ public class GysahlGreenBlock extends PlantBlock
     public void applyGrowth(World world, BlockPos pos, BlockState state) {
         int j;
         int i = this.getAge(state) + this.getGrowthAmount(world);
-        if (i > (j = this.getMaxAge())) {
-            i = j;
-        }
+        if (i > (j = this.getMaxAge())) { i = j; }
         world.setBlockState(pos, this.withAge(i), Block.NOTIFY_LISTENERS);
     }
-    protected int getGrowthAmount(World world) {
-        return MathHelper.nextInt(world.random, 2, 5);
-    }
-    protected static float getAvailableMoisture(Block block, BlockView world, BlockPos pos) {
+    protected int getGrowthAmount(@NotNull World world) { return MathHelper.nextInt(world.random, 2, 5); }
+    protected static float getAvailableMoisture(Block block, BlockView world, @NotNull BlockPos pos) {
         boolean bl2;
         float f = 1.0f;
         BlockPos blockPos = pos.down();
@@ -132,19 +120,9 @@ public class GysahlGreenBlock extends PlantBlock
         }
         super.onEntityCollision(state, world, pos, entity);
     }
-    public ItemStack getPickStack(BlockView world, BlockPos pos, BlockState state) {
-        return new ItemStack(this.getSeedsItem());
-    }
-    public boolean isFertilizable(BlockView world, BlockPos pos, BlockState state, boolean isClient) {
-        return !this.isMature(state);
-    }
-    public boolean canGrow(World world, Random random, BlockPos pos, BlockState state) {
-        return true;
-    }
-    public void grow(ServerWorld world, Random random, BlockPos pos, BlockState state) {
-        this.applyGrowth(world, pos, state);
-    }
-    protected void appendProperties(StateManager.Builder<Block, BlockState> builder) {
-        builder.add(AGE);
-    }
+    public ItemStack getPickStack(BlockView world, BlockPos pos, BlockState state) { return new ItemStack(this.getSeedsItem()); }
+    public boolean isFertilizable(BlockView world, BlockPos pos, BlockState state, boolean isClient) { return !this.isMature(state); }
+    public boolean canGrow(World world, Random random, BlockPos pos, BlockState state) { return true; }
+    public void grow(ServerWorld world, Random random, BlockPos pos, BlockState state) { this.applyGrowth(world, pos, state); }
+    protected void appendProperties(StateManager.@NotNull Builder<Block, BlockState> builder) { builder.add(AGE); }
 }

@@ -1,6 +1,6 @@
 {
   "parent": "minecraft:item/generated",
   "textures": {
-    "layer0": "delchoco:item/blue_chocobo_spawn_egg"
+    "layer0": "delchoco:item/eggs/blue_chocobo_spawn_egg"
   }
 }

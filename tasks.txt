@@ -4,9 +4,49 @@
 + Config Comments
 -- include min/max accepted
 
-+ Chocbo Names
--- Added RNG to spawned Chicbos from Breeding & to wild Chocobos on Tamed.
++ Chocobo Names
+-- Added RNG to spawn Chicbos from Breeding & to wild Chocobos on Tamed.
 
-------------
++ Add Chocobo Stat increase items back in
 
-- Add Chocobo Stat increase items back in
++ Add Methods to increase chocobo stats by 1 up to Max limit
+
++ Json Files for greens
+
++ Timers to prevent spamming
+
++ retrieved item PNGs
+
++ logic preventions
+-- Chocobos with real Water Breathing do not eat Aqua Berries
+-- Chocobos without real WaterBreathing do not eat Aero Shrooms
+
++ Made it easier to look at the item folder of images
+
++ Changed Creative Tab Menu icon to Chocobo Saddle
+
+- Methods of obtaining items
+-- dead pepper
+== Desert Temples
+== Craft - Lovely Gysahl + dead bush
+== Trade - T4
+-- golden Gysahl Green
+== End City Ships
+== Craft - Lovely Gysahl + 4 Golden Apples
+== Trade - T5
+-- pink Gysahl Green
+== Jungle Temples
+== Craft - Lovely + 8 beats
+== Trade - T3
+-- spike fruit
+== UnderWater Temples
+== Craft - Lovely + diamond + 1 netherite Debris
+== Trade - T4
+-- aero Shroom
+== all dungeon loot
+== Craft - berries + Gysahl Greens
+== Trade - T2
+-- aqua berry
+== all dungeon loot
+== Craft - berries + Gysahl Seeds
+== Trade - T2

@@ -87,6 +87,16 @@ public class ChocoboConfig {
     public double chocoboStaminaCostJump = dSTAMINA_JUMP.getDefault();
 
     @Configurable
+    @Configurable.Comment("The Time in Ticks, a Aqua Berry will give a chocobo water breathing, or a aero Shroom will keep WaterBreathing Chocobo Afloat. min 300, max 12000, default 1500")
+    @Configurable.Range(min = 300, max = 12000)
+    public int chocoboFruitTimer = dGIFTED_WATER_BREATHER_STATUS.getDefault();
+
+    @Configurable
+    @Configurable.Comment("The Time in Ticks, the cooldown time a chocobo has between eating non-Gysahl Green. min 40, max 600, default 60")
+    @Configurable.Range(min = 40, max = 600)
+    public int chocoboFruitCoolDown = dFRUIT_COOL_DOWN.getDefault();
+
+    @Configurable
     @Configurable.Comment("The possible amount of percent Stats passed on the the chicbo gains in the breeding process. min 0, max 1, default 0.1 - Double")
     @Configurable.DecimalRange(min = 0, max = 1)
     public double chocoboPossibleGain = dPOS_GAIN.getDefault();

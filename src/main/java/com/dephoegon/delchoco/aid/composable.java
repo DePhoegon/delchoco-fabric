@@ -6,7 +6,7 @@ import org.jetbrains.annotations.NotNull;
 import static com.dephoegon.delchoco.common.init.ModItems.*;
 import static net.minecraft.block.ComposterBlock.ITEM_TO_LEVEL_INCREASE_CHANCE;
 
-public class composables {
+public class composable {
     private static void compost() {
         ITEM_TO_LEVEL_INCREASE_CHANCE.defaultReturnValue();
         float f = 0.3F;
@@ -22,7 +22,6 @@ public class composables {
         add(f3, CHOCOBO_DRUMSTICK_COOKED);
         add(f3, CHOCOBO_DRUMSTICK_RAW);
         add(f4, LOVELY_GYSAHL_GREEN);
-        add(f4, STRAW_NEST_ITEM);
         add(f4, GYSAHL_CAKE);
         add(f4, LEATHER_CHOCO_DISGUISE_LEGS);
         add(f4, LEATHER_CHOCO_DISGUISE_BOOTS);

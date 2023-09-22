@@ -23,11 +23,10 @@ public class LayerMaleTrims extends FeatureRenderer<Chocobo, EntityModel<Chocobo
         this.alpha = layerAlpha;
     }
     public void render(@NotNull MatrixStack matrixStackIn, @NotNull VertexConsumerProvider bufferIn, int packedLightIn, @NotNull Chocobo chocobo, float limbSwing, float limbSwingAmount, float partialTicks, float ageInTicks, float netHeadYaw, float headPitch) {
-        if (!chocobo.isInvisible() && chocobo.isMale()) {
-            if (!chocobo.isBaby()) {
-                VertexConsumer vertexconsumer = bufferIn.getBuffer(RenderLayer.getEntityTranslucent(chocobo.isTamed() ? tamed : notTamed, false));
-                this.getContextModel().render(matrixStackIn, vertexconsumer, packedLightIn, LivingEntityRenderer.getOverlay(chocobo, 0F), 1F, 1F, 1F, alpha);
-            }
+        float mAlpha = chocobo.isMale() ? alpha : 0F;
+        if (!chocobo.isInvisible() && !chocobo.isBaby()) {
+            VertexConsumer vertexconsumer = bufferIn.getBuffer(RenderLayer.getEntityTranslucent(chocobo.isTamed() ? tamed : notTamed, false));
+            this.getContextModel().render(matrixStackIn, vertexconsumer, packedLightIn, LivingEntityRenderer.getOverlay(chocobo, 0F), 1F, 1F, 1F, mAlpha);
         }
     }
 }

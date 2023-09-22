@@ -83,10 +83,12 @@ import static com.dephoegon.delchoco.DelChoco.chocoConfigHolder;
 import static com.dephoegon.delchoco.DelChoco.worldConfigHolder;
 import static com.dephoegon.delchoco.aid.chocoKB.isChocoShiftDown;
 import static com.dephoegon.delchoco.aid.chocoKB.isChocoboWaterGlide;
+import static com.dephoegon.delchoco.aid.chocoboChecks.IS_OCEAN;
 import static com.dephoegon.delchoco.aid.chocoboChecks.*;
 import static com.dephoegon.delchoco.aid.dyeList.getDyeList;
 import static com.dephoegon.delchoco.aid.world.WorldConfig.FloatChocoConfigGet;
 import static com.dephoegon.delchoco.aid.world.dValues.defaultDoubles.*;
+import static com.dephoegon.delchoco.common.entities.breeding.BreedingHelper.getChocoName;
 import static com.dephoegon.delchoco.common.entities.breeding.ChocoboSnap.setChocoScale;
 import static com.dephoegon.delchoco.common.init.ModItems.*;
 import static com.dephoegon.delchoco.common.init.ModSounds.AMBIENT_SOUND;
@@ -1121,6 +1123,8 @@ public class Chocobo extends TameableEntity implements Angerable {
                     this.setTamed(true);
                     this.setCollarColor(16);
                     player.sendMessage(new TranslatableText(DelChoco.DELCHOCO_ID + ".entity_chocobo.tame_success"), true);
+                    if (!this.hasCustomName()) { this.setCustomName(getChocoName()); }
+                    this.setCustomNameVisible(true);
                 } else { player.sendMessage(new TranslatableText(DelChoco.DELCHOCO_ID + ".entity_chocobo.tame_fail"), true); }
                 return ActionResult.SUCCESS;
             }
@@ -1168,10 +1172,17 @@ public class Chocobo extends TameableEntity implements Angerable {
     protected SoundEvent getDeathSound() { return AMBIENT_SOUND; }
     protected float getSoundVolume() { return .6f; }
     public int getMinAmbientSoundDelay() { return (24 * (int) (Math.random() * 100)); }
+    @SuppressWarnings("OptionalGetWithoutIsPresent")
     public boolean canSpawn(@NotNull WorldAccess worldIn, @NotNull SpawnReason spawnReasonIn) {
         ServerWorldAccess theWorld = Objects.requireNonNull(worldIn.getServer()).getWorld(this.world.getRegistryKey());
         if (!isOverworld(theWorld) && theWorld != null) {
             if (isEnd(theWorld)) { return !this.world.getBlockState(getBlockPos().down()).isAir();} else { return true; }
+        }
+        assert theWorld != null;
+        RegistryKey<Biome> biomes = theWorld.getBiome(getBlockPos().down()).getKey().get();
+        if (isOverworld(theWorld)) {
+            if (IS_OCEAN().contains(biomes)) { return isOceanBlocked(biomes, true); }
+            else return true;
         }
         return super.canSpawn(worldIn, spawnReasonIn);
     }

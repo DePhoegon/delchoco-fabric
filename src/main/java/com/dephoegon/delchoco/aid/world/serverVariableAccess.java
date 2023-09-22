@@ -1,7 +1,7 @@
 package com.dephoegon.delchoco.aid.world;
 
 import com.dephoegon.delchoco.DelChoco;
-import com.dephoegon.delchoco.aid.composables;
+import com.dephoegon.delchoco.aid.composable;
 import com.dephoegon.delchoco.client.ChocoboSprintingEventHandler;
 import com.dephoegon.delchoco.common.commands.chocoboTeams;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
@@ -15,7 +15,7 @@ public class serverVariableAccess {
             ClientTickEvents.END_CLIENT_TICK.register(client -> {
                 ChocoboSprintingEventHandler.onKeyPress();
             });
-            composables.addToList();
+            composable.addToList();
             CommandRegistrationCallback.EVENT.register((dispatcher, dedicated) -> {
                 chocoboTeams.commands(dispatcher);
             });

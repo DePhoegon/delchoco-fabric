@@ -1,0 +1,12 @@
++ chocobo spawns
+-- double check
+
++ Config Comments
+-- include min/max accepted
+
++ Chocbo Names
+-- Added RNG to spawned Chicbos from Breeding & to wild Chocobos on Tamed.
+
+------------
+
+- Add Chocobo Stat increase items back in

@@ -20,6 +20,8 @@ public class LayerCollarTells extends FeatureRenderer<Chocobo, EntityModel<Choco
     private final Identifier MALE_CHOCOBO = new Identifier(DelChoco.DELCHOCO_ID, "textures/entities/chocobos/collars/m_tell.png");
     private final Identifier MALE_CHICOBO = new Identifier(DelChoco.DELCHOCO_ID, "textures/entities/chicobos/collars/m_tell.png");
     private final Identifier FEMALE_CHICOBO = new Identifier(DelChoco.DELCHOCO_ID, "textures/entities/chicobos/collars/f_tell.png");
+    private final Identifier tamed = new Identifier(DelChoco.DELCHOCO_ID, "textures/entities/chocobos/tamed_plumes/male.png");
+    private final Identifier notTamed = new Identifier(DelChoco.DELCHOCO_ID, "textures/entities/chocobos/untamed_plumes/male.png");
 
     public LayerCollarTells(FeatureRendererContext<Chocobo, EntityModel<Chocobo>> rendererIn, float visibleAlpha, float invisibleAlpha) {
         super(rendererIn);
@@ -28,13 +30,20 @@ public class LayerCollarTells extends FeatureRenderer<Chocobo, EntityModel<Choco
     }
 
     public void render(@NotNull MatrixStack matrixStackIn, @NotNull VertexConsumerProvider bufferIn, int packedLightIn, @NotNull Chocobo chocoboEntity, float limbSwing, float limbSwingAmount, float partialTicks, float ageInTicks, float netHeadYaw, float headPitch) {
+        float mTellAlpha = chocoboEntity.isMale() ? .35F : 0F;
+        Identifier TELL = notTamed;
         if (chocoboEntity.isTamed()) {
+            TELL = tamed;
             Identifier COLLAR = chocoboEntity.isBaby() ? chocoboEntity.isMale() ? MALE_CHICOBO : FEMALE_CHICOBO : chocoboEntity.isMale() ? MALE_CHOCOBO : FEMALE_CHOCOBO;
             float alpha = chocoboEntity.isInvisible() ? hide : show;
             if (alpha != 0F) {
                 VertexConsumer vertexconsumer = bufferIn.getBuffer(RenderLayer.getEntityTranslucent(COLLAR, false));
                 this.getContextModel().render(matrixStackIn, vertexconsumer, packedLightIn, LivingEntityRenderer.getOverlay(chocoboEntity, 0F), 1F, 1F, 1F, alpha);
             }
+        }
+        if (!chocoboEntity.isInvisible() && !chocoboEntity.isBaby()) {
+            VertexConsumer vertexconsumer = bufferIn.getBuffer(RenderLayer.getEntityTranslucent(TELL, false));
+            this.getContextModel().render(matrixStackIn, vertexconsumer, packedLightIn, LivingEntityRenderer.getOverlay(chocoboEntity, 0F), 1F, 1F, 1F, mTellAlpha);
         }
     }
 }

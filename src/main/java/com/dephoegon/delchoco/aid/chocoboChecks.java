@@ -42,6 +42,21 @@ public class chocoboChecks {
         out.add(BiomeKeys.DEEP_LUKEWARM_OCEAN);
         out.add(BiomeKeys.WARM_OCEAN);
         out.add(BiomeKeys.RIVER);
+        out.add(BiomeKeys.FROZEN_OCEAN);
+        out.add(BiomeKeys.DEEP_FROZEN_OCEAN);
+        return out;
+    }
+    public static @NotNull ArrayList<RegistryKey<Biome>> IS_OCEAN() {
+        ArrayList<RegistryKey<Biome>> out = new ArrayList<>();
+        out.add(BiomeKeys.WARM_OCEAN);
+        out.add(BiomeKeys.LUKEWARM_OCEAN);
+        out.add(BiomeKeys.DEEP_LUKEWARM_OCEAN);
+        out.add(BiomeKeys.OCEAN);
+        out.add(BiomeKeys.DEEP_OCEAN);
+        out.add(BiomeKeys.COLD_OCEAN);
+        out.add(BiomeKeys.DEEP_COLD_OCEAN);
+        out.add(BiomeKeys.FROZEN_OCEAN);
+        out.add(BiomeKeys.DEEP_FROZEN_OCEAN);
         return out;
     }
     private static @NotNull ArrayList<RegistryKey<Biome>> greenChocobo() {
@@ -90,19 +105,6 @@ public class chocoboChecks {
     public static @NotNull ArrayList<RegistryKey<Biome>> IS_MUSHROOM() {
         ArrayList<RegistryKey<Biome>> out = new ArrayList<>();
         out.add(BiomeKeys.MUSHROOM_FIELDS);
-        return out;
-    }
-    private static @NotNull ArrayList<RegistryKey<Biome>> IS_OCEAN() {
-        ArrayList<RegistryKey<Biome>> out = new ArrayList<>();
-        out.add(BiomeKeys.WARM_OCEAN);
-        out.add(BiomeKeys.LUKEWARM_OCEAN);
-        out.add(BiomeKeys.DEEP_LUKEWARM_OCEAN);
-        out.add(BiomeKeys.OCEAN);
-        out.add(BiomeKeys.DEEP_OCEAN);
-        out.add(BiomeKeys.COLD_OCEAN);
-        out.add(BiomeKeys.DEEP_COLD_OCEAN);
-        out.add(BiomeKeys.FROZEN_OCEAN);
-        out.add(BiomeKeys.DEEP_FROZEN_OCEAN);
         return out;
     }
     public static boolean isOverworld(ServerWorldAccess world) {

@@ -6,7 +6,7 @@ import com.dephoegon.delchoco.common.init.ModAttributes;
 import com.dephoegon.delchoco.common.init.ModEntities;
 import net.minecraft.block.BlockState;
 import net.minecraft.entity.attribute.EntityAttributes;
-import net.minecraft.item.ItemStack;
+import net.minecraft.text.Text;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import org.jetbrains.annotations.NotNull;
@@ -25,7 +25,7 @@ import static java.lang.Math.*;
 public class BreedingHelper {
     private static double minCheck(double one, double two) { return round((one + two) / 2) < 11 ? round((one+two)/2+1) : round((one + two) / 2); }
 
-    public static @Nullable Chocobo createChild(ChocoboBreedInfo breedInfo, World world, ItemStack egg) {
+    public static @Nullable Chocobo createChild(ChocoboBreedInfo breedInfo, World world) {
         final Chocobo baby = ModEntities.CHOCOBO_ENTITY.create(world);
         if (baby == null) { return null; }
         final ChocoboStatSnapshot mother = breedInfo.getMother();
@@ -46,7 +46,7 @@ public class BreedingHelper {
         Objects.requireNonNull(baby.getAttributeInstance(EntityAttributes.GENERIC_ARMOR)).setBaseValue(min(defence, chocoConfigHolder.chocoboMaxArmor));
         double toughness = minCheck(mother.toughness, father.toughness) * (chocoConfigHolder.chocoboPossibleLoss + ((float) random() * (chocoConfigHolder.chocoboPossibleGain +25D)));
         toughness = Math.max(toughness, chocoConfigHolder.chocoboArmorToughness);
-        Objects.requireNonNull(baby.getAttributeInstance(EntityAttributes.GENERIC_ARMOR_TOUGHNESS)).setBaseValue(min(toughness, chocoConfigHolder.chocoboArmorToughness));
+        Objects.requireNonNull(baby.getAttributeInstance(EntityAttributes.GENERIC_ARMOR_TOUGHNESS)).setBaseValue(min(toughness, chocoConfigHolder.chocoboMaxArmorToughness));
 
         ChocoboColor yellow = ChocoboColor.YELLOW;
         ChocoboColor green = ChocoboColor.GREEN;
@@ -97,7 +97,7 @@ public class BreedingHelper {
         baby.setPoisonImmune(mother.poisonImmune || father.poisonImmune || isPoisonImmuneChocobo(bColor));
         baby.setFlame(mother.flameBlood || father.flameBlood || bColor == flame);
         baby.setFromEgg(true);
-        if (egg.hasCustomName()) { baby.setCustomName(egg.getName()); }
+        baby.setCustomName(getChocoName());
         baby.setBreedingAge(-7500);
         return baby;
     }
@@ -107,4 +107,9 @@ public class BreedingHelper {
         else return .50f > Math.random() ? mother : father;
     }
     private static boolean alter(BlockState centerDefaultBlockstate, BlockState NEWS_blockstate, BlockPos centerPos, @NotNull World world) { return world.getBlockState(centerPos).getBlock().getDefaultState() == centerDefaultBlockstate && world.getBlockState(centerPos.north()).getBlock().getDefaultState() == NEWS_blockstate && world.getBlockState(centerPos.south()).getBlock().getDefaultState() == NEWS_blockstate && world.getBlockState(centerPos.east()).getBlock().getDefaultState() == NEWS_blockstate && world.getBlockState(centerPos.west()).getBlock().getDefaultState() == NEWS_blockstate; }
+    private static final String[] PREFIX = {"Swift", "Golden", "Silver", "Tiny", "Giant", "Happy", "Sad", "Angry", "Calm", "Brave", "Shiny", "Dashing", "Prancing", "Majestic", "Noble", "Gallant", "Fierce", "Graceful", "Mighty", "Daring", "Bold", "Fearless", "Loyal", "Reliable", "Steady", "Sturdy", "Robust", "Hardy", "Energetic", "Vigorous", "Vital", "Vibrant", "Vivacious", "Vigilant", "Voracious", "Vorpal", "Vicious", "Vexing", "Vexatious", "Volatile", "Vivifying", "Viv"};
+    private static final String[] SUFFIX = {"Feather", "Beak", "Wing", "Claw", "Eye", "Talon", "Plume", "Crest", "Squawk", "Caw", "Trotter", "Runner", "Racer", "Sprinter", "Flyer", "Pacer", "Strider", "Galloper", "Charger", "Dasher", "Leaper", "Bounder", "Jumper", "Hopper", "Skipper", "Bouncer", "Pouncer", "Soarer", "Glider", "Swooper", "Diver", "Plunger", "Ducker", "Diver", "Dropper", "Plummet", "Plunge", "Plumage", "Plummet", "Plummeting", "Plummeted"};
+    public static Text getChocoName() {
+        return Text.of(PREFIX[(int) (Math.random() * PREFIX.length)] + " " + SUFFIX[(int) (Math.random() * SUFFIX.length)]);
+    }
 }

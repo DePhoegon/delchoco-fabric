@@ -54,15 +54,15 @@ public class ChocoboRenderer extends MobEntityRenderer<Chocobo, EntityModel<Choc
     public static final float collarAlpha = 1;
     public static final float collarTellAlpha = .45F;
     public static final float saddleAlpha = 1;
+    private boolean isMale;
 
     public ChocoboRenderer(Context context) {
         super(context, new AdultChocoboModel<>(context.getPart(clientHandler.CHOCOBO_LAYER)), 0.75f);
         this.chicoboModel = new ChicoboModel<>(context.getPart(clientHandler.CHICOBO_LAYER));
 
+        this.addFeature(new LayerChocoboTrims(this, .75F, .85F));
         this.addFeature(new LayerCollar(this, collarAlpha, chocoConfigHolder.chocoboCollarAlpha));
         this.addFeature(new LayerCollarTells(this, collarTellAlpha, chocoConfigHolder.chocoboCollarAlpha));
-        this.addFeature(new LayerMaleTrims(this, .85F));
-        this.addFeature(new LayerChocoboTrims(this, .75F, .85F));
         this.addFeature(new LayerBeakClaws(this, true));
         this.addFeature(new LayerArmor(this, armorAlpha, chocoConfigHolder.chocoboArmorAlpha));
         this.addFeature(new LayerSaddle(this, saddleAlpha, chocoConfigHolder.chocoboSaddleAlpha));

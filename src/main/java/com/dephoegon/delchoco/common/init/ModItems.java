@@ -1,24 +1,20 @@
 package com.dephoegon.delchoco.common.init;
 
 import com.dephoegon.delchoco.DelChoco;
-import com.dephoegon.delchoco.common.blocks.ChocoboEggBlock;
 import com.dephoegon.delchoco.common.blocks.GysahlGreenBlock;
-import com.dephoegon.delchoco.common.blocks.StrawNestBlock;
 import com.dephoegon.delchoco.common.entities.properties.ChocoboColor;
 import com.dephoegon.delchoco.common.items.*;
 import net.fabricmc.fabric.api.item.v1.FabricItemSettings;
 import net.fabricmc.fabric.api.object.builder.v1.block.FabricBlockSettings;
-import net.minecraft.block.AbstractBlock;
 import net.minecraft.block.Block;
 import net.minecraft.block.Blocks;
-import net.minecraft.block.Material;
 import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.item.AliasedBlockItem;
 import net.minecraft.item.Item;
-import net.minecraft.sound.BlockSoundGroup;
 
 import static com.dephoegon.delchoco.common.entities.Chocobo.tier_one_chocobo_inv_slot_count;
 import static com.dephoegon.delchoco.common.entities.Chocobo.tier_two_chocobo_inv_slot_count;
+import static com.dephoegon.delchoco.common.init.ModArmorMaterial.CHOCO_ARMOR_MATERIALS;
 import static com.dephoegon.delchoco.common.items.ChocoboArmorItems.CHOCOBO_ARMOR_MATERIALS;
 import static com.dephoegon.delchoco.common.items.ChocoboWeaponItems.CHOCOBO_WEAPON_TIERS;
 
@@ -50,10 +46,6 @@ public class ModItems extends BaseReg {
 
     // Chocobo MISCELLANEOUS
     public static final Item CHOCOBO_FEATHER = registerItem("chocobo_feather", new Item(new FabricItemSettings().group(DelChoco.DELCHOCO_ITEMS).maxCount(64)));
-    public static final Block CHOCOBO_EGG = registerBlockWithoutBlockItem("chocobo_egg", new ChocoboEggBlock(AbstractBlock.Settings.of(Material.EGG).noCollision().ticksRandomly().sounds(BlockSoundGroup.GRASS).nonOpaque()));
-    public static final Item CHOCOBO_EGG_ITEM = registerItem("chocobo_egg", new AliasedBlockItem(CHOCOBO_EGG, new FabricItemSettings().group(DelChoco.DELCHOCO_ITEMS).maxCount(64)));
-    public static final Block STRAW_NEST = registerBlockWithoutBlockItem("straw_nest", new StrawNestBlock(AbstractBlock.Settings.of(Material.WOOL).noCollision().sounds(BlockSoundGroup.GRASS).nonOpaque()));
-    public static final Item STRAW_NEST_ITEM = registerItem("straw_nest", new AliasedBlockItem(STRAW_NEST, new FabricItemSettings().group(DelChoco.DELCHOCO_ITEMS).maxCount(64)));
     public static final Item CHOCOBO_WHISTLE = registerItem("chocobo_whistle", new Item(new FabricItemSettings().group(DelChoco.DELCHOCO_ITEMS).maxCount(1)));
     public static final Item GYSAHL_CAKE = registerItem("gysahl_cake", new Item(new FabricItemSettings().group(DelChoco.DELCHOCO_ITEMS).maxCount(8)));
     public static final Item CHOCOBO_LEASH_STICK = registerItem("chocobo_leash_stick", new ChocoboLeashPointer(new FabricItemSettings().group(DelChoco.DELCHOCO_ITEMS).maxCount(1)));
@@ -73,22 +65,22 @@ public class ModItems extends BaseReg {
     public static final Item CHOCOBO_SADDLE_PACK = registerItem("chocobo_saddle_pack", new ChocoboSaddleItem(new FabricItemSettings().group(DelChoco.DELCHOCO_ITEMS).maxCount(2), tier_two_chocobo_inv_slot_count, true));
 
     // ChocoGuise Gear
-    public static final Item LEATHER_CHOCO_DISGUISE_HELMET = registerItem("choco_disguise_leather_helmet", new ChocoDisguiseItem(CHOCOBO_ARMOR_MATERIALS.get(1), EquipmentSlot.HEAD, new FabricItemSettings().group(DelChoco.DELCHOCO_ITEMS).maxCount(1)));
-    public static final Item LEATHER_CHOCO_DISGUISE_CHEST = registerItem("choco_disguise_leather_chestplate", new ChocoDisguiseItem(CHOCOBO_ARMOR_MATERIALS.get(1), EquipmentSlot.CHEST, new FabricItemSettings().group(DelChoco.DELCHOCO_ITEMS).maxCount(1)));
-    public static final Item LEATHER_CHOCO_DISGUISE_LEGS = registerItem("choco_disguise_leather_leggings", new ChocoDisguiseItem(CHOCOBO_ARMOR_MATERIALS.get(1), EquipmentSlot.LEGS, new FabricItemSettings().group(DelChoco.DELCHOCO_ITEMS).maxCount(1)));
-    public static final Item LEATHER_CHOCO_DISGUISE_BOOTS = registerItem("choco_disguise_leather_boots", new ChocoDisguiseItem(CHOCOBO_ARMOR_MATERIALS.get(1), EquipmentSlot.FEET, new FabricItemSettings().group(DelChoco.DELCHOCO_ITEMS).maxCount(1)));
-    public static final Item IRON_CHOCO_DISGUISE_HELMET = registerItem("choco_disguise_iron_helmet", new ChocoDisguiseItem(CHOCOBO_ARMOR_MATERIALS.get(2), EquipmentSlot.HEAD, new FabricItemSettings().group(DelChoco.DELCHOCO_ITEMS).maxCount(1)));
-    public static final Item IRON_CHOCO_DISGUISE_CHEST = registerItem("choco_disguise_iron_chestplate", new ChocoDisguiseItem(CHOCOBO_ARMOR_MATERIALS.get(2), EquipmentSlot.CHEST, new FabricItemSettings().group(DelChoco.DELCHOCO_ITEMS).maxCount(1)));
-    public static final Item IRON_CHOCO_DISGUISE_LEGS = registerItem("choco_disguise_iron_leggings", new ChocoDisguiseItem(CHOCOBO_ARMOR_MATERIALS.get(2), EquipmentSlot.LEGS, new FabricItemSettings().group(DelChoco.DELCHOCO_ITEMS).maxCount(1)));
-    public static final Item IRON_CHOCO_DISGUISE_BOOTS = registerItem("choco_disguise_iron_boots", new ChocoDisguiseItem(CHOCOBO_ARMOR_MATERIALS.get(2), EquipmentSlot.FEET, new FabricItemSettings().group(DelChoco.DELCHOCO_ITEMS).maxCount(1)));
-    public static final Item DIAMOND_CHOCO_DISGUISE_HELMET = registerItem("choco_disguise_diamond_helmet", new ChocoDisguiseItem(CHOCOBO_ARMOR_MATERIALS.get(3), EquipmentSlot.HEAD, new FabricItemSettings().group(DelChoco.DELCHOCO_ITEMS).maxCount(1)));
-    public static final Item DIAMOND_CHOCO_DISGUISE_CHEST = registerItem("choco_disguise_diamond_chestplate", new ChocoDisguiseItem(CHOCOBO_ARMOR_MATERIALS.get(3), EquipmentSlot.CHEST, new FabricItemSettings().group(DelChoco.DELCHOCO_ITEMS).maxCount(1)));
-    public static final Item DIAMOND_CHOCO_DISGUISE_LEGS = registerItem("choco_disguise_diamond_leggings", new ChocoDisguiseItem(CHOCOBO_ARMOR_MATERIALS.get(3), EquipmentSlot.LEGS, new FabricItemSettings().group(DelChoco.DELCHOCO_ITEMS).maxCount(1)));
-    public static final Item DIAMOND_CHOCO_DISGUISE_BOOTS = registerItem("choco_disguise_diamond_boots", new ChocoDisguiseItem(CHOCOBO_ARMOR_MATERIALS.get(3), EquipmentSlot.FEET, new FabricItemSettings().group(DelChoco.DELCHOCO_ITEMS).maxCount(1)));
-    public static final Item NETHERITE_CHOCO_DISGUISE_HELMET = registerItem("choco_disguise_netherite_helmet", new ChocoDisguiseItem(CHOCOBO_ARMOR_MATERIALS.get(4), EquipmentSlot.HEAD, new FabricItemSettings().group(DelChoco.DELCHOCO_ITEMS).maxCount(1)));
-    public static final Item NETHERITE_CHOCO_DISGUISE_CHEST = registerItem("choco_disguise_netherite_chestplate", new ChocoDisguiseItem(CHOCOBO_ARMOR_MATERIALS.get(4), EquipmentSlot.CHEST, new FabricItemSettings().group(DelChoco.DELCHOCO_ITEMS).maxCount(1)));
-    public static final Item NETHERITE_CHOCO_DISGUISE_LEGS = registerItem("choco_disguise_netherite_leggings", new ChocoDisguiseItem(CHOCOBO_ARMOR_MATERIALS.get(4), EquipmentSlot.LEGS, new FabricItemSettings().group(DelChoco.DELCHOCO_ITEMS).maxCount(1)));
-    public static final Item NETHERITE_CHOCO_DISGUISE_BOOTS = registerItem("choco_disguise_netherite_boots", new ChocoDisguiseItem(CHOCOBO_ARMOR_MATERIALS.get(4), EquipmentSlot.FEET, new FabricItemSettings().group(DelChoco.DELCHOCO_ITEMS).maxCount(1)));
+    public static final Item LEATHER_CHOCO_DISGUISE_HELMET = registerItem("choco_disguise_leather_helmet", new ChocoDisguiseItem(CHOCO_ARMOR_MATERIALS.get(1), EquipmentSlot.HEAD, new FabricItemSettings().group(DelChoco.DELCHOCO_ITEMS).maxCount(1)));
+    public static final Item LEATHER_CHOCO_DISGUISE_CHEST = registerItem("choco_disguise_leather_chestplate", new ChocoDisguiseItem(CHOCO_ARMOR_MATERIALS.get(1), EquipmentSlot.CHEST, new FabricItemSettings().group(DelChoco.DELCHOCO_ITEMS).maxCount(1)));
+    public static final Item LEATHER_CHOCO_DISGUISE_LEGS = registerItem("choco_disguise_leather_leggings", new ChocoDisguiseItem(CHOCO_ARMOR_MATERIALS.get(1), EquipmentSlot.LEGS, new FabricItemSettings().group(DelChoco.DELCHOCO_ITEMS).maxCount(1)));
+    public static final Item LEATHER_CHOCO_DISGUISE_BOOTS = registerItem("choco_disguise_leather_boots", new ChocoDisguiseItem(CHOCO_ARMOR_MATERIALS.get(1), EquipmentSlot.FEET, new FabricItemSettings().group(DelChoco.DELCHOCO_ITEMS).maxCount(1)));
+    public static final Item IRON_CHOCO_DISGUISE_HELMET = registerItem("choco_disguise_iron_helmet", new ChocoDisguiseItem(CHOCO_ARMOR_MATERIALS.get(2), EquipmentSlot.HEAD, new FabricItemSettings().group(DelChoco.DELCHOCO_ITEMS).maxCount(1)));
+    public static final Item IRON_CHOCO_DISGUISE_CHEST = registerItem("choco_disguise_iron_chestplate", new ChocoDisguiseItem(CHOCO_ARMOR_MATERIALS.get(2), EquipmentSlot.CHEST, new FabricItemSettings().group(DelChoco.DELCHOCO_ITEMS).maxCount(1)));
+    public static final Item IRON_CHOCO_DISGUISE_LEGS = registerItem("choco_disguise_iron_leggings", new ChocoDisguiseItem(CHOCO_ARMOR_MATERIALS.get(2), EquipmentSlot.LEGS, new FabricItemSettings().group(DelChoco.DELCHOCO_ITEMS).maxCount(1)));
+    public static final Item IRON_CHOCO_DISGUISE_BOOTS = registerItem("choco_disguise_iron_boots", new ChocoDisguiseItem(CHOCO_ARMOR_MATERIALS.get(2), EquipmentSlot.FEET, new FabricItemSettings().group(DelChoco.DELCHOCO_ITEMS).maxCount(1)));
+    public static final Item DIAMOND_CHOCO_DISGUISE_HELMET = registerItem("choco_disguise_diamond_helmet", new ChocoDisguiseItem(CHOCO_ARMOR_MATERIALS.get(3), EquipmentSlot.HEAD, new FabricItemSettings().group(DelChoco.DELCHOCO_ITEMS).maxCount(1)));
+    public static final Item DIAMOND_CHOCO_DISGUISE_CHEST = registerItem("choco_disguise_diamond_chestplate", new ChocoDisguiseItem(CHOCO_ARMOR_MATERIALS.get(3), EquipmentSlot.CHEST, new FabricItemSettings().group(DelChoco.DELCHOCO_ITEMS).maxCount(1)));
+    public static final Item DIAMOND_CHOCO_DISGUISE_LEGS = registerItem("choco_disguise_diamond_leggings", new ChocoDisguiseItem(CHOCO_ARMOR_MATERIALS.get(3), EquipmentSlot.LEGS, new FabricItemSettings().group(DelChoco.DELCHOCO_ITEMS).maxCount(1)));
+    public static final Item DIAMOND_CHOCO_DISGUISE_BOOTS = registerItem("choco_disguise_diamond_boots", new ChocoDisguiseItem(CHOCO_ARMOR_MATERIALS.get(3), EquipmentSlot.FEET, new FabricItemSettings().group(DelChoco.DELCHOCO_ITEMS).maxCount(1)));
+    public static final Item NETHERITE_CHOCO_DISGUISE_HELMET = registerItem("choco_disguise_netherite_helmet", new ChocoDisguiseItem(CHOCO_ARMOR_MATERIALS.get(4), EquipmentSlot.HEAD, new FabricItemSettings().group(DelChoco.DELCHOCO_ITEMS).maxCount(1)));
+    public static final Item NETHERITE_CHOCO_DISGUISE_CHEST = registerItem("choco_disguise_netherite_chestplate", new ChocoDisguiseItem(CHOCO_ARMOR_MATERIALS.get(4), EquipmentSlot.CHEST, new FabricItemSettings().group(DelChoco.DELCHOCO_ITEMS).maxCount(1)));
+    public static final Item NETHERITE_CHOCO_DISGUISE_LEGS = registerItem("choco_disguise_netherite_leggings", new ChocoDisguiseItem(CHOCO_ARMOR_MATERIALS.get(4), EquipmentSlot.LEGS, new FabricItemSettings().group(DelChoco.DELCHOCO_ITEMS).maxCount(1)));
+    public static final Item NETHERITE_CHOCO_DISGUISE_BOOTS = registerItem("choco_disguise_netherite_boots", new ChocoDisguiseItem(CHOCO_ARMOR_MATERIALS.get(4), EquipmentSlot.FEET, new FabricItemSettings().group(DelChoco.DELCHOCO_ITEMS).maxCount(1)));
 
 
     public static void registerModItems() {

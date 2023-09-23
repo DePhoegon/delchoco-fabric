@@ -52,12 +52,12 @@ public class ChocoboConfig {
     public int chocoboHealAmount = dHEAL_AMOUNT.getDefault();
 
     @Configurable
-    @Configurable.Comment("The Maximum Health a Chocobo can have. min 25, max 3000, default 60")
+    @Configurable.Comment("The Maximum Health a Chocobo can have. min 25, max 3000, default 200")
     @Configurable.Range(min = 25, max = 3000)
     public int chocoboMaxHealth = dMAX_HEALTH.getDefault();
 
     @Configurable
-    @Configurable.Comment("The Maximum Speed a Chocobo can have. min 30, max 160, default 40")
+    @Configurable.Comment("The Maximum Speed a Chocobo can have. min 30, max 160, default 60")
     @Configurable.Range(min = 30, max = 160)
     public int chocoboMaxSpeed = dMAX_SPEED.getDefault();
 
@@ -85,11 +85,6 @@ public class ChocoboConfig {
     @Configurable.Comment("The Amount of Stamina a Chocobo uses per Jump. min 0, max 1, default 0 - Double")
     @Configurable.DecimalRange(min = 0, max = 1)
     public double chocoboStaminaCostJump = dSTAMINA_JUMP.getDefault();
-
-    @Configurable
-    @Configurable.Comment("The Time in Ticks, a Aqua Berry will give a chocobo water breathing, or a aero Shroom will keep WaterBreathing Chocobo Afloat. min 300, max 12000, default 1500")
-    @Configurable.Range(min = 300, max = 12000)
-    public int chocoboFruitTimer = dGIFTED_WATER_BREATHER_STATUS.getDefault();
 
     @Configurable
     @Configurable.Comment("The Time in Ticks, the cooldown time a chocobo has between eating non-Gysahl Green. min 40, max 600, default 60")
@@ -137,23 +132,23 @@ public class ChocoboConfig {
     public double chocoboPossibleLossStamina = dPOS_LOSS.getDefault();
 
     @Configurable
-    @Configurable.Comment("The Maximum Stamina a Chocobo can have. min 10, max 1024, default 150")
+    @Configurable.Comment("The Maximum Stamina a Chocobo can have. min 10, max 1024, default 200")
     @Configurable.Range(min = 10, max = 1024)
     public double chocoboMaxStamina = dMAX_STAMINA.getDefault();
 
     @Configurable
-    @Configurable.Comment("The Maximum Strength a Chocobo can have. min 8, max 100, default 60")
-    @Configurable.Range(min = 8, max = 100)
+    @Configurable.Comment("The Maximum Strength a Chocobo can have. min 8, max 200, default 80")
+    @Configurable.Range(min = 8, max = 200)
     public double chocoboMaxStrength = dMAX_STRENGTH.getDefault();
 
     @Configurable
     @Configurable.Comment("The Maximum Armor a Chocobo can have. min 20, max 500, default 200")
-    @Configurable.Range(min = 20, max = 500)
+    @Configurable.Range(min = 20, max = 5000)
     public double chocoboMaxArmor = dMAX_ARMOR.getDefault();
 
     @Configurable
-    @Configurable.Comment("The Maximum Armor Toughness a Chocobo can have. min 8, max 100, default 20")
-    @Configurable.Range(min = 8, max = 100)
+    @Configurable.Comment("The Maximum Armor Toughness a Chocobo can have. min 8, max 200, default 40")
+    @Configurable.Range(min = 8, max = 200)
     public double chocoboMaxArmorToughness = dMAX_ARMOR_TOUGH.getDefault();
 
     @Configurable

@@ -1,0 +1,14 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "ingredients": [
+    { "item": "minecraft:golden_apple" },
+    { "item": "minecraft:golden_apple" },
+    { "item": "minecraft:golden_apple" },
+    { "item": "minecraft:golden_apple" },
+    { "item": "delchoco:lovely_gysahl_green" }
+  ],
+  "result": {
+    "item": "delchoco:golden_gysahl_green",
+    "count": 1
+  }
+}

@@ -1,0 +1,18 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "ingredients": [
+    { "item": "minecraft:beetroot" },
+    { "item": "minecraft:beetroot" },
+    { "item": "minecraft:beetroot" },
+    { "item": "minecraft:beetroot" },
+    { "item": "minecraft:beetroot" },
+    { "item": "minecraft:beetroot" },
+    { "item": "minecraft:beetroot" },
+    { "item": "minecraft:beetroot" },
+    { "item": "delchoco:lovely_gysahl_green" }
+  ],
+  "result": {
+    "item": "delchoco:pink_gysahl_green",
+    "count": 1
+  }
+}

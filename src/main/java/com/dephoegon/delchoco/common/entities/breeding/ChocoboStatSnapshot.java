@@ -4,6 +4,7 @@ import com.dephoegon.delchoco.common.entities.Chocobo;
 import com.dephoegon.delchoco.common.entities.properties.ChocoboColor;
 import com.dephoegon.delchoco.common.init.ModAttributes;
 import net.minecraft.entity.attribute.EntityAttributes;
+import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
 import org.jetbrains.annotations.NotNull;
 
@@ -58,19 +59,25 @@ public class ChocoboStatSnapshot {
     }
     public ChocoboStatSnapshot() { }
     public ChocoboStatSnapshot(@NotNull Chocobo chocobo) {
+        ItemStack weapon = chocobo.getWeapon();
+        if (!weapon.isEmpty()) { chocobo.setChocoboWeaponStats(ItemStack.EMPTY); }
+        ItemStack armor = chocobo.getArmorItemStack();
+        if (!armor.isEmpty()) { chocobo.setChocoboArmorStats(ItemStack.EMPTY); }
         this.generation = chocobo.getGeneration();
-        this.health = (float) Objects.requireNonNull(chocobo.getAttributeInstance(EntityAttributes.GENERIC_MAX_HEALTH)).getBaseValue();
-        this.speed = (float) Objects.requireNonNull(chocobo.getAttributeInstance(EntityAttributes.GENERIC_MOVEMENT_SPEED)).getBaseValue();
-        this.stamina = (float) Objects.requireNonNull(chocobo.getAttributeInstance(ModAttributes.CHOCOBO_MAX_STAMINA)).getBaseValue();
-        this.attack = Objects.requireNonNull(chocobo.getAttributeInstance(EntityAttributes.GENERIC_ATTACK_DAMAGE)).getBaseValue();
-        this.defense = Objects.requireNonNull(chocobo.getAttributeInstance(EntityAttributes.GENERIC_ARMOR)).getBaseValue();
-        this.toughness = Objects.requireNonNull(chocobo.getAttributeInstance(EntityAttributes.GENERIC_ARMOR_TOUGHNESS)).getBaseValue();
+        this.health = (float) Objects.requireNonNull(chocobo.getAttributeInstance(EntityAttributes.GENERIC_MAX_HEALTH)).getValue();
+        this.speed = (float) Objects.requireNonNull(chocobo.getAttributeInstance(EntityAttributes.GENERIC_MOVEMENT_SPEED)).getValue();
+        this.stamina = (float) Objects.requireNonNull(chocobo.getAttributeInstance(ModAttributes.CHOCOBO_MAX_STAMINA)).getValue();
+        this.attack = Objects.requireNonNull(chocobo.getAttributeInstance(EntityAttributes.GENERIC_ATTACK_DAMAGE)).getValue();
+        this.defense = Objects.requireNonNull(chocobo.getAttributeInstance(EntityAttributes.GENERIC_ARMOR)).getValue();
+        this.toughness = Objects.requireNonNull(chocobo.getAttributeInstance(EntityAttributes.GENERIC_ARMOR_TOUGHNESS)).getValue();
         this.flameBlood = chocobo.isFireImmune();
         this.waterBreath = chocobo.isWaterBreather();
         this.witherImmune = chocobo.isWitherImmune();
         this.poisonImmune = chocobo.isPoisonImmune();
         this.scale = 0;
         this.color = chocobo.getChocoboColor();
+        if (!weapon.isEmpty()) { chocobo.setChocoboWeaponStats(weapon); }
+        if (!armor.isEmpty()) { chocobo.setChocoboArmorStats(armor); }
     }
     public ChocoboStatSnapshot(@NotNull NbtCompound nbt) {
         this.generation = nbt.getInt(NBTKEY_GENERATION);

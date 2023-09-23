@@ -8,10 +8,10 @@ public enum defaultDoubles {
     dSTAMINA_JUMP(0D, 0D, 1D),
     dPOS_GAIN(0D, .1D, 1D),
     dPOS_LOSS(0D, 1D, 1D),
-    dMAX_STAMINA(10D, 15D, 1024D),
-    dMAX_STRENGTH(8D, 60D, 100D),
-    dMAX_ARMOR(20D, 200D, 500D),
-    dMAX_ARMOR_TOUGH(8D, 20D, 100D),
+    dMAX_STAMINA(10D, 200D, 1024D),
+    dMAX_STRENGTH(8D, 80D, 200D),
+    dMAX_ARMOR(20D, 200D, 5000D),
+    dMAX_ARMOR_TOUGH(8D, 40D, 200D),
     dGYSAHL_GREEN_SPAWN_CHANCE(0.1D, 0.1D, 1D);
     private final double Min;
     private final double Default;

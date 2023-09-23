@@ -35,8 +35,6 @@ public class ModItems extends BaseReg {
     public static final Item PINK_GYSAHL_GREEN = registerItem("pink_gysahl_green", new Item(new FabricItemSettings().group(DelChoco.DELCHOCO_ITEMS).maxCount(64)));
     public static final Item DEAD_PEPPER = registerItem("dead_pepper", new Item(new FabricItemSettings().group(DelChoco.DELCHOCO_ITEMS).maxCount(64)));
     public static final Item SPIKE_FRUIT = registerItem("spike_fruit", new Item(new FabricItemSettings().group(DelChoco.DELCHOCO_ITEMS).maxCount(64)));
-    public static final Item AERO_SHROOM = registerItem("aero_shroom", new Item(new FabricItemSettings().group(DelChoco.DELCHOCO_ITEMS).maxCount(64)));
-    public static final Item AQUA_BERRY = registerItem("aqua_berry", new Item(new FabricItemSettings().group(DelChoco.DELCHOCO_ITEMS).maxCount(64)));
 
     // Spawn Eggs
     public static final Item YELLOW_CHOCOBO_SPAWN_EGG = registerItem("yellow_chocobo_spawn_egg", new ChocoboSpawnEggItem(new FabricItemSettings().group(DelChoco.DELCHOCO_ITEMS).maxCount(64), ChocoboColor.YELLOW));

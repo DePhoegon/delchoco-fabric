@@ -25,7 +25,7 @@
 
 + Changed Creative Tab Menu icon to Chocobo Saddle
 
-- Methods of obtaining items
++ Methods of obtaining items
 -- dead pepper
 == Desert Temples
 == Craft - Lovely Gysahl + dead bush
@@ -40,13 +40,10 @@
 == Trade - T3
 -- spike fruit
 == UnderWater Temples
-== Craft - Lovely + diamond + 1 netherite Debris
+== Craft - Lovely + diamond
 == Trade - T4
--- aero Shroom
-== all dungeon loot
-== Craft - berries + Gysahl Greens
-== Trade - T2
--- aqua berry
-== all dungeon loot
-== Craft - berries + Gysahl Seeds
-== Trade - T2
+
++ removed Aqua Berries & aero Shrooms
+-- No real need & it complicated the water breather & path finding
+
+- Double Check Chocobo Spawn ammounts

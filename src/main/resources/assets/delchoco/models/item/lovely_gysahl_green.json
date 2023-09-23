@@ -1,6 +1,6 @@
 {
   "parent": "item/generated",
   "textures": {
-    "layer0": "delchoco:item/lovely_gysahl_green"
+    "layer0": "delchoco:item/chocobo_foods/lovely_gysahl_green"
     }
 }

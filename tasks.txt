@@ -46,4 +46,8 @@
 + removed Aqua Berries & aero Shrooms
 -- No real need & it complicated the water breather & path finding
 
-- Double Check Chocobo Spawn ammounts
++ Double Check Chocobo Spawn amounts
+
+- Double check lang files
+
+- Double check version

@@ -73,10 +73,7 @@ import net.minecraft.world.biome.Biome;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.ArrayList;
-import java.util.Map;
-import java.util.Objects;
-import java.util.UUID;
+import java.util.*;
 
 import static com.dephoegon.delbase.item.ShiftingDyes.*;
 import static com.dephoegon.delchoco.DelChoco.chocoConfigHolder;
@@ -1232,14 +1229,17 @@ public class Chocobo extends TameableEntity implements Angerable {
     @SuppressWarnings("OptionalGetWithoutIsPresent")
     public boolean canSpawn(@NotNull WorldAccess worldIn, @NotNull SpawnReason spawnReasonIn) {
         ServerWorldAccess theWorld = Objects.requireNonNull(worldIn.getServer()).getWorld(this.world.getRegistryKey());
-        if (!isOverworld(theWorld) && theWorld != null) {
-            if (isEnd(theWorld)) { return !this.world.getBlockState(getBlockPos().down()).isAir();} else { return true; }
-        }
         assert theWorld != null;
-        RegistryKey<Biome> biomes = theWorld.getBiome(getBlockPos().down()).getKey().get();
-        if (isOverworld(theWorld)) {
+        List<Chocobo> bob = worldIn.getNonSpectatingEntities(Chocobo.class, new Box(getBlockPos()).expand(48, 32, 48));
+        if (!isOverworld(theWorld)) {
+            if (isEnd(theWorld)) {
+                if (bob.size() > 20) { return false; }
+                return !this.world.getBlockState(getBlockPos().down()).isAir();
+            } else { if (bob.size() > 25) { return false; } }
+        } else {
+            if (bob.size() > 5) { return false; }
+            RegistryKey<Biome> biomes = theWorld.getBiome(getBlockPos().down()).getKey().get();
             if (IS_OCEAN().contains(biomes)) { return isOceanBlocked(biomes, true); }
-            else return true;
         }
         return super.canSpawn(worldIn, spawnReasonIn);
     }
@@ -1323,6 +1323,9 @@ public class Chocobo extends TameableEntity implements Angerable {
                 .forEach((p_34440_) -> p_34440_.setTarget(this.getTarget()));
     }
     public boolean isPersistent() { return this.isTamed() || this.fromEgg() || this.isCustomNameVisible(); }
+    public boolean cannotDespawn() {
+        return this.hasVehicle() || this.isPersistent();
+    }
     public boolean isDisallowedInPeaceful() { return super.isDisallowedInPeaceful(); }
     public boolean canImmediatelyDespawn(double pDistanceToClosestPlayer) { return true; }
     public void applyDamageEffects(LivingEntity attacker, Entity target) {

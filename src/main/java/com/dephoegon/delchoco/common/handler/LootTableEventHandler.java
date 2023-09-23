@@ -22,7 +22,7 @@ public class LootTableEventHandler {
             if (DESERT_CHEST.equals(id)) {
                 LootPool.Builder deadPepper = LootPool.builder()
                         .rolls(ConstantLootNumberProvider.create(1))
-                        .conditionally(RandomChanceLootCondition.builder(0.35f))
+                        .conditionally(RandomChanceLootCondition.builder(0.45f))
                         .with(ItemEntry.builder(ModItems.DEAD_PEPPER))
                         .apply(SetCountLootFunction.builder(UniformLootNumberProvider.create(1f, 2f)).build());
                 tableBuilder.pool(deadPepper.build());
@@ -30,7 +30,7 @@ public class LootTableEventHandler {
             if (END_CITY_CHEST.equals(id)) {
                 LootPool.Builder goldGreen = LootPool.builder()
                         .rolls(ConstantLootNumberProvider.create(1))
-                        .conditionally(RandomChanceLootCondition.builder(0.35f))
+                        .conditionally(RandomChanceLootCondition.builder(0.45f))
                         .with(ItemEntry.builder(ModItems.GOLDEN_GYSAHL_GREEN))
                         .apply(SetCountLootFunction.builder(UniformLootNumberProvider.create(1f, 2f)).build());
                 tableBuilder.pool(goldGreen.build());
@@ -46,18 +46,18 @@ public class LootTableEventHandler {
             if (WOODLAND_MANSION_CHEST.equals(id)) {
                 LootPool.Builder spikeFruit = LootPool.builder()
                         .rolls(ConstantLootNumberProvider.create(1))
-                        .conditionally(RandomChanceLootCondition.builder(0.35f))
+                        .conditionally(RandomChanceLootCondition.builder(0.45f))
                         .with(ItemEntry.builder(ModItems.SPIKE_FRUIT))
                         .apply(SetCountLootFunction.builder(UniformLootNumberProvider.create(1f, 2f)).build());
                 tableBuilder.pool(spikeFruit.build());
             }
             if (GRASS_GYSAHL_SEED.equals(id)) {
-                LootPool.Builder aquaBerry = LootPool.builder()
+                LootPool.Builder gysahlGreen = LootPool.builder()
                         .rolls(ConstantLootNumberProvider.create(1))
                         .conditionally(RandomChanceLootCondition.builder(0.15f))
                         .with(ItemEntry.builder(ModItems.GYSAHL_GREEN_SEEDS))
                         .apply(SetCountLootFunction.builder(UniformLootNumberProvider.create(1f, 2f)).build());
-                tableBuilder.pool(aquaBerry.build());
+                tableBuilder.pool(gysahlGreen.build());
             }
         });
     }

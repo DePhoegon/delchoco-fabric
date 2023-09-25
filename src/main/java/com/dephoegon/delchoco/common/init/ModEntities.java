@@ -12,7 +12,7 @@ import net.minecraft.util.registry.Registry;
 
 public class ModEntities {
     public static final EntityType<Chocobo> CHOCOBO_ENTITY = Registry.register(Registry.ENTITY_TYPE, new Identifier(DelChoco.DELCHOCO_ID, "chocobo"),
-            FabricEntityTypeBuilder.create(SpawnGroup.CREATURE, Chocobo::new).dimensions(EntityDimensions.fixed(1.2f, 2.8f)).trackedUpdateRate(64).build());
+            FabricEntityTypeBuilder.create(SpawnGroup.CREATURE, Chocobo::new).spawnableFarFromPlayer().dimensions(EntityDimensions.fixed(1.2f, 2.8f)).trackedUpdateRate(64).trackRangeChunks(8).build());
     public static void registerAttributes() {
         DelChoco.LOGGER.info("Registering Chocobo Attributes");
         FabricDefaultAttributeRegistry.register(CHOCOBO_ENTITY, Chocobo.createAttributes());

@@ -81,6 +81,15 @@ public class chocoboChecks {
         out.add(BiomeKeys.BAMBOO_JUNGLE);
         return out;
     }
+    public static @NotNull ArrayList<RegistryKey<Biome>> IS_SPARSE() {
+        ArrayList<RegistryKey<Biome>> out = new ArrayList<>();
+        out.add(BiomeKeys.DESERT);
+        out.add(BiomeKeys.RIVER);
+        out.add(BiomeKeys.BADLANDS);
+        out.add(BiomeKeys.ERODED_BADLANDS);
+        out.add(BiomeKeys.STONY_PEAKS);
+        return out;
+    }
     private static @NotNull ArrayList<RegistryKey<Biome>> IS_SAVANNA() {
         ArrayList<RegistryKey<Biome>> out = new ArrayList<>();
         out.add(BiomeKeys.SAVANNA);

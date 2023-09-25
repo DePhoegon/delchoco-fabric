@@ -1231,16 +1231,20 @@ public class Chocobo extends TameableEntity implements Angerable {
         ServerWorldAccess theWorld = Objects.requireNonNull(worldIn.getServer()).getWorld(this.world.getRegistryKey());
         assert theWorld != null;
         List<Chocobo> bob = worldIn.getNonSpectatingEntities(Chocobo.class, new Box(getBlockPos()).expand(48, 32, 48));
+        int sizeCtrl = 15;
+        RegistryKey<Biome> biomes = theWorld.getBiome(getBlockPos().down()).getKey().get();
         if (!isOverworld(theWorld)) {
             if (isEnd(theWorld)) {
-                if (bob.size() > 20) { return false; }
                 return !this.world.getBlockState(getBlockPos().down()).isAir();
-            } else { if (bob.size() > 25) { return false; } }
+            } else if (isNether(theWorld)) { return true; }
         } else {
-            if (bob.size() > 5) { return false; }
-            RegistryKey<Biome> biomes = theWorld.getBiome(getBlockPos().down()).getKey().get();
-            if (IS_OCEAN().contains(biomes)) { return isOceanBlocked(biomes, true); }
+            if (IS_OCEAN().contains(biomes)) {
+                if (bob.size() > 5) { return false; }
+                return isOceanBlocked(biomes, true);
+            }
         }
+        if (IS_SPARSE().contains(biomes)) { sizeCtrl = 5; }
+        if (bob.size() > sizeCtrl) { return false; }
         return super.canSpawn(worldIn, spawnReasonIn);
     }
     protected void onTamedChanged() {

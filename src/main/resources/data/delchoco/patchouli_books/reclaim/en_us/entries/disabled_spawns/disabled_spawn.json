@@ -1,12 +1,12 @@
 {
   "name": "No Natural Spawn",
-  "icon": "delchoco:chocobo_egg",
+  "icon": "delchoco:chocobo_feather",
   "category": "delchoco:chocobo_sum",
   "pages": [
     {
       "title": "No Natural Spawn Option",
       "type": "patchouli:spotlight",
-      "item": "delchoco:chocobo_egg",
+      "item": "delchoco:chocobo_feather",
       "text": "The Following Pages are recipes to the basics. All Chocobos can be gotten"
     },
     {

@@ -1,0 +1,18 @@
+{
+  "name": "Dead Pepper",
+  "icon": "delchoco:dead_pepper",
+  "category": "delchoco:chocobo_rec",
+  "pages": [
+    {
+      "title": "Dead Pepper",
+      "type": "patchouli:spotlight",
+      "item": "delchoco:dead_pepper",
+      "text": "A Fruit for increasing Strength.$(br)-Useful to increasing a chocobo Attack Damage."
+    },
+    {
+      "type": "patchouli:crafting",
+      "recipe": "delchoco:dead_pepper",
+      "text": "-1x$(item)dead_bush$()$(br)-1x$(item)Lovely Gysahl Green$()"
+    }
+  ]
+}

@@ -1,0 +1,18 @@
+{
+  "name": "Pink Gysahl",
+  "icon": "delchoco:pink_gysahl_green",
+  "category": "delchoco:chocobo_rec",
+  "pages": [
+    {
+      "title": "Pink Gysahl Green",
+      "type": "patchouli:spotlight",
+      "item": "delchoco:pink_gysahl_green",
+      "text": "A Fruit for increasing Heartiness.$(br)-Useful to increasing a chocobo HP."
+    },
+    {
+      "type": "patchouli:crafting",
+      "recipe": "delchoco:pink_green",
+      "text": "-8x$(item)Beet Roots$()$(br)-1x$(item)Lovely Gysahl Green$()"
+    }
+  ]
+}

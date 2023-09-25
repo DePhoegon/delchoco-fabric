@@ -10,12 +10,6 @@
       "text": "Useful to help move Chocobos about with ease$(br)Leads do not work"
     },
     {
-      "title": "Straw Nest",
-      "type": "patchouli:crafting",
-      "recipe": "delchoco:chocobo_nest",
-      "text": "Shift Right click to view it's inventory & if it actually has an egg$(br)-$(l:delchoco:recipe/straw_nest)Recipe$(/l)"
-    },
-    {
       "title": "Saddle",
       "type": "patchouli:crafting",
       "recipe": "delchoco:chocobo_saddle",

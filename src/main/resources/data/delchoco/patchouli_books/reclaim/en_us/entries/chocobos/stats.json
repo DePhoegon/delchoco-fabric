@@ -1,0 +1,31 @@
+{
+  "name": "08 - Chocobo Stat Increases",
+  "icon": "delchoco:dead_pepper",
+  "category": "delchoco:chocobo_combat",
+  "pages": [
+    {
+      "title": "Dead Pepper",
+      "type": "patchouli:spotlight",
+      "item": "delchoco:dead_pepper",
+      "text": "Hot & Spicy for Chocobos.$(br)$(l:delchoco:recipe/dead_pepper)Recipe$(/l).$(br)-Trades, Crafted, & Found in Desert Temples."
+    },
+    {
+      "title": "Golden Gysahl Green",
+      "type": "patchouli:spotlight",
+      "item": "delchoco:golden_gysahl_green",
+      "text": "Almost Chocobos Magic.$(br)$(l:delchoco:recipe/golden_green)Recipe$(/l).$(br)-Trades, Crafted, & Found in End Cities/End City Ships."
+    },
+    {
+      "title": "Pink Gysahl",
+      "type": "patchouli:spotlight",
+      "item": "delchoco:pink_gysahl_green",
+      "text": "Diamond Claws for Chocobos.$(br)$(l:delchoco:recipe/pink_gysahl)Recipe$(/l).$(br)-Trades, Crafted, & Found in Jungle Temples."
+    },
+    {
+      "title": "Spike Fruit",
+      "type": "patchouli:spotlight",
+      "item": "delchoco:spike_fruit",
+      "text": "Hardening for Chocobos.$(br)$(l:delchoco:recipe/spike_fruit)Recipe$(/l).$(br)-Trades, Crafted, & Found in Woodland Mansions."
+    }
+  ]
+}

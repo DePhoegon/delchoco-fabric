@@ -1,19 +1,13 @@
 {
   "name": "02 - Chocobo Math",
-  "icon": "delchoco:chocobo_egg",
+  "icon": "delchoco:chocobo_feather",
   "category": "delchoco:chocobo_ent",
   "pages": [
     {
       "title": "Stats",
       "type": "patchouli:spotlight",
-      "item": "delchoco:chocobo_egg",
+      "item": "delchoco:chocobo_feather",
       "text": "Breeding can bring Stats & colors.$(br)Chocobo Stats are$(br)- Stamina$(br)- Health$(br)- Speed"
-    },
-    {
-      "title": "Nesting Habits",
-      "type": "patchouli:spotlight",
-      "item": "delchoco:straw_nest",
-      "text": "is Useful for hatching chocobos from eggs.$(br)- It is safe to break & replace $(item)AFTER THE CHICOBO IS HATCHED$(), just right click it & see if an egg is in the slot$(br)- $(l:delchoco:chocobos/tools)here$(/l)"
     },
     {
       "title": "Colorful Choices",
@@ -30,7 +24,7 @@
     {
       "title": "Breeding Chart",
       "type": "patchouli:spotlight",
-      "item": "delchoco:chocobo_egg",
+      "item": "delchoco:chocobo_feather",
       "text": "Yellow+Yellow -> Blue, White, Green, Yellow$(br)Yellow+Black-> Gold$(br)Green+Blue -> Black$(br)Blue+Red -> Purple$(br)White+Flame -> Red$(br)White+Red -> Pink$(br)-Failed pairings are a 50/50~ of mother/father colors.  Non listed pairings give a 50/50 for color, & a 3%~ Yellow chocobo"
     }
   ]

@@ -111,9 +111,10 @@ public class GysahlGreenBlock extends PlantBlock
         }
         return f;
     }
-    public boolean canPlaceAt(BlockState state, @NotNull WorldView world, BlockPos pos) {
-        return (world.getBaseLightLevel(pos, 0) >= 8 || world.isSkyVisible(pos)) && super.canPlaceAt(state, world, pos);
+    public boolean canPlaceAt(BlockState state, @NotNull WorldView world, @NotNull BlockPos pos) {
+        return blockPlaceableOnList().contains(world.getBlockState(pos.down()).getBlock().getDefaultState());
     }
+    @SuppressWarnings("deprecation")
     public void onEntityCollision(BlockState state, World world, BlockPos pos, Entity entity) {
         if (entity instanceof RavagerEntity && world.getGameRules().getBoolean(GameRules.DO_MOB_GRIEFING)) {
             world.breakBlock(pos, true, entity);

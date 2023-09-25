@@ -1,0 +1,17 @@
+{
+  "name": "Pickled Gysahl",
+  "icon": "delchoco:pickled_gysahl_cooked",
+  "category": "delchoco:chocobo_rec",
+  "pages": [
+    {
+      "type": "patchouli:smelting",
+      "recipe": "delchoco:pickled_gysahl_cooked",
+      "text": "Tasty & Cooked up Gysahl Greens.$(br)-$(item)pickled_gysahl_raw$()$(br)-Also able to be cooked on a campfire or in a smoker."
+    },
+    {
+      "type": "patchouli:crafting",
+      "recipe": "delchoco:pickled_gysahl_raw",
+      "text": "Eatable, but is better cooked.$(br)-$(item)pickled_gysahl_raw$()$(br)-Also able to be cooked on a campfire or in a smoker."
+    }
+  ]
+}

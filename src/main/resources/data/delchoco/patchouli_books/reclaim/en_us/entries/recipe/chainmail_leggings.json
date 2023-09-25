@@ -1,0 +1,18 @@
+{
+  "name": "Chainmail Leggings",
+  "icon": "minecraft:chainmail_leggings",
+  "category": "delchoco:chocobo_rec",
+  "pages": [
+    {
+      "title": "Straw Nest",
+      "type": "patchouli:spotlight",
+      "item": "minecraft:chainmail_leggings",
+      "text": "Useful for Players to wear, and part of making Chain Chocobo Armor."
+    },
+    {
+      "type": "patchouli:crafting",
+      "recipe": "delchoco:chocobo_armor/chain_feet",
+      "text": "-5x$(item)iron chains$()$(br)-2x$(item)iron nuggets$()"
+    }
+  ]
+}

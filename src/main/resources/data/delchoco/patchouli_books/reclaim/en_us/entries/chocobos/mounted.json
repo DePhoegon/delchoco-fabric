@@ -1,0 +1,38 @@
+{
+  "name": "02 - Chocobo Combat",
+  "icon": "delchoco:chocobo_saddle",
+  "category": "delchoco:chocobo_combat",
+  "pages": [
+    {
+      "title": "Invisible to You",
+      "type": "patchouli:spotlight",
+      "item": "delchoco:chocobo_weapon_stone",
+      "text": "While Riding a Chocobo, the chocobo will not get in your field of view.$(br)-aka, The Chocobo will not render locally for you while you're mounted & in first person view"
+    },
+    {
+      "title": "Mounted Movement",
+      "type": "patchouli:text",
+      "text": "Chocobos will not 'Move' on their own while Mounted, but will Melee attack a target in melee range that you are attacking, or has attacked you or it.$(br)-Exception being other Chocobos you hit or hit you.  It maybe possible to get one to attack another, but given chocobos do not have ranged attacks... don't count on it."
+    },
+    {
+      "title": "Side by Side",
+      "type": "patchouli:text",
+      "text": "The Chocobo will focus targets above following you. The Chocobo will Target those you hit & hit you, with some exceptions."
+    },
+    {
+      "title": "Targeting Refused",
+      "type": "patchouli:text",
+      "text": "Chocobos Will refuse to attack the following$(br)-Chocobos$(br)-Ender Dragons$(br)-Phantoms$(br)-Fishes[Puffer fish/Tropical Fish/etc]$(br)-Squid/GlowSquid$(br)-Bats$(br)-Dolphins$(br)-Guardians/Elder Guardians$(br)-Striders$(br)-Ghasts$(br)-Skeleton Horses"
+    },
+    {
+      "title": "Multi-Player Friendly",
+      "type": "patchouli:text",
+      "text": "Chocobos Respect & honor The Owners team.$(br)-Players on the same team will not be targeted by each others chocobo.$(br)-- Included basic teams will be enough to enable to play with each other without accidents being turned deadly."
+    },
+    {
+      "title": "Chocobo Pack Attack",
+      "type": "patchouli:text",
+      "text": "Chocobos will join on the attack with most any targets With some exception."
+    }
+  ]
+}

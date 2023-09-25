@@ -1,0 +1,18 @@
+{
+  "name": "Chocobo Netherite Claws",
+  "icon": "delchoco:chocobo_weapon_netherite",
+  "category": "delchoco:chocobo_rec",
+  "pages": [
+    {
+      "title": "Netherite Claws",
+      "type": "patchouli:spotlight",
+      "item": "delchoco:chocobo_weapon_netherite",
+      "text": "Netherite Claws for Chocobos$(br)-Can be used by Players, Does not break blocks."
+    },
+    {
+      "type": "patchouli:smithing",
+      "recipe": "delchoco:chocobo_weapon/netherite",
+      "text": "-$(item)Chocobo Diamond Claws$()$(br)-$(item)Netherite Axe$()"
+    }
+  ]
+}

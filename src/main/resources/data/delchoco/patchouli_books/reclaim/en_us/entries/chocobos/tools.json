@@ -1,0 +1,49 @@
+{
+  "name": "04 - Tools",
+  "icon": "delchoco:pickled_gysahl_cooked",
+  "category": "delchoco:chocobo_ent",
+  "pages": [
+    {
+      "title": "Bird Whistles",
+      "type": "patchouli:crafting",
+      "recipe": "delchoco:chocobo_whistle",
+      "text": "Useful to help move Chocobos about with ease$(br)Leads do not work"
+    },
+    {
+      "title": "Straw Nest",
+      "type": "patchouli:crafting",
+      "recipe": "delchoco:chocobo_nest",
+      "text": "Shift Right click to view it's inventory & if it actually has an egg$(br)-$(l:delchoco:recipe/straw_nest)Recipe$(/l)"
+    },
+    {
+      "title": "Saddle",
+      "type": "patchouli:crafting",
+      "recipe": "delchoco:chocobo_saddle",
+      "text": "Ridding only saddle"
+    },
+    {
+      "title": "Saddle Bags",
+      "type": "patchouli:crafting",
+      "recipe": "delchoco:chocobo_saddle_bags",
+      "text": "small Inventory Chocobo Container w/ Riding"
+    },
+    {
+      "title": "Saddle Packs",
+      "type": "patchouli:crafting",
+      "recipe": "delchoco:chocobo_pack_bags",
+      "text": "Large Inventory Chocobo Container w/ Riding"
+    },
+    {
+      "title": "The Chocobo Leash",
+      "type": "patchouli:crafting",
+      "recipe": "delchoco:chocobo_leash_stick",
+      "text": "You will Need one of these."
+    },
+    {
+      "title": "The Chocobo Leash",
+      "type": "patchouli:spotlight",
+      "item": "delchoco:chocobo_leash_stick",
+      "text": "You will Need one of these.$(br)This is useful for setting an area for chocobo to roam around in.$(br)Right-Click -> Choose center | Crouch Right-Click -> Choose Distance (from Center)$(br)When both points are set correctly, Right-click your tamed chocobo & it will head there on its own."
+    }
+  ]
+}

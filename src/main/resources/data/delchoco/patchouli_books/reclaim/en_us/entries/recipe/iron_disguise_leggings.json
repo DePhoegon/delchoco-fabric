@@ -1,0 +1,18 @@
+{
+  "name": "Disguise Leggings - Iron",
+  "icon": "delchoco:choco_disguise_iron_leggings",
+  "category": "delchoco:chocobo_rec",
+  "pages": [
+    {
+      "title": "Chocobo Disguise Leggings",
+      "type": "patchouli:spotlight",
+      "item": "delchoco:choco_disguise_iron_leggings",
+      "text": "Useful for Players to wear.$(br)- Slightly Better than Iron Armor$(br)- Useful for helping to summon chocobos without eating the alter$(br)- Needed get Iron Versions"
+    },
+    {
+      "type": "patchouli:smithing",
+      "recipe": "delchoco:choco_disguise/iron_feet",
+      "text": "-$(item)Disguise Boots - Leather$()$(br)-$(item)Iron Leggings$()"
+    }
+  ]
+}

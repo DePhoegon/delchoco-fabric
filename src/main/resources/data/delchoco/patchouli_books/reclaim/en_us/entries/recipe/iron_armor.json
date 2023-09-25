@@ -1,0 +1,18 @@
+{
+  "name": "Chocobo Iron Armor",
+  "icon": "delchoco:chocobo_armor_iron",
+  "category": "delchoco:chocobo_rec",
+  "pages": [
+    {
+      "title": "Iron Armor",
+      "type": "patchouli:spotlight",
+      "item": "delchoco:chocobo_armor_iron",
+      "text": "Iron Armor for Chocobos"
+    },
+    {
+      "type": "patchouli:smithing",
+      "recipe": "delchoco:chocobo_armor/iron",
+      "text": "-$(item)Chocobo Chainmail Armor$()$(br)-$(item)Iron Chestplate$()"
+    }
+  ]
+}

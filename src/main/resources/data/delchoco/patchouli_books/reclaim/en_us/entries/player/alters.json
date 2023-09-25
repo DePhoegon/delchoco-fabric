@@ -1,0 +1,139 @@
+{
+  "name": "Alter Types",
+  "icon": "delchoco:chocobo_egg",
+  "category": "delchoco:chocobo_sum",
+  "pages": [
+    {
+      "title": "Random* Chocobo",
+      "type": "patchouli:spotlight",
+      "item": "minecraft:dirt",
+      "text": "Alter Block $(item)Dirt Block$()$(br)Pillar Blocks -None-$(br)Alter Base Blocks - $(l:delchoco:recipe/alter_blocks)Valid Blocks Link$(/l)$(br)$(br)Chocobo Summoned Based on Biomes/Dimensions w/ Default Yellow$(br)- $(l:delchoco:player/alter_build)Alter Build$(/l)"
+    },
+    {
+      "title": "Random* Chocobo Alter",
+      "type": "patchouli:image",
+      "images": [ "delchoco:textures/screens/alters/random.jpg" ],
+      "text": "Center column Must be liquid Source(Water/Lava)"
+    },
+    {
+      "title": "Flame Chocobo",
+      "type": "patchouli:spotlight",
+      "item": "minecraft:magma_block",
+      "text": "Alter Block - $(item)Magma Block$()$(br)Pillar Blocks - $(item)Magma Block$()$(br)Alter Base Blocks - $(l:delchoco:recipe/alter_blocks)Valid Blocks Link$(/l)"
+    },
+    {
+      "title": "Flame Chocobo Alter",
+      "type": "patchouli:image",
+      "images": [ "delchoco:textures/screens/alters/flame.png" ],
+      "text": "Center column Must be liquid Source(Water/Lava)"
+    },
+    {
+      "title": "Purple Chocobo",
+      "type": "patchouli:spotlight",
+      "item": "minecraft:purpur_block",
+      "text": "Alter Block Options - $(br)- $(item)Purpur Block$()$(br)- $(item)End Stone Bricks$()$(br)Pillar Blocks - $(item)PurPur Pillar$()$(br)Alter Base Blocks - $(l:delchoco:recipe/alter_blocks)Valid Blocks Link$(/l)"
+    },
+    {
+      "title": "Purple Chocobo Alter",
+      "type": "patchouli:image",
+      "images": [ "delchoco:textures/screens/alters/purple.png" ],
+      "text": "Center column Must be liquid Source(Water/Lava)"
+    },
+    {
+      "title": "Pink Chocobo",
+      "type": "patchouli:spotlight",
+      "item": "minecraft:mycelium",
+      "text": "Alter Block Options - $(br)- $(item)Mycelium$()$(br)- $(item)Mushroom Stem$()$(br)- $(item)Red Mushroom Block$()$(br)- $(item)Brown Mushroom Block$()$(br)Pillar Blocks - $(item)Mushroom Stem$()$(br)Alter Base Blocks - $(l:delchoco:recipe/alter_blocks)Valid Blocks Link$(/l)"
+    },
+    {
+      "title": "Pink Chocobo Alter",
+      "type": "patchouli:image",
+      "images": [ "delchoco:textures/screens/alters/pink.png" ],
+      "text": "Center column Must be liquid Source(Water/Lava)"
+    },
+    {
+      "title": "White Chocobo",
+      "type": "patchouli:spotlight",
+      "item": "minecraft:packed_ice",
+      "text": "Alter Block Options - $(br)- $(item)Ice$()$(br)- $(item)Blue Ice$()$(br)- $(item)Packed Ice$()$(br)- $(item)Birch Wood$()$(br)Pillar Blocks - $(item)Snow Block$()$(br)Alter Base Blocks - $(l:delchoco:recipe/alter_blocks)Valid Blocks Link$(/l)"
+    },
+    {
+      "title": "White Chocobo Alter",
+      "type": "patchouli:image",
+      "images": [ "delchoco:textures/screens/alters/white.png" ],
+      "text": "Center column Must be liquid Source(Water/Lava)"
+    },
+    {
+      "title": "Blue Chocobo",
+      "type": "patchouli:spotlight",
+      "item": "minecraft:brain_coral",
+      "text": "Alter Block Options -$(br)- Any 'ALIVE' Coral$(br)- 'ALIVE' coral Fan$(br)- 'ALIVE' Coral Block$(br)Pillar Blocks - $(item)Dried Kelp Block$()$(br)Alter Base Blocks - $(l:delchoco:recipe/alter_blocks)Valid Blocks Link$(/l)"
+    },
+    {
+      "title": "Blue Chocobo Alter",
+      "type": "patchouli:image",
+      "images": [ "delchoco:textures/screens/alters/blue.png" ],
+      "text": "Center column Must be liquid Source(Water/Lava)"
+    },
+    {
+      "title": "Red Chocobo",
+      "type": "patchouli:spotlight",
+      "item": "minecraft:terracotta",
+      "text": "Alter Block Options -$(br)- $(item)Red Sand$()$(br)- $(item)Red SandStone$()(including cut, chiseled, smooth)$(br)Pillar Blocks - $(item)Red Terracotta$()$(br)Alter Base Blocks - $(l:delchoco:recipe/alter_blocks)Valid Blocks Link$(/l)"
+    },
+    {
+      "title": "Red Chocobo Alter",
+      "type": "patchouli:image",
+      "images": [ "delchoco:textures/screens/alters/red.png" ],
+      "text": "Center column Must be liquid Source(Water/Lava)"
+    },
+    {
+      "title": "Green Chocobo",
+      "type": "patchouli:spotlight",
+      "item": "minecraft:moss_block",
+      "text": "Alter Block Options -$(br)- $(item)Moss Block$()$(br)- $(item)Clay Block$()$(br)- $(item)Jungle Wood$()$(br)Pillar Blocks - $(item)Moss Block$()$(br)Alter Base Blocks - $(l:delchoco:recipe/alter_blocks)Valid Blocks Link$(/l)"
+    },
+    {
+      "title": "Green Chocobo Alter",
+      "type": "patchouli:image",
+      "images": [ "delchoco:textures/screens/alters/green.png" ],
+      "text": "Center column Must be liquid Source(Water/Lava)"
+    },
+    {
+      "title": "Black Chocobo",
+      "type": "patchouli:spotlight",
+      "item": "minecraft:sand",
+      "text": "Alter Block Options -$(br)- $(item)Sand$()$(br)- $(item)SandStone$()(including cut, chiseled, smooth)$(br)Pillar Blocks - $(item)Cactus$()$(br)Alter Base Blocks - $(l:delchoco:recipe/alter_blocks)Valid Blocks Link$(/l)"
+    },
+    {
+      "title": "Black Chocobo Alter",
+      "type": "patchouli:image",
+      "images": [ "delchoco:textures/screens/alters/black.png" ],
+      "text": "Center column Must be liquid Source(Water/Lava)"
+    },
+    {
+      "title": "Gold Chocobo",
+      "type": "patchouli:spotlight",
+      "item": "minecraft:gold_block",
+      "text": "Alter Block - $(item)Gold Block$()$(br)Pillar Blocks - $(item)Gold Block$()$(br)Alter Base Blocks - $(l:delchoco:recipe/alter_blocks)Valid Blocks Link$(/l)"
+    },
+    {
+      "title": "Gold Chocobo Alter",
+      "type": "patchouli:image",
+      "images": [ "delchoco:textures/screens/alters/gold.png" ],
+      "text": "Center column Must be liquid Source(Water/Lava)"
+    },
+    {
+      "title": "Yellow Chocobo",
+      "type": "patchouli:spotlight",
+      "item": "minecraft:grass_block",
+      "text": "Alter Block - $(item)Grass Block$()$(br)Pillar Blocks - $(item)Hay Block$()$(br)Alter Base Blocks - $(l:delchoco:recipe/alter_blocks)Valid Blocks Link$(/l)"
+    },
+    {
+      "title": "Yellow Chocobo Alter",
+      "type": "patchouli:image",
+      "images": [ "delchoco:textures/screens/alters/yellow.png" ],
+      "text": "Center column Must be liquid Source(Water/Lava)"
+    }
+  ]
+}

@@ -1,0 +1,18 @@
+{
+  "name": "Teaming with Chocobos",
+  "icon": "minecraft:oak_sign",
+  "category": "delchoco:chocobo_ent",
+  "pages": [
+    {
+      "title": "Built in Teams",
+      "type": "patchouli:spotlight",
+      "item": "minecraft:oak_sign",
+      "text": "Includes Built in Teams.$(br)- /DelChoco Player JoinTeam <Color> $(br)-- Join Team of that color$(br)- /DelChoco Player LeaveTeam $(br)--Leave the team you're on$(br)- /DelChoco TeamSettings TeamFriendlyFire <true/false>$(br)-- Turns the teams friendly fire on or off for your team"
+    },
+    {
+      "title": "OP Commands",
+      "type": "patchouli:text",
+      "text": "Just commands to create all the groups or completely reset the groups & their members (removes them)$(br)$(br)- /DelChoco TeamInitialize <create / refresh>"
+    }
+  ]
+}

@@ -1,0 +1,18 @@
+{
+  "name": "Disguise Boots - Netherite",
+  "icon": "delchoco:choco_disguise_netherite_boots",
+  "category": "delchoco:chocobo_rec",
+  "pages": [
+    {
+      "title": "Chocobo Disguise Boots",
+      "type": "patchouli:spotlight",
+      "item": "delchoco:choco_disguise_netherite_boots",
+      "text": "Useful for Players to wear.$(br)- Slightly Better than Netherite Armor$(br)- Useful for helping to summon chocobos without eating the alter$(br)- Needed get Iron Versions"
+    },
+    {
+      "type": "patchouli:smithing",
+      "recipe": "delchoco:choco_disguise/netherite_feet",
+      "text": "-$(item)Disguise Boots - Diamond$()$(br)-$(item)Netherite Boots$()"
+    }
+  ]
+}

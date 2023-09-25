@@ -1,0 +1,54 @@
+{"name": "07 - Natural Effects",
+  "icon": "delchoco:chocobo_egg",
+  "category": "delchoco:chocobo_combat",
+  "pages": [
+    {
+      "title": "Berry Bush Damage",
+      "type": "patchouli:spotlight",
+      "item": "minecraft:sweet_berries",
+      "text": "All Chocobos will not take Berry Bush damage."
+    },
+    {
+      "title": "Fall Damage",
+      "type": "patchouli:spotlight",
+      "item": "minecraft:phantom_membrane",
+      "text": "All Chocobos will not take fall Damage, They Float."
+    },
+    {
+      "title": "Fire/Lava Damage",
+      "type": "patchouli:spotlight",
+      "item": "minecraft:blaze_powder",
+      "text": "Flame & Gold Chocobos are Naturally immune.$(br)- This Trait can be passed on Through Breeding"
+    },
+    {
+      "title": "Water Breathing Ability",
+      "type": "patchouli:spotlight",
+      "item": "minecraft:water_bucket",
+      "text": "Blue & Gold Chocobos can breath water.$(br)- This Trait can be passed on Through Breeding"
+    },
+    {
+      "title": "Poison Damage",
+      "type": "patchouli:spotlight",
+      "item": "minecraft:pufferfish",
+      "text": "Green & Gold Chocobos are Naturally immune.$(br)- This Trait can be passed on Through Breeding"
+    },
+    {
+      "title": "Wither Damage",
+      "type": "patchouli:spotlight",
+      "item": "minecraft:wither_rose",
+      "text": "Black & Gold Chocobos are Naturally immune.$(br)- This Trait can be passed on Through Breeding"
+    },
+    {
+      "title": "Freezing Damage",
+      "type": "patchouli:spotlight",
+      "item": "minecraft:ice",
+      "text": "White & Gold Chocobos are Naturally immune."
+    },
+    {
+      "title": "Dragon Breath Damage",
+      "type": "patchouli:spotlight",
+      "item": "minecraft:dragon_breath",
+      "text": "Purple & Gold Chocobos are Naturally immune."
+    }
+  ]
+}

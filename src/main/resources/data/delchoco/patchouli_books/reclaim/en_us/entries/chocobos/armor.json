@@ -1,0 +1,31 @@
+{
+  "name": "00 - Chocobo Armor",
+  "icon": "delchoco:chocobo_armor_chain",
+  "category": "delchoco:chocobo_combat",
+  "pages": [
+    {
+      "title": "Chain Armor",
+      "type": "patchouli:spotlight",
+      "item": "delchoco:chocobo_armor_chain",
+      "text": "Chainmail Armor for Chocobos.$(br)$(l:delchoco:recipe/chain_armor)Recipe$(/l)"
+    },
+    {
+      "title": "Iron Armor",
+      "type": "patchouli:spotlight",
+      "item": "delchoco:chocobo_armor_iron",
+      "text": "Iron Armor for Chocobos.$(br)$(l:delchoco:recipe/iron_armor)Recipe$(/l)"
+    },
+    {
+      "title": "Diamond Armor",
+      "type": "patchouli:spotlight",
+      "item": "delchoco:chocobo_armor_diamond",
+      "text": "Diamond Armor for Chocobos.$(br)$(l:delchoco:recipe/diamond_armor)Recipe$(/l)"
+    },
+    {
+      "title": "Netherite Armor",
+      "type": "patchouli:spotlight",
+      "item": "delchoco:chocobo_armor_netherite",
+      "text": "Iron Armor for Chocobos.$(br)$(l:delchoco:recipe/netherite_armor)Recipe$(/l)"
+    }
+  ]
+}

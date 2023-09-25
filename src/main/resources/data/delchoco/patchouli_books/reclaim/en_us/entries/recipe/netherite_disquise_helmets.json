@@ -1,0 +1,18 @@
+{
+  "name": "Disguise Helmet - Netherite",
+  "icon": "delchoco:choco_disguise_netherite_helmet",
+  "category": "delchoco:chocobo_rec",
+  "pages": [
+    {
+      "title": "Chocobo Disguise Helmet",
+      "type": "patchouli:spotlight",
+      "item": "delchoco:choco_disguise_netherite_helmet",
+      "text": "Useful for Players to wear.$(br)- Slightly Better than Netherite Armor$(br)- Useful for helping to summon chocobos without eating the alter$(br)- Needed get Iron Versions"
+    },
+    {
+      "type": "patchouli:smithing",
+      "recipe": "delchoco:choco_disguise/netherite_head",
+      "text": "-$(item)Disguise Helmet - Diamond$()$(br)-$(item)Netherite Helmet$()"
+    }
+  ]
+}

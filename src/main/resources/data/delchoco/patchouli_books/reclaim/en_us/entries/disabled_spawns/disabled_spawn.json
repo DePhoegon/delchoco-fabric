@@ -1,0 +1,37 @@
+{
+  "name": "No Natural Spawn",
+  "icon": "delchoco:chocobo_egg",
+  "category": "delchoco:chocobo_sum",
+  "pages": [
+    {
+      "title": "No Natural Spawn Option",
+      "type": "patchouli:spotlight",
+      "item": "delchoco:chocobo_egg",
+      "text": "The Following Pages are recipes to the basics. All Chocobos can be gotten"
+    },
+    {
+      "title": "Chocobo Feather",
+      "type": "patchouli:crafting",
+      "recipe": "delchoco:spawnless_root/chocobo_feather",
+      "text": "-$(item)Wheat Seed$()$(br)-$(item)Chicken Feather$()$(br)Used for the base Recipes & ChocoDisguise Armor"
+    },
+    {
+      "title": "Chocobo Feather",
+      "type": "patchouli:crafting",
+      "recipe": "delchoco:spawnless_root/gysahl_green",
+      "text": "-$(item)Wheat Seed$()$(br)-$(item)Chicken Feather$()$(br)-$(item)Chocobo Feather$()$(br)Useful for food & breeding"
+    },
+    {
+      "title": "Chocobo Feather",
+      "type": "patchouli:crafting",
+      "recipe": "delchoco:spawnless_root/flame_spawn_egg",
+      "text": "-$(item)Chicken Egg()$(br)-$(item)Crimson Fungus$()$(br)-$(item)Chocobo Feather$()$(br)Use to spawn a flame Chocobo. Will drop feathers like normal."
+    },
+    {
+      "title": "Chocobo Feather",
+      "type": "patchouli:crafting",
+      "recipe": "delchoco:spawnless_root/yellow_spawn_egg",
+      "text": "-$(item)Chicken Egg()$(br)-$(item)wheat$()$(br)-$(item)Chocobo Feather$()$(br)Use to spawn a Yellow Chocobo. Will drop feathers like normal."
+    }
+  ]
+}

@@ -1,0 +1,73 @@
+{
+  "name": "05 - Chocobo Kills",
+  "icon": "delchoco:chocobo_weapon_stone",
+  "category": "delchoco:chocobo_combat",
+  "pages": [
+    {
+      "title": "Configuration",
+      "type": "patchouli:spotlight",
+      "item": "minecraft:oak_sign",
+      "text": "Can be disabled in the configuration file."
+    },
+    {
+      "title": "Black Chocobo",
+      "type": "patchouli:spotlight",
+      "item": "minecraft:wither_rose",
+      "text": "Black Chocobos have a chance of producing one of the following on an entity kill.$(br)- $(item)Wither Rose$() $(br)- $(item)Dead Bush$()"
+    },
+    {
+      "title": "Flame Chocobo",
+      "type": "patchouli:spotlight",
+      "item": "minecraft:magma_cream",
+      "text": "Flame Chocobos have a chance of producing one of the following on an entity kill.$(br)- $(item)Magma Cream$()$(br)- $(item)Crimson Fungus$()$(br)- $(item)Warped Fungus$()"
+    },
+    {
+      "title": "Green Chocobo",
+      "type": "patchouli:spotlight",
+      "item": "minecraft:moss_block",
+      "text": "Green Chocobos have a chance of producing one of the following on an entity kill.$(br)- $(item)Moss Block$()$(br)- $(item)Spore Blossom$()$(br)- $(item)Small Drip leaf$()"
+    },
+    {
+      "title": "White Chocobo",
+      "type": "patchouli:spotlight",
+      "item": "minecraft:snowball",
+      "text": "White Chocobos have a chance of producing one of the following on an entity kill.$(br)- $(item)Bone Meal$()$(br)- $(item)Snowball$()$(br)- $(item)Lily of The Valley$()$(br)- $(item)Oxeye Daisy$()"
+    },
+    {
+      "title": "Gold Chocobo",
+      "type": "patchouli:spotlight",
+      "item": "minecraft:gold_nugget",
+      "text": "Gold Chocobos have a chance of producing one of the following on an entity kill.$(br)- $(item)Gold Nugget$()$(br)- $(item)Sunflower$()"
+    },
+    {
+      "title": "Blue Chocobo",
+      "type": "patchouli:spotlight",
+      "item": "minecraft:nautilus_shell",
+      "text": "Blue Chocobos have a chance of producing one of the following on an entity kill.$(br)- $(item)Nautilus Shell$()$(br)- $(item)Kelp$()$(br)- $(item)Sea Pickle$()"
+    },
+    {
+      "title": "Pink Chocobo",
+      "type": "patchouli:spotlight",
+      "item": "minecraft:allium",
+      "text": "Pink Chocobos have a chance of producing one of the following on an entity kill.$(br)- $(item)Allium$()$(br)- $(item)Brown Mushroom$()$(br)- $(item)Red Mushroom$()"
+    },
+    {
+      "title": "Red Chocobo",
+      "type": "patchouli:spotlight",
+      "item": "minecraft:bamboo",
+      "text": "Red Chocobos have a chance of producing one of the following on an entity kill.$(br)- $(item)Bamboo$()$(br)- $(item)Stick$()$(br)- $(item)Vine$()"
+    },
+    {
+      "title": "Purple Chocobo",
+      "type": "patchouli:spotlight",
+      "item": "minecraft:ender_pearl",
+      "text": "Purple Chocobos have a chance of producing one of the following on an entity kill.$(br)- $(item)Ender Pearl$()$(br)- $(item)Chorus Flower$()"
+    },
+    {
+      "title": "Yellow Chocobo",
+      "type": "patchouli:spotlight",
+      "item": "minecraft:dandelion",
+      "text": "Yellow Chocobos have a chance of producing one of the following on an entity kill.$(br)- $(item)Dandelion$() - $(item)Poppy$()$(br)- $(item)Blue Orchid$() - $(item)Allium$()$(br)- $(item)Azure Bluet$() - $(item)Red Tulip$()$(br)- $(item)Orange Tulip$() - $(item)White Tulip$()$(br)- $(item)Pink Tulip$() - $(item)Oxeye Daisy$()$(br)- $(item)CornFlower$() - $(item)Lily of the Valley$()"
+    }
+  ]
+}

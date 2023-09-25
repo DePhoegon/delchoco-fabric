@@ -1,0 +1,31 @@
+{
+  "name": "03 - Foods",
+  "icon": "delchoco:pickled_gysahl_cooked",
+  "category": "delchoco:chocobo_ent",
+  "pages": [
+    {
+      "title": "Gysahl Greens",
+      "type": "patchouli:spotlight",
+      "item": "delchoco:gysahl_green",
+      "text": "These wonderful things can be fed to your chocobos for taming & further more prepared for your own eating."
+    },
+    {
+      "title": "Pickled Gyashl Raw",
+      "type": "patchouli:crafting",
+      "recipe": "delchoco:pickled_gysahl_raw",
+      "text": "Raw prepped food for snacking on later"
+    },
+    {
+      "title": "Pickled Gyashl Cooked",
+      "type": "patchouli:spotlight",
+      "item": "delchoco:pickled_gysahl_cooked",
+      "text": "Tasty Plant Based, & renewable portable meals.$(br)Cooked in the following$(br)-Campfire$(br)-Furnace$(br)-Smoker"
+    },
+    {
+      "title": "'Forbidden' Drumsticks",
+      "type": "patchouli:spotlight",
+      "item": "delchoco:chocobo_drumstick_cooked",
+      "text": "Tasty, but at what costs?  They drop from .... predictable sources.$(br)Cooked in the following$(br)-Campfire$(br)-Furnace$(br)-Smoker"
+    }
+  ]
+}

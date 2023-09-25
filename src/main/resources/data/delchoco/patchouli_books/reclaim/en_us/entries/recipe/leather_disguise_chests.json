@@ -1,0 +1,18 @@
+{
+  "name": "Disguise Chestplate - Leather",
+  "icon": "delchoco:choco_disguise_leather_chestplate",
+  "category": "delchoco:chocobo_rec",
+  "pages": [
+    {
+      "title": "Straw Nest",
+      "type": "patchouli:spotlight",
+      "item": "delchoco:choco_disguise_leather_chestplate",
+      "text": "Useful for Players to wear.$(br)- Slightly Better than Leather Armor$(br)- Useful for helping to summon chocobos without eating the alter$(br)- Needed get Iron Versions"
+    },
+    {
+      "type": "patchouli:crafting",
+      "recipe": "delchoco:choco_disguise/leather_chest",
+      "text": "-8x$(item)Chocobo feathers$()$(br)-$(item)Leather Chestplate$()"
+    }
+  ]
+}

@@ -1,0 +1,31 @@
+{
+  "name": "01 - Chocobo Weapons",
+  "icon": "delchoco:chocobo_weapon_stone",
+  "category": "delchoco:chocobo_combat",
+  "pages": [
+    {
+      "title": "Stone Claws",
+      "type": "patchouli:spotlight",
+      "item": "delchoco:chocobo_weapon_stone",
+      "text": "Stone Claws for Chocobos.$(br)$(l:delchoco:recipe/stone_weapon)Recipe$(/l)$(br)-Player Usable, Does not break blocks."
+    },
+    {
+      "title": "Iron Claws",
+      "type": "patchouli:spotlight",
+      "item": "delchoco:chocobo_weapon_iron",
+      "text": "Iron Claws for Chocobos.$(br)$(l:delchoco:recipe/iron_weapon)Recipe$(/l)$(br)-Player Usable, Does not break blocks."
+    },
+    {
+      "title": "Diamond Claws",
+      "type": "patchouli:spotlight",
+      "item": "delchoco:chocobo_weapon_diamond",
+      "text": "Diamond Claws for Chocobos.$(br)$(l:delchoco:recipe/diamond_weapon)Recipe$(/l)$(br)-Player Usable, Does not break blocks."
+    },
+    {
+      "title": "Netherite Claws",
+      "type": "patchouli:spotlight",
+      "item": "delchoco:chocobo_weapon_netherite",
+      "text": "Netherite Claws for Chocobos.$(br)$(l:delchoco:recipe/netherite_weapon)Recipe$(/l)$(br)-Player Usable, Does not break blocks."
+    }
+  ]
+}

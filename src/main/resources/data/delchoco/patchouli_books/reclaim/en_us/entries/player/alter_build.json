@@ -1,0 +1,30 @@
+{
+  "name": "Alter Structure",
+  "icon": "minecraft:beacon",
+  "category": "delchoco:chocobo_sum",
+  "pages": [
+    {
+      "title": "Base Layer",
+      "type": "patchouli:image",
+      "images": [ "delchoco:textures/screens/alters/base.png" ],
+      "text": "Center Must be liquid Source(Water/Lava)"
+    },
+    {
+      "title": "Middle Layer",
+      "type": "patchouli:image",
+      "images": [ "delchoco:textures/screens/alters/mid.png" ],
+      "text": "Center Must be liquid Source(Water/Lava)"
+    },
+    {
+      "title": "Top Layer",
+      "type": "patchouli:image",
+      "images": [ "delchoco:textures/screens/alters/top.png" ],
+      "text": "Center Must be liquid Source(Water/Lava)"
+    },
+    {
+      "title": "Alter Block",
+      "type": "patchouli:text",
+      "text": "The Alter Block must sit where a beacon sit.$(br)- No Size Variance allowed."
+    }
+  ]
+}

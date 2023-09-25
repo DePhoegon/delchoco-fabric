@@ -1,0 +1,18 @@
+{
+  "name": "Disguise Boots - Iron",
+  "icon": "delchoco:choco_disguise_iron_boots",
+  "category": "delchoco:chocobo_rec",
+  "pages": [
+    {
+      "title": "Chocobo Disguise Boots",
+      "type": "patchouli:spotlight",
+      "item": "delchoco:choco_disguise_iron_boots",
+      "text": "Useful for Players to wear.$(br)- Slightly Better than Iron Armor$(br)- Useful for helping to summon chocobos without eating the alter$(br)- Needed get Iron Versions"
+    },
+    {
+      "type": "patchouli:smithing",
+      "recipe": "delchoco:choco_disguise/iron_feet",
+      "text": "-$(item)Disguise Boots - Leather$()$(br)-$(item)Iron Boots$()"
+    }
+  ]
+}

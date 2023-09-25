@@ -1,0 +1,18 @@
+{
+  "name": "Chocobo Netherite Armor",
+  "icon": "delchoco:chocobo_armor_netherite",
+  "category": "delchoco:chocobo_rec",
+  "pages": [
+    {
+      "title": "Diamond Armor",
+      "type": "patchouli:spotlight",
+      "item": "delchoco:chocobo_armor_netherite",
+      "text": "Netherite Armor for Chocobos"
+    },
+    {
+      "type": "patchouli:smithing",
+      "recipe": "delchoco:chocobo_armor/netherite",
+      "text": "-$(item)Chocobo Diamond Armor$()$(br)-$(item)Netherite Chestplate$()"
+    }
+  ]
+}

@@ -1,0 +1,18 @@
+{
+  "name": "Chocobo Chainmail Armor",
+  "icon": "delchoco:chocobo_armor_chain",
+  "category": "delchoco:chocobo_rec",
+  "pages": [
+    {
+      "title": "Chain Armor",
+      "type": "patchouli:spotlight",
+      "item": "delchoco:chocobo_armor_chain",
+      "text": "Chainmail Armor for Chocobos"
+    },
+    {
+      "type": "patchouli:crafting",
+      "recipe": "delchoco:chocobo_armor/chain",
+      "text": "-$(l:delchoco:recipe/chainmail_chest)Chainmail Chestplate$(/l)$(br)-$(l:delchoco:recipe/chainmail_leggings)Chainmail Leggings$(/l)$(br)-$(l:delchoco:recipe/chainmail_head)Chainmail Helmet$(/l) $(br)-$(l:delchoco:recipe/chainmail_feet)Chainmail Boots$(/l)"
+    }
+  ]
+}

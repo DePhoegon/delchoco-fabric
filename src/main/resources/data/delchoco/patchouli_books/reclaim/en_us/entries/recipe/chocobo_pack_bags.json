@@ -1,0 +1,18 @@
+{
+  "name": "Chocobo Pack Bags",
+  "icon": "delchoco:chocobo_saddle_pack",
+  "category": "delchoco:chocobo_rec",
+  "pages": [
+    {
+      "title": "Chocobo Pack Bags",
+      "type": "patchouli:spotlight",
+      "item": "delchoco:chocobo_saddle_pack",
+      "text": "Very Useful for riding and allowing your Chocobo to carry an inventory of stuff for you."
+    },
+    {
+      "type": "patchouli:crafting",
+      "recipe": "delchoco:chocobo_pack_bags",
+      "text": "-$(item)Chocobo feather$()$(br)-$(item)Leather$()$(br)-4x$(item)String$()$(br)-2x$(item)Wool$()$(br)-$(l:delchoco:recipe/chocobo_saddle_bags)Saddle Bag$(/l)"
+    }
+  ]
+}

@@ -1,0 +1,47 @@
+{
+  "name": "Gysahl Greens Spawns",
+  "icon": "delchoco:gysahl_green",
+  "category": "delchoco:chocobo_combat",
+  "pages": [
+    {
+      "title": "General Greens Patch",
+      "type": "patchouli:image",
+      "images": [ "delchoco:textures/screens/greens/green.png" ]
+    },
+    {
+      "title": "Flower Forest Greens",
+      "type": "patchouli:image",
+      "images": [ "delchoco:textures/screens/greens/flower_forest_green.png" ]
+    },
+    {
+      "title": "Forest Greens",
+      "type": "patchouli:image",
+      "images": [ "delchoco:textures/screens/greens/forest_green.png" ]
+    },
+    {
+      "title": "Plains Greens",
+      "type": "patchouli:image",
+      "images": [ "delchoco:textures/screens/greens/plains_green.png" ]
+    },
+    {
+      "title": "Savanna Greens",
+      "type": "patchouli:image",
+      "images": [ "delchoco:textures/screens/greens/savana_green.png" ]
+    },
+    {
+      "title": "Swamp Greens",
+      "type": "patchouli:image",
+      "images": [ "delchoco:textures/screens/greens/swamp_green.png" ]
+    },
+    {
+      "title": "Nether Greens",
+      "type": "patchouli:image",
+      "images": [ "delchoco:textures/screens/greens/nether_greens.png" ]
+    },
+    {
+      "title": "End Greens",
+      "type": "patchouli:image",
+      "images": [ "delchoco:textures/screens/greens/end_greens.png" ]
+    }
+  ]
+}

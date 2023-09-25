@@ -1,0 +1,49 @@
+{
+  "name": "00 - Quick Start",
+  "icon": "delchoco:chocobo_feather",
+  "category": "delchoco:chocobo_ent",
+  "pages": [
+    {
+      "title": "Minimally Needed Mats",
+      "type": "patchouli:spotlight",
+      "item": "delchoco:chocobo_saddle",
+      "text": "$(item)Gysahl Greens$()$(br)$(item)String$()$(br)$(item)Leather$()$(br)$(item)Chocobo Feather$()"
+    },
+    {
+      "title": "A Starting Point",
+      "type": "patchouli:spotlight",
+      "item": "delchoco:gysahl_green",
+      "text": "The upmost item needed.$(br) It is suggested to get 5-30ish per Chocobo (based on luck)$(br)-$(l:delchoco:showcase/greens)Example Locations$(/l)"
+    },
+    {
+      "title": "Strings",
+      "type": "patchouli:spotlight",
+      "item": "minecraft:string",
+      "text": "2 $(item)String$() will be needed"
+    },
+    {
+      "title": "Leather",
+      "type": "patchouli:spotlight",
+      "item": "minecraft:leather",
+      "text": "1 $(item)Leather$() will be needed"
+    },
+    {
+      "title": "Chocobo Feather",
+      "type": "patchouli:spotlight",
+      "item": "delchoco:chocobo_feather",
+      "text": "$(item)Chocobo Feather$()s will be needed$(br)Just stay near some for enough time & they drop."
+    },
+    {
+      "title": "The Chocobo Saddle",
+      "type": "patchouli:crafting",
+      "recipe": "delchoco:chocobo_saddle",
+      "text": "You will Need one of these.$(br)This is the easiest recipe to get for the most part."
+    },
+    {
+      "title": "The Chocobo Saddle",
+      "type": "patchouli:crafting",
+      "recipe": "delchoco:chocobo_saddle_alt",
+      "text": "You will Need one of these.$(br)This is only viable if you've already access to a regular saddle."
+    }
+  ]
+}

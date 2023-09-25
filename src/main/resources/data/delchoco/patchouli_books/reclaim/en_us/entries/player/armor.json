@@ -1,0 +1,121 @@
+{
+  "name": "05 - Armor of Chocobos",
+  "icon": "delchoco:chocobo_feather",
+  "category": "delchoco:chocobo_ent",
+  "pages": [
+
+    {
+      "title": "Configuration",
+      "type": "patchouli:spotlight",
+      "item": "minecraft:oak_sign",
+      "text": "Combat Effects be disabled in the configuration file."
+    },
+    {
+      "title": "Combat Effects",
+      "type": "patchouli:text",
+      "text": "Effects with a full Color set.$(br)Any Colors $(br)- Immunity to Berry Bushes$(br)White $(br)- Immunity to Freezing$(br)Purple/Gold $(br)- Immunity to Dragon Breath$(br)Black/Red/Purple/Pink/Gold $(br)- Immunity to Wither$(br)Green/Black/Gold $(br)- Poison Resistance$(br)Flame/Gold $(br)- Fire Resistance$(br)Gold $(br)- Night Vision"
+    },
+    {
+      "title": "Repair Costs",
+      "type": "patchouli:spotlight",
+      "item": "minecraft:anvil",
+      "text": "Dying the armor will lower the repair costs.$(br) Armor can only be Dyed from Yellow, and to Yellow.$(br)- $(item)Cleansing Shift Dye$() will put it set the piece to yellow"
+    },
+    {
+      "title": "Chocobo Disguise",
+      "type": "patchouli:crafting",
+      "recipe": "delchoco:choco_disguise/leather_head",
+      "text": "Leather Helmet"
+    },
+    {
+      "title": "Chocobo Disguise",
+      "type": "patchouli:crafting",
+      "recipe": "delchoco:choco_disguise/leather_chest",
+      "text": "Leather Chestplate"
+    },
+    {
+      "title": "Chocobo Disguise",
+      "type": "patchouli:crafting",
+      "recipe": "delchoco:choco_disguise/leather_leg",
+      "text": "Leather Leggings"
+    },
+    {
+      "title": "Chocobo Disguise",
+      "type": "patchouli:crafting",
+      "recipe": "delchoco:choco_disguise/leather_feet",
+      "text": "Leather Boots"
+    },
+    {
+      "title": "Chocobo Disguise",
+      "type": "patchouli:smithing",
+      "recipe": "delchoco:choco_disguise/iron_head",
+      "text": "Iron Helmet"
+    },
+    {
+      "title": "Chocobo Disguise",
+      "type": "patchouli:smithing",
+      "recipe": "delchoco:choco_disguise/iron_chest",
+      "text": "Iron Chestplate"
+    },
+    {
+      "title": "Chocobo Disguise",
+      "type": "patchouli:smithing",
+      "recipe": "delchoco:choco_disguise/iron_leg",
+      "text": "Iron Leggings"
+    },
+    {
+      "title": "Chocobo Disguise",
+      "type": "patchouli:smithing",
+      "recipe": "delchoco:choco_disguise/iron_feet",
+      "text": "Iron Boots"
+    },
+    {
+      "title": "Chocobo Disguise",
+      "type": "patchouli:smithing",
+      "recipe": "delchoco:choco_disguise/diamond_head",
+      "text": "Diamond Helmet"
+    },
+    {
+      "title": "Chocobo Disguise",
+      "type": "patchouli:smithing",
+      "recipe": "delchoco:choco_disguise/diamond_chest",
+      "text": "Diamond Chestplate"
+    },
+    {
+      "title": "Chocobo Disguise",
+      "type": "patchouli:smithing",
+      "recipe": "delchoco:choco_disguise/diamond_leg",
+      "text": "Diamond Leggings"
+    },
+    {
+      "title": "Chocobo Disguise",
+      "type": "patchouli:smithing",
+      "recipe": "delchoco:choco_disguise/diamond_feet",
+      "text": "Diamond Boots"
+    },
+    {
+      "title": "Chocobo Disguise",
+      "type": "patchouli:smithing",
+      "recipe": "delchoco:choco_disguise/netherite_head",
+      "text": "Netherite Helmet"
+    },
+    {
+      "title": "Chocobo Disguise",
+      "type": "patchouli:smithing",
+      "recipe": "delchoco:choco_disguise/netherite_chest",
+      "text": "Netherite Chestplate"
+    },
+    {
+      "title": "Chocobo Disguise",
+      "type": "patchouli:smithing",
+      "recipe": "delchoco:choco_disguise/netherite_leg",
+      "text": "Netherite Leggings"
+    },
+    {
+      "title": "Chocobo Disguise",
+      "type": "patchouli:smithing",
+      "recipe": "delchoco:choco_disguise/netherite_feet",
+      "text": "Netherite Boots"
+    }
+  ]
+}

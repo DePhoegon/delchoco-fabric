@@ -1,0 +1,57 @@
+{
+  "name": "Tamed Chocobos",
+  "icon": "delchoco:chocobo_feather",
+  "category": "delchoco:chocobo_combat",
+  "pages": [
+    {
+      "title": "Black Chocobo",
+      "type": "patchouli:image",
+      "images": [ "delchoco:textures/screens/chocobos/black.png" ]
+    },
+    {
+      "title": "Blue Chocobo",
+      "type": "patchouli:image",
+      "images": [ "delchoco:textures/screens/chocobos/blue.png" ]
+    },
+    {
+      "title": "Flame Chocobo",
+      "type": "patchouli:image",
+      "images": [ "delchoco:textures/screens/chocobos/flame.png" ]
+    },
+    {
+      "title": "Gold Chocobo",
+      "type": "patchouli:image",
+      "images": [ "delchoco:textures/screens/chocobos/gold.png" ]
+    },
+    {
+      "title": "Green Chocobo",
+      "type": "patchouli:image",
+      "images": [ "delchoco:textures/screens/chocobos/green.png" ]
+    },
+    {
+      "title": "Pink Chocobo",
+      "type": "patchouli:image",
+      "images": [ "delchoco:textures/screens/chocobos/pink.png" ]
+    },
+    {
+      "title": "Purple Chocobo",
+      "type": "patchouli:image",
+      "images": [ "delchoco:textures/screens/chocobos/purple.png" ]
+    },
+    {
+      "title": "Red Chocobo",
+      "type": "patchouli:image",
+      "images": [ "delchoco:textures/screens/chocobos/red.png" ]
+    },
+    {
+      "title": "White Chocobo",
+      "type": "patchouli:image",
+      "images": [ "delchoco:textures/screens/chocobos/white.png" ]
+    },
+    {
+      "title": "Yellow Chocobo",
+      "type": "patchouli:image",
+      "images": [ "delchoco:textures/screens/chocobos/yellow.png" ]
+    }
+  ]
+}

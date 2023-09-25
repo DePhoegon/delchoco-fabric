@@ -1,0 +1,18 @@
+{
+  "name": "Chocobo Stone Claws",
+  "icon": "delchoco:chocobo_weapon_stone",
+  "category": "delchoco:chocobo_rec",
+  "pages": [
+    {
+      "title": "Stone Claws",
+      "type": "patchouli:spotlight",
+      "item": "delchoco:chocobo_weapon_stone",
+      "text": "Stone Claws for Chocobos$(br)-Can be used by Players, Does not break blocks."
+    },
+    {
+      "type": "patchouli:crafting",
+      "recipe": "delchoco:chocobo_weapon/stone",
+      "text": "-3x$(item)Stone Axe$()$(br)-$(item)Leather$()$(br)"
+    }
+  ]
+}

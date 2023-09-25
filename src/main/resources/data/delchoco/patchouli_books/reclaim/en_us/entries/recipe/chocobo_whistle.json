@@ -1,0 +1,18 @@
+{
+  "name": "Chocobo Whistle",
+  "icon": "delchoco:chocobo_whistle",
+  "category": "delchoco:chocobo_rec",
+  "pages": [
+    {
+      "title": "Chocobo Whistle",
+      "type": "patchouli:spotlight",
+      "item": "delchoco:chocobo_whistle",
+      "text": "Very Useful for controlling your Chocobo$(br)-Allowing Follow, Wander, Stay Nearby."
+    },
+    {
+      "type": "patchouli:crafting",
+      "recipe": "delchoco:chocobo_whistle",
+      "text": "-$(item)Chocobo feather$()$(br)-$(item)Gold Ingot$()"
+    }
+  ]
+}

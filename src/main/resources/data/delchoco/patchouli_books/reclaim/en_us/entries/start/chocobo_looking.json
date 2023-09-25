@@ -1,0 +1,67 @@
+{
+  "name": "01 - Where to Get Looking",
+  "icon": "minecraft:map",
+  "category": "delchoco:chocobo_ent",
+  "pages": [
+    {
+      "title": "Locations & Locations",
+      "type": "patchouli:spotlight",
+      "item": "minecraft:filled_map",
+      "text": "Locations That Chocobos Can be found in is Varied. Examples are to follow.$(br)- The only Chocobo that will not spawn naturally & must be bred for - Gold Chocobo -"
+    },
+    {
+      "title": "Black Chocobo",
+      "type": "patchouli:image",
+      "images": ["delchoco:textures/screens/chocobos/black_spawn.png"],
+      "text": "Hot & Dry Like a Desert"
+    },
+    {
+      "title": "Flame Chocobo",
+      "type": "patchouli:image",
+      "images": ["delchoco:textures/screens/chocobos/flame_spawn.png"],
+      "text": "Nether Realm"
+    },
+    {
+      "title": "Green Chocobo",
+      "type": "patchouli:image",
+      "images": ["delchoco:textures/screens/chocobos/green_spawn.png"],
+      "text": "Swampy lands"
+    },
+    {
+      "title": "Pink Chocobo",
+      "type": "patchouli:image",
+      "images": ["delchoco:textures/screens/chocobos/pink_spawn.png"],
+      "text": "Mushrooms for Space"
+    },
+    {
+      "title": "Red Chocobo",
+      "type": "patchouli:image",
+      "images": ["delchoco:textures/screens/chocobos/red_spawn.png"],
+      "text": "Mesa & Forest Places"
+    },
+    {
+      "title": "White Chocobo",
+      "type": "patchouli:image",
+      "images": ["delchoco:textures/screens/chocobos/white_spawn.png"],
+      "text": "Snowy Lands"
+    },
+    {
+      "title": "Yellow Chocobo",
+      "type": "patchouli:image",
+      "images": ["delchoco:textures/screens/chocobos/yellow_spawn.png"],
+      "text": "Plains & Hills, Most common"
+    },
+    {
+      "title": "Blue Chocobo",
+      "type": "patchouli:image",
+      "images": ["delchoco:textures/screens/chocobos/blue_spawn.png"],
+      "text": "Rivers & Warm Oceans"
+    },
+    {
+      "title": "Purple Chocobo",
+      "type": "patchouli:image",
+      "images": ["delchoco:textures/screens/chocobos/purple_spawn.png"],
+      "text": "The End Dimension"
+    }
+  ]
+}

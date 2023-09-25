@@ -1,0 +1,18 @@
+{
+  "name": "Forbidden Drumsticks",
+  "icon": "delchoco:chocobo_drumstick_cooked",
+  "category": "delchoco:chocobo_rec",
+  "pages": [
+    {
+      "title": "Forbidden DrumSticks",
+      "type": "patchouli:spotlight",
+      "item": "delchoco:chocobo_drumstick_cooked",
+      "text": "Useful for eating, if you must."
+    },
+    {
+      "type": "patchouli:smelting",
+      "recipe": "delchoco:chocobo_drumstick_cooked",
+      "text": "Eatable, if you must.$(br)-$(item)Raw Forbidden Drumstick$()$(br)-Also able to be cooked on a campfire or in a smoker."
+    }
+  ]
+}

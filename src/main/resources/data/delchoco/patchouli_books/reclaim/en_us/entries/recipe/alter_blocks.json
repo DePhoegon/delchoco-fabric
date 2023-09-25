@@ -1,0 +1,28 @@
+{
+  "name": "Valid Alter Blocks",
+  "icon": "minecraft:oak_sign",
+  "category": "delchoco:chocobo_rec",
+  "pages": [
+    {
+      "title": "Alter Blocks",
+      "type": "patchouli:image",
+      "images": [ "delchoco:textures/screens/alters/random.jpg" ],
+      "text": "Blocks accepted for the Alter bases"
+    },
+    {
+      "title": "Block List Pg.1",
+      "type": "patchouli:text",
+      "text": "- $(item)Oak Wood$()$(br)- $(item)Stripped Oak Wood$()$(br)- $(item)Spruce Wood$()$(br)- $(item)Stripped Spruce Wood$()$(br)- $(item)Birch Wood$()$(br)- $(item)Stripped Birch Wood$()$(br)- $(item)Acacia Wood$()$(br)- $(item)Stripped Acacia Wood$()$(br)- $(item)Dark Oak Wood$()$(br)- $(item)Stripped Dark Oak Wood$()$(br)- $(item)Hay Block$()$(br)- $(item)Clay Block$()$(br)- $(item)Moss Block$()"
+    },
+    {
+      "title": "Block List Pg.2",
+      "type": "patchouli:text",
+      "text": "$(br)- $(item)Oak Leaves$()$(br)- $(item)Spruce Leaves$()$(br)- $(item)Birch Leaves$()$(br)- $(item)Jungle Leaves$()$(br)- $(item)Acacia Leaves$()$(br)- $(item)Dark Oak Leaves$()$(br)- $(item)Flowering Azalea Leaves$()$(br)- $(item)Azalea Leaves$()$(br)- $(item)Warped Nylium$()$(br)- $(item)Crimson Nylium$()$(br)- $(item)Sand $()$(br)- $(item)Red Sand$()"
+    },
+    {
+      "title": "Internal Column",
+      "type": "patchouli:text",
+      "text": "The Center Column has to to be Liquid (Water or Lava) Source Blocks.$(br)- Any Waterlogged Block is acceptable.$(br)- To be able to use the Blue Chocobo, a waterlogged $(item)Slab$() topside, or waterlogged Upside down $(item)Stair$() are valid."
+    }
+  ]
+}

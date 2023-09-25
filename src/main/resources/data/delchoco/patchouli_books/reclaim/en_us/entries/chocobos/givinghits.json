@@ -1,0 +1,49 @@
+{
+  "name": "04 - Chocobos Hitting Others",
+  "icon": "delchoco:chocobo_weapon_stone",
+  "category": "delchoco:chocobo_combat",
+  "pages": [
+    {
+      "title": "Configuration",
+      "type": "patchouli:spotlight",
+      "item": "minecraft:oak_sign",
+      "text": "Can be disabled in the configuration file."
+    },
+    {
+      "title": "All Targets",
+      "type": "patchouli:spotlight",
+      "item": "delchoco:chocobo_weapon_stone",
+      "text": "Chocobos have a tendency to disarm Their targets$(br)-Chance on hit, to have the target drop their main-hand / off-hand items"
+    },
+    {
+      "title": "Spider Targets",
+      "type": "patchouli:spotlight",
+      "item": "minecraft:string",
+      "text": "Chocobos can at times knock a string out of the spiders."
+    },
+    {
+      "title": "Cave Spider Targets",
+      "type": "patchouli:spotlight",
+      "item": "minecraft:fermented_spider_eye",
+      "text": "Chocobos are able to dislodge fermented spider eye, from Cave spiders."
+    },
+    {
+      "title": "Skeleton Targets",
+      "type": "patchouli:spotlight",
+      "item": "minecraft:bone",
+      "text": "Chocobos can at times knock a bone off the skeleton.$(br)-What's one less bone for those boys?."
+    },
+    {
+      "title": "Wither Skeleton Targets",
+      "type": "patchouli:spotlight",
+      "item": "minecraft:charcoal",
+      "text": "Chocobos can at times knock a bit of charcoal off of them on each hit.$(br)- It use to be a bone, but now it's fuel."
+    },
+    {
+      "title": "Iron Golem Targets",
+      "type": "patchouli:spotlight",
+      "item": "minecraft:poppy",
+      "text": "Chocobos can at times knock a spare poppy off of the golem.$(br)-somewhat risky for a weird reward"
+    }
+  ]
+}

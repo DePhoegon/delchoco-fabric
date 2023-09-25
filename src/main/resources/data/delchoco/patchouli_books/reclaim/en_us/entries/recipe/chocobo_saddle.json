@@ -1,0 +1,17 @@
+{
+  "name": "Chocobo Saddle",
+  "icon": "delchoco:chocobo_saddle",
+  "category": "delchoco:chocobo_rec",
+  "pages": [
+    {
+      "type": "patchouli:crafting",
+      "recipe": "delchoco:chocobo_saddle",
+      "text": "Very Useful for riding your Chocobo.$(br)-$(item)Chocobo feather$()$(br)-$(item)Leather$()$(br)-2x$(item)String$()"
+    },
+    {
+      "type": "patchouli:crafting",
+      "recipe": "delchoco:chocobo_saddle_alt",
+      "text": "Very Useful for riding your Chocobo.$(br)-$(item)Chocobo feather$()$(br)-$(item)Saddle$()"
+    }
+  ]
+}

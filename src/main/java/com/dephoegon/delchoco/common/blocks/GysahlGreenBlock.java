@@ -53,13 +53,16 @@ public class GysahlGreenBlock extends PlantBlock
         block_set.add(13, Blocks.TUFF.getDefaultState());
         return block_set;
     }
+    @SuppressWarnings("deprecation")
     public VoxelShape getOutlineShape(@NotNull BlockState state, BlockView world, BlockPos pos, ShapeContext context) {
         return AGE_TO_SHAPE[state.get(this.getAgeProperty())];
     }
     protected int getAge(@NotNull BlockState state) { return state.get(this.getAgeProperty()); }
     public BlockState withAge(int age) { return (BlockState)this.getDefaultState().with(this.getAgeProperty(), age); }
+    @SuppressWarnings("BooleanMethodIsAlwaysInverted")
     public boolean isMature(@NotNull BlockState state) { return state.get(this.getAgeProperty()) >= this.getMaxAge(); }
     public boolean hasRandomTicks(BlockState state) { return !this.isMature(state); }
+    @SuppressWarnings("deprecation")
     public void randomTick(BlockState state, @NotNull ServerWorld world, BlockPos pos, Random random) {
         float f;
         int i;
@@ -111,9 +114,10 @@ public class GysahlGreenBlock extends PlantBlock
         }
         return f;
     }
-    public boolean canPlaceAt(BlockState state, @NotNull WorldView world, BlockPos pos) {
-        return (world.getBaseLightLevel(pos, 0) >= 8 || world.isSkyVisible(pos)) && super.canPlaceAt(state, world, pos);
+    public boolean canPlaceAt(BlockState state, @NotNull WorldView world, @NotNull BlockPos pos) {
+        return blockPlaceableOnList().contains(world.getBlockState(pos.down()).getBlock().getDefaultState()) && world.getBlockState(pos).isAir();
     }
+    @SuppressWarnings("deprecation")
     public void onEntityCollision(BlockState state, World world, BlockPos pos, Entity entity) {
         if (entity instanceof RavagerEntity && world.getGameRules().getBoolean(GameRules.DO_MOB_GRIEFING)) {
             world.breakBlock(pos, true, entity);

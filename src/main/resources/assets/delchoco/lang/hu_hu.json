@@ -1,9 +1,7 @@
 {
-  "itemGroup.dephoegon_chocobos": "DePhoegons csokoládéja",
+  "itemGroup.delchoco.dephoegon_chocobos": "DePhoegons csokoládéja",
 
   "block.delchoco.gysahl_green": "Gysahl zöld",
-  "block.delchoco.chocobo_egg": "Chocobo tojás",
-  "block.delchoco.straw_nest": "Chocobo fészek",
 
   "entity.delchoco.chocobo": "Csokoládé",
   "tooltip.delchoco.info.spawn_egg": "Nem kompatibilis az ívókkal",
@@ -78,9 +76,6 @@
   "item.delchoco.purple_chocobo_spawn_egg": "Lila Chocobo ívási tojás",
   "item.delchoco.flame_chocobo_spawn_egg": "Láng Chocobo ívási tojás",
 
-  "item.delchoco.chocobo_egg.tooltip.invalid_egg": "§Instabil tojás. Állítsa a földre a stabilizáláshoz",
-  "item.delchoco.chocobo_egg.tooltip.mother_info": "Anya: %s / %s / %s / %s",
-  "item.delchoco.chocobo_egg.tooltip.father_info": "Atya: %s / %s / %s / %s",
   "item.delchoco.chocobo_egg.tooltip.yellow": "Sárga",
   "item.delchoco.chocobo_egg.tooltip.green": "Zöld",
   "item.delchoco.chocobo_egg.tooltip.blue": "Kék",
@@ -112,8 +107,8 @@
   "command.delchoco.chocobo.get_stamina": "Állóképesség: %s",
   "command.delchoco.chocobo.get_attack": "Támadási erő: %s",
   "command.delchoco.chocobo.get_generation": "Chocobo generáció: %s",
-  "delchoco.entity_chocobo.str.room" : "%s looks Stronger",
-  "delchoco.entity_chocobo.str.full" : "%s looks as Strong as can be",
+  "delchoco.entity_chocobo.str.room" : "%s looks stronger",
+  "delchoco.entity_chocobo.str.full" : "%s looks as strong as can be",
   "delchoco.entity_chocobo.arm.room" : "%s feathers look denser",
   "delchoco.entity_chocobo.arm.full" : "%s feathers are as dense as can be",
   "delchoco.entity_chocobo.arm_tough.room" : "%s looks tougher",

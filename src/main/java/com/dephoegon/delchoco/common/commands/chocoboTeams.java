@@ -1,5 +1,6 @@
 package com.dephoegon.delchoco.common.commands;
 
+import com.dephoegon.delchoco.DelChoco;
 import com.dephoegon.delchoco.common.entities.Chocobo;
 import com.dephoegon.delchoco.common.init.ModAttributes;
 import com.dephoegon.delchoco.common.teamColors;
@@ -16,18 +17,20 @@ import net.minecraft.scoreboard.Team;
 import net.minecraft.server.command.CommandManager;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.text.LiteralText;
 import net.minecraft.text.Text;
 import net.minecraft.text.TranslatableText;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.Arrays;
 import java.util.Objects;
 
 import static com.dephoegon.delchoco.DelChoco.DELCHOCO_ID;
 
 @SuppressWarnings("SameReturnValue")
 public class chocoboTeams {
-    public static void commands(CommandDispatcher<ServerCommandSource> dispatcher) {
+    public static void commands(@NotNull CommandDispatcher<ServerCommandSource> dispatcher) {
         final LiteralArgumentBuilder<ServerCommandSource> delChocobo = CommandManager.literal("DelChoco");
         delChocobo.then(CommandManager.literal("TeamInitialize").requires((commandSource) -> commandSource.hasPermissionLevel(2))
                 .then(CommandManager.literal("refresh").executes(chocoboTeams::refreshTeams))
@@ -35,46 +38,39 @@ public class chocoboTeams {
         delChocobo.then(CommandManager.literal("TeamSettings").then(CommandManager.literal("TeamFriendlyFire")
                 .then(CommandManager.literal("True").executes((command) -> setFriendlyFire(command, true)))
                 .then(CommandManager.literal("False").executes((command)-> setFriendlyFire(command, false)))));
-        for (teamColors delCo: teamColors.values()) {
-            delChocobo.then(CommandManager.literal("Player").then(CommandManager.literal("JoinTeam")
-                    .then(CommandManager.literal(delCo.getColorName()).executes((command) -> join(command, delCo.getTeamName())))));
-        }
-        delChocobo.then(CommandManager.literal("Player")
-                .then(CommandManager.literal("LeaveTeam").executes(chocoboTeams::leave)));
-        delChocobo.then(CommandManager.literal("Chocobo")
-                .then(CommandManager.literal("RiddenChocoboStats").executes(chocoboTeams::sendList)));
+        Arrays.stream(teamColors.values()).map(delCo -> CommandManager.literal("Player")
+                .then(CommandManager.literal("JoinTeam").then(CommandManager.literal(delCo.getColorName())
+                .executes((command) -> join(command, delCo.getTeamName()))))).forEach(delChocobo::then);
+        delChocobo.then(CommandManager.literal("Player").then(CommandManager.literal("LeaveTeam").executes(chocoboTeams::leave)));
+        delChocobo.then(CommandManager.literal("Chocobo").then(CommandManager.literal("RiddenChocoboStats").executes(chocoboTeams::sendList)));
         dispatcher.register(delChocobo);
     }
 
     private static int setFriendlyFire(@NotNull CommandContext<ServerCommandSource> commandSourceStack, boolean fire) throws CommandSyntaxException {
+        DelChoco.LOGGER.info("set teams Friendly fire");
         ServerPlayerEntity player = commandSourceStack.getSource().getPlayer();
-        Team playerTeamName = player.getScoreboard().getPlayerTeam(player.getName().getString());
-        if (playerTeamName != null) {
-            String teamName = playerTeamName.getName();
-            Team playerTeam = commandSourceStack.getSource().getWorld().getScoreboard().getPlayerTeam(teamName);
-            assert playerTeam != null;
+        Team playerTeam = player.getScoreboard().getPlayerTeam(player.getName().getString());
+        if (playerTeam != null) {
             playerTeam.setFriendlyFireAllowed(fire);
-            commandSourceStack.getSource().sendFeedback(Text.of("Player "+ player.getName().asString()+ " set friendly fire to " + fire), true);
-        } else {
-            commandSourceStack.getSource().sendFeedback(Text.of("Player "+ player.getName().asString()+ " Must be on a team to set Friendly fire for their team"), true);
-        }
+            commandSourceStack.getSource().sendFeedback(new LiteralText("Player "+ player.getName().asString()+ " set friendly fire to " + fire + " for " + playerTeam.getName()), true);
+        } else { commandSourceStack.getSource().sendFeedback(new LiteralText("Player "+ player.getName().asString()+ " Must be on a team to set Friendly fire for their team"), true); }
         return 1;
     }
     private static int join(@NotNull CommandContext<ServerCommandSource> commandSourceStack, String teamName) throws CommandSyntaxException {
-        Scoreboard scoreboard = commandSourceStack.getSource().getServer().getScoreboard();
+        Scoreboard scoreboard = commandSourceStack.getSource().getWorld().getScoreboard();
         addTeams(scoreboard, teamName, commandSourceStack);
         ServerPlayerEntity player = commandSourceStack.getSource().getPlayer();
-        Team playerTeam = scoreboard.getPlayerTeam(teamName);
+        Team playerTeam = scoreboard.getTeam(teamName);
         assert playerTeam != null;
-        scoreboard.addPlayerToTeam(player.getName().getString(), playerTeam);
-        commandSourceStack.getSource().sendFeedback(Text.of("Player " + player.getName().asString() + " added to " + teamName + " team."), true);
+        scoreboard.addPlayerToTeam(player.getName().asString(), playerTeam);
+        commandSourceStack.getSource().sendFeedback(new LiteralText("Player " + player.getName().asString() + " added to " + teamName + " team."), true);
         return 1;
     }
     private static int leave(@NotNull CommandContext<ServerCommandSource> commandSourceStack) throws CommandSyntaxException {
         Scoreboard scoreboard = commandSourceStack.getSource().getServer().getScoreboard();
         ServerPlayerEntity player = commandSourceStack.getSource().getPlayer();
         scoreboard.removePlayerFromTeam(player.getName().asString(), player.getScoreboard().getPlayerTeam(player.getName().getString()));
-        commandSourceStack.getSource().sendFeedback(Text.of("Player " + player.getName().asString() + " left their team."), true);
+        commandSourceStack.getSource().sendFeedback(new LiteralText("Player " + player.getName().asString() + " left their team."), true);
         return 1;
     }
     private static int refreshTeams(@NotNull CommandContext<ServerCommandSource> commandSourceStack) {
@@ -86,24 +82,22 @@ public class chocoboTeams {
         return 1;
     }
     private static void removeTeams(@NotNull Scoreboard scoreboard, String tName, CommandContext<ServerCommandSource> commandSourceStack) {
-        Team chocoboTeam = scoreboard.getPlayerTeam(tName);
+        Team chocoboTeam = scoreboard.getTeam(tName);
         if (chocoboTeam != null) {
-            scoreboard.removePlayerFromTeam(tName, chocoboTeam);
-            commandSourceStack.getSource().sendFeedback(Text.of("Removed " + tName + "team"), true);
+            scoreboard.removeTeam(chocoboTeam);
+            commandSourceStack.getSource().sendFeedback(new LiteralText("Removed " + tName + "team"), true);
         }
     }
     private static void addTeams(@NotNull Scoreboard scoreboard, String tName, CommandContext<ServerCommandSource> commandSourceStack) {
         Team chocoboTeam = scoreboard.getPlayerTeam(tName);
         if (chocoboTeam == null) {
-            scoreboard.addPlayerToTeam(tName, scoreboard.getTeam(tName));
-            commandSourceStack.getSource().sendFeedback(Text.of("Added " + tName + "team"), true);
+            scoreboard.addTeam(tName);
+            commandSourceStack.getSource().sendFeedback(new LiteralText("Added " + tName + "team"), true);
         }
     }
     private static int createTeams(@NotNull CommandContext<ServerCommandSource> commandSourceStack) {
         Scoreboard scoreboard = commandSourceStack.getSource().getServer().getScoreboard();
-        for (teamColors colors: teamColors.values()) {
-            addTeams(scoreboard, colors.getTeamName() ,commandSourceStack);
-        }
+        Arrays.stream(teamColors.values()).forEach(colors -> addTeams(scoreboard, colors.getTeamName(), commandSourceStack));
         return 1;
     }
     @SuppressWarnings("SameReturnValue")
@@ -124,11 +118,10 @@ public class chocoboTeams {
                 source.sendFeedback(getText(chocobo.getGenerationString()), false);
             }
         }
-
         return 0;
     }
     @Contract("_, _, _ -> new")
-    private static @NotNull TranslatableText getText(String key, @NotNull Chocobo chocobo, EntityAttribute attribute) { return new TranslatableText("command." + DELCHOCO_ID + ".chocobo." + key, Objects.requireNonNull(chocobo.getAttributeInstance(attribute)).getBaseValue()); }
+    private static @NotNull Text getText(String key, @NotNull Chocobo chocobo, EntityAttribute attribute) { return new TranslatableText("command." + DELCHOCO_ID + ".chocobo." + key, Objects.requireNonNull(chocobo.getAttributeInstance(attribute)).getValue()); }
     @Contract(value = "_ -> new", pure = true)
-    private static @NotNull TranslatableText getText(String value) { return new TranslatableText("command." + DELCHOCO_ID + ".chocobo." + "get_generation", value); }
+    private static @NotNull Text getText(String value) { return new TranslatableText("command." + DELCHOCO_ID + ".chocobo." + "get_generation", value); }
 }

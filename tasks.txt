@@ -48,6 +48,15 @@
 
 + Double Check Chocobo Spawn amounts
 
-- Double check lang files
++ Double check lang files
+- Fixed lang Files
 
-- Double check version
++ Double check version
+
++ Fixed Commands
+- Moved the registry to the correct spot
+- Fixed improper commands
+
++ Fixed Advancement for first tick to give Items
+
++ Fixed Gysahl Green spawning

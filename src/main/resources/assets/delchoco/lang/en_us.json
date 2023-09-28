@@ -2,8 +2,6 @@
     "itemGroup.delchoco.dephoegon_chocobos": "DePhoegons' Chocobos",
 
     "block.delchoco.gysahl_green": "Gysahl Green",
-    "item.delchoco.chocobo_egg": "Chocobo Egg",
-    "item.delchoco.straw_nest": "Chocobo Nest",
 
     "entity.delchoco.chocobo": "Chocobo",
     "tooltip.delchoco.info.spawn_egg": "Spawners will Spawn Chocobos as if naturally spawn in the world",
@@ -78,9 +76,6 @@
     "item.delchoco.purple_chocobo_spawn_egg": "Purple Chocobo Spawn Egg",
     "item.delchoco.flame_chocobo_spawn_egg": "Flame Chocobo Spawn Egg",
 
-    "item.delchoco.chocobo_egg.tooltip.invalid_egg": "§cUnstable Egg. Set on Ground to stabilize",
-    "item.delchoco.chocobo_egg.tooltip.mother_info": "Mother: %s / %s / %s / %s",
-    "item.delchoco.chocobo_egg.tooltip.father_info": "Father: %s / %s / %s / %s",
     "item.delchoco.chocobo_egg.tooltip.yellow": "Yellow",
     "item.delchoco.chocobo_egg.tooltip.green": "Green",
     "item.delchoco.chocobo_egg.tooltip.blue": "Blue",
@@ -99,8 +94,8 @@
     "delchoco.entity_chocobo.chocobo_wander_cmd": "Wander",
     "delchoco.entity_chocobo.chocobo_stay_cmd": "Stay Nearby",
     "delchoco.entity_chocobo.not_owner": "§cYou are not the owner of this Chocobo!",
-    "delchoco.entity_chocobo.str.room" : "%s looks Stronger",
-    "delchoco.entity_chocobo.str.full" : "%s looks as Strong as can be",
+    "delchoco.entity_chocobo.str.room" : "%s looks stronger",
+    "delchoco.entity_chocobo.str.full" : "%s looks as strong as can be",
     "delchoco.entity_chocobo.arm.room" : "%s feathers look denser",
     "delchoco.entity_chocobo.arm.full" : "%s feathers are as dense as can be",
     "delchoco.entity_chocobo.arm_tough.room" : "%s looks tougher",

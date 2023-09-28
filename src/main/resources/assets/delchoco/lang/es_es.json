@@ -1,9 +1,7 @@
 {
-  "itemGroup.dephoegon_chocobos": "Chocobos de DePhoegons",
+  "itemGroup.delchoco.dephoegon_chocobos": "Chocobos de DePhoegons",
 
   "block.delchoco.gysahl_green": "Gysahl Verde",
-  "block.delchoco.chocobo_egg": "Huevo Chocobo",
-  "block.delchoco.straw_nest": "Nido de Chocobo",
 
   "entity.delchoco.chocobo": "Chocobo",
   "tooltip.delchoco.info.spawn_egg": "No compatible con los reproductores",
@@ -78,9 +76,6 @@
   "item.delchoco.purple_chocobo_spawn_egg": "Huevo de Prole de Chocobo Púrpura",
   "item.delchoco.flame_chocobo_spawn_egg": "Huevo de Flame Chocobo",
 
-  "item.delchoco.chocobo_egg.tooltip.invalid_egg": "§cHuevo inestable. Puesto en el suelo para estabilizar",
-  "item.delchoco.chocobo_egg.tooltip.mother_info": "Madre: %s / %s / %s / %s",
-  "item.delchoco.chocobo_egg.tooltip.father_info": "Padre: %s / %s / %s / %s",
   "item.delchoco.chocobo_egg.tooltip.yellow": "Amarillo",
   "item.delchoco.chocobo_egg.tooltip.green": "Verde",
   "item.delchoco.chocobo_egg.tooltip.blue": "Azul",
@@ -112,8 +107,8 @@
   "command.delchoco.chocobo.get_stamina": "Resistencia: %s",
   "command.delchoco.chocobo.get_attack": "Fuerza de ataque: %s",
   "command.delchoco.chocobo.get_generation": "Generación Chocobo: %s",
-  "delchoco.entity_chocobo.str.room" : "%s looks Stronger",
-  "delchoco.entity_chocobo.str.full" : "%s looks as Strong as can be",
+  "delchoco.entity_chocobo.str.room" : "%s looks stronger",
+  "delchoco.entity_chocobo.str.full" : "%s looks as strong as can be",
   "delchoco.entity_chocobo.arm.room" : "%s feathers look denser",
   "delchoco.entity_chocobo.arm.full" : "%s feathers are as dense as can be",
   "delchoco.entity_chocobo.arm_tough.room" : "%s looks tougher",

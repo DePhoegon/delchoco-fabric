@@ -18,29 +18,29 @@ public class tradeAdds {
         final ItemStack spike_fruit = new ItemStack(SPIKE_FRUIT, 1);
 
         TradeOfferHelper.registerVillagerOffers(VillagerProfession.FARMER, 1, factories -> {
-            factories.add((entity, random) -> new TradeOffer(gysahl_green, new ItemStack(Items.EMERALD, 1), 16, 1, 0.02F));
-            factories.add((entity, random) -> new TradeOffer(new ItemStack(Items.EMERALD, 2), gysahl_green, 16, 2, 0.03F));
+            factories.add((entity, random) -> new TradeOffer(gysahl_green, new ItemStack(Items.EMERALD, 1), 16, 8, 0.02F));
+            factories.add((entity, random) -> new TradeOffer(new ItemStack(Items.EMERALD, 2), gysahl_green, 16, 8, 0.03F));
         });
         TradeOfferHelper.registerVillagerOffers(VillagerProfession.FARMER, 2, factories -> {
-            factories.add((entity, random) -> new TradeOffer(lovely_gysahl, new ItemStack(Items.EMERALD, 1), 16, 3, 0.02F));
-            factories.add((entity, random) -> new TradeOffer(new ItemStack(Items.EMERALD, 2), lovely_gysahl, 16, 3, 0.03F));
+            factories.add((entity, random) -> new TradeOffer(lovely_gysahl, new ItemStack(Items.EMERALD, 1), 16, 16, 0.02F));
+            factories.add((entity, random) -> new TradeOffer(new ItemStack(Items.EMERALD, 2), lovely_gysahl, 16, 16, 0.03F));
         });
         TradeOfferHelper.registerVillagerOffers(VillagerProfession.FARMER,
                 3, factories -> {
-            factories.add(((entity, random) -> new TradeOffer(pink_green, new ItemStack(Items.EMERALD, 4), 6, 6, 0.05F)));
-            factories.add(((entity, random) -> new TradeOffer(new ItemStack(Items.EMERALD, 8), pink_green, 4, 6, 0.05F)));
+            factories.add(((entity, random) -> new TradeOffer(pink_green, new ItemStack(Items.EMERALD, 4), 6, 24, 0.05F)));
+            factories.add(((entity, random) -> new TradeOffer(new ItemStack(Items.EMERALD, 8), pink_green, 4, 24, 0.05F)));
         });
         TradeOfferHelper.registerVillagerOffers(VillagerProfession.FARMER,
                 4, factories -> {
-            factories.add(((entity, random) -> new TradeOffer(dead_pepper, new ItemStack(Items.EMERALD, 6), 6, 12, 0.05F)));
-            factories.add(((entity, random) -> new TradeOffer(new ItemStack(Items.EMERALD, 12), dead_pepper, 3, 12, 0.05F)));
-            factories.add(((entity, random) -> new TradeOffer(spike_fruit, new ItemStack(Items.EMERALD, 6), 6, 12, 0.05F)));
-            factories.add(((entity, random) -> new TradeOffer(new ItemStack(Items.EMERALD, 12), spike_fruit, 3, 12, 0.05F)));
+            factories.add(((entity, random) -> new TradeOffer(dead_pepper, new ItemStack(Items.EMERALD, 6), 6, 32, 0.05F)));
+            factories.add(((entity, random) -> new TradeOffer(new ItemStack(Items.EMERALD, 12), dead_pepper, 3, 32, 0.05F)));
+            factories.add(((entity, random) -> new TradeOffer(spike_fruit, new ItemStack(Items.EMERALD, 6), 6, 32, 0.05F)));
+            factories.add(((entity, random) -> new TradeOffer(new ItemStack(Items.EMERALD, 12), spike_fruit, 3, 32, 0.05F)));
         });
         TradeOfferHelper.registerVillagerOffers(VillagerProfession.FARMER,
                 5, factories -> {
-            factories.add(((entity, random) -> new TradeOffer(golden_green, new ItemStack(Items.EMERALD, 16), 4, 18, 0.05F)));
-            factories.add(((entity, random) -> new TradeOffer(new ItemStack(Items.EMERALD, 32), golden_green, 2, 18, 0.05F)));
+            factories.add(((entity, random) -> new TradeOffer(golden_green, new ItemStack(Items.EMERALD, 16), 4, 40, 0.05F)));
+            factories.add(((entity, random) -> new TradeOffer(new ItemStack(Items.EMERALD, 32), golden_green, 2, 40, 0.05F)));
         });
     }
 }

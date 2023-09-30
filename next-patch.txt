@@ -1,0 +1,2 @@
+Already Done
+- Trade xp (for villager) increased to match forge versions (8*Trade Tier)

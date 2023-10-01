@@ -133,7 +133,7 @@ public class ChocoboConfig {
 
     @Configurable
     @Configurable.Comment("The Maximum Stamina a Chocobo can have. min 10, max 1024, default 200")
-    @Configurable.Range(min = 10, max = 1024)
+    @Configurable.Range(min = 20, max = 1024)
     public double chocoboMaxStamina = dMAX_STAMINA.getDefault();
 
     @Configurable

@@ -36,6 +36,7 @@ run/defaultconfigs
 run/world/
 run/logs
 run/mods
+run/data
 run/patchouli_books
 run/resourcepacks
 run/resources

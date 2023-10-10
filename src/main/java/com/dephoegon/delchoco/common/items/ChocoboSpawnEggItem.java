@@ -12,7 +12,6 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.ItemUsageContext;
-import net.minecraft.nbt.NbtCompound;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.text.Text;
 import net.minecraft.util.ActionResult;
@@ -39,12 +38,9 @@ public class ChocoboSpawnEggItem extends Item {
         final BlockPos pos = context.getBlockPos();
         final PlayerEntity player = context.getPlayer();
         BlockState blockState = worldIn.getBlockState(pos);
-        if (blockState.isOf(Blocks.SPAWNER) && (blockEntity = worldIn.getBlockEntity(pos)) instanceof MobSpawnerBlockEntity block) {
+        if (blockState.isOf(Blocks.SPAWNER) && (blockEntity = worldIn.getBlockEntity(pos)) instanceof MobSpawnerBlockEntity) {
             MobSpawnerLogic mobSpawnerLogic = ((MobSpawnerBlockEntity)blockEntity).getLogic();
-            mobSpawnerLogic.setEntityId(CHOCOBO_ENTITY);
-            NbtCompound nbtCompound = block.getLogic().writeNbt(new NbtCompound());
-            nbtCompound.putString("ChocoVariant", this.color.getColorName());
-            blockEntity.readNbt(nbtCompound);
+            mobSpawnerLogic.setEntityId(this.color.getEntityTypeByColor());
             blockEntity.markDirty();
             worldIn.updateListeners(pos, blockState, blockState, Block.NOTIFY_ALL);
             context.getStack().decrement(1);

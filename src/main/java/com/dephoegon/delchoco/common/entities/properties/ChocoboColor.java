@@ -1,10 +1,14 @@
 package com.dephoegon.delchoco.common.entities.properties;
 
 import com.dephoegon.delchoco.DelChoco;
+import net.minecraft.entity.EntityType;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
+import org.jetbrains.annotations.Contract;
 
 import java.util.Random;
+
+import static com.dephoegon.delchoco.common.init.ModEntities.*;
 
 @SuppressWarnings("SameParameterValue")
 public enum ChocoboColor {
@@ -36,4 +40,20 @@ public enum ChocoboColor {
         return YELLOW;
     }
     public MutableText getEggText() { return eggText; }
+    @Contract(pure = true)
+    public EntityType<?> getEntityTypeByColor() {
+        ChocoboColor chocoboColor = this;
+        return switch (chocoboColor) {
+            case RED -> RED_CHOCOBO_ENTITY;
+            case YELLOW -> YELLOW_CHOCOBO_ENTITY;
+            case BLUE -> BLUE_CHOCOBO_ENTITY;
+            case GOLD -> GOLD_CHOCOBO_ENTITY;
+            case PINK -> PINK_CHOCOBO_ENTITY;
+            case BLACK -> BLACK_CHOCOBO_ENTITY;
+            case FLAME -> FLAME_CHOCOBO_ENTITY;
+            case GREEN -> GREEN_CHOCOBO_ENTITY;
+            case WHITE -> WHITE_CHOCOBO_ENTITY;
+            case PURPLE -> PURPLE_CHOCOBO_ENTITY;
+        };
+    }
 }

@@ -6,8 +6,6 @@
     "ClientPlayNetworkHandlerMixin",
     "MixinEntity",
     "MixinLivingEntity",
-    "MobSpawnerLogicAccessor",
-    "MobSpawnerLogicMixin",
     "PlayerEntityMixin",
     "ServerPlayerEntityAccessor"
   ],

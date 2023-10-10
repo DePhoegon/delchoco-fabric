@@ -118,7 +118,7 @@ public class Chocobo extends TameableEntity implements Angerable {
     private final double followSpeedModifier = 2.0D;
     private static final float maxStepUp = 1.5f;
     private final UniformIntProvider ALERT_INTERVAL = TimeHelper.betweenSeconds(4, 6);
-    private static final String NBTKEY_CHOCOBO_COLOR = "Color";
+    protected static final String NBTKEY_CHOCOBO_COLOR = "Color";
     private static final String NBTKEY_CHOCOBO_IS_MALE = "Male";
     private static final String NBTKEY_CHOCOBO_FROM_EGG = "Egg";
     private static final String NBTKEY_MOVEMENT_TYPE = "MovementType";

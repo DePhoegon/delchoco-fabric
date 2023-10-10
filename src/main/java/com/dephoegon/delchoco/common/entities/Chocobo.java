@@ -266,7 +266,7 @@ public class Chocobo extends TameableEntity implements Angerable {
     }
     public static DefaultAttributeContainer.Builder createAttributes() {
         return MobEntity.createMobAttributes()
-                .add(ModAttributes.CHOCOBO_MAX_STAMINA, chocoConfigHolder.chocoboMaxStamina)
+                .add(ModAttributes.CHOCOBO_MAX_STAMINA, chocoConfigHolder.chocoboStamina)
                 .add(EntityAttributes.GENERIC_MOVEMENT_SPEED, chocoConfigHolder.chocoboSpeed / 100f)
                 .add(EntityAttributes.GENERIC_MAX_HEALTH, chocoConfigHolder.chocoboHealth)
                 .add(EntityAttributes.GENERIC_ARMOR, chocoConfigHolder.chocoboArmor)

@@ -15,7 +15,7 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.client.itemgroup.FabricItemGroupBuilder;
-import net.fabricmc.fabric.api.client.rendereregistry.v1.EntityRendererRegistry;
+import net.fabricmc.fabric.api.client.rendering.v1.EntityRendererRegistry;
 import net.minecraft.item.ItemGroup;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.Identifier;
@@ -39,11 +39,10 @@ public class DelChoco implements ModInitializer, ClientModInitializer {
 		ModEntities.registerAttributes();
 		ChocoList.commonRegOrder();
 	}
-	@SuppressWarnings("deprecation")
 	@Environment(EnvType.CLIENT)
 	public void onInitializeClient() {
 		ChocoList.clientRegOrder();
-		EntityRendererRegistry.INSTANCE.register(ModEntities.CHOCOBO_ENTITY, ChocoboRenderer::new);
+		EntityRendererRegistry.register(ModEntities.CHOCOBO_ENTITY, ChocoboRenderer::new);
 		clientHandler.ChocoboRendering();
 		GeoArmorRenderer.registerArmorRenderer(new ChocoDisguiseFeatureRenderer(), ModItems.LEATHER_CHOCO_DISGUISE_BOOTS, ModItems.LEATHER_CHOCO_DISGUISE_LEGS, ModItems.LEATHER_CHOCO_DISGUISE_CHEST, ModItems.LEATHER_CHOCO_DISGUISE_HELMET, ModItems.IRON_CHOCO_DISGUISE_BOOTS, ModItems.IRON_CHOCO_DISGUISE_LEGS, ModItems.IRON_CHOCO_DISGUISE_CHEST, ModItems.IRON_CHOCO_DISGUISE_HELMET, ModItems.DIAMOND_CHOCO_DISGUISE_BOOTS, ModItems.DIAMOND_CHOCO_DISGUISE_LEGS, ModItems.DIAMOND_CHOCO_DISGUISE_CHEST, ModItems.DIAMOND_CHOCO_DISGUISE_HELMET, ModItems.NETHERITE_CHOCO_DISGUISE_BOOTS, ModItems.NETHERITE_CHOCO_DISGUISE_LEGS, ModItems.NETHERITE_CHOCO_DISGUISE_CHEST, ModItems.NETHERITE_CHOCO_DISGUISE_HELMET);
 	}

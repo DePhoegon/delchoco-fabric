@@ -57,8 +57,7 @@ import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.sound.SoundEvent;
 import net.minecraft.tag.FluidTags;
-import net.minecraft.text.LiteralText;
-import net.minecraft.text.TranslatableText;
+import net.minecraft.text.Text;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.Hand;
 import net.minecraft.util.TimeHelper;
@@ -418,7 +417,7 @@ public class Chocobo extends TameableEntity implements Angerable {
         if (isEnd(worldIn)) { skip = !worldConfigHolder.endSpawn; }
         else if (isNether(worldIn)) { skip = !worldConfigHolder.netherSpawn; }
         else if (isOverworld(worldIn)) { skip = !worldConfigHolder.overworldSpawn; } else { skip = false; }
-        if (!fromEgg() && !skip) {
+        if (!fromEgg() && !skip && reason != SpawnReason.SPAWNER) {
             setChocoboSpawnCheck(ChocoboColor.YELLOW);
             if (isNether(worldIn)) { setChocoboSpawnCheck(ChocoboColor.FLAME); }
             if (isEnd(worldIn)){ setChocoboSpawnCheck(ChocoboColor.PURPLE); }
@@ -428,6 +427,8 @@ public class Chocobo extends TameableEntity implements Angerable {
             if (currentBiomes.isIn(IS_FOREST) || currentBiomes.isIn(IS_BADLANDS)) { setChocoboSpawnCheck(ChocoboColor.RED); }
             if (isGreenChocoboBiomes(biomeRegistryKey)) { setChocoboSpawnCheck(ChocoboColor.GREEN); }
             if (isHotOverWorld(biomeRegistryKey) && !isSavanna(biomeRegistryKey)) { setChocoboSpawnCheck(ChocoboColor.BLACK); }
+            this.setChocoboScale(this.isMale(), 0, false);
+        } else if (reason == SpawnReason.SPAWNER) {
             this.setChocoboScale(this.isMale(), 0, false);
         }
         chocoboStatShake(EntityAttributes.GENERIC_MAX_HEALTH, "health");
@@ -976,7 +977,7 @@ public class Chocobo extends TameableEntity implements Angerable {
             if (heldItemStack.isEmpty() && !player.isSneaking() && !this.isBaby() && this.isSaddled()) {
                 if (chocoConfigHolder.ownerInventoryAccess) {
                     if (isOwner(player)) { player.startRiding(this); }
-                    else { player.sendMessage(new TranslatableText(DelChoco.DELCHOCO_ID + ".entity_chocobo.not_owner"), true); }
+                    else { player.sendMessage(Text.translatable(DelChoco.DELCHOCO_ID + ".entity_chocobo.not_owner"), true); }
                 } else { player.startRiding(this); }
                 return ActionResult.SUCCESS;
             }
@@ -984,7 +985,7 @@ public class Chocobo extends TameableEntity implements Angerable {
                 if (getHealth() != getMaxHealth()) {
                     this.eat(player, hand, player.getInventory().getMainHandStack());
                     heal(chocoConfigHolder.chocoboHealAmount);
-                } else { player.sendMessage(new TranslatableText(DelChoco.DELCHOCO_ID + ".entity_chocobo.heal_fail"), true); }
+                } else { player.sendMessage(Text.translatable(DelChoco.DELCHOCO_ID + ".entity_chocobo.heal_fail"), true); }
             }
             if (this.fruitAteTimer == 0 && !player.world.isClient())  {
                 if (defaultHand == GOLDEN_GYSAHL_GREEN) {
@@ -1028,7 +1029,7 @@ public class Chocobo extends TameableEntity implements Angerable {
                         this.goalSelector.add(4, this.follow);
                         followingMrHuman = 1;
                         this.clearWonders();
-                        player.sendMessage(new TranslatableText(DelChoco.DELCHOCO_ID + ".entity_chocobo.chocobo_follow_cmd"), true);
+                        player.sendMessage(Text.translatable(DelChoco.DELCHOCO_ID + ".entity_chocobo.chocobo_follow_cmd"), true);
                     } else if (this.followingMrHuman == 1) {
                         this.playSound(ModSounds.WHISTLE_SOUND_WANDER, 1.0F, 1.0F);
                         this.goalSelector.remove(this.follow);
@@ -1040,7 +1041,7 @@ public class Chocobo extends TameableEntity implements Angerable {
                         } else {
                             this.goalSelector.add(7, roamAround);
                         }
-                        player.sendMessage(new TranslatableText(DelChoco.DELCHOCO_ID + ".entity_chocobo.chocobo_wander_cmd"), true);
+                        player.sendMessage(Text.translatable(DelChoco.DELCHOCO_ID + ".entity_chocobo.chocobo_wander_cmd"), true);
                     } else if (this.followingMrHuman == 2) {
                         this.playSound(ModSounds.WHISTLE_SOUND_STAY, 1.0F, 1.0F);
                         this.setMovementType(MovementType.STANDSTILL);
@@ -1060,9 +1061,9 @@ public class Chocobo extends TameableEntity implements Angerable {
                             noRoam = true;
                         }
                         followingMrHuman = 3;
-                        player.sendMessage(new TranslatableText(DelChoco.DELCHOCO_ID + ".entity_chocobo.chocobo_stay_cmd"), true);
+                        player.sendMessage(Text.translatable(DelChoco.DELCHOCO_ID + ".entity_chocobo.chocobo_stay_cmd"), true);
                     }
-                } else { player.sendMessage(new TranslatableText(DelChoco.DELCHOCO_ID + ".entity_chocobo.not_owner"), true); }
+                } else { player.sendMessage(Text.translatable(DelChoco.DELCHOCO_ID + ".entity_chocobo.not_owner"), true); }
                 return ActionResult.SUCCESS;
             }
             if (!this.isInLove() && defaultHand == LOVELY_GYSAHL_GREEN && !this.isBaby()) {
@@ -1096,7 +1097,7 @@ public class Chocobo extends TameableEntity implements Angerable {
                         this.setCustomName(heldItemStack.getName());
                         this.setCustomNameVisible(true);
                         this.eat(player, hand, heldItemStack);
-                    } else { player.sendMessage(new TranslatableText(DelChoco.DELCHOCO_ID + ".entity_chocobo.not_owner"), true); }
+                    } else { player.sendMessage(Text.translatable(DelChoco.DELCHOCO_ID + ".entity_chocobo.not_owner"), true); }
                 } else {
                     this.setCustomName(heldItemStack.getName());
                     this.setCustomNameVisible(true);
@@ -1106,7 +1107,7 @@ public class Chocobo extends TameableEntity implements Angerable {
             }
             if (defaultHand == CHOCOBO_FEATHER.asItem()) {
                 if (isOwner(player)) { this.setCustomNameVisible(!this.isCustomNameVisible()); }
-                else { player.sendMessage(new TranslatableText(DelChoco.DELCHOCO_ID + ".entity_chocobo.not_owner"), true); }
+                else { player.sendMessage(Text.translatable(DelChoco.DELCHOCO_ID + ".entity_chocobo.not_owner"), true); }
                 return ActionResult.SUCCESS;
             }
             if (defaultHand instanceof ChocoboLeashPointer item) {
@@ -1123,7 +1124,7 @@ public class Chocobo extends TameableEntity implements Angerable {
                     this.goalSelector.add(7, this.localWonder);
                 }
                 String name = this.getCustomName() == null ? this.getName().getString() : this.getCustomName().getString();
-                player.sendMessage(new LiteralText(name + " Area Set: "+dist+ " around X: " + center.getX() + " Z: " + center.getZ()), true);
+                player.sendMessage(Text.literal(name + " Area Set: "+dist+ " around X: " + center.getX() + " Z: " + center.getZ()), true);
                 this.setLeashSpot(center);
                 this.setLeashedDistance(dist);
                 return ActionResult.SUCCESS;
@@ -1135,10 +1136,10 @@ public class Chocobo extends TameableEntity implements Angerable {
                     this.setOwnerUuid(player.getUuid());
                     this.setTamed(true);
                     this.setCollarColor(16);
-                    player.sendMessage(new TranslatableText(DelChoco.DELCHOCO_ID + ".entity_chocobo.tame_success"), true);
+                    player.sendMessage(Text.translatable(DelChoco.DELCHOCO_ID + ".entity_chocobo.tame_success"), true);
                     if (!this.hasCustomName()) { this.setCustomName(getChocoName()); }
                     this.setCustomNameVisible(true);
-                } else { player.sendMessage(new TranslatableText(DelChoco.DELCHOCO_ID + ".entity_chocobo.tame_fail"), true); }
+                } else { player.sendMessage(Text.translatable(DelChoco.DELCHOCO_ID + ".entity_chocobo.tame_fail"), true); }
                 return ActionResult.SUCCESS;
             }
             if (defaultHand == Items.NAME_TAG) {
@@ -1190,7 +1191,7 @@ public class Chocobo extends TameableEntity implements Angerable {
             String keys = ".entity_chocobo." + key;
             if (trip) { keys = keys + ".full"; }
             else { keys = keys + ".room"; }
-            player.sendSystemMessage(new TranslatableText(DelChoco.DELCHOCO_ID + keys, this.getCustomName()), Util.NIL_UUID);
+            player.sendMessage(Text.translatable(DelChoco.DELCHOCO_ID + keys, this.getCustomName()));
         }
     }
     private void displayChocoboInventory(@NotNull ServerPlayerEntity player) {

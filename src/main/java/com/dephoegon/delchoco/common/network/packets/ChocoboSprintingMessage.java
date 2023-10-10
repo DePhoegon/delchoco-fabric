@@ -1,7 +1,6 @@
 package com.dephoegon.delchoco.common.network.packets;
 
 import com.dephoegon.delchoco.common.entities.Chocobo;
-import net.fabricmc.fabric.api.network.PacketContext;
 import net.minecraft.entity.Entity;
 import net.minecraft.network.PacketByteBuf;
 import net.minecraft.server.network.ServerPlayerEntity;
@@ -24,7 +23,7 @@ public class ChocoboSprintingMessage {
         return new ChocoboSprintingMessage(buf.readBoolean());
     }
 
-    public static void handle(ChocoboSprintingMessage message, @NotNull PacketContext context) {
+    public static void handle(ChocoboSprintingMessage message, MyPacketContext context) {
         ServerPlayerEntity player = (ServerPlayerEntity) context.getPlayer();
         if (player != null) {
             if (player.getVehicle() == null) { return; }

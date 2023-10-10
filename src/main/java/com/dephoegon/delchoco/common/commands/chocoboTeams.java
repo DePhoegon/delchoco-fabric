@@ -17,9 +17,7 @@ import net.minecraft.scoreboard.Team;
 import net.minecraft.server.command.CommandManager;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.text.LiteralText;
 import net.minecraft.text.Text;
-import net.minecraft.text.TranslatableText;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 
@@ -52,8 +50,8 @@ public class chocoboTeams {
         Team playerTeam = player.getScoreboard().getPlayerTeam(player.getName().getString());
         if (playerTeam != null) {
             playerTeam.setFriendlyFireAllowed(fire);
-            commandSourceStack.getSource().sendFeedback(new LiteralText("Player "+ player.getName().asString()+ " set friendly fire to " + fire + " for " + playerTeam.getName()), true);
-        } else { commandSourceStack.getSource().sendFeedback(new LiteralText("Player "+ player.getName().asString()+ " Must be on a team to set Friendly fire for their team"), true); }
+            commandSourceStack.getSource().sendFeedback(Text.literal("Player "+ player.getName().getString()+ " set friendly fire to " + fire + " for " + playerTeam.getName()), true);
+        } else { commandSourceStack.getSource().sendFeedback(Text.literal("Player "+ player.getName().getString()+ " Must be on a team to set Friendly fire for their team"), true); }
         return 1;
     }
     private static int join(@NotNull CommandContext<ServerCommandSource> commandSourceStack, String teamName) throws CommandSyntaxException {
@@ -62,15 +60,15 @@ public class chocoboTeams {
         ServerPlayerEntity player = commandSourceStack.getSource().getPlayer();
         Team playerTeam = scoreboard.getTeam(teamName);
         assert playerTeam != null;
-        scoreboard.addPlayerToTeam(player.getName().asString(), playerTeam);
-        commandSourceStack.getSource().sendFeedback(new LiteralText("Player " + player.getName().asString() + " added to " + teamName + " team."), true);
+        scoreboard.addPlayerToTeam(player.getName().getString(), playerTeam);
+        commandSourceStack.getSource().sendFeedback(Text.literal("Player " + player.getName().getString() + " added to " + teamName + " team."), true);
         return 1;
     }
     private static int leave(@NotNull CommandContext<ServerCommandSource> commandSourceStack) throws CommandSyntaxException {
         Scoreboard scoreboard = commandSourceStack.getSource().getServer().getScoreboard();
         ServerPlayerEntity player = commandSourceStack.getSource().getPlayer();
-        scoreboard.removePlayerFromTeam(player.getName().asString(), player.getScoreboard().getPlayerTeam(player.getName().getString()));
-        commandSourceStack.getSource().sendFeedback(new LiteralText("Player " + player.getName().asString() + " left their team."), true);
+        scoreboard.removePlayerFromTeam(player.getName().getString(), player.getScoreboard().getPlayerTeam(player.getName().getString()));
+        commandSourceStack.getSource().sendFeedback(Text.literal("Player " + player.getName().getString() + " left their team."), true);
         return 1;
     }
     private static int refreshTeams(@NotNull CommandContext<ServerCommandSource> commandSourceStack) {
@@ -85,14 +83,14 @@ public class chocoboTeams {
         Team chocoboTeam = scoreboard.getTeam(tName);
         if (chocoboTeam != null) {
             scoreboard.removeTeam(chocoboTeam);
-            commandSourceStack.getSource().sendFeedback(new LiteralText("Removed " + tName + "team"), true);
+            commandSourceStack.getSource().sendFeedback(Text.literal("Removed " + tName + "team"), true);
         }
     }
     private static void addTeams(@NotNull Scoreboard scoreboard, String tName, CommandContext<ServerCommandSource> commandSourceStack) {
         Team chocoboTeam = scoreboard.getPlayerTeam(tName);
         if (chocoboTeam == null) {
             scoreboard.addTeam(tName);
-            commandSourceStack.getSource().sendFeedback(new LiteralText("Added " + tName + "team"), true);
+            commandSourceStack.getSource().sendFeedback(Text.literal("Added " + tName + "team"), true);
         }
     }
     private static int createTeams(@NotNull CommandContext<ServerCommandSource> commandSourceStack) {
@@ -107,7 +105,7 @@ public class chocoboTeams {
         if(commandEntity instanceof PlayerEntity player) {
             Entity mount = player.getVehicle();
             if (!(mount instanceof Chocobo chocobo)) {
-                source.sendFeedback(new TranslatableText("command." + DELCHOCO_ID + ".chocobo.not_riding_chocobo"), false);
+                source.sendFeedback(Text.translatable("command." + DELCHOCO_ID + ".chocobo.not_riding_chocobo"), false);
                 return 0;
             } else {
                 source.sendFeedback(getText("get_health", chocobo, EntityAttributes.GENERIC_MAX_HEALTH), false);
@@ -121,7 +119,7 @@ public class chocoboTeams {
         return 0;
     }
     @Contract("_, _, _ -> new")
-    private static @NotNull Text getText(String key, @NotNull Chocobo chocobo, EntityAttribute attribute) { return new TranslatableText("command." + DELCHOCO_ID + ".chocobo." + key, Objects.requireNonNull(chocobo.getAttributeInstance(attribute)).getValue()); }
+    private static @NotNull Text getText(String key, @NotNull Chocobo chocobo, EntityAttribute attribute) { return Text.translatable("command." + DELCHOCO_ID + ".chocobo." + key, Objects.requireNonNull(chocobo.getAttributeInstance(attribute)).getValue()); }
     @Contract(value = "_ -> new", pure = true)
-    private static @NotNull Text getText(String value) { return new TranslatableText("command." + DELCHOCO_ID + ".chocobo." + "get_generation", value); }
+    private static @NotNull Text getText(String value) { return Text.translatable("command." + DELCHOCO_ID + ".chocobo." + "get_generation", value); }
 }

@@ -8,15 +8,15 @@ import software.bernie.geckolib3.model.AnimatedGeoModel;
 
 public class ChocoDisguiseModel extends AnimatedGeoModel<ChocoDisguiseItem> {
     @Override
-    public Identifier getModelLocation(ChocoDisguiseItem object) {
+    public Identifier getModelResource(ChocoDisguiseItem object) {
         return new Identifier(DelChoco.DELCHOCO_ID, "geo/choco_disguise.geo.json");
     }
 
-    public Identifier getTextureLocation(@NotNull ChocoDisguiseItem object) {
+    public Identifier getTextureResource(@NotNull ChocoDisguiseItem object) {
         // Default texture location, Overrides in ChocoDisguiseFeatureRenderer.java with itemStack NBT
         return new Identifier(DelChoco.DELCHOCO_ID, "textures/models/armor/leather/yellow.png");
     }
-    public Identifier getAnimationFileLocation(ChocoDisguiseItem animatable) {
+    public Identifier getAnimationResource(ChocoDisguiseItem animatable) {
         return new Identifier(DelChoco.DELCHOCO_ID, "animations/armor_holder.json");
     }
 }

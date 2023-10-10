@@ -10,7 +10,7 @@ import com.dephoegon.delchoco.common.init.ModItems;
 import com.dephoegon.delchoco.common.init.ModSounds;
 import com.dephoegon.delchoco.common.network.PacketManager;
 import com.dephoegon.delchoco.common.world.worldgen.ModWorldGen;
-import net.fabricmc.fabric.api.command.v1.CommandRegistrationCallback;
+import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 
 public class ChocoList {
     public static void clientRegOrder() {
@@ -19,7 +19,7 @@ public class ChocoList {
     }
     public static void commonRegOrder() {
         ModEntities.registerAttributes();
-        CommandRegistrationCallback.EVENT.register((dispatcher, dedicated) -> chocoboTeams.commands(dispatcher));
+        CommandRegistrationCallback.EVENT.register((dispatcher, dedicated, environment) -> chocoboTeams.commands(dispatcher));
         ModSounds.registerSounds();
         PacketManager.init();
         serverVariableAccess.init();

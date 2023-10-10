@@ -1,12 +1,11 @@
 package com.dephoegon.delchoco.common.network.packets;
 
 import net.fabricmc.api.EnvType;
-import net.fabricmc.fabric.api.network.PacketContext;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.util.thread.ThreadExecutor;
 
-public class MyPacketContext implements PacketContext {
+public class MyPacketContext {
     private final ServerPlayerEntity player;
 
     public MyPacketContext(ServerPlayerEntity player) { this.player = player; }

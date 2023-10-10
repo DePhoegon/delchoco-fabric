@@ -1,7 +1,8 @@
 package com.dephoegon.delchoco.common.entities.properties;
 
 import com.dephoegon.delchoco.DelChoco;
-import net.minecraft.text.TranslatableText;
+import net.minecraft.text.MutableText;
+import net.minecraft.text.Text;
 
 import java.util.Random;
 
@@ -20,12 +21,12 @@ public enum ChocoboColor {
 
     private final static Random rand = new Random();
     private final String colorTag;
-    private final TranslatableText eggText;
+    private final MutableText eggText;
     private final int customModelData;
     ChocoboColor(String colorNameString, int CustomModelData) {
         this.colorTag = colorNameString;
         this.customModelData = CustomModelData;
-        this.eggText = new TranslatableText("item." + DelChoco.DELCHOCO_ID + ".chocobo_egg.tooltip." + this.name().toLowerCase());
+        this.eggText = Text.translatable("item." + DelChoco.DELCHOCO_ID + ".chocobo_egg.tooltip." + this.name().toLowerCase());
     }
     public int getCustomModelData() { return this.customModelData; }
     public static ChocoboColor getRandomColor() { return values()[rand.nextInt(values().length)]; }
@@ -34,5 +35,5 @@ public enum ChocoboColor {
         for (ChocoboColor color : values()) { if(name.equals(color.colorTag.toLowerCase())) { return color; } }
         return YELLOW;
     }
-    public TranslatableText getEggText() { return eggText; }
+    public MutableText getEggText() { return eggText; }
 }

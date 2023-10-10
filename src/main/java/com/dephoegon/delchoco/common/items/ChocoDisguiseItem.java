@@ -17,7 +17,6 @@ import net.minecraft.item.ArmorMaterial;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.text.Text;
-import net.minecraft.text.TranslatableText;
 import net.minecraft.util.Hand;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.TypedActionResult;
@@ -156,7 +155,7 @@ public class ChocoDisguiseItem extends ArmorItem implements IAnimatable {
     }
     public void appendTooltip(@NotNull ItemStack stack, @Nullable World level, @NotNull List<Text> tooltip, @NotNull TooltipContext flagIn) {
         super.appendTooltip(stack, level, tooltip, flagIn);
-        tooltip.add(new TranslatableText("item." + DelChoco.DELCHOCO_ID + ".choco_disguise_"+ getCustomModelColor(stack)));
+        tooltip.add(Text.translatable("item." + DelChoco.DELCHOCO_ID + ".choco_disguise_"+ getCustomModelColor(stack)));
     }
     public void inventoryTick(@NotNull ItemStack stack, World world, Entity entity, int slot, boolean selected) {
         if (stack.getNbt() == null) { stack.setNbt(serialize(NBTKEY_COLOR, yellow)); }

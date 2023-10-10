@@ -4,7 +4,6 @@ import com.dephoegon.delchoco.DelChoco;
 import com.dephoegon.delchoco.client.gui.ChocoInventoryScreen;
 import com.dephoegon.delchoco.common.entities.Chocobo;
 import com.dephoegon.delchoco.common.entities.properties.ChocoboInventory;
-import net.fabricmc.fabric.api.network.PacketContext;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.entity.Entity;
 import net.minecraft.item.ItemStack;
@@ -57,7 +56,7 @@ public class OpenChocoboGuiMessage {
     @Contract("_ -> new")
     public static @NotNull OpenChocoboGuiMessage decode(@NotNull PacketByteBuf buf) { return new OpenChocoboGuiMessage(buf.readInt(), buf.readInt(), buf.readNbt(), buf.readNbt(), buf.readNbt(), buf.readBoolean() ? buf.readNbt() : null); }
 
-    public static void handle(@NotNull OpenChocoboGuiMessage message, PacketContext context) {
+    public static void handle(@NotNull OpenChocoboGuiMessage message, MyPacketContext context) {
         MinecraftClient mc = MinecraftClient.getInstance();
         assert mc.world != null;
         Entity entity = mc.world.getEntityById(message.entityId);

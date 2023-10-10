@@ -2,10 +2,10 @@
 	"schemaVersion": 1,
 	"id": "delchoco",
 	"version": "${version}",
-	"name": "delchoco",
-	"description": "This is an example description! Tell everyone what your mod is about!",
+	"name": "DePhoegons` Chocobos",
+	"description": "Chocobos for DePhoegons` Reclaim",
 	"authors": [
-		"Me!"
+		"Mrbysco, Xalcon, Slayer5934, balika011, DePhoegon"
 	],
 	"contact": {
 		"homepage": "https://fabricmc.net/",
@@ -27,7 +27,7 @@
 	],
 	"depends": {
 		"fabricloader": ">=0.14.22",
-		"minecraft": "~1.18.2",
+		"minecraft": "~1.19.2",
 		"java": ">=17",
 		"fabric-api": "*",
 		"delbase": ">=1.5.1"

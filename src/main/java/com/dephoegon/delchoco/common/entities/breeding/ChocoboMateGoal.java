@@ -4,12 +4,12 @@ import com.dephoegon.delchoco.common.entities.Chocobo;
 import net.minecraft.entity.ai.goal.Goal;
 import net.minecraft.particle.ParticleTypes;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.random.Random;
 import net.minecraft.world.World;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.EnumSet;
 import java.util.List;
-import java.util.Random;
 
 public class ChocoboMateGoal extends Goal {
     private final Chocobo chocobo;

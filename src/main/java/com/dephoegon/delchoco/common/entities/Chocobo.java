@@ -119,7 +119,7 @@ public class Chocobo extends TameableEntity implements Angerable {
     private final double followSpeedModifier = 2.0D;
     private static final float maxStepUp = 1.5f;
     private final UniformIntProvider ALERT_INTERVAL = TimeHelper.betweenSeconds(4, 6);
-    private static final String NBTKEY_CHOCOBO_COLOR = "Color";
+    protected static final String NBTKEY_CHOCOBO_COLOR = "Color";
     private static final String NBTKEY_CHOCOBO_IS_MALE = "Male";
     private static final String NBTKEY_CHOCOBO_FROM_EGG = "Egg";
     private static final String NBTKEY_MOVEMENT_TYPE = "MovementType";
@@ -267,7 +267,7 @@ public class Chocobo extends TameableEntity implements Angerable {
     }
     public static DefaultAttributeContainer.Builder createAttributes() {
         return MobEntity.createMobAttributes()
-                .add(ModAttributes.CHOCOBO_MAX_STAMINA, chocoConfigHolder.chocoboMaxStamina)
+                .add(ModAttributes.CHOCOBO_MAX_STAMINA, chocoConfigHolder.chocoboStamina)
                 .add(EntityAttributes.GENERIC_MOVEMENT_SPEED, chocoConfigHolder.chocoboSpeed / 100f)
                 .add(EntityAttributes.GENERIC_MAX_HEALTH, chocoConfigHolder.chocoboHealth)
                 .add(EntityAttributes.GENERIC_ARMOR, chocoConfigHolder.chocoboArmor)
@@ -418,7 +418,7 @@ public class Chocobo extends TameableEntity implements Angerable {
         if (isEnd(worldIn)) { skip = !worldConfigHolder.endSpawn; }
         else if (isNether(worldIn)) { skip = !worldConfigHolder.netherSpawn; }
         else if (isOverworld(worldIn)) { skip = !worldConfigHolder.overworldSpawn; } else { skip = false; }
-        if (!fromEgg() && !skip) {
+        if (!fromEgg() && !skip && reason != SpawnReason.SPAWNER) {
             setChocoboSpawnCheck(ChocoboColor.YELLOW);
             if (isNether(worldIn)) { setChocoboSpawnCheck(ChocoboColor.FLAME); }
             if (isEnd(worldIn)){ setChocoboSpawnCheck(ChocoboColor.PURPLE); }
@@ -430,6 +430,7 @@ public class Chocobo extends TameableEntity implements Angerable {
             if (isHotOverWorld(biomeRegistryKey) && !isSavanna(biomeRegistryKey)) { setChocoboSpawnCheck(ChocoboColor.BLACK); }
             this.setChocoboScale(this.isMale(), 0, false);
         }
+        this.setChocoboScale(this.isMale(), 0, false);
         chocoboStatShake(EntityAttributes.GENERIC_MAX_HEALTH, "health");
         chocoboStatShake(EntityAttributes.GENERIC_ATTACK_DAMAGE, "attack");
         chocoboStatShake(EntityAttributes.GENERIC_ARMOR, "defense");

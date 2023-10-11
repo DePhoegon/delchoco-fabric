@@ -40,7 +40,7 @@ public class ChocoboSpawnEggItem extends Item {
         BlockState blockState = worldIn.getBlockState(pos);
         if (blockState.isOf(Blocks.SPAWNER) && (blockEntity = worldIn.getBlockEntity(pos)) instanceof MobSpawnerBlockEntity) {
             MobSpawnerLogic mobSpawnerLogic = ((MobSpawnerBlockEntity)blockEntity).getLogic();
-            mobSpawnerLogic.setEntityId(CHOCOBO_ENTITY);
+            mobSpawnerLogic.setEntityId(this.color.getEntityTypeByColor());
             blockEntity.markDirty();
             worldIn.updateListeners(pos, blockState, blockState, Block.NOTIFY_ALL);
             context.getStack().decrement(1);

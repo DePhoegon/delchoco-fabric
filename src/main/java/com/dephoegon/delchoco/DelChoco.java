@@ -24,6 +24,7 @@ import org.slf4j.LoggerFactory;
 import software.bernie.geckolib3.renderers.geo.GeoArmorRenderer;
 
 import static com.dephoegon.delchoco.common.init.ModItems.CHOCOBO_SADDLE;
+import static net.fabricmc.fabric.api.client.rendering.v1.EntityRendererRegistry.*;
 
 public class DelChoco implements ModInitializer, ClientModInitializer {
 	public static final String DELCHOCO_ID = "delchoco";
@@ -39,11 +40,20 @@ public class DelChoco implements ModInitializer, ClientModInitializer {
 		ModEntities.registerAttributes();
 		ChocoList.commonRegOrder();
 	}
-	@SuppressWarnings("deprecation")
 	@Environment(EnvType.CLIENT)
 	public void onInitializeClient() {
 		ChocoList.clientRegOrder();
-		EntityRendererRegistry.INSTANCE.register(ModEntities.CHOCOBO_ENTITY, ChocoboRenderer::new);
+		register(ModEntities.CHOCOBO_ENTITY, ChocoboRenderer::new);
+		register(ModEntities.YELLOW_CHOCOBO_ENTITY, ChocoboRenderer::new);
+		register(ModEntities.GREEN_CHOCOBO_ENTITY, ChocoboRenderer::new);
+		register(ModEntities.BLUE_CHOCOBO_ENTITY, ChocoboRenderer::new);
+		register(ModEntities.WHITE_CHOCOBO_ENTITY, ChocoboRenderer::new);
+		register(ModEntities.BLACK_CHOCOBO_ENTITY, ChocoboRenderer::new);
+		register(ModEntities.GOLD_CHOCOBO_ENTITY, ChocoboRenderer::new);
+		register(ModEntities.PINK_CHOCOBO_ENTITY, ChocoboRenderer::new);
+		register(ModEntities.RED_CHOCOBO_ENTITY, ChocoboRenderer::new);
+		register(ModEntities.PURPLE_CHOCOBO_ENTITY, ChocoboRenderer::new);
+		register(ModEntities.FLAME_CHOCOBO_ENTITY, ChocoboRenderer::new);
 		clientHandler.ChocoboRendering();
 		GeoArmorRenderer.registerArmorRenderer(new ChocoDisguiseFeatureRenderer(), ModItems.LEATHER_CHOCO_DISGUISE_BOOTS, ModItems.LEATHER_CHOCO_DISGUISE_LEGS, ModItems.LEATHER_CHOCO_DISGUISE_CHEST, ModItems.LEATHER_CHOCO_DISGUISE_HELMET, ModItems.IRON_CHOCO_DISGUISE_BOOTS, ModItems.IRON_CHOCO_DISGUISE_LEGS, ModItems.IRON_CHOCO_DISGUISE_CHEST, ModItems.IRON_CHOCO_DISGUISE_HELMET, ModItems.DIAMOND_CHOCO_DISGUISE_BOOTS, ModItems.DIAMOND_CHOCO_DISGUISE_LEGS, ModItems.DIAMOND_CHOCO_DISGUISE_CHEST, ModItems.DIAMOND_CHOCO_DISGUISE_HELMET, ModItems.NETHERITE_CHOCO_DISGUISE_BOOTS, ModItems.NETHERITE_CHOCO_DISGUISE_LEGS, ModItems.NETHERITE_CHOCO_DISGUISE_CHEST, ModItems.NETHERITE_CHOCO_DISGUISE_HELMET);
 	}

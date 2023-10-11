@@ -17,7 +17,7 @@ public class Pink extends Chocobo {
     }
     public EntityData initialize(ServerWorldAccess worldIn, LocalDifficulty difficultyIn, SpawnReason reason, @Nullable EntityData spawnDataIn, @Nullable NbtCompound dataTag) {
         this.setChocobo(ChocoboColor.PINK);
-        return super.initialize(worldIn, difficultyIn, reason, spawnDataIn, dataTag);
+        return super.initialize(worldIn, difficultyIn, SpawnReason.SPAWNER, spawnDataIn, dataTag);
     }
     public void writeCustomDataToNbt(NbtCompound compound) {
         super.writeCustomDataToNbt(compound);

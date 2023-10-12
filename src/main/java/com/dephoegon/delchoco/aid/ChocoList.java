@@ -15,6 +15,7 @@ import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 public class ChocoList {
     public static void clientRegOrder() {
         KeyBindManager.registerKeyBinds();
+        serverVariableAccess.clientInit();
         RenderChocoboOverlay.onGuiInGameOverlayRender();
     }
     public static void commonRegOrder() {

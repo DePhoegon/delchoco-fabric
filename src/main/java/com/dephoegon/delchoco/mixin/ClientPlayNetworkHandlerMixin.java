@@ -18,13 +18,13 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-@Environment(value= EnvType.CLIENT)
 @Mixin(ClientPlayNetworkHandler.class)
 public class ClientPlayNetworkHandlerMixin {
     @Shadow
     private ClientWorld world;
     @Shadow
     private MinecraftClient client;
+
     @Inject(method = "onOpenHorseScreen", at = @At("TAIL"))
     private void onOpenHorseScreen(@NotNull OpenHorseScreenS2CPacket packet, CallbackInfo ci) {
         Entity entity = this.world.getEntityById(packet.getHorseId());

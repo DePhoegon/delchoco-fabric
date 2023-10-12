@@ -2,12 +2,9 @@ package com.dephoegon.delchoco.client;
 
 import com.dephoegon.delchoco.common.network.PacketManager;
 import com.dephoegon.delchoco.common.network.packets.ChocoboSprintingMessage;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.option.KeyBinding;
 
-@Environment(EnvType.CLIENT)
 public class ChocoboSprintingEventHandler {
     private static boolean isSprinting = false;
 

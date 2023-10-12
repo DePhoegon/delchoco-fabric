@@ -20,6 +20,9 @@
 		],
 		"client": [
 			"com.dephoegon.delchoco.DelChoco"
+		],
+		"fabric-datagen": [
+			"com.dephoegon.delchoco.datagen.modDataGen"
 		]
 	},
 	"mixins": [

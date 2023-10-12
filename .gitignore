@@ -37,6 +37,7 @@ run/world/
 run/logs
 run/mods
 run/data
+run/server_check
 run/patchouli_books
 run/resourcepacks
 run/resources
@@ -53,3 +54,4 @@ replay_*.log
 *.hprof
 *.jfr
 run/.fabric/
+*.dat

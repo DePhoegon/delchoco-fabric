@@ -9,9 +9,9 @@ import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 public class serverVariableAccess {
     public static void init() {
         DelChoco.LOGGER.info("(DelChoco Mod) - Server Variable Access Initialized");
-        ServerLifecycleEvents.SERVER_STARTED.register(server -> {
-            ClientTickEvents.END_CLIENT_TICK.register(client -> { ChocoboSprintingEventHandler.onKeyPress(); });
-            composable.addToList();
-        });
+        ServerLifecycleEvents.SERVER_STARTED.register(server -> composable.addToList());
+    }
+    public static void clientInit() {
+        ServerLifecycleEvents.SERVER_STARTED.register(server -> ClientTickEvents.END_CLIENT_TICK.register(client -> ChocoboSprintingEventHandler.onKeyPress()));
     }
 }

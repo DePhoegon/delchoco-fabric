@@ -79,7 +79,8 @@ public class GysahlGreenBlock extends PlantBlock
         super.onEntityCollision(state, world, pos, entity);
     }
     public ItemStack getPickStack(BlockView world, BlockPos pos, BlockState state) { return new ItemStack(this.getSeedsItem()); }
-    public boolean isFertilizable(BlockView world, BlockPos pos, BlockState state, boolean isClient) { return !this.isMature(state); }
+    public boolean isFertilizable(WorldView world, BlockPos pos, BlockState state, boolean isClient) { return !this.isMature(state); }
+
     public boolean canGrow(World world, net.minecraft.util.math.random.Random random, BlockPos pos, BlockState state) { return true; }
     public void grow(ServerWorld world, net.minecraft.util.math.random.Random random, BlockPos pos, BlockState state) { this.applyGrowth(world, pos, state); }
     protected void appendProperties(StateManager.@NotNull Builder<Block, BlockState> builder) { builder.add(AGE); }

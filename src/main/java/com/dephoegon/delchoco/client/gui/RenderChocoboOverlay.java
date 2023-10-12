@@ -21,7 +21,7 @@ public class RenderChocoboOverlay {
                 return;
             }
 
-            RenderSystem.setShader(GameRenderer::getPositionTexShader);
+            RenderSystem.setShader(GameRenderer::getPositionTexProgram);
             RenderSystem.setShaderTexture(0, ICONS);
 
             final int width = minecraft.getWindow().getScaledWidth();

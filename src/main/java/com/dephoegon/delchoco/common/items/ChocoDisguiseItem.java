@@ -1,8 +1,11 @@
 package com.dephoegon.delchoco.common.items;
 
 import com.dephoegon.delchoco.DelChoco;
+import com.dephoegon.delchoco.client.models.armor.ChocoDisguiseFeatureRenderer;
 import com.dephoegon.delchoco.common.entities.properties.ChocoboColor;
+import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet;
 import net.minecraft.client.item.TooltipContext;
+import net.minecraft.client.render.entity.model.BipedEntityModel;
 import net.minecraft.enchantment.Enchantment;
 import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.entity.Entity;
@@ -14,6 +17,7 @@ import net.minecraft.entity.effect.StatusEffects;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ArmorItem;
 import net.minecraft.item.ArmorMaterial;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.text.Text;
@@ -24,17 +28,24 @@ import net.minecraft.world.World;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import software.bernie.geckolib3.core.IAnimatable;
-import software.bernie.geckolib3.core.PlayState;
-import software.bernie.geckolib3.core.builder.AnimationBuilder;
-import software.bernie.geckolib3.core.controller.AnimationController;
-import software.bernie.geckolib3.core.event.predicate.AnimationEvent;
-import software.bernie.geckolib3.core.manager.AnimationData;
-import software.bernie.geckolib3.core.manager.AnimationFactory;
+import software.bernie.example.client.renderer.armor.GeckoArmorRenderer;
+import software.bernie.geckolib.animatable.GeoItem;
+import software.bernie.geckolib.animatable.client.RenderProvider;
+import software.bernie.geckolib.constant.DataTickets;
+import software.bernie.geckolib.constant.DefaultAnimations;
+import software.bernie.geckolib.core.animatable.instance.AnimatableInstanceCache;
+import software.bernie.geckolib.core.animatable.instance.SingletonAnimatableInstanceCache;
+import software.bernie.geckolib.core.animation.AnimatableManager;
+import software.bernie.geckolib.core.animation.AnimationController;
+import software.bernie.geckolib.core.object.PlayState;
+import software.bernie.geckolib.renderer.GeoArmorRenderer;
 
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
+import java.util.function.Consumer;
+import java.util.function.Supplier;
 
 import static com.dephoegon.delbase.item.ShiftingDyes.CLEANSE_SHIFT_DYE;
 import static com.dephoegon.delchoco.aid.dyeList.CHOCO_COLOR_ITEMS;
@@ -44,8 +55,9 @@ import static com.dephoegon.delchoco.common.entities.properties.ChocoboColor.*;
 import static com.dephoegon.delchoco.common.init.ModArmorMaterial.*;
 
 @SuppressWarnings("ALL")
-public class ChocoDisguiseItem extends ArmorItem implements IAnimatable {
-    private final AnimationFactory factory = new AnimationFactory(this);
+public class ChocoDisguiseItem extends ArmorItem implements GeoItem {
+    private final AnimatableInstanceCache chocoCache = new SingletonAnimatableInstanceCache(this);
+    private final Supplier<Object> renderProvider = GeoItem.makeRenderer(this);
     public final static String NBTKEY_COLOR = "Color";
     public final static String yellow = YELLOW.getColorName(); // default
     public final static String green = GREEN.getColorName();
@@ -200,44 +212,64 @@ public class ChocoDisguiseItem extends ArmorItem implements IAnimatable {
         if (color.equals(gold) || color.equals(flame) || netherite) { return true; }
         return super.isFireproof();
     }
-    @SuppressWarnings("removal")
-    private <P extends IAnimatable> PlayState predicate(AnimationEvent<P> event) {
-        // This is all the extra data this event carries.
-        // The living entity is the entity that's wearing the armor.
-        // The Item stack and equipment slot-type are self-explanatory.
-        LivingEntity livingEntity = event.getExtraDataOfType(LivingEntity.class).get(0);
-
-        // Always loop the animation, but later on in this method we'll decide whether to actually play it
-        event.getController().setAnimation(new AnimationBuilder().addAnimation("idle", true));
-
-        // If the living entity is an armor-stand just play the animation nonstop
-        if (livingEntity instanceof ArmorStandEntity) { return PlayState.CONTINUE; }
-
-        // The entity is a player, so we want to only play if the player is wearing the
-        // full set of armor
-        else if (livingEntity instanceof PlayerEntity player) {
-            // Make sure the player is wearing all the armor.
-            // If they are, continue playing the animation, otherwise stop
-            ItemStack head = player.getEquippedStack(EquipmentSlot.HEAD);
-            ItemStack chest = player.getEquippedStack(EquipmentSlot.CHEST);
-            ItemStack legs = player.getEquippedStack(EquipmentSlot.LEGS);
-            ItemStack feet = player.getEquippedStack(EquipmentSlot.FEET);
-            boolean isWearingAll = armorMatch(head, chest, legs, feet);
-            return isWearingAll ? PlayState.CONTINUE : PlayState.STOP;
-        }
-        return PlayState.STOP;
-    }
 
     // All you need to do here is add your animation controllers to the
     // AnimationData
     @SuppressWarnings({ "rawtypes", "unchecked" })
     @Override
-    public void registerControllers(AnimationData data) {
-        data.addAnimationController(new AnimationController(this, "controller", 20, this::predicate));
+    public void registerControllers(AnimatableManager.@NotNull ControllerRegistrar controllerRegistrar) {
+        controllerRegistrar.add(new AnimationController<>(this, 20, animationState -> {
+            animationState.getController().setAnimation(DefaultAnimations.IDLE);
+            Entity entity = animationState.getData(DataTickets.ENTITY);
+
+            if (entity instanceof ArmorStandEntity) { return PlayState.CONTINUE; }
+
+            ItemStack head = ItemStack.EMPTY;
+            ItemStack chest = ItemStack.EMPTY;
+            ItemStack legs = ItemStack.EMPTY;
+            ItemStack feet = ItemStack.EMPTY;
+
+            for (ItemStack stack: entity.getArmorItems()) {
+                if (stack.isEmpty()) { return PlayState.STOP; }
+                if (stack.getItem() instanceof ChocoDisguiseItem choArmor) {
+                    switch (choArmor.getSlotType()) {
+                        case FEET -> feet = stack;
+                        case HEAD -> head = stack;
+                        case LEGS -> legs = stack;
+                        case CHEST -> chest = stack;
+                    }
+                }
+            }
+            boolean isWearingAll = armorMatch(head, chest, legs, feet);
+            return isWearingAll ? PlayState.CONTINUE : PlayState.STOP;
+        }));
+    }
+
+    public AnimatableInstanceCache getAnimatableInstanceCache() {
+        return this.chocoCache;
     }
 
     @Override
-    public AnimationFactory getFactory() {
-        return this.factory;
+    public void createRenderer(@NotNull Consumer<Object> consumer) {
+        consumer.accept(new RenderProvider() {
+            private GeoArmorRenderer<?> renderer;
+
+            @Override
+            public BipedEntityModel<LivingEntity> getHumanoidArmorModel(LivingEntity livingEntity, ItemStack itemStack, EquipmentSlot equipmentSlot, BipedEntityModel<LivingEntity> original) {
+                if(this.renderer == null)
+                    this.renderer = new ChocoDisguiseFeatureRenderer();
+
+                // This prepares our GeoArmorRenderer for the current render frame.
+                // These parameters may be null however, so we don't do anything further with them
+                this.renderer.prepForRender(livingEntity, itemStack, equipmentSlot, original);
+
+                return this.renderer;
+            }
+        });
+    }
+
+    @Override
+    public Supplier<Object> getRenderProvider() {
+        return this.renderProvider;
     }
 }

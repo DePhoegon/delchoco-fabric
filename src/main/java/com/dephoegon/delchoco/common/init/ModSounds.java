@@ -1,9 +1,10 @@
 package com.dephoegon.delchoco.common.init;
 
 import com.dephoegon.delchoco.DelChoco;
+import net.minecraft.registry.Registries;
+import net.minecraft.registry.Registry;
 import net.minecraft.sound.SoundEvent;
 import net.minecraft.util.Identifier;
-import net.minecraft.util.registry.Registry;
 
 public class ModSounds {
     public static final SoundEvent AMBIENT_SOUND = register("entity.chocobo.kweh");
@@ -13,7 +14,7 @@ public class ModSounds {
 
     private static SoundEvent register(String id) {
         Identifier identifier = new Identifier(DelChoco.DELCHOCO_ID, id);
-        return Registry.register(Registry.SOUND_EVENT, identifier, new SoundEvent(identifier));
+        return Registry.register(Registries.SOUND_EVENT, identifier, SoundEvent.of(identifier));
     }
     public static void registerSounds() {
         DelChoco.LOGGER.info("Registering Sounds");

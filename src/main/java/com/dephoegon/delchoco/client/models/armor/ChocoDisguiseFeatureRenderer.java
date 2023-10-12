@@ -4,7 +4,7 @@ import com.dephoegon.delchoco.DelChoco;
 import com.dephoegon.delchoco.common.items.ChocoDisguiseItem;
 import net.minecraft.item.ArmorMaterial;
 import net.minecraft.util.Identifier;
-import software.bernie.geckolib3.renderers.geo.GeoArmorRenderer;
+import software.bernie.geckolib.renderer.GeoArmorRenderer;
 
 import static com.dephoegon.delchoco.common.init.ModArmorMaterial.*;
 import static com.dephoegon.delchoco.common.items.ChocoDisguiseItem.*;
@@ -13,18 +13,18 @@ public class ChocoDisguiseFeatureRenderer extends GeoArmorRenderer<ChocoDisguise
     public ChocoDisguiseFeatureRenderer() {
         super(new ChocoDisguiseModel());
 
-        this.headBone = "armorHead";
-        this.bodyBone = "armorBody";
-        this.leftArmBone = "armorRightArm";
-        this.rightArmBone = "armorLeftArm";
-        this.rightLegBone = "armorLeftLeg";
-        this.leftLegBone = "armorRightLeg";
-        this.rightBootBone = "armorLeftBoot";
-        this.leftBootBone = "armorRightBoot";
+        this.head = getHeadBone();
+        this.body = getBodyBone();
+        this.leftArm = getRightArmBone();
+        this.rightArm = getLeftArmBone();
+        this.rightLeg = getLeftLegBone();
+        this.leftLeg = getRightLegBone();
+        this.rightBoot = getLeftBootBone();
+        this.leftBoot = getRightBootBone();
     }
 
     public Identifier getTextureLocation(ChocoDisguiseItem instance) {
-        String customModelData = ChocoDisguiseItem.getNBTKEY_COLOR(this.itemStack);
+        String customModelData = ChocoDisguiseItem.getNBTKEY_COLOR(this.currentStack);
         ArmorMaterial armor = ((ChocoDisguiseItem) instance).getMaterial();
         String folder = "textures/models/armor/leather/";
         if (armor == IRON_CHOCO_DISGUISE) { folder = "textures/models/armor/iron/"; }

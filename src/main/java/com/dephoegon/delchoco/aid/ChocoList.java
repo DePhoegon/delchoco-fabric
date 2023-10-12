@@ -18,6 +18,7 @@ public class ChocoList {
         RenderChocoboOverlay.onGuiInGameOverlayRender();
     }
     public static void commonRegOrder() {
+        itemGroupLogic.registerItemGroups();
         ModEntities.registerAttributes();
         CommandRegistrationCallback.EVENT.register((dispatcher, dedicated, environment) -> chocoboTeams.commands(dispatcher));
         ModSounds.registerSounds();

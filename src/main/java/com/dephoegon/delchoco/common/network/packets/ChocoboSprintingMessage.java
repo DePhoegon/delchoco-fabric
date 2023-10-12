@@ -23,7 +23,7 @@ public class ChocoboSprintingMessage {
         return new ChocoboSprintingMessage(buf.readBoolean());
     }
 
-    public static void handle(ChocoboSprintingMessage message, MyPacketContext context) {
+    public static void handle(ChocoboSprintingMessage message, @NotNull MyPacketContext context) {
         ServerPlayerEntity player = (ServerPlayerEntity) context.getPlayer();
         if (player != null) {
             if (player.getVehicle() == null) { return; }

@@ -1,7 +1,7 @@
 package com.dephoegon.delchoco.aid;
 
 import com.dephoegon.delchoco.common.entities.properties.ChocoboColor;
-import net.minecraft.util.registry.RegistryKey;
+import net.minecraft.registry.RegistryKey;
 import net.minecraft.world.ServerWorldAccess;
 import net.minecraft.world.World;
 import net.minecraft.world.biome.Biome;

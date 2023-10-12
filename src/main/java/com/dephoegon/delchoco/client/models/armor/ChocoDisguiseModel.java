@@ -4,9 +4,9 @@ import com.dephoegon.delchoco.DelChoco;
 import com.dephoegon.delchoco.common.items.ChocoDisguiseItem;
 import net.minecraft.util.Identifier;
 import org.jetbrains.annotations.NotNull;
-import software.bernie.geckolib3.model.AnimatedGeoModel;
+import software.bernie.geckolib.model.GeoModel;
 
-public class ChocoDisguiseModel extends AnimatedGeoModel<ChocoDisguiseItem> {
+public class ChocoDisguiseModel extends GeoModel<ChocoDisguiseItem> {
     @Override
     public Identifier getModelResource(ChocoDisguiseItem object) {
         return new Identifier(DelChoco.DELCHOCO_ID, "geo/choco_disguise.geo.json");

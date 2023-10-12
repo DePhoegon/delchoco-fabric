@@ -9,11 +9,10 @@ import net.minecraft.world.gen.GenerationStep;
 import static com.dephoegon.delchoco.DelChoco.worldConfigHolder;
 import static com.dephoegon.delchoco.aid.chocoboChecks.vanillaBiomes;
 
-@SuppressWarnings("OptionalGetWithoutIsPresent")
 public class ModWorldGen {
     public static void generateGysahl() {
-        BiomeModifications.addFeature(BiomeSelectors.all(), GenerationStep.Feature.VEGETAL_DECORATION, ModPlacements.PATCH_GYSAHL_ALL_BIOMES.getKey().get());
-        BiomeModifications.addFeature(BiomeSelectors.all(), GenerationStep.Feature.UNDERGROUND_DECORATION, ModPlacements.PATCH_GYSAHL_UNDERGROUND.getKey().get());
+        BiomeModifications.addFeature(BiomeSelectors.all(), GenerationStep.Feature.VEGETAL_DECORATION, ModPlacements.PATCH_GYSAHL_ALL_BIOMES);
+        BiomeModifications.addFeature(BiomeSelectors.all(), GenerationStep.Feature.UNDERGROUND_DECORATION, ModPlacements.PATCH_GYSAHL_UNDERGROUND);
     }
     public static void spawnChocobos() {
         if (worldConfigHolder.canChocoboSpawn) {

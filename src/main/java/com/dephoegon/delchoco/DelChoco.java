@@ -8,11 +8,13 @@ import com.dephoegon.delchoco.client.renderer.entities.ChocoboRenderer;
 import com.dephoegon.delchoco.common.init.ModEntities;
 import dev.toma.configuration.Configuration;
 import dev.toma.configuration.config.format.ConfigFormats;
+import fuzs.forgeconfigapiport.api.config.v2.ForgeConfigRegistry;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.client.rendering.v1.EntityRendererRegistry;
+import net.minecraftforge.fml.config.ModConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import software.bernie.geckolib.GeckoLib;
@@ -24,8 +26,8 @@ public class DelChoco implements ModInitializer, ClientModInitializer {
 	public static WorldConfig worldConfigHolder;
 
 	public void onInitialize() {
-		chocoConfigHolder = Configuration.registerConfig(ChocoboConfig.class, ConfigFormats.yaml()).getConfigInstance();
-		worldConfigHolder = Configuration.registerConfig(WorldConfig.class, ConfigFormats.yaml()).getConfigInstance();
+		ForgeConfigRegistry.INSTANCE.register(DELCHOCO_ID, ModConfig.Type.COMMON, ChocoboConfig.SPEC, DelChoco.DELCHOCO_ID+"-chocobo_config.toml");
+		ForgeConfigRegistry.INSTANCE.register(DELCHOCO_ID, ModConfig.Type.COMMON, WorldConfig.SPEC, DelChoco.DELCHOCO_ID+"-world_config.toml");
 		ModEntities.registerAttributes();
 		ChocoList.commonRegOrder();
 		GeckoLib.initialize();

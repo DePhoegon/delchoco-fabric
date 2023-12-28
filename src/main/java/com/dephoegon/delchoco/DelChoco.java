@@ -6,8 +6,6 @@ import com.dephoegon.delchoco.aid.world.WorldConfig;
 import com.dephoegon.delchoco.client.clientHandler;
 import com.dephoegon.delchoco.client.renderer.entities.ChocoboRenderer;
 import com.dephoegon.delchoco.common.init.ModEntities;
-import dev.toma.configuration.Configuration;
-import dev.toma.configuration.config.format.ConfigFormats;
 import fuzs.forgeconfigapiport.api.config.v2.ForgeConfigRegistry;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.api.EnvType;

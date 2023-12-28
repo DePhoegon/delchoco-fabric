@@ -1,5 +1,6 @@
 package com.dephoegon.delchoco.common.effects;
 
+import com.dephoegon.delchoco.aid.world.ChocoboConfig;
 import com.dephoegon.delchoco.common.entities.Chocobo;
 import com.dephoegon.delchoco.common.entities.properties.ChocoboColor;
 import com.dephoegon.delchoco.common.init.ModItems;
@@ -8,6 +9,7 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.damage.DamageSource;
+import net.minecraft.entity.damage.DamageTypes;
 import net.minecraft.entity.effect.StatusEffect;
 import net.minecraft.entity.effect.StatusEffectInstance;
 import net.minecraft.entity.effect.StatusEffects;
@@ -20,11 +22,11 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
+import net.minecraft.registry.tag.DamageTypeTags;
 import net.minecraft.scoreboard.Team;
 import net.minecraft.util.Hand;
 import org.jetbrains.annotations.NotNull;
 
-import static com.dephoegon.delchoco.DelChoco.chocoConfigHolder;
 import static com.dephoegon.delchoco.aid.chocoboChecks.isPoisonImmuneChocobo;
 import static com.dephoegon.delchoco.aid.chocoboChecks.isWitherImmuneChocobo;
 import static com.dephoegon.delchoco.common.entities.properties.ChocoboColor.*;
@@ -49,11 +51,11 @@ public class ChocoboCombatEvents {
             PlayerEntity source = attackerEntity instanceof PlayerEntity play ? play : null;
             PlayerEntity owner = chocoboTarget.getOwner() instanceof PlayerEntity play ? play : null;
             Team group = owner != null ? (Team) owner.getScoreboardTeam() : null;
-            if (source != null) { boolean shift = chocoConfigHolder.shiftHitBypass && source.isSneaking();
+            if (source != null) { boolean shift = ChocoboConfig.SHIFT_HIT_BYPASS.get() && source.isSneaking();
                 boolean teams = group != null && source.getScoreboardTeam() == group;
                 if (!shift) {
-                    if (owner == source || teams) { return chocoConfigHolder.ownChocoboHittable; }
-                    return chocoConfigHolder.tamedChocoboHittable;
+                    if (owner == source || teams) { return ChocoboConfig.OWN_CHOCOBO_HITTABLE.get(); }
+                    return ChocoboConfig.TAMED_CHOCOBO_HITTABLE.get();
                 }
             }
         }
@@ -65,7 +67,7 @@ public class ChocoboCombatEvents {
      * Intended to be used in the Entity#applyDamageEffects mixin method
      */
     public static void onChocoboCombatHit(@NotNull Chocobo chocoboAttacker, Entity targetEntity) {
-        if (chocoConfigHolder.extraChocoboResourcesOnHit) {
+        if (ChocoboConfig.EXTRA_CHOCOBO_RESOURCES_HIT.get()) {
             LivingEntity target = targetEntity instanceof LivingEntity living ? living : null;
             if (target instanceof SpiderEntity e) { onHitMobChance(10, STRING, e); }
             if (target instanceof CaveSpiderEntity e) { onHitMobChance(5, FERMENTED_SPIDER_EYE, e); }
@@ -94,14 +96,14 @@ public class ChocoboCombatEvents {
      * Intended to be used in the PlayerEntity#isInvulnerableTo mixin method
      */
     public static boolean playerDamageImmunityCheck(ItemStack HeadStack, ItemStack ChestStack, ItemStack LegStack, ItemStack FeetStack, DamageSource source) {
-        if (chocoConfigHolder.extraChocoboEffects) {
+        if (ChocoboConfig.EXTRA_CHOCOBO_EFFECT.get()) {
             if (armorColorMatch(HeadStack, ChestStack, LegStack, FeetStack)) {
                 ChocoboColor headColor = getNBTKEY_COLOR(HeadStack);
-                if (source == DamageSource.WITHER) { return headColor.equals(BLACK) || headColor.equals(RED) || headColor.equals(PURPLE) || headColor.equals(GOLD) || headColor.equals(PINK); }
-                if (source == DamageSource.DRAGON_BREATH) { return headColor.equals(PURPLE) || headColor.equals(GOLD); }
-                if (source == DamageSource.FREEZE) { return headColor.equals(WHITE) || headColor.equals(GOLD); }
+                if (source.isOf(DamageTypes.WITHER) || source.isOf(DamageTypes.WITHER_SKULL)) { return headColor.equals(BLACK) || headColor.equals(RED) || headColor.equals(PURPLE) || headColor.equals(GOLD) || headColor.equals(PINK); }
+                if (source.isOf(DamageTypes.DRAGON_BREATH)) { return headColor.equals(PURPLE) || headColor.equals(GOLD); }
+                if (source.isIn(DamageTypeTags.IS_FREEZING)) { return headColor.equals(WHITE) || headColor.equals(GOLD); }
             }
-            if (source == DamageSource.SWEET_BERRY_BUSH) { return armorMatch(HeadStack, ChestStack, LegStack, FeetStack); }
+            if (source.isOf(DamageTypes.SWEET_BERRY_BUSH)) { return armorMatch(HeadStack, ChestStack, LegStack, FeetStack); }
         }
         return false;
     }
@@ -129,7 +131,7 @@ public class ChocoboCombatEvents {
      */
     public static void onChocoboKill(Chocobo chocoboAttacker, Entity targetEntity) {
         if (chocoboAttacker != null && targetEntity != null) {
-            if (chocoConfigHolder.extraChocoboResourcesOnKill) {
+            if (ChocoboConfig.EXTRA_CHOCOBO_RESOURCES_KILL.get()) {
                 ChocoboColor color = chocoboAttacker.getChocoboColor();
                 if (targetEntity instanceof SpiderEntity) {
                     if (.20f > (float) Math.random()) { targetEntity.dropItem(COBWEB); }

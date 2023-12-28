@@ -1,6 +1,7 @@
 package com.dephoegon.delchoco.client.renderer.entities;
 
 import com.dephoegon.delchoco.DelChoco;
+import com.dephoegon.delchoco.aid.world.ChocoboConfig;
 import com.dephoegon.delchoco.client.clientHandler;
 import com.dephoegon.delchoco.client.models.entities.AdultChocoboModel;
 import com.dephoegon.delchoco.client.models.entities.ChicoboModel;
@@ -19,7 +20,6 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.Map;
 
-import static com.dephoegon.delchoco.DelChoco.chocoConfigHolder;
 import static com.dephoegon.delchoco.aid.chocoKB.hideChocoboMountInFirstPerson;
 
 public class ChocoboRenderer extends MobEntityRenderer<Chocobo, EntityModel<Chocobo>> {
@@ -61,12 +61,12 @@ public class ChocoboRenderer extends MobEntityRenderer<Chocobo, EntityModel<Choc
         this.chicoboModel = new ChicoboModel<>(context.getPart(clientHandler.CHICOBO_LAYER));
 
         this.addFeature(new LayerChocoboTrims(this, .75F, .85F));
-        this.addFeature(new LayerCollar(this, collarAlpha, chocoConfigHolder.chocoboCollarAlpha));
-        this.addFeature(new LayerCollarTells(this, collarTellAlpha, chocoConfigHolder.chocoboCollarAlpha));
+        this.addFeature(new LayerCollar(this, collarAlpha, ChocoboConfig.configTwist(ChocoboConfig.CHOCOBO_COLLAR_ALPHA.get())));
+        this.addFeature(new LayerCollarTells(this, collarTellAlpha, ChocoboConfig.configTwist(ChocoboConfig.CHOCOBO_COLLAR_ALPHA.get())));
         this.addFeature(new LayerBeakClaws(this, true));
-        this.addFeature(new LayerArmor(this, armorAlpha, chocoConfigHolder.chocoboArmorAlpha));
-        this.addFeature(new LayerSaddle(this, saddleAlpha, chocoConfigHolder.chocoboSaddleAlpha));
-        this.addFeature(new LayerWeapon(this, weaponAlpha, chocoConfigHolder.chocoboWeaponAlpha));
+        this.addFeature(new LayerArmor(this, armorAlpha, ChocoboConfig.configTwist(ChocoboConfig.CHOCOBO_ARMOR_ALPHA.get())));
+        this.addFeature(new LayerSaddle(this, saddleAlpha, ChocoboConfig.configTwist(ChocoboConfig.CHOCOBO_SADDLE_ALPHA.get())));
+        this.addFeature(new LayerWeapon(this, weaponAlpha, ChocoboConfig.configTwist(ChocoboConfig.CHOCOBO_WEAPON_ALPHA.get())));
     }
     public void render(@NotNull Chocobo chocobo, float entityYaw, float partialTicks, MatrixStack matrixStack, VertexConsumerProvider bufferSource, int packedLight) {
         this.model = chocobo.isBaby() ? chicoboModel : chocoboModel;

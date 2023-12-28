@@ -1,6 +1,7 @@
 package com.dephoegon.delchoco.common.entities.breeding;
 
-import static com.dephoegon.delchoco.DelChoco.chocoConfigHolder;
+import com.dephoegon.delchoco.aid.world.ChocoboConfig;
+
 import static com.dephoegon.delchoco.aid.chocoboChecks.*;
 import static com.dephoegon.delchoco.common.entities.properties.ChocoboColor.FLAME;
 import static com.dephoegon.delchoco.common.entities.properties.ChocoboColor.getRandomColor;
@@ -11,12 +12,12 @@ public class ChocoboSnap {
 
     private void setTWEAKED() {
         this.TWEAKED_DEFAULT.generation = 1;
-        this.TWEAKED_DEFAULT.health = boundedIntRange(5, 10, chocoConfigHolder.chocoboHealth);
-        this.TWEAKED_DEFAULT.stamina = chocoConfigHolder.chocoboStamina;
-        this.TWEAKED_DEFAULT.speed = chocoConfigHolder.chocoboSpeed / 100f;
-        this.TWEAKED_DEFAULT.attack = boundedIntRange(1, 3, chocoConfigHolder.chocoboAttackDamage);
-        this.TWEAKED_DEFAULT.defense = boundedIntRange(2, 4, chocoConfigHolder.chocoboArmor);
-        this.TWEAKED_DEFAULT.toughness = boundedIntRange(1, 3, chocoConfigHolder.chocoboArmorToughness);
+        this.TWEAKED_DEFAULT.health = boundedIntRange(5, 10, ChocoboConfig.DEFAULT_HEALTH.get());
+        this.TWEAKED_DEFAULT.stamina = ChocoboConfig.DEFAULT_STAMINA.get();
+        this.TWEAKED_DEFAULT.speed = ChocoboConfig.DEFAULT_SPEED.get() / 100f;
+        this.TWEAKED_DEFAULT.attack = boundedIntRange(1, 3, ChocoboConfig.DEFAULT_ATTACK_DAMAGE.get());
+        this.TWEAKED_DEFAULT.defense = boundedIntRange(2, 4, ChocoboConfig.DEFAULT_ARMOR.get());
+        this.TWEAKED_DEFAULT.toughness = boundedIntRange(1, 3, ChocoboConfig.DEFAULT_ARMOR_TOUGHNESS.get());
         this.TWEAKED_DEFAULT.color = getRandomColor();
         this.TWEAKED_DEFAULT.flameBlood = TWEAKED_DEFAULT.color == FLAME;
         this.TWEAKED_DEFAULT.waterBreath = isWaterBreathingChocobo(this.TWEAKED_DEFAULT.color);

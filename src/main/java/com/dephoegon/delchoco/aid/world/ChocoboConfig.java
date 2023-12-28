@@ -43,7 +43,7 @@ public class ChocoboConfig {
     public static final ForgeConfigSpec.ConfigValue<Boolean> SHIFT_HIT_BYPASS;
     public static final ForgeConfigSpec.ConfigValue<Boolean> OWN_CHOCOBO_HITTABLE;
     public static final ForgeConfigSpec.ConfigValue<Boolean> TAMED_CHOCOBO_HITTABLE;
-    public static final ForgeConfigSpec.ConfigValue<Boolean> OWNER_ONLY_ACCES;
+    public static final ForgeConfigSpec.ConfigValue<Boolean> OWNER_ONLY_ACCESS;
     static {
         BUILDER.push("Chocobo Configurations");
         BUILDER.push("Default Stats");
@@ -95,9 +95,10 @@ public class ChocoboConfig {
         SHIFT_HIT_BYPASS = BUILDER.comment("Allow Shift to bypass hit protection on chocobos").define("Shift Bypass", true);
         OWN_CHOCOBO_HITTABLE = BUILDER.comment("Allows Owner to hit their Chocobos").define("Owner Chocobo Hittable", false);
         TAMED_CHOCOBO_HITTABLE = BUILDER.comment("Allows Tamed Chocobos to be hit by a player").define("Tamed Chocobo Hittable", false);
-        OWNER_ONLY_ACCES = BUILDER.comment("Allows Tamed Chocobos to have their inventory accessed by only the Owner").define("Owner Only Access", false);
+        OWNER_ONLY_ACCESS = BUILDER.comment("Allows Tamed Chocobos to have their inventory accessed by only the Owner").define("Owner Only Access", false);
         BUILDER.pop();
         BUILDER.pop();
         SPEC = BUILDER.build();
     }
+    public static Float configTwist(double ConfigDouble) { return (float)ConfigDouble; }
 }

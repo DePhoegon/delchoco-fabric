@@ -1,5 +1,6 @@
 package com.dephoegon.delchoco.common.entities.breeding;
 
+import com.dephoegon.delchoco.aid.world.ChocoboConfig;
 import com.dephoegon.delchoco.common.entities.Chocobo;
 import com.dephoegon.delchoco.common.entities.properties.ChocoboColor;
 import com.dephoegon.delchoco.common.init.ModAttributes;
@@ -9,8 +10,6 @@ import net.minecraft.nbt.NbtCompound;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Objects;
-
-import static com.dephoegon.delchoco.DelChoco.chocoConfigHolder;
 
 public class ChocoboStatSnapshot {
     public static final ChocoboStatSnapshot DEFAULT;
@@ -45,12 +44,12 @@ public class ChocoboStatSnapshot {
     static {
         DEFAULT = new ChocoboStatSnapshot();
         DEFAULT.generation = 1;
-        DEFAULT.health = chocoConfigHolder.chocoboHealth;
-        DEFAULT.stamina = chocoConfigHolder.chocoboStamina;
-        DEFAULT.speed = chocoConfigHolder.chocoboSpeed / 100f;
-        DEFAULT.attack = chocoConfigHolder.chocoboAttackDamage;
-        DEFAULT.defense = chocoConfigHolder.chocoboArmor;
-        DEFAULT.toughness = chocoConfigHolder.chocoboArmorToughness;
+        DEFAULT.health = ChocoboConfig.DEFAULT_HEALTH.get();
+        DEFAULT.stamina = ChocoboConfig.DEFAULT_STAMINA.get();
+        DEFAULT.speed = ChocoboConfig.DEFAULT_SPEED.get() / 100f;
+        DEFAULT.attack = ChocoboConfig.DEFAULT_ATTACK_DAMAGE.get();
+        DEFAULT.defense = ChocoboConfig.DEFAULT_ARMOR.get();
+        DEFAULT.toughness = ChocoboConfig.DEFAULT_ARMOR_TOUGHNESS.get();
         DEFAULT.flameBlood = false;
         DEFAULT.waterBreath = false;
         DEFAULT.color = ChocoboColor.YELLOW;
@@ -66,7 +65,7 @@ public class ChocoboStatSnapshot {
         this.generation = chocobo.getGeneration();
         this.health = (float) Objects.requireNonNull(chocobo.getAttributeInstance(EntityAttributes.GENERIC_MAX_HEALTH)).getValue();
         this.speed = (float) Objects.requireNonNull(chocobo.getAttributeInstance(EntityAttributes.GENERIC_MOVEMENT_SPEED)).getValue();
-        this.stamina = (float) Objects.requireNonNull(chocobo.getAttributeInstance(ModAttributes.CHOCOBO_MAX_STAMINA)).getValue();
+        this.stamina = (float) Objects.requireNonNull(chocobo.getAttributeInstance(ModAttributes.CHOCOBO_STAMINA)).getValue();
         this.attack = Objects.requireNonNull(chocobo.getAttributeInstance(EntityAttributes.GENERIC_ATTACK_DAMAGE)).getValue();
         this.defense = Objects.requireNonNull(chocobo.getAttributeInstance(EntityAttributes.GENERIC_ARMOR)).getValue();
         this.toughness = Objects.requireNonNull(chocobo.getAttributeInstance(EntityAttributes.GENERIC_ARMOR_TOUGHNESS)).getValue();

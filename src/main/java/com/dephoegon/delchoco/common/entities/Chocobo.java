@@ -2,6 +2,8 @@ package com.dephoegon.delchoco.common.entities;
 
 import com.dephoegon.delchoco.DelChoco;
 import com.dephoegon.delchoco.aid.chocoboChecks;
+import com.dephoegon.delchoco.aid.world.ChocoboConfig;
+import com.dephoegon.delchoco.aid.world.WorldConfig;
 import com.dephoegon.delchoco.common.effects.ChocoboCombatEvents;
 import com.dephoegon.delchoco.common.entities.breeding.ChocoboMateGoal;
 import com.dephoegon.delchoco.common.entities.properties.ChocoboColor;
@@ -31,6 +33,7 @@ import net.minecraft.entity.ai.pathing.LandPathNodeMaker;
 import net.minecraft.entity.ai.pathing.PathNodeType;
 import net.minecraft.entity.attribute.*;
 import net.minecraft.entity.damage.DamageSource;
+import net.minecraft.entity.damage.DamageTypes;
 import net.minecraft.entity.data.DataTracker;
 import net.minecraft.entity.data.TrackedData;
 import net.minecraft.entity.data.TrackedDataHandlerRegistry;
@@ -55,6 +58,7 @@ import net.minecraft.network.packet.s2c.play.OpenHorseScreenS2CPacket;
 import net.minecraft.recipe.Ingredient;
 import net.minecraft.registry.RegistryKey;
 import net.minecraft.registry.entry.RegistryEntry;
+import net.minecraft.registry.tag.DamageTypeTags;
 import net.minecraft.registry.tag.FluidTags;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
@@ -75,8 +79,6 @@ import org.jetbrains.annotations.Nullable;
 import java.util.*;
 
 import static com.dephoegon.delbase.item.ShiftingDyes.*;
-import static com.dephoegon.delchoco.DelChoco.chocoConfigHolder;
-import static com.dephoegon.delchoco.DelChoco.worldConfigHolder;
 import static com.dephoegon.delchoco.aid.chocoKB.isChocoShiftDown;
 import static com.dephoegon.delchoco.aid.chocoKB.isChocoboWaterGlide;
 import static com.dephoegon.delchoco.aid.chocoboChecks.IS_OCEAN;
@@ -266,13 +268,13 @@ public class Chocobo extends TameableEntity implements Angerable {
     }
     public static DefaultAttributeContainer.Builder createAttributes() {
         return MobEntity.createMobAttributes()
-                .add(ModAttributes.CHOCOBO_MAX_STAMINA, chocoConfigHolder.chocoboStamina)
-                .add(EntityAttributes.GENERIC_MOVEMENT_SPEED, chocoConfigHolder.chocoboSpeed / 100f)
-                .add(EntityAttributes.GENERIC_MAX_HEALTH, chocoConfigHolder.chocoboHealth)
-                .add(EntityAttributes.GENERIC_ARMOR, chocoConfigHolder.chocoboArmor)
-                .add(EntityAttributes.GENERIC_ARMOR_TOUGHNESS, chocoConfigHolder.chocoboArmorToughness)
+                .add(ModAttributes.CHOCOBO_STAMINA, ChocoboConfig.DEFAULT_STAMINA.get())
+                .add(EntityAttributes.GENERIC_MOVEMENT_SPEED, ChocoboConfig.DEFAULT_SPEED.get() / 100f)
+                .add(EntityAttributes.GENERIC_MAX_HEALTH, ChocoboConfig.DEFAULT_HEALTH.get())
+                .add(EntityAttributes.GENERIC_ARMOR, ChocoboConfig.DEFAULT_ARMOR.get())
+                .add(EntityAttributes.GENERIC_ARMOR_TOUGHNESS, ChocoboConfig.DEFAULT_ARMOR_TOUGHNESS.get())
                 .add(EntityAttributes.GENERIC_ATTACK_SPEED)
-                .add(EntityAttributes.GENERIC_ATTACK_DAMAGE, chocoConfigHolder.chocoboAttackDamage)
+                .add(EntityAttributes.GENERIC_ATTACK_DAMAGE, ChocoboConfig.DEFAULT_ATTACK_DAMAGE.get())
                 .add(EntityAttributes.GENERIC_FOLLOW_RANGE, EntityAttributes.GENERIC_FOLLOW_RANGE.getDefaultValue()*3);
     }
     protected void initDataTracker() {
@@ -289,7 +291,7 @@ public class Chocobo extends TameableEntity implements Angerable {
         this.dataTracker.startTracking(PARAM_SADDLE_ITEM, ItemStack.EMPTY);
         this.dataTracker.startTracking(PARAM_ARMOR_ITEM, ItemStack.EMPTY);
         this.dataTracker.startTracking(PARAM_WEAPON_ITEM, ItemStack.EMPTY);
-        this.dataTracker.startTracking(PARAM_STAMINA, (float)chocoConfigHolder.chocoboStamina);
+        this.dataTracker.startTracking(PARAM_STAMINA, (float)ChocoboConfig.DEFAULT_STAMINA.get());
         this.dataTracker.startTracking(PARAM_GENERATION, 0);
         this.dataTracker.startTracking(PARAM_ABILITY_MASK, (byte) 0);
         this.dataTracker.startTracking(PARAM_SCALE, 0);
@@ -379,11 +381,7 @@ public class Chocobo extends TameableEntity implements Angerable {
         int x = this.dataTracker.get(PARAM_LEASH_BLOCK_X);
         int z = this.dataTracker.get(PARAM_LEASH_BLOCK_Z);
         int y = this.dataTracker.get(PARAM_LEASH_BLOCK_Y);
-        return new BlockPos(new Position() {
-            public double getX() { return x; }
-            public double getY() { return y; }
-            public double getZ() { return z; }
-        });
+        return new BlockPos(new Vec3i(x, y, z));
     }
     private void setLeashedDistance(double distance) { this.dataTracker.set(PARAM_LEASH_LENGTH, (int) distance); }
     private double getLeashDistance() { return (double) this.dataTracker.get(PARAM_LEASH_LENGTH); }
@@ -405,19 +403,17 @@ public class Chocobo extends TameableEntity implements Angerable {
     }
     // Spawn/Breeding Related
     @Nullable
-    public PassiveEntity createChild(ServerWorld world, PassiveEntity entity) {
-        return null;
-    }
+    public PassiveEntity createChild(ServerWorld world, PassiveEntity entity) { return null; }
     public EntityData initialize(ServerWorldAccess worldIn, LocalDifficulty difficultyIn, SpawnReason reason, @Nullable EntityData spawnDataIn, @Nullable NbtCompound dataTag) {
-        this.setMale(this.world.random.nextBoolean());
+        this.setMale(this.getWorld().random.nextBoolean());
         boolean skip;
 
-        final RegistryEntry<Biome> currentBiomes = this.world.getBiome(getBlockPos().down());
+        final RegistryEntry<Biome> currentBiomes = this.getWorld().getBiome(getBlockPos().down());
         //noinspection OptionalGetWithoutIsPresent
         final RegistryKey<Biome> biomeRegistryKey = currentBiomes.getKey().get();
-        if (isEnd(worldIn)) { skip = !worldConfigHolder.endSpawn; }
-        else if (isNether(worldIn)) { skip = !worldConfigHolder.netherSpawn; }
-        else if (isOverworld(worldIn)) { skip = !worldConfigHolder.overworldSpawn; } else { skip = false; }
+        if (isEnd(worldIn)) { skip = !WorldConfig.CHOCOBO_SPAWN_SWITCH_THE_END.get(); }
+        else if (isNether(worldIn)) { skip = !WorldConfig.CHOCOBO_SPAWN_SWITCH_NETHER.get(); }
+        else if (isOverworld(worldIn)) { skip = !WorldConfig.CHOCOBO_SPAWN_SWITCH_OVERWORLD.get(); } else { skip = false; }
         if (!fromEgg() && !skip && reason != SpawnReason.SPAWNER) {
             setChocoboSpawnCheck(ChocoboColor.YELLOW);
             if (isNether(worldIn)) { setChocoboSpawnCheck(ChocoboColor.FLAME); }
@@ -473,9 +469,9 @@ public class Chocobo extends TameableEntity implements Angerable {
     }
     public boolean isChocoboArmor(@NotNull ItemStack pStack) { return pStack.getItem() instanceof ChocoboArmorItems; }
     public boolean isChocoWeapon(@NotNull ItemStack pStack) { return pStack.getItem() instanceof ChocoboWeaponItems; }
-    public int chocoStatMod() { return chocoConfigHolder.chocoboWeaponMod; }
+    public int chocoStatMod() { return ChocoboConfig.DEFAULT_WEAPON_MOD.get(); }
     public void setChocoboArmorStats(ItemStack pStack) {
-        if (!this.world.isClient()) {
+        if (!this.getWorld().isClient()) {
             Objects.requireNonNull(this.getAttributeInstance(EntityAttributes.GENERIC_ARMOR)).removeModifier(CHOCOBO_CHEST_ARMOR_MOD_UUID);
             Objects.requireNonNull(this.getAttributeInstance(EntityAttributes.GENERIC_ARMOR_TOUGHNESS)).removeModifier(CHOCOBO_CHEST_ARMOR_TOUGH_MOD_UUID);
             if (this.isChocoboArmor(pStack)) {
@@ -489,7 +485,7 @@ public class Chocobo extends TameableEntity implements Angerable {
         }
     }
     public void setChocoboWeaponStats(ItemStack pStack) {
-        if (!this.world.isClient()) {
+        if (!this.getWorld().isClient()) {
             Objects.requireNonNull(this.getAttributeInstance(EntityAttributes.GENERIC_ATTACK_DAMAGE)).removeModifier(CHOCOBO_WEAPON_DAM_MOD_UUID);
             Objects.requireNonNull(this.getAttributeInstance(EntityAttributes.GENERIC_ATTACK_SPEED)).removeModifier(CHOCOBO_WEAPON_SPD_MOD_UUID);
             if (this.isChocoWeapon(pStack)) {
@@ -516,20 +512,20 @@ public class Chocobo extends TameableEntity implements Angerable {
         this.setChocoboScaleMod(ScaleMod(scale));
         this.dataTracker.set(PARAM_SCALE, scale);
     }
-    public boolean isInvulnerableTo(DamageSource source) {
-        if (source == DamageSource.FALL) { return true; }
-        if (source == DamageSource.SWEET_BERRY_BUSH) { return true; }
-        if (source == DamageSource.CACTUS) { return true; }
-        if (source == DamageSource.DRAGON_BREATH) {
+    public boolean isInvulnerableTo(@NotNull DamageSource source) {
+        if (source.isIn(DamageTypeTags.IS_FALL)) { return true; }
+        if (source.isOf(DamageTypes.SWEET_BERRY_BUSH)) { return true; }
+        if (source.isOf(DamageTypes.CACTUS)) { return true; }
+        if (source.isOf(DamageTypes.DRAGON_BREATH)) {
             ChocoboColor color = this.getChocoboColor();
             return color == ChocoboColor.GOLD || color == ChocoboColor.PURPLE;
         }
-        if (source == DamageSource.FREEZE) {
+        if (source.isIn(DamageTypeTags.IS_FREEZING)) {
             ChocoboColor color = this.getChocoboColor();
             return color == ChocoboColor.GOLD || color == ChocoboColor.WHITE;
         }
-        if (source == DamageSource.DROWN) { return this.isWaterBreather(); }
-        if (source == DamageSource.WITHER) { return this.isWitherImmune(); }
+        if (source.isIn(DamageTypeTags.IS_DROWNING)) { return this.isWaterBreather(); }
+        if (source.isOf(DamageTypes.WITHER_SKULL) || source.isOf(DamageTypes.WITHER)) { return this.isWitherImmune(); }
         return super.isInvulnerableTo(source);
     }
     public boolean canHaveStatusEffect(@NotNull StatusEffectInstance potionEffect) {
@@ -565,7 +561,7 @@ public class Chocobo extends TameableEntity implements Angerable {
             default -> this.followingMrHuman = 2;
         }
         boolean skipper = this.followingMrHuman == 2 || length < 2D || length > 20D;
-        if (this.isWaterBreather() && !this.world.getBiome(this.getSteppingPos()).isIn(IS_NETHER)) {
+        if (this.isWaterBreather() && !this.getWorld().getBiome(this.getSteppingPos()).isIn(IS_NETHER)) {
             if (skipper) { this.goalSelector.add(7, roamAroundWB); }
             else {
                 this.localWonderWB = new ChocoboRandomStrollGoal(this, 1D, leashPoint, length);
@@ -608,7 +604,7 @@ public class Chocobo extends TameableEntity implements Angerable {
     public boolean canBreatheInWater() { return this.isWaterBreather(); }
     public float getStamina() { return this.dataTracker.get(PARAM_STAMINA); }
     public void setStamina(float value) { this.dataTracker.set(PARAM_STAMINA, value); }
-    public float getStaminaPercentage() { return (float) (this.getStamina() / Objects.requireNonNull(this.getAttributeInstance(ModAttributes.CHOCOBO_MAX_STAMINA)).getValue()); }
+    public float getStaminaPercentage() { return (float) (this.getStamina() / Objects.requireNonNull(this.getAttributeInstance(ModAttributes.CHOCOBO_STAMINA)).getValue()); }
     public int getGeneration() { return this.dataTracker.get(PARAM_GENERATION); }
     public String getGenerationString() {
         int gen = this.getGeneration();
@@ -620,7 +616,7 @@ public class Chocobo extends TameableEntity implements Angerable {
         float curStamina = this.dataTracker.get(PARAM_STAMINA);
         if (curStamina < value) return false;
 
-        float maxStamina = (float) Objects.requireNonNull(this.getAttributeInstance(ModAttributes.CHOCOBO_MAX_STAMINA)).getValue();
+        float maxStamina = (float) Objects.requireNonNull(this.getAttributeInstance(ModAttributes.CHOCOBO_STAMINA)).getValue();
         float newStamina = MathHelper.clamp(curStamina - value, 0, maxStamina);
         this.dataTracker.set(PARAM_STAMINA, newStamina);
         return true;
@@ -638,7 +634,7 @@ public class Chocobo extends TameableEntity implements Angerable {
             this.setLeashedDistance(length);
             this.followingMrHuman = 3;
             this.setMovementTypeByFollowMrHuman(this.followingMrHuman);
-            if (this.isWaterBreather() && !this.world.getBiome(this.getBlockPos()).isIn(IS_NETHER)) {
+            if (this.isWaterBreather() && !this.getWorld().getBiome(this.getBlockPos()).isIn(IS_NETHER)) {
                 this.localWonderWB = new ChocoboRandomStrollGoal(this, 1D, spot, length);
                 this.goalSelector.add(7, this.localWonderWB);
             } else {
@@ -689,12 +685,12 @@ public class Chocobo extends TameableEntity implements Angerable {
             if (newVector.getZ() <= 0.0D)
                 newVector = new Vec3d(newVector.x, newVector.y, newVector.z * 0.25F);
 
-            if (this.onGround) { this.isChocoboJumping = false; }
+            if (this.isOnGround()) { this.isChocoboJumping = false; }
 
             if (this.isLogicalSideForUpdatingMovement()) {
                 if (MinecraftClient.getInstance().options.jumpKey.isPressed()) {
                     // jump logic
-                    if (!this.isChocoboJumping && this.onGround && this.useStamina(FloatChocoConfigGet(chocoConfigHolder.chocoboStaminaCostJump, dSTAMINA_JUMP.getDefault()))) {
+                    if (!this.isChocoboJumping && this.isOnGround() && this.useStamina(FloatChocoConfigGet(ChocoboConfig.STAMINA_JUMP_USE.get(), dSTAMINA_JUMP.getDefault()))) {
                         Vec3d motion = getVelocity();
                         setVelocity(new Vec3d(motion.x, .6f, motion.z));
                         this.isChocoboJumping = true;
@@ -720,20 +716,20 @@ public class Chocobo extends TameableEntity implements Angerable {
                     }
                 }
                 // Insert override for slow-fall Option on Chocobo
-                if (!this.onGround && !this.isTouchingWater() && !this.isInLava() && !isChocoShiftDown() && this.getVelocity().y < 0 &&
-                        this.useStamina(FloatChocoConfigGet(chocoConfigHolder.chocoboStaminaCostJump, dSTAMINA_GLIDE.getDefault()))) {
+                if (!this.isOnGround() && !this.isTouchingWater() && !this.isInLava() && !isChocoShiftDown() && this.getVelocity().y < 0 &&
+                        this.useStamina(FloatChocoConfigGet(ChocoboConfig.STAMINA_GLIDE_USE.get(), dSTAMINA_GLIDE.getDefault()))) {
                     if (MinecraftClient.getInstance().options.jumpKey.isPressed()) {
                         Vec3d motion = getVelocity();
                         setVelocity(new Vec3d(motion.x, motion.y * 0.65F, motion.z));
                     }
                 }
-                if ((this.isSprinting() && !this.useStamina(FloatChocoConfigGet(chocoConfigHolder.chocoboStaminaCostSprint, dSTAMINA_SPRINT.getDefault())) || (this.isSprinting() && this.isTouchingWater() && this.useStamina(FloatChocoConfigGet(chocoConfigHolder.chocoboStaminaCostSprint, dSTAMINA_SPRINT.getDefault()))))) { this.setSprinting(false); }
+                if ((this.isSprinting() && !this.useStamina(FloatChocoConfigGet(ChocoboConfig.STAMINA_SPRINT_USE.get(), dSTAMINA_SPRINT.getDefault())) || (this.isSprinting() && this.isTouchingWater() && this.useStamina(FloatChocoConfigGet(ChocoboConfig.STAMINA_SPRINT_USE.get(), dSTAMINA_SPRINT.getDefault()))))) { this.setSprinting(false); }
 
                 this.setMovementSpeed((float) Objects.requireNonNull(this.getAttributeInstance(EntityAttributes.GENERIC_MOVEMENT_SPEED)).getValue());
                 super.travel(newVector);
             }
         } else {
-            if (!this.onGround && !this.isTouchingWater() && !this.isInLava() && this.getVelocity().y < 0 && this.useStamina(FloatChocoConfigGet(chocoConfigHolder.chocoboStaminaCostGlide, dSTAMINA_SPRINT.getDefault()))) {
+            if (!this.isOnGround() && !this.isTouchingWater() && !this.isInLava() && this.getVelocity().y < 0 && this.useStamina(FloatChocoConfigGet(ChocoboConfig.STAMINA_GLIDE_USE.get(), dSTAMINA_SPRINT.getDefault()))) {
                 Vec3d motion = getVelocity();
                 setVelocity(new Vec3d(motion.x, motion.y * 0.65F, motion.z));
             }
@@ -743,9 +739,11 @@ public class Chocobo extends TameableEntity implements Angerable {
             super.travel(cappedNewVector);
         }
     }
-    public void updatePassengerPosition(Entity passenger) {
-        super.updatePassengerPosition(passenger);
+    protected void updatePassengerPosition(Entity passenger, PositionUpdater positionUpdater) {
+        if (!this.hasPassenger(passenger)) { return; }
         if (passenger instanceof MobEntity && this.getPrimaryPassenger() == passenger) { this.bodyYaw = ((LivingEntity) passenger).bodyYaw; }
+        double d = this.getY() + this.getMountedHeightOffset() + passenger.getHeightOffset();
+        positionUpdater.accept(passenger, this.getX(), d, this.getZ());
     }
     public void tick() {
         super.tick();
@@ -760,7 +758,7 @@ public class Chocobo extends TameableEntity implements Angerable {
                     this.setInvulnerable(player.isCreative());
                     if (this.getHealth() != this.getMaxHealth() && player.getOffHandStack().getItem() == GYSAHL_GREEN_ITEM) {
                         player.getOffHandStack().decrement(1);
-                        heal(chocoConfigHolder.chocoboHealAmount);
+                        heal(ChocoboConfig.DEFAULT_HEALING.get());
                     }
                 } else { this.setInvulnerable(false); }
             } else {
@@ -784,12 +782,12 @@ public class Chocobo extends TameableEntity implements Angerable {
     private void floatChocobo() {
         if (this.isInLava()) {
             ShapeContext collisionContext = ShapeContext.of(this);
-            if (collisionContext.isAbove(FluidBlock.COLLISION_SHAPE, this.getBlockPos(), true) && !this.world.getFluidState(this.getBlockPos().up()).isIn(FluidTags.LAVA)) { this.onGround = true; }
+            if (collisionContext.isAbove(FluidBlock.COLLISION_SHAPE, this.getBlockPos(), true) && !this.getWorld().getFluidState(this.getBlockPos().up()).isIn(FluidTags.LAVA)) { this.setOnGround(true); }
             else { this.setVelocity(this.getVelocity().multiply(.003D).add(0.0D, 0.05D, 0.0D)); }
         }
         if (this.isTouchingWater() && !this.isWaterBreather()) {
             ShapeContext collisionContext = ShapeContext.of(this);
-            if (collisionContext.isAbove(FluidBlock.COLLISION_SHAPE, this.getBlockPos(), true) && !this.world.getFluidState(this.getBlockPos().up()).isIn(FluidTags.WATER)) { this.onGround = true; }
+            if (collisionContext.isAbove(FluidBlock.COLLISION_SHAPE, this.getBlockPos(), true) && !this.getWorld().getFluidState(this.getBlockPos().up()).isIn(FluidTags.WATER)) { this.setOnGround(true); }
             else { this.setVelocity(this.getVelocity().multiply(.003D).add(0.0D, 0.05D, 0.0D)); }
         }
     }
@@ -819,11 +817,11 @@ public class Chocobo extends TameableEntity implements Angerable {
         }
     }
     private boolean canTeleportTo(@NotNull BlockPos pPos) {
-        PathNodeType pathNodeTypes = LandPathNodeMaker.getLandNodeType(this.world, pPos.mutableCopy());
+        PathNodeType pathNodeTypes = LandPathNodeMaker.getLandNodeType(this.getWorld(), pPos.mutableCopy());
         if (pathNodeTypes != PathNodeType.WALKABLE) { return false; }
         else {
             BlockPos blockpos = pPos.subtract(this.getBlockPos());
-            return this.world.isSpaceEmpty(this, this.getBoundingBox().offset(blockpos));
+            return this.getWorld().isSpaceEmpty(this, this.getBoundingBox().offset(blockpos));
         }
     }
     private int randomIntInclusive(int pMin, int pMax) { return this.getRandom().nextInt(pMax - pMin + 1) + pMin; }
@@ -849,7 +847,7 @@ public class Chocobo extends TameableEntity implements Angerable {
         super.tickMovement();
         this.setRotation(this.getYaw(), this.getPitch());
         this.regenerateStamina();
-        this.stepHeight = maxStepUp;
+        this.setStepHeight(maxStepUp);
         this.fallDistance = 0f;
 
         if (this.TimeSinceFeatherChance == 3000) {
@@ -878,31 +876,28 @@ public class Chocobo extends TameableEntity implements Angerable {
         } else {
             // Wing rotations, control packet
             // Client side
-            this.destPos += (float) ((double) (this.onGround ? -1 : 4) * 0.3D);
+            this.destPos += (float) ((double) (this.isOnGround() ? -1 : 4) * 0.3D);
             this.destPos = MathHelper.clamp(destPos, 0f, 1f);
 
-            if (!this.onGround) { this.wingRotDelta = Math.min(wingRotation, 1f); }
+            if (!this.isOnGround()) { this.wingRotDelta = Math.min(wingRotation, 1f); }
             this.wingRotDelta *= 0.9F;
             this.wingRotation += this.wingRotDelta * 2.0F;
 
-            if (this.onGround) {
-                this.lastLimbDistance = this.limbDistance;
+            if (this.isOnGround()) {
                 double d1 = this.getX() - this.prevX;
                 double d0 = this.getZ() - this.prevZ;
                 float f4 = ((float)Math.sqrt(d1 * d1 + d0 * d0)) * 4.0F;
                 if (f4 > 1.0F) { f4 = 1.0F; }
-                this.limbDistance += (f4 - this.limbDistance) * 0.4F;
-                this.limbAngle += this.limbDistance;
+                this.limbAnimator.updateLimbs(f4, 0.4F);
             } else {
-                this.limbAngle = 0;
-                this.limbDistance = 0;
-                this.lastLimbDistance = 0;
+                this.limbAnimator.setSpeed(0);
+                this.limbAnimator.updateLimbs(0,0);
             }
         }
     }
     private void regenerateStamina() {
-        if (!this.onGround && !this.isSprinting()) { return; }
-        float regen = FloatChocoConfigGet(chocoConfigHolder.chocoboStaminaRegen, dSTAMINA_REGEN.getDefault());
+        if (!this.isOnGround() && !this.isSprinting()) { return; }
+        float regen = FloatChocoConfigGet(ChocoboConfig.STAMINA_REGEN.get(), dSTAMINA_REGEN.getDefault());
 
         // half the amount of regeneration while moving
         Vec3d motion = getVelocity();
@@ -975,7 +970,7 @@ public class Chocobo extends TameableEntity implements Angerable {
                 return ActionResult.SUCCESS;
             }
             if (heldItemStack.isEmpty() && !player.isSneaking() && !this.isBaby() && this.isSaddled()) {
-                if (chocoConfigHolder.ownerInventoryAccess) {
+                if (ChocoboConfig.OWNER_ONLY_ACCESS.get()) {
                     if (isOwner(player)) { player.startRiding(this); }
                     else { player.sendMessage(Text.translatable(DelChoco.DELCHOCO_ID + ".entity_chocobo.not_owner"), true); }
                 } else { player.startRiding(this); }
@@ -984,25 +979,25 @@ public class Chocobo extends TameableEntity implements Angerable {
             if (defaultHand == GYSAHL_GREEN_ITEM) {
                 if (getHealth() != getMaxHealth()) {
                     this.eat(player, hand, player.getInventory().getMainHandStack());
-                    heal(chocoConfigHolder.chocoboHealAmount);
+                    heal(ChocoboConfig.DEFAULT_HEALING.get());
                 } else { player.sendMessage(Text.translatable(DelChoco.DELCHOCO_ID + ".entity_chocobo.heal_fail"), true); }
             }
-            if (this.fruitAteTimer == 0 && !player.world.isClient())  {
+            if (this.fruitAteTimer == 0 && !player.getWorld().isClient())  {
                 if (defaultHand == GOLDEN_GYSAHL_GREEN) {
                     increaseStat("All", (ServerPlayerEntity)player);
-                    this.fruitAteTimer = chocoConfigHolder.chocoboFruitCoolDown;
+                    this.fruitAteTimer = ChocoboConfig.FRUIT_COOL_DOWN.get();
                 }
                 if (defaultHand == PINK_GYSAHL_GREEN) {
                     increaseStat("HP", player);
-                    this.fruitAteTimer = chocoConfigHolder.chocoboFruitCoolDown;
+                    this.fruitAteTimer = ChocoboConfig.FRUIT_COOL_DOWN.get();
                 }
                 if (defaultHand == DEAD_PEPPER) {
                     increaseStat("Attack", player);
-                    this.fruitAteTimer = chocoConfigHolder.chocoboFruitCoolDown;
+                    this.fruitAteTimer = ChocoboConfig.FRUIT_COOL_DOWN.get();
                 }
                 if (defaultHand == SPIKE_FRUIT) {
                     increaseStat("Defence", player);
-                    this.fruitAteTimer = chocoConfigHolder.chocoboFruitCoolDown;
+                    this.fruitAteTimer = ChocoboConfig.FRUIT_COOL_DOWN.get();
                 }
                 if (fruitAteTimer > 0) { this.eat(player, hand, player.getInventory().getMainHandStack()); }
             }
@@ -1016,7 +1011,7 @@ public class Chocobo extends TameableEntity implements Angerable {
                             this.clearWonders();
                             this.setLeashSpot(0,50000,0);
                             this.setLeashedDistance(0D);
-                            if (this.isWaterBreather() && !this.world.getBiome(this.getSteppingPos()).isIn(IS_NETHER)) {
+                            if (this.isWaterBreather() && !this.getWorld().getBiome(this.getSteppingPos()).isIn(IS_NETHER)) {
                                 this.goalSelector.add(7, roamAroundWB);
                             } else {
                                 this.goalSelector.add(7, roamAround);
@@ -1036,7 +1031,7 @@ public class Chocobo extends TameableEntity implements Angerable {
                         this.setMovementType(MovementType.WANDER);
                         followingMrHuman = 2;
                         this.clearWonders();
-                        if (this.isWaterBreather() && !this.world.getBiome(this.getSteppingPos()).isIn(IS_NETHER)) {
+                        if (this.isWaterBreather() && !this.getWorld().getBiome(this.getSteppingPos()).isIn(IS_NETHER)) {
                             this.goalSelector.add(7, roamAroundWB);
                         } else {
                             this.goalSelector.add(7, roamAround);
@@ -1051,7 +1046,7 @@ public class Chocobo extends TameableEntity implements Angerable {
                             this.clearWonders();
                             this.setLeashedDistance(distance);
                             this.setLeashSpot(leashPoint);
-                            if (this.isWaterBreather() && !this.world.getBiome(this.getSteppingPos()).isIn(IS_NETHER)) {
+                            if (this.isWaterBreather() && !this.getWorld().getBiome(this.getSteppingPos()).isIn(IS_NETHER)) {
                                 this.localWonderWB = new ChocoboRandomStrollGoal(this, 1D, leashPoint, distance);
                                 this.goalSelector.add(7, this.localWonderWB);
                             } else {
@@ -1092,7 +1087,7 @@ public class Chocobo extends TameableEntity implements Angerable {
                 return ActionResult.SUCCESS;
             }
             if (defaultHand == Items.NAME_TAG) {
-                if (chocoConfigHolder.ownerInventoryAccess) {
+                if (ChocoboConfig.OWNER_ONLY_ACCESS.get()) {
                     if (isOwner(player)) {
                         this.setCustomName(heldItemStack.getName());
                         this.setCustomNameVisible(true);
@@ -1116,7 +1111,7 @@ public class Chocobo extends TameableEntity implements Angerable {
                 double dist = (double) Math.max(Math.min(item.getLeashDistance(), 40), 6) /2;
                 if (leash == null || center == null) { return ActionResult.FAIL; }
                 this.clearWonders();
-                if (this.isWaterBreather() && !this.world.getBiome(this.getSteppingPos()).isIn(IS_NETHER)) {
+                if (this.isWaterBreather() && !this.getWorld().getBiome(this.getSteppingPos()).isIn(IS_NETHER)) {
                     this.localWonderWB = new ChocoboRandomStrollGoal(this, 1D, center, dist);
                     this.goalSelector.add(7, this.localWonderWB);
                 } else {
@@ -1132,7 +1127,7 @@ public class Chocobo extends TameableEntity implements Angerable {
         } else {
             if (defaultHand == GYSAHL_GREEN_ITEM) {
                 this.eat(player, hand, player.getInventory().getMainHandStack());
-                if ((float) random() < chocoConfigHolder.chocoboTameChance || player.isCreative()) {
+                if ((float) random() < ChocoboConfig.TAME_CHANCE.get() || player.isCreative()) {
                     this.setOwnerUuid(player.getUuid());
                     this.setTamed(true);
                     this.setCollarColor(16);
@@ -1153,34 +1148,74 @@ public class Chocobo extends TameableEntity implements Angerable {
         return super.interactAt(player, vec, hand);
     }
     private void increaseStat(@NotNull String type, PlayerEntity player) {
-        if (type.equals("All")) {
-            this.statPlus(EntityAttributes.GENERIC_ATTACK_DAMAGE, chocoConfigHolder.chocoboMaxStrength, "str", player);
-            this.statPlus(EntityAttributes.GENERIC_ARMOR, chocoConfigHolder.chocoboMaxArmor, "arm", player);
-            this.statPlus(EntityAttributes.GENERIC_ARMOR_TOUGHNESS, chocoConfigHolder.chocoboMaxArmorToughness, "arm_tough", player);
-            this.statPlus(EntityAttributes.GENERIC_MAX_HEALTH, chocoConfigHolder.chocoboMaxHealth, "hp", player);
-            this.statPlus(ModAttributes.CHOCOBO_MAX_STAMINA, chocoConfigHolder.chocoboMaxStamina, "sta", player);
-        }
-        if (type.equals("HP")) {
-            this.statPlus(EntityAttributes.GENERIC_MAX_HEALTH, chocoConfigHolder.chocoboMaxHealth, "hp", player);
-            this.statPlus(ModAttributes.CHOCOBO_MAX_STAMINA, chocoConfigHolder.chocoboMaxStamina, "sta", player);
-        }
-        if (type.equals("Attack")) {
-            this.statPlus(EntityAttributes.GENERIC_ATTACK_DAMAGE, chocoConfigHolder.chocoboMaxStrength, "str", player);
-        }
+        int statValues = 0;
+        if (type.equals("All")) { statValues = 31; }
+        if (type.equals("HP")) { statValues = 24; }
+        if (type.equals("Attack")) { statValues = 1; }
         if (type.equals("Defence")) {
-            if (chocoConfigHolder.chocoboMaxArmorToughness > this.getAttributeBaseValue(EntityAttributes.GENERIC_ARMOR_TOUGHNESS)) {
-                if (.50f > (float) random() && this.getAttributeBaseValue(EntityAttributes.GENERIC_ARMOR) < chocoConfigHolder.chocoboMaxArmor) {
-                    this.statPlus(EntityAttributes.GENERIC_ARMOR, chocoConfigHolder.chocoboMaxArmor, "arm", player);
-                } else {
-                    this.statPlus(EntityAttributes.GENERIC_ARMOR_TOUGHNESS, chocoConfigHolder.chocoboMaxArmorToughness, "arm_tough", player);
-                }
-            } else {
-                this.statPlus(EntityAttributes.GENERIC_ARMOR, chocoConfigHolder.chocoboMaxArmor, "arm", player);
-            }
+            if (ChocoboConfig.MAX_ARMOR_TOUGHNESS.get() > this.getAttributeValue(EntityAttributes.GENERIC_ARMOR_TOUGHNESS)) {
+                if (ChocoboConfig.MAX_ARMOR.get() > this.getAttributeValue(EntityAttributes.GENERIC_ARMOR)) { statValues = 6; }
+                else { statValues = 4; }
+            } else { statValues = 2; }
+        }
+        if (statValues > 0) { numSplit(statValues, player); }
+    }
+    private void numSplit(int value, PlayerEntity player) {
+        int hold = value;
+        String health = "hp";
+        String strength = "str";
+        String armor = "arm";
+        String armorTough = "arm_tough";
+        String stamina = "sta";
+        String dualDefense = "defences";
+        String flipDefense = "xDefence";
+        int chk_hold = statCount(hold, 16);
+        if (chk_hold >= 0) {
+            hold = chk_hold;
+            this.statSwitch(stamina, player);
+        }
+        chk_hold = statCount(hold, 8);
+        if (chk_hold >= 0) {
+            hold = chk_hold;
+            this.statSwitch(health, player);
+        }
+        chk_hold = statCount(hold, 4);
+        if (chk_hold >= 0) {
+            hold = chk_hold;
+            if (chk_hold > 2) {
+                hold = hold-2;
+                this.statSwitch(dualDefense, player);
+            } else if (chk_hold == 2) {
+                hold = 0;
+                this.statSwitch(flipDefense, player);
+            } else { this.statSwitch(armorTough, player); }
+        }
+        chk_hold = statCount(hold, 2);
+        if (chk_hold >= 0) {
+            hold = chk_hold;
+            this.statSwitch(armor, player);
+        }
+        chk_hold = statCount(hold, 1);
+        if (chk_hold >= 0) { this.statSwitch(strength, player); }
+    }
+    private int statCount(int statNumber, int checkNumber) { return statNumber - checkNumber; }
+    private void statSwitch(@NotNull String key, PlayerEntity player) {
+        String loop = key;
+        if (loop.matches("defences")) {
+            this.statSwitch("arm", player);
+            loop = "arm_tough";
+        }
+        if (loop.matches("xDefence")) { loop = .50f > (float) random() ? "arm" : "arm_tough"; }
+        switch (loop) {
+            case "arm" -> this.statPlus(EntityAttributes.GENERIC_ARMOR, ChocoboConfig.MAX_ARMOR.get(), key, player);
+            case "arm_tough" -> this.statPlus(EntityAttributes.GENERIC_ARMOR_TOUGHNESS, ChocoboConfig.MAX_ARMOR_TOUGHNESS.get(), key, player);
+            case "str" -> this.statPlus(EntityAttributes.GENERIC_ATTACK_DAMAGE, ChocoboConfig.MAX_ATTACK.get(), key, player);
+            case "sta" -> this.statPlus(ModAttributes.CHOCOBO_STAMINA, ChocoboConfig.MAX_STAMINA.get(), key, player);
+            case "hp" -> this.statPlus(EntityAttributes.GENERIC_MAX_HEALTH, ChocoboConfig.MAX_HEALTH.get(), key, player);
         }
     }
     private void statPlus(EntityAttribute stat, double max, String key, @NotNull PlayerEntity player) {
-        if (!player.world.isClient()) {
+        if (!player.getWorld().isClient()) {
             double base = this.getAttributeInstance(stat) != null ? Objects.requireNonNull(this.getAttributeInstance(stat)).getValue() : -10;
             boolean trip = base + (double) 1 >= max;
             if (trip) { trip = base >= max; }
@@ -1229,14 +1264,14 @@ public class Chocobo extends TameableEntity implements Angerable {
     public int getMinAmbientSoundDelay() { return (24 * (int) (random() * 100)); }
     @SuppressWarnings("OptionalGetWithoutIsPresent")
     public boolean canSpawn(@NotNull WorldAccess worldIn, @NotNull SpawnReason spawnReasonIn) {
-        ServerWorldAccess theWorld = Objects.requireNonNull(worldIn.getServer()).getWorld(this.world.getRegistryKey());
+        ServerWorldAccess theWorld = Objects.requireNonNull(worldIn.getServer()).getWorld(this.getWorld().getRegistryKey());
         assert theWorld != null;
         List<Chocobo> bob = worldIn.getNonSpectatingEntities(Chocobo.class, new Box(getBlockPos()).expand(48, 32, 48));
         int sizeCtrl = 15;
         RegistryKey<Biome> biomes = theWorld.getBiome(getBlockPos().down()).getKey().get();
         if (!isOverworld(theWorld)) {
             if (isEnd(theWorld)) {
-                return !this.world.getBlockState(getBlockPos().down()).isAir();
+                return !this.getWorld().getBlockState(getBlockPos().down()).isAir();
             } else if (isNether(theWorld)) { return true; }
         } else {
             if (IS_OCEAN().contains(biomes)) {
@@ -1262,14 +1297,14 @@ public class Chocobo extends TameableEntity implements Angerable {
             double length = Math.max(2D, Math.min(this.getLeashDistance(), 21D));
             boolean skip = leashPoint.getY() > 4000;
             if (skip) {
-                if (this.isWaterBreather() && !this.world.getBiome(this.getSteppingPos()).isIn(IS_NETHER)) {
+                if (this.isWaterBreather() && !this.getWorld().getBiome(this.getSteppingPos()).isIn(IS_NETHER)) {
                     this.goalSelector.add(7, roamAroundWB);
                 } else {
                     this.goalSelector.add(7, roamAround);
                 }
             }
             else {
-                if (this.isWaterBreather() && !this.world.getBiome(this.getSteppingPos()).isIn(IS_NETHER)) {
+                if (this.isWaterBreather() && !this.getWorld().getBiome(this.getSteppingPos()).isIn(IS_NETHER)) {
                     this.localWonderWB = new ChocoboRandomStrollGoal(this, 1D, leashPoint, length);
                     this.goalSelector.add(7, this.localWonderWB);
                 } else {
@@ -1279,7 +1314,7 @@ public class Chocobo extends TameableEntity implements Angerable {
             }
         } else {
             this.goalSelector.add(6, chocoboAvoidPlayerGoal);
-            if (this.isWaterBreather() && !this.world.getBiome(this.getSteppingPos()).isIn(IS_NETHER)) {
+            if (this.isWaterBreather() && !this.getWorld().getBiome(this.getSteppingPos()).isIn(IS_NETHER)) {
                 this.goalSelector.add(7, roamAroundWB);
             } else {
                 this.goalSelector.add(7, roamAround);
@@ -1307,7 +1342,7 @@ public class Chocobo extends TameableEntity implements Angerable {
     @Override
     public void chooseRandomAngerTime() { this.setAngerTime(PERSISTENT_ANGER_TIME.get(this.random)); }
     protected void mobTick() {
-        this.tickAngerLogic((ServerWorld) this.world, true);
+        this.tickAngerLogic((ServerWorld) this.getWorld(), true);
         if (this.getTarget() != null) { this.maybeAlertOthers(); }
         if (this.hasAngerTime()) { this.playerHitTimer = this.age; }
     }
@@ -1321,7 +1356,7 @@ public class Chocobo extends TameableEntity implements Angerable {
     private void alertOthers() {
         double d0 = this.getAttributeValue(EntityAttributes.GENERIC_FOLLOW_RANGE);
         Box aabb = Box.from(this.getPos()).expand(d0, 10.0D, d0);
-        this.world.getNonSpectatingEntities(Chocobo.class, aabb).stream()
+        this.getWorld().getNonSpectatingEntities(Chocobo.class, aabb).stream()
                 .filter((p_34463_) -> p_34463_ != this)
                 .filter((p_34461_) -> p_34461_.getTarget() == null)
                 .filter((p_34456_) -> !p_34456_.isTeamPlayer(Objects.requireNonNull(this.getTarget()).getScoreboardTeam()))
@@ -1342,9 +1377,9 @@ public class Chocobo extends TameableEntity implements Angerable {
         super.onDeath(source);
     }
     public void checkDespawn() {
-        if (this.world.getDifficulty() == Difficulty.PEACEFUL && this.isDisallowedInPeaceful()) { this.discard(); }
+        if (this.getWorld().getDifficulty() == Difficulty.PEACEFUL && this.isDisallowedInPeaceful()) { this.discard(); }
         else if (!this.isPersistent() && !this.cannotDespawn()) {
-            Entity entity = this.world.getClosestPlayer(this, -1.0D);
+            Entity entity = this.getWorld().getClosestPlayer(this, -1.0D);
             if (entity != null) {
                 double d0 = entity.squaredDistanceTo(this);
                 int i = CREATURE.getImmediateDespawnRange()*5;
@@ -1360,4 +1395,6 @@ public class Chocobo extends TameableEntity implements Angerable {
     }
     // Ride Related
     public int getRideTickDelay() { return this.rideTickDelay; }
+    // Method to get World, Used by 'default public LivingEntity getOwner()' to get Owner by UUID in the world.
+    public EntityView method_48926() { return super.getWorld(); }
 }

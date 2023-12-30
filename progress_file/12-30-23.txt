@@ -1,0 +1,12 @@
+Trimmed some AI
+
+Reworked Some Goals
+= cut out Supers where it made sense to avoid rechecking.
+
+RemovedWB versions
+
+Removed SwimGoal
+Removed FleeEntityGoal
+Removed Avoid PlayersGoal
+
+Test further to find ways to cut down resource use on chocobos

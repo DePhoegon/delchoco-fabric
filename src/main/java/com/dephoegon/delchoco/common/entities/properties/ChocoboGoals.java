@@ -3,11 +3,11 @@ package com.dephoegon.delchoco.common.entities.properties;
 import com.dephoegon.delchoco.common.entities.Chocobo;
 import com.dephoegon.delchoco.common.items.ChocoDisguiseItem;
 import com.dephoegon.delchoco.utils.RandomHelper;
-import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.ai.FuzzyTargeting;
 import net.minecraft.entity.ai.NoPenaltyTargeting;
+import net.minecraft.entity.ai.TargetPredicate;
 import net.minecraft.entity.ai.goal.*;
 import net.minecraft.entity.ai.pathing.LandPathNodeMaker;
 import net.minecraft.entity.ai.pathing.PathNodeType;
@@ -28,12 +28,11 @@ import java.util.ArrayList;
 import java.util.EnumSet;
 
 import static com.dephoegon.delchoco.utils.RandomHelper.random;
-import static net.minecraft.entity.ai.pathing.NavigationType.LAND;
 import static net.minecraft.entity.ai.pathing.PathNodeType.WALKABLE;
 
 public class ChocoboGoals {
     @SuppressWarnings("rawtypes")
-    private static boolean doNotAttackClassCheck(Class target) {
+    private static boolean AttackClassCheck(Class target) {
         ArrayList<Class> out = new ArrayList<>();
         out.add(Chocobo.class);
         out.add(EnderDragonEntity.class);
@@ -101,41 +100,17 @@ public class ChocoboGoals {
     private static int boundedModifier(double lower, double upper) {
         return (int) (random.nextDouble(upper)-lower);
     }
-    public static class ChocoboRandomStrollGoal extends WanderAroundGoal {
-        final BlockPos blockPos;
-        final double limit;
-        double xSpot;
-        double zSpot;
-        public ChocoboRandomStrollGoal(Chocobo pMob, double pSpeedModifier, BlockPos position, Double RangeLimit) {
-            super(pMob, pSpeedModifier);
-            this.blockPos = position;
-            this.limit = RangeLimit;
-        }
-        @Nullable
-        protected Vec3d getPosition(Vec3d target) {
-            Vec3d vec3 = target;
-            int x = boundedModifier(limit/2, limit);
-            int z = boundedModifier(limit/2, limit);
-            if (vec3 == null) { vec3 = new Vec3d(this.blockPos.getX()+x, this.blockPos.getY(), this.blockPos.getZ()+z); }
-            this.xSpot = boundsFlip(vec3.getX(), this.blockPos.getX(), this.limit);
-            this.zSpot = boundsFlip(vec3.getZ(), this.blockPos.getZ(), this.limit);
-            return new Vec3d(this.xSpot, vec3.getY(), this.zSpot);
-        }
-        @Nullable
-        protected Vec3d getWanderTarget() {
-            Vec3d target = NoPenaltyTargeting.find(this.mob, 10, 7);
-            return getPosition(target);
-        }
-    }
     public static class ChocoboLocalizedWonder extends WanderAroundFarGoal {
+        final Chocobo choco;
         final BlockPos blockPos;
         final double limit;
         double xSpot;
         double zSpot;
         public ChocoboLocalizedWonder(Chocobo pMob, double pSpeedModifier, BlockPos position, Double RangeLimit) {
-            super(pMob, pSpeedModifier);
+            super(pMob, pSpeedModifier, 0.04f);
             this.blockPos = position;
             this.limit = RangeLimit;
+            this.choco = pMob;
         }
         @Nullable
         protected Vec3d getPosition(Vec3d target) {
@@ -148,69 +123,25 @@ public class ChocoboGoals {
             return new Vec3d(this.xSpot, vec3.getY(), this.zSpot);
         }
         protected Vec3d getRandomPosition() {
-            Vec3d target = FuzzyTargeting.find(this.mob, 10, 7);
-            return getPosition(target);
+            return NoPenaltyTargeting.find(this.mob, 10, 7);
         }
         @Override
         @Nullable
         protected Vec3d getWanderTarget() {
             if (this.mob.isInsideWaterOrBubbleColumn()) {
                 Vec3d vec3d = FuzzyTargeting.find(this.mob, 15, 7);
-                return vec3d == null ? getRandomPosition() : getPosition(vec3d);
+                return vec3d == null ? getPosition(getRandomPosition()) : getPosition(vec3d);
             }
-            return getRandomPosition();
-        }
-    }
-    public static class ChocoboAvoidBlockGoal extends Goal {
-        private final PathAwareEntity mob;
-        private final ArrayList<Class<? extends Block>> classes;
-
-        public ChocoboAvoidBlockGoal(PathAwareEntity pMob, ArrayList<Class<? extends Block>> classLists) {
-            this.mob = pMob;
-            this.classes = classLists;
-        }
-        public boolean canStart() { return mob.isOnGround(); }
-
-        public void start() {
-            BlockPos block = null;
-            BlockPos newBlockPos = null;
-            double mobX = mob.getX();
-            double mobY = mob.getY();
-            double mobZ = mob.getZ();
-
-            // Checks ArrayList for Classes of blocks for match, & moves on.
-            for(BlockPos blockPos1 : BlockPos.iterate(MathHelper.floor(mobX - 2.0D), MathHelper.floor(mobY - 2.0D), MathHelper.floor(mobZ - 2.0D), MathHelper.floor(mobX + 2.0D), this.mob.getBlockY(), MathHelper.floor(mobZ + 2.0D))) {
-                Class<? extends Block> block1 = mob.getWorld().getBlockState(blockPos1).getBlock().getClass();
-                if (classes.contains(block1)) {
-                    block = blockPos1;
-                    break;
-                }
+            if (this.mob.getRandom().nextFloat() >= this.probability) {
+                return getPosition(FuzzyTargeting.find(this.mob, 10, 7));
             }
-
-            // Gets Distance between Block in X & Z, uses it to check distance in favor of away from the block
-            if (block != null) {
-                double posX = ((mobX - block.getX())*-1)+mobX;
-                double blockY = block.getY();
-                double posZ = ((mobZ - block.getZ())*-1)+mobZ;
-                // Increases the distance by a block to avoid accidental resource hogging/looping
-                posZ = posZ > 0 ? posZ+1 : posZ-1;
-                posX = posX > 0 ? posX+1 : posX-1;
-
-                // Looks for Pathfindable ground within range of Chocobo to fence & Y+4 from chocobo, & blockposY-4,
-                for(BlockPos blockPos2 : BlockPos.iterate(MathHelper.floor(posX), MathHelper.floor(mobY+4), MathHelper.floor(posZ), MathHelper.floor(mobX), MathHelper.floor(blockY-4), MathHelper.floor(mobZ))) {
-                    BlockState blockState = mob.getWorld().getBlockState(blockPos2);
-                    if (blockState.canPathfindThrough(mob.getWorld(), blockPos2, LAND)){
-                        newBlockPos = blockPos2;
-                        break;
-                    }
-                }
-                // Sets postion to wonder towards.
-                if (newBlockPos != null) { mob.getMoveControl().moveTo(newBlockPos.getX(), newBlockPos.getY(), newBlockPos.getZ(), 1.0D); }
-            }
+            return getPosition(getRandomPosition());
         }
     }
     public static class ChocoboOwnerHurtGoal extends AttackWithOwnerGoal {
         private final TameableEntity tameAnimal;
+        private LivingEntity attacking;
+        private int lastAttackTime;
 
         public ChocoboOwnerHurtGoal(TameableEntity pTameAnimal) {
             super(pTameAnimal);
@@ -219,19 +150,28 @@ public class ChocoboGoals {
         }
         public boolean canStart() {
             if (tameAnimal.isTamed()) {
-                LivingEntity livingentity = tameAnimal.getOwner();
-                if (livingentity == null) { return false; }
-                else {
-                    Class<? extends LivingEntity> ownerLastHurt;
-                    if (livingentity.getAttacking() != null) { ownerLastHurt = livingentity.getAttacking().getClass();}
-                    else { ownerLastHurt = null; }
-                    return (doNotAttackClassCheck(ownerLastHurt)) && super.canStart();
+                LivingEntity livingEntity = tameAnimal.getOwner();
+                if (livingEntity == null) { return false; }
+                this.attacking = livingEntity.getAttacking();
+                int i = livingEntity.getLastAttackTime();
+                if (AttackClassCheck(this.attacking.getClass())) {
+                    return i != this.lastAttackTime && this.canTrack(this.attacking, TargetPredicate.DEFAULT) && this.tameAnimal.canAttackWithOwner(this.attacking, livingEntity);
                 }
-            } else { return super.canStart(); }
+            }
+            return false;
+        }
+        @Override
+        public void start() {
+            this.mob.setTarget(this.attacking);
+            LivingEntity livingEntity = this.tameAnimal.getOwner();
+            if (livingEntity != null) { this.lastAttackTime = livingEntity.getLastAttackTime(); }
+            super.start();
         }
     }
     public static class ChocoboOwnerHurtByGoal extends TrackOwnerAttackerGoal {
         private final TameableEntity tameAnimal;
+        private LivingEntity attacker;
+        private int lastAttackedTime;
 
         public ChocoboOwnerHurtByGoal(TameableEntity pTameAnimal) {
             super(pTameAnimal);
@@ -242,13 +182,22 @@ public class ChocoboGoals {
             if (tameAnimal.isTamed()) {
                 LivingEntity livingentity = tameAnimal.getOwner();
                 if (livingentity == null) { return false; }
-                else {
-                    Class<? extends LivingEntity> ownerLastHurtBy;
-                    if (livingentity.getAttacking() != null) { ownerLastHurtBy = livingentity.getAttacking().getClass(); }
-                    else { ownerLastHurtBy = null; }
-                    return doNotAttackClassCheck(ownerLastHurtBy) && super.canStart();
+                this.attacker = livingentity.getAttacker();
+                int i = livingentity.getLastAttackedTime();
+                if (AttackClassCheck(this.attacker.getClass())) {
+                    return i != this.lastAttackedTime && this.canTrack(this.attacker, TargetPredicate.DEFAULT) && this.tameAnimal.canAttackWithOwner(this.attacker, livingentity);
                 }
-            } else { return super.canStart(); }
+            }
+            return false;
+        }
+        @Override
+        public void start() {
+            this.mob.setTarget(this.attacker);
+            LivingEntity livingEntity = this.tameAnimal.getOwner();
+            if (livingEntity != null) {
+                this.lastAttackedTime = livingEntity.getLastAttackedTime();
+            }
+            super.start();
         }
     }
     public static class ChocoPanicGoal extends EscapeDangerGoal {
@@ -274,9 +223,11 @@ public class ChocoboGoals {
             super(pMob, PlayerEntity.class, livingEntity -> {
                 if(livingEntity instanceof PlayerEntity player) {
                     int chance = 0;
-                    for (ItemStack stack : player.getInventory().armor) { if (stack != null) {
-                        if (stack.getItem() instanceof ChocoDisguiseItem) { chance += 25; }
-                    } }
+                    for (ItemStack stack : player.getInventory().armor) { 
+                        if (stack != null) {
+                            if (stack.getItem() instanceof ChocoDisguiseItem) { chance += 25; }
+                        }
+                    }
                     return !RandomHelper.getChanceResult(chance);
                 }
                 return false;
@@ -288,8 +239,8 @@ public class ChocoboGoals {
         public boolean canStart() {
             LivingEntity livingentity = this.mob.getAttacker();
             boolean canAttack = true;
-            if (livingentity != null) { canAttack = doNotAttackClassCheck(livingentity.getClass()); }
-            return canAttack && super.canStart();
+            if (livingentity != null) { canAttack = AttackClassCheck(livingentity.getClass()); }
+            if (canAttack) { return super.canStart(); } else { return false; }
         }
     }
 }

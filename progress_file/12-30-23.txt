@@ -10,3 +10,17 @@ Removed FleeEntityGoal
 Removed Avoid PlayersGoal
 
 Test further to find ways to cut down resource use on chocobos
+
+-------------
+
+Trimmed Chocobo goals
+- removed 'swim'
+- removed 'llama checks' for avoiding
+- commented out 'player checks' for avoiding
+- removed 'silverfish' targeting
+- removed waterBreathing Wanders
+- removed waterBreathing checks for assigning chocobo goals
+- Adjusted goals to streamline checks
+- added use of rideTickDelay to force 2/3 of the time not able to start
+-- Due to the sheer number of chocobos
+--- Namely around terrian generation & heavy natural usage. X"}

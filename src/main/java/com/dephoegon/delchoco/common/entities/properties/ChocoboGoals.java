@@ -5,7 +5,6 @@ import com.dephoegon.delchoco.common.items.ChocoDisguiseItem;
 import com.dephoegon.delchoco.utils.RandomHelper;
 import net.minecraft.block.BlockState;
 import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.ai.FuzzyTargeting;
 import net.minecraft.entity.ai.NoPenaltyTargeting;
 import net.minecraft.entity.ai.TargetPredicate;
 import net.minecraft.entity.ai.goal.*;
@@ -100,17 +99,35 @@ public class ChocoboGoals {
     private static int boundedModifier(double lower, double upper) {
         return (int) (random.nextDouble(upper)-lower);
     }
-    public static class ChocoboLocalizedWonder extends WanderAroundFarGoal {
+    public static class ChocoboRoamWonder extends WanderAroundGoal {
+        final Chocobo choco;
+
+        public ChocoboRoamWonder(Chocobo mob, double speed) {
+            super(mob, speed, 120, !mob.cannotDespawn());
+            this.choco = mob;
+        }
+        // using riding tick delay to limit movement starts to .5 seconds (10 ticks) out of 1.5 seconds (30 ticks)
+        public boolean canStart() {
+            boolean staggeredStart = choco.getRideTickDelay() > 20;
+            if (staggeredStart) { return super.canStart(); } else { return false; }
+        }
+    }
+    public static class ChocoboLocalizedWonder extends WanderAroundGoal {
         final Chocobo choco;
         final BlockPos blockPos;
         final double limit;
         double xSpot;
         double zSpot;
         public ChocoboLocalizedWonder(Chocobo pMob, double pSpeedModifier, BlockPos position, Double RangeLimit) {
-            super(pMob, pSpeedModifier, 0.04f);
+            super(pMob, pSpeedModifier, 120, !pMob.cannotDespawn());
             this.blockPos = position;
             this.limit = RangeLimit;
             this.choco = pMob;
+        }
+        // using riding tick delay to limit movement starts to .75 seconds (15 ticks) out of 1.5 seconds (30 ticks)
+        public boolean canStart() {
+            boolean staggeredStart = choco.getRideTickDelay() > 15;
+            if (staggeredStart) { return super.canStart(); } else { return false; }
         }
         @Nullable
         protected Vec3d getPosition(Vec3d target) {
@@ -122,20 +139,10 @@ public class ChocoboGoals {
             this.zSpot = boundsFlip(vec3.getZ(), this.blockPos.getZ(), this.limit);
             return new Vec3d(this.xSpot, vec3.getY(), this.zSpot);
         }
-        protected Vec3d getRandomPosition() {
-            return NoPenaltyTargeting.find(this.mob, 10, 7);
-        }
         @Override
         @Nullable
         protected Vec3d getWanderTarget() {
-            if (this.mob.isInsideWaterOrBubbleColumn()) {
-                Vec3d vec3d = FuzzyTargeting.find(this.mob, 15, 7);
-                return vec3d == null ? getPosition(getRandomPosition()) : getPosition(vec3d);
-            }
-            if (this.mob.getRandom().nextFloat() >= this.probability) {
-                return getPosition(FuzzyTargeting.find(this.mob, 10, 7));
-            }
-            return getPosition(getRandomPosition());
+            return getPosition(NoPenaltyTargeting.find(this.mob, 10, 7));
         }
     }
     public static class ChocoboOwnerHurtGoal extends AttackWithOwnerGoal {
@@ -233,7 +240,7 @@ public class ChocoboGoals {
                 return false;
             }, 10.0F, 1.0D, 1.2D, EntityPredicates.EXCEPT_CREATIVE_OR_SPECTATOR);
         }
-    }
+    } // keeping commented out.
     public static class ChocoboHurtByTargetGoal extends RevengeGoal {
         public ChocoboHurtByTargetGoal(PathAwareEntity pMob, Class<?>... pToIgnoreDamage) { super(pMob, pToIgnoreDamage); }
         public boolean canStart() {

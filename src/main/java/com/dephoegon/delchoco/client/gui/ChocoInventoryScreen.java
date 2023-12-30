@@ -4,11 +4,9 @@ import com.dephoegon.delchoco.DelChoco;
 import com.dephoegon.delchoco.common.entities.Chocobo;
 import com.dephoegon.delchoco.common.init.ModItems;
 import com.dephoegon.delchoco.common.inventory.SaddlebagContainer;
-import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.ingame.HandledScreen;
-import net.minecraft.client.render.GameRenderer;
-import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.item.Item;
@@ -36,29 +34,30 @@ public class ChocoInventoryScreen extends HandledScreen<SaddlebagContainer> {
         player.currentScreenHandler = saddleContainer;
         MinecraftClient.getInstance().setScreen(new ChocoInventoryScreen(saddleContainer, player.getInventory(), chocobo));
     }
-    protected void drawBackground(MatrixStack matrices, float delta, int mouseX, int mouseY) {
-        RenderSystem.setShader(GameRenderer::getPositionTexProgram);
-        RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
-
+    protected void drawBackground(DrawContext context, float delta, int mouseX, int mouseY) {
+        Identifier out;
         ItemStack saddleStack = chocobo.getSaddle();
         if(!saddleStack.isEmpty()){
             Item item = saddleStack.getItem();
-            if(item == ModItems.CHOCOBO_SADDLE) { RenderSystem.setShaderTexture(0, INV_TEXTURE_NULL); }
-            else if(item == ModItems.CHOCOBO_SADDLE_BAGS) { RenderSystem.setShaderTexture(0, INV_TEXTURE_SMALL); }
-            else if(item == ModItems.CHOCOBO_SADDLE_PACK) { RenderSystem.setShaderTexture(0, INV_TEXTURE_LARGE); }
-        } else { RenderSystem.setShaderTexture(0, INV_TEXTURE_NULL); }
+            out = getChocoboSaddleInv(item);
+        } else { out = INV_TEXTURE_NULL; }
         int i = (this.width - this.backgroundWidth) / 2;
         int j = (this.height - this.backgroundHeight) / 2;
-        this.drawTexture(matrices, i, j, 0, 0, this.backgroundWidth, this.backgroundHeight);
-        this.drawTexture(matrices, i - 24, j - 10, 0, 204, 27+xAdjust, 33);
+        context.drawTexture(out, i, j, 0, 0, this.backgroundWidth, this.backgroundHeight);
+        context.drawTexture(out, i - 24, j - 10, 0, 204, 27+xAdjust, 33);
     }
-    public void render(MatrixStack matrices, int mouseX, int mouseY, float delta) {
-        this.renderBackground(matrices);
-        super.render(matrices, mouseX, mouseY, delta);
-        this.drawMouseoverTooltip(matrices, mouseX, mouseY);
+    private Identifier getChocoboSaddleInv(Item saddleItem) {
+        if (saddleItem == ModItems.CHOCOBO_SADDLE_BAGS) { return INV_TEXTURE_SMALL; }
+        if (saddleItem == ModItems.CHOCOBO_SADDLE_PACK) { return INV_TEXTURE_LARGE; }
+        return INV_TEXTURE_NULL;
     }
-    protected void drawForeground(@NotNull MatrixStack matrixStack, int x, int y) {
-        this.textRenderer.draw(matrixStack, this.chocobo.getDisplayName().getString(), xAdjust-16, 6, 0x888888);
-        this.textRenderer.draw(matrixStack, this.playerInventoryTitle, 8, this.backgroundHeight - 96 + 2, 0x888888);
+    public void render(DrawContext context, int mouseX, int mouseY, float delta) {
+        this.renderBackground(context);
+        super.render(context, mouseX, mouseY, delta);
+        this.drawMouseoverTooltip(context, mouseX, mouseY);
+    }
+    protected void drawForeground(@NotNull DrawContext context, int x, int y) {
+        context.drawText(this.textRenderer, this.chocobo.getDisplayName().getString(), xAdjust-16, 6, 0x888888, false);
+        context.drawText(this.textRenderer, this.playerInventoryTitle, 8, this.backgroundHeight - 96 + 2, 0x888888, false);
     }
 }

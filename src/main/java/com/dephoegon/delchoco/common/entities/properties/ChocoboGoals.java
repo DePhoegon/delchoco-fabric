@@ -61,10 +61,10 @@ public class ChocoboGoals {
             this.mob = pathfinderChocobo;
         }
         private void TeleportTo(@NotNull BlockPos pPos) {
-            PathNodeType PathNodeType = LandPathNodeMaker.getLandNodeType(mob.world, pPos.mutableCopy());
+            PathNodeType PathNodeType = LandPathNodeMaker.getLandNodeType(mob.getWorld(), pPos.mutableCopy());
             if (PathNodeType == WALKABLE) {
                 BlockPos blockpos = pPos.subtract(this.mob.getBlockPos());
-                this.mob.world.isSpaceEmpty(this.mob, this.mob.getBoundingBox().offset(blockpos));
+                this.mob.getWorld().isSpaceEmpty(this.mob, this.mob.getBoundingBox().offset(blockpos));
             } else { mob.getMoveControl().moveTo(pPos.getX(), pPos.getY(), pPos.getZ(), this.chocobo.getFollowSpeedModifier()); }
         }
         private void canTeleport() {
@@ -75,9 +75,9 @@ public class ChocoboGoals {
             double mobZ = this.mob.getZ();
 
             for(BlockPos blockPos1 : BlockPos.iterate(MathHelper.floor(mobX - 10.0D), MathHelper.floor(mobY - 10.0D), MathHelper.floor(mobZ - 10.0D), MathHelper.floor(mobX + 10.0D), MathHelper.floor(mobY + 10D), MathHelper.floor(mobZ + 10.0D))) {
-                if (!this.mob.world.getFluidState(blockPos1).isIn(FluidTags.LAVA)) {
+                if (!this.mob.getWorld().getFluidState(blockPos1).isIn(FluidTags.LAVA)) {
                     block = blockPos1;
-                    newBlock = this.mob.world.getBlockState(blockPos1);
+                    newBlock = this.mob.getWorld().getBlockState(blockPos1);
                     break;
                 }
             }
@@ -180,7 +180,7 @@ public class ChocoboGoals {
 
             // Checks ArrayList for Classes of blocks for match, & moves on.
             for(BlockPos blockPos1 : BlockPos.iterate(MathHelper.floor(mobX - 2.0D), MathHelper.floor(mobY - 2.0D), MathHelper.floor(mobZ - 2.0D), MathHelper.floor(mobX + 2.0D), this.mob.getBlockY(), MathHelper.floor(mobZ + 2.0D))) {
-                Class<? extends Block> block1 = mob.world.getBlockState(blockPos1).getBlock().getClass();
+                Class<? extends Block> block1 = mob.getWorld().getBlockState(blockPos1).getBlock().getClass();
                 if (classes.contains(block1)) {
                     block = blockPos1;
                     break;
@@ -198,8 +198,8 @@ public class ChocoboGoals {
 
                 // Looks for Pathfindable ground within range of Chocobo to fence & Y+4 from chocobo, & blockposY-4,
                 for(BlockPos blockPos2 : BlockPos.iterate(MathHelper.floor(posX), MathHelper.floor(mobY+4), MathHelper.floor(posZ), MathHelper.floor(mobX), MathHelper.floor(blockY-4), MathHelper.floor(mobZ))) {
-                    BlockState blockState = mob.world.getBlockState(blockPos2);
-                    if (blockState.canPathfindThrough(mob.world, blockPos2, LAND)){
+                    BlockState blockState = mob.getWorld().getBlockState(blockPos2);
+                    if (blockState.canPathfindThrough(mob.getWorld(), blockPos2, LAND)){
                         newBlockPos = blockPos2;
                         break;
                     }

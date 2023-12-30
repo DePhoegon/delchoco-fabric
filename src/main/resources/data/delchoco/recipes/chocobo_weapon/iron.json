@@ -1,12 +1,15 @@
 {
-  "type": "minecraft:smithing",
+  "type": "minecraft:smithing_transform",
+  "addition": {
+    "item": "minecraft:iron_ingot"
+  },
   "base": {
     "item": "delchoco:chocobo_weapon_stone"
   },
-  "addition": {
-    "item": "minecraft:iron_axe"
-  },
   "result": {
     "item": "delchoco:chocobo_weapon_iron"
+  },
+  "template": {
+    "item": "minecraft:iron_axe"
   }
 }

@@ -46,6 +46,7 @@ run/options.txt
 run/*.json
 run/crash-reports
 run/servers.*
+run/GeoTexture Debug Printouts
 
 # java
 

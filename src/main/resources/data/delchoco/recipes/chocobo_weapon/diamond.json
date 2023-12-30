@@ -1,12 +1,15 @@
 {
-  "type": "minecraft:smithing",
+  "type": "minecraft:smithing_transform",
+  "addition": {
+    "item": "minecraft:diamond"
+  },
   "base": {
     "item": "delchoco:chocobo_weapon_iron"
   },
-  "addition": {
-    "item": "minecraft:diamond_axe"
-  },
   "result": {
     "item": "delchoco:chocobo_weapon_diamond"
+  },
+  "template": {
+    "item": "minecraft:diamond_axe"
   }
 }

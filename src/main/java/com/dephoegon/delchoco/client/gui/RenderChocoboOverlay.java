@@ -5,7 +5,6 @@ import com.dephoegon.delchoco.common.entities.Chocobo;
 import com.mojang.blaze3d.systems.RenderSystem;
 import net.fabricmc.fabric.api.client.rendering.v1.HudRenderCallback;
 import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.DrawableHelper;
 import net.minecraft.client.render.GameRenderer;
 import net.minecraft.entity.Entity;
 import net.minecraft.util.Identifier;
@@ -35,16 +34,16 @@ public class RenderChocoboOverlay {
                 int x = left_align - i * 8 - 9;
                 if (i >= staminaPercentage) {
                     // render empty
-                    DrawableHelper.drawTexture(matrixStack, x, top, 0, 0, 9, 9, 32, 32);
+                    matrixStack.drawTexture(ICONS, x, top, 0, 0, 9, 9, 32, 32);
                 } else {
                     if (i == ((int) staminaPercentage)) {
                         // draw partial
-                        DrawableHelper.drawTexture(matrixStack, x, top, 0, 0, 9, 9, 32, 32);
+                        matrixStack.drawTexture(ICONS, x, top, 0, 0, 9, 9, 32, 32);
                         int iconHeight = (int) (9 * (staminaPercentage - ((int) staminaPercentage)));
-                        DrawableHelper.drawTexture(matrixStack, x, top + (9 - iconHeight), 0, 18 + (9 - iconHeight), 9, iconHeight, 32, 32);
+                        matrixStack.drawTexture(ICONS, x, top + (9 - iconHeight), 0, 18 + (9 - iconHeight), 9, iconHeight, 32, 32);
                     } else {
                         // draw full
-                        DrawableHelper.drawTexture(matrixStack, x, top, 0, 18, 9, 9, 32, 32);
+                        matrixStack.drawTexture(ICONS, x, top, 0, 18, 9, 9, 32, 32);
                     }
                 }
             }

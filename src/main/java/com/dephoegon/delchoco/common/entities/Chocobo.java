@@ -385,7 +385,6 @@ public class Chocobo extends TameableEntity implements Angerable {
     }
     private void setLeashedDistance(double distance) { this.dataTracker.set(PARAM_LEASH_LENGTH, (int) distance); }
     private double getLeashDistance() { return (double) this.dataTracker.get(PARAM_LEASH_LENGTH); }
-
     public int ChocoboShaker(@NotNull String stat) {
         return switch (stat) {
             case "health" -> boundedRangeModifier(5, 10);
@@ -547,7 +546,7 @@ public class Chocobo extends TameableEntity implements Angerable {
     public void setMale(boolean isMale) { this.dataTracker.set(PARAM_IS_MALE, isMale); }
     public void setFromEgg(boolean fromEgg) { this.dataTracker.set(PARAM_FROM_EGG, fromEgg); }
     public MovementType getMovementType() { return MovementType.values()[this.dataTracker.get(PARAM_MOVEMENT_TYPE)]; }
-    public void setMovementType(MovementType type) { this.dataTracker.set(PARAM_MOVEMENT_TYPE, type.ordinal()); setMovementAiByType(type); }
+    public void setMovementType(@NotNull MovementType type) { this.dataTracker.set(PARAM_MOVEMENT_TYPE, type.ordinal()); setMovementAiByType(type); }
     private void setMovementAiByType(@NotNull MovementType type) {
         BlockPos leashPoint = this.getLeashSpot();
         double length = this.getLeashDistance();
@@ -645,6 +644,14 @@ public class Chocobo extends TameableEntity implements Angerable {
         super.dismountVehicle();
     }
     public Entity getPrimaryPassenger() { return this.getPassengerList().isEmpty() ? null : this.getPassengerList().get(0); }
+    @Override
+    @Nullable
+    public LivingEntity getControllingPassenger() {
+        Entity entity = this.getPrimaryPassenger();
+        if (entity instanceof MobEntity mobEntity) { return mobEntity; }
+        if (this.isSaddled() && entity instanceof PlayerEntity playerEntity) { return playerEntity; }
+        return null;
+    }
     protected boolean updateWaterState() {
         this.fluidHeight.clear();
         this.updateInWaterStateAndDoWaterCurrentPushing();
@@ -1207,11 +1214,11 @@ public class Chocobo extends TameableEntity implements Angerable {
         }
         if (loop.matches("xDefence")) { loop = .50f > (float) random() ? "arm" : "arm_tough"; }
         switch (loop) {
-            case "arm" -> this.statPlus(EntityAttributes.GENERIC_ARMOR, ChocoboConfig.MAX_ARMOR.get(), key, player);
-            case "arm_tough" -> this.statPlus(EntityAttributes.GENERIC_ARMOR_TOUGHNESS, ChocoboConfig.MAX_ARMOR_TOUGHNESS.get(), key, player);
-            case "str" -> this.statPlus(EntityAttributes.GENERIC_ATTACK_DAMAGE, ChocoboConfig.MAX_ATTACK.get(), key, player);
-            case "sta" -> this.statPlus(ModAttributes.CHOCOBO_STAMINA, ChocoboConfig.MAX_STAMINA.get(), key, player);
-            case "hp" -> this.statPlus(EntityAttributes.GENERIC_MAX_HEALTH, ChocoboConfig.MAX_HEALTH.get(), key, player);
+            case "arm" -> this.statPlus(EntityAttributes.GENERIC_ARMOR, ChocoboConfig.MAX_ARMOR.get(), loop, player);
+            case "arm_tough" -> this.statPlus(EntityAttributes.GENERIC_ARMOR_TOUGHNESS, ChocoboConfig.MAX_ARMOR_TOUGHNESS.get(), loop, player);
+            case "str" -> this.statPlus(EntityAttributes.GENERIC_ATTACK_DAMAGE, ChocoboConfig.MAX_ATTACK.get(), loop, player);
+            case "sta" -> this.statPlus(ModAttributes.CHOCOBO_STAMINA, ChocoboConfig.MAX_STAMINA.get(), loop, player);
+            case "hp" -> this.statPlus(EntityAttributes.GENERIC_MAX_HEALTH, ChocoboConfig.MAX_HEALTH.get(), loop, player);
         }
     }
     private void statPlus(EntityAttribute stat, double max, String key, @NotNull PlayerEntity player) {

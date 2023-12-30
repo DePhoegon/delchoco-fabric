@@ -20,8 +20,6 @@ import software.bernie.geckolib.GeckoLib;
 public class DelChoco implements ModInitializer, ClientModInitializer {
 	public static final String DELCHOCO_ID = "delchoco";
     public static final Logger LOGGER = LoggerFactory.getLogger(DELCHOCO_ID);
-	public static ChocoboConfig chocoConfigHolder;
-	public static WorldConfig worldConfigHolder;
 
 	public void onInitialize() {
 		ForgeConfigRegistry.INSTANCE.register(DELCHOCO_ID, ModConfig.Type.COMMON, ChocoboConfig.SPEC, DelChoco.DELCHOCO_ID+"-chocobo_config.toml");

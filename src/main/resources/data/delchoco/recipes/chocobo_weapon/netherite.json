@@ -1,12 +1,15 @@
 {
-  "type": "minecraft:smithing",
+  "type": "minecraft:smithing_transform",
+  "addition": {
+    "item": "minecraft:netherite_ingot"
+  },
   "base": {
     "item": "delchoco:chocobo_weapon_diamond"
   },
-  "addition": {
-    "item": "minecraft:netherite_axe"
-  },
   "result": {
     "item": "delchoco:chocobo_weapon_netherite"
+  },
+  "template": {
+    "item": "minecraft:netherite_upgrade_smithing_template"
   }
 }

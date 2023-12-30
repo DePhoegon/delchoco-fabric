@@ -1,12 +1,15 @@
 {
-  "type": "minecraft:smithing",
+  "type": "minecraft:smithing_transform",
+  "addition": {
+    "item": "minecraft:netherite_ingot"
+  },
   "base": {
     "item": "delchoco:chocobo_armor_diamond"
   },
-  "addition": {
-    "item": "minecraft:netherite_chestplate"
-  },
   "result": {
     "item": "delchoco:chocobo_armor_netherite"
+  },
+  "template": {
+    "item": "minecraft:netherite_upgrade_smithing_template"
   }
 }

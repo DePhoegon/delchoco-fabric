@@ -1,7 +1,7 @@
 package com.dephoegon.delchoco.common.init;
 
 import com.google.common.collect.Maps;
-import net.minecraft.entity.EquipmentSlot;
+import net.minecraft.item.ArmorItem;
 import net.minecraft.item.ArmorMaterial;
 import net.minecraft.item.Items;
 import net.minecraft.recipe.Ingredient;
@@ -27,6 +27,12 @@ public enum ModArmorMaterial implements ArmorMaterial {
         map.put(4, NETHERITE_CHOCO_DISGUISE);
     });
     private static final int[] HEALTH_PER_SLOT = new int[]{13, 15, 16, 11};
+    private static final Map<ArmorItem.Type, Integer> SLOT_ID_PER_TYPE = Util.make(Maps.newHashMap(), (map) -> {
+        map.put(ArmorItem.Type.HELMET, 0);
+        map.put(ArmorItem.Type.CHESTPLATE, 1);
+        map.put(ArmorItem.Type.LEGGINGS, 2);
+        map.put(ArmorItem.Type.BOOTS, 3);
+    });
     private final String name;
     private final int durabilityMultiplier;
     private final int[] slotProtections;
@@ -48,8 +54,8 @@ public enum ModArmorMaterial implements ArmorMaterial {
         this.repairIngredient = new Lazy<>(pRepairIngredient);
     }
     @Contract(pure = true)
-    public int getDurability(@NotNull EquipmentSlot var1) { return HEALTH_PER_SLOT[var1.getEntitySlotId()] * this.durabilityMultiplier; }
-    public int getProtectionAmount(@NotNull EquipmentSlot p_40487_) { return this.slotProtections[p_40487_.getEntitySlotId()]; }
+    public int getDurability(@NotNull ArmorItem.Type type) { return HEALTH_PER_SLOT[SLOT_ID_PER_TYPE.get(type)] * this.durabilityMultiplier; }
+    public int getProtection(@NotNull ArmorItem.Type type) { return this.slotProtections[SLOT_ID_PER_TYPE.get(type)]; }
     public int getEnchantability() { return this.enchantmentValue; }
     public @NotNull SoundEvent getEquipSound() { return this.sound; }
     public @NotNull Ingredient getRepairIngredient() { return this.repairIngredient.get(); }

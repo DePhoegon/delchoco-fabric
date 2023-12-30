@@ -3,7 +3,6 @@ package com.dephoegon.delchoco.common.items;
 import com.dephoegon.delchoco.DelChoco;
 import com.dephoegon.delchoco.client.models.armor.ChocoDisguiseFeatureRenderer;
 import com.dephoegon.delchoco.common.entities.properties.ChocoboColor;
-import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet;
 import net.minecraft.client.item.TooltipContext;
 import net.minecraft.client.render.entity.model.BipedEntityModel;
 import net.minecraft.enchantment.Enchantment;
@@ -17,7 +16,6 @@ import net.minecraft.entity.effect.StatusEffects;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ArmorItem;
 import net.minecraft.item.ArmorMaterial;
-import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.text.Text;
@@ -28,22 +26,21 @@ import net.minecraft.world.World;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import software.bernie.example.client.renderer.armor.GeckoArmorRenderer;
 import software.bernie.geckolib.animatable.GeoItem;
 import software.bernie.geckolib.animatable.client.RenderProvider;
 import software.bernie.geckolib.constant.DataTickets;
-import software.bernie.geckolib.constant.DefaultAnimations;
 import software.bernie.geckolib.core.animatable.instance.AnimatableInstanceCache;
 import software.bernie.geckolib.core.animatable.instance.SingletonAnimatableInstanceCache;
 import software.bernie.geckolib.core.animation.AnimatableManager;
+import software.bernie.geckolib.core.animation.Animation;
 import software.bernie.geckolib.core.animation.AnimationController;
+import software.bernie.geckolib.core.animation.RawAnimation;
 import software.bernie.geckolib.core.object.PlayState;
 import software.bernie.geckolib.renderer.GeoArmorRenderer;
 
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Set;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
@@ -69,7 +66,7 @@ public class ChocoDisguiseItem extends ArmorItem implements GeoItem {
     public final static String flame = FLAME.getColorName();
     public final static String white = WHITE.getColorName();
     public final static String purple = PURPLE.getColorName();
-    public ChocoDisguiseItem(ArmorMaterial material, EquipmentSlot slot, Settings settings) {
+    public ChocoDisguiseItem(ArmorMaterial material, ArmorItem.Type slot, Settings settings) {
         super(material, slot, settings);
         ItemStack stack = new ItemStack(this);
         stack.setNbt(serialize(NBTKEY_COLOR, yellow));
@@ -219,7 +216,7 @@ public class ChocoDisguiseItem extends ArmorItem implements GeoItem {
     @Override
     public void registerControllers(AnimatableManager.@NotNull ControllerRegistrar controllerRegistrar) {
         controllerRegistrar.add(new AnimationController<>(this, 20, animationState -> {
-            animationState.getController().setAnimation(DefaultAnimations.IDLE);
+            animationState.getController().setAnimation(RawAnimation.begin().then("idle", Animation.LoopType.LOOP));
             Entity entity = animationState.getData(DataTickets.ENTITY);
 
             if (entity instanceof ArmorStandEntity) { return PlayState.CONTINUE; }

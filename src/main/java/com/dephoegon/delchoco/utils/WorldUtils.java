@@ -11,7 +11,7 @@ public class WorldUtils {
 
         for (BlockPos pos = startPos; pos.getY() < world.getTopY(); pos = pos.up()) {
             BlockState state = world.getBlockState(pos);
-            if (!state.getMaterial().isLiquid()) { break; }
+            if (state.getFluidState().isEmpty()) { break; }
             lastLiquidPos = pos;
         }
         return lastLiquidPos == null ? -1 : lastLiquidPos.getY() - startPos.getY();

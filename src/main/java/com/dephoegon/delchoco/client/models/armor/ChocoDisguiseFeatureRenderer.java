@@ -15,17 +15,17 @@ public class ChocoDisguiseFeatureRenderer extends GeoArmorRenderer<ChocoDisguise
 
         this.head = getHeadBone();
         this.body = getBodyBone();
-        this.leftArm = getRightArmBone();
-        this.rightArm = getLeftArmBone();
-        this.rightLeg = getLeftLegBone();
-        this.leftLeg = getRightLegBone();
-        this.rightBoot = getLeftBootBone();
-        this.leftBoot = getRightBootBone();
+        this.leftArm = getLeftArmBone();
+        this.rightArm = getRightArmBone();
+        this.leftLeg = getLeftLegBone();
+        this.rightLeg = getRightLegBone();
+        this.leftBoot = getLeftBootBone();
+        this.rightBoot = getRightBootBone();
     }
 
     public Identifier getTextureLocation(ChocoDisguiseItem instance) {
         String customModelData = ChocoDisguiseItem.getNBTKEY_COLOR(this.currentStack);
-        ArmorMaterial armor = ((ChocoDisguiseItem) instance).getMaterial();
+        ArmorMaterial armor = instance.getMaterial();
         String folder = "textures/models/armor/leather/";
         if (armor == IRON_CHOCO_DISGUISE) { folder = "textures/models/armor/iron/"; }
         if (armor == DIAMOND_CHOCO_DISGUISE) { folder = "textures/models/armor/diamond/"; }

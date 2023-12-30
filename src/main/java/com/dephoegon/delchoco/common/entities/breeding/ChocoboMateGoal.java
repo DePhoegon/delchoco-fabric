@@ -20,7 +20,7 @@ public class ChocoboMateGoal extends Goal {
 
     public ChocoboMateGoal(@NotNull Chocobo chocobo, double moveSpeed) {
         this.chocobo = chocobo;
-        this.world = chocobo.world;
+        this.world = chocobo.getWorld();
         this.moveSpeed = moveSpeed;
         this.setControls(EnumSet.of(Goal.Control.MOVE, Goal.Control.LOOK));
     }

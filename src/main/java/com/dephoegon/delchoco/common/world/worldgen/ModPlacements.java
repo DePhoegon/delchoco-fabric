@@ -1,6 +1,7 @@
 package com.dephoegon.delchoco.common.world.worldgen;
 
 import com.dephoegon.delchoco.DelChoco;
+import com.dephoegon.delchoco.aid.world.WorldConfig;
 import net.minecraft.registry.Registerable;
 import net.minecraft.registry.RegistryKey;
 import net.minecraft.registry.RegistryKeys;
@@ -16,15 +17,13 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 
-import static com.dephoegon.delchoco.DelChoco.worldConfigHolder;
-
 public class ModPlacements {
     public static final RegistryKey<PlacedFeature> PATCH_GYSAHL_ALL_BIOMES = registerKey("patch_gysahl_all_biomes");
     public static final RegistryKey<PlacedFeature> PATCH_GYSAHL_UNDERGROUND = registerKey("patch_gysahl_underground");
     static final RarityFilterPlacementModifier normRarity = RarityFilterPlacementModifier.of(getSpawnChance(10));
     static final RarityFilterPlacementModifier underGroundRarity = RarityFilterPlacementModifier.of(getSpawnChance(30));
 
-    private static int getSpawnChance(int MultipleFactor) { return (int) (worldConfigHolder.gysahlGreenSpawnChance * MultipleFactor); }
+    private static int getSpawnChance(int MultipleFactor) { return (int) (WorldConfig.GYSAHL_GREEN_SPAWN_WEIGHT.get() * MultipleFactor); }
 
     public static void bootstrap(@NotNull Registerable<PlacedFeature> context) {
         var configuredFeatureRegistryEntryLookup = context.getRegistryLookup(RegistryKeys.CONFIGURED_FEATURE);

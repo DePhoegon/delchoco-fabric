@@ -1,6 +1,5 @@
 package com.dephoegon.delchoco.common.commands;
 
-import com.dephoegon.delchoco.DelChoco;
 import com.dephoegon.delchoco.common.entities.Chocobo;
 import com.dephoegon.delchoco.common.init.ModAttributes;
 import com.dephoegon.delchoco.common.teamColors;
@@ -45,13 +44,13 @@ public class chocoboTeams {
     }
 
     private static int setFriendlyFire(@NotNull CommandContext<ServerCommandSource> commandSourceStack, boolean fire) throws CommandSyntaxException {
-        DelChoco.LOGGER.info("set teams Friendly fire");
         ServerPlayerEntity player = commandSourceStack.getSource().getPlayer();
-        Team playerTeam = player.getScoreboard().getPlayerTeam(player.getName().getString());
+        Team playerTeam = player != null ? player.getScoreboard().getPlayerTeam(player.getName().getString()): null;
+        String pName = player != null ? player.getName().getString() : "Null_Player";
         if (playerTeam != null) {
             playerTeam.setFriendlyFireAllowed(fire);
-            commandSourceStack.getSource().sendFeedback(Text.literal("Player "+ player.getName().getString()+ " set friendly fire to " + fire + " for " + playerTeam.getName()), true);
-        } else { commandSourceStack.getSource().sendFeedback(Text.literal("Player "+ player.getName().getString()+ " Must be on a team to set Friendly fire for their team"), true); }
+            commandSourceStack.getSource().sendFeedback(() -> Text.literal("Player "+ pName + " set friendly fire to " + fire + " for " + playerTeam.getName()), true);
+        } else { commandSourceStack.getSource().sendFeedback(() -> Text.literal("Player "+ pName + " Must be on a team to set Friendly fire for their team"), true); }
         return 1;
     }
     private static int join(@NotNull CommandContext<ServerCommandSource> commandSourceStack, String teamName) throws CommandSyntaxException {
@@ -59,16 +58,19 @@ public class chocoboTeams {
         addTeams(scoreboard, teamName, commandSourceStack);
         ServerPlayerEntity player = commandSourceStack.getSource().getPlayer();
         Team playerTeam = scoreboard.getTeam(teamName);
+        String pName = player != null ? player.getName().getString() : "Null_Player";
         assert playerTeam != null;
-        scoreboard.addPlayerToTeam(player.getName().getString(), playerTeam);
-        commandSourceStack.getSource().sendFeedback(Text.literal("Player " + player.getName().getString() + " added to " + teamName + " team."), true);
+        scoreboard.addPlayerToTeam(pName, playerTeam);
+        commandSourceStack.getSource().sendFeedback(() -> Text.literal("Player " + pName + " added to " + teamName + " team."), true);
         return 1;
     }
     private static int leave(@NotNull CommandContext<ServerCommandSource> commandSourceStack) throws CommandSyntaxException {
         Scoreboard scoreboard = commandSourceStack.getSource().getServer().getScoreboard();
         ServerPlayerEntity player = commandSourceStack.getSource().getPlayer();
-        scoreboard.removePlayerFromTeam(player.getName().getString(), player.getScoreboard().getPlayerTeam(player.getName().getString()));
-        commandSourceStack.getSource().sendFeedback(Text.literal("Player " + player.getName().getString() + " left their team."), true);
+        if (player != null){
+            scoreboard.removePlayerFromTeam(player.getName().getString(), player.getScoreboard().getPlayerTeam(player.getName().getString()));
+            commandSourceStack.getSource().sendFeedback(() -> Text.literal("Player " + player.getName().getString() + " left their team."), true);
+        }
         return 1;
     }
     private static int refreshTeams(@NotNull CommandContext<ServerCommandSource> commandSourceStack) {
@@ -83,14 +85,14 @@ public class chocoboTeams {
         Team chocoboTeam = scoreboard.getTeam(tName);
         if (chocoboTeam != null) {
             scoreboard.removeTeam(chocoboTeam);
-            commandSourceStack.getSource().sendFeedback(Text.literal("Removed " + tName + "team"), true);
+            commandSourceStack.getSource().sendFeedback(() -> Text.literal("Removed " + tName + "team"), true);
         }
     }
     private static void addTeams(@NotNull Scoreboard scoreboard, String tName, CommandContext<ServerCommandSource> commandSourceStack) {
         Team chocoboTeam = scoreboard.getPlayerTeam(tName);
         if (chocoboTeam == null) {
             scoreboard.addTeam(tName);
-            commandSourceStack.getSource().sendFeedback(Text.literal("Added " + tName + "team"), true);
+            commandSourceStack.getSource().sendFeedback(() -> Text.literal("Added " + tName + "team"), true);
         }
     }
     private static int createTeams(@NotNull CommandContext<ServerCommandSource> commandSourceStack) {
@@ -105,15 +107,15 @@ public class chocoboTeams {
         if(commandEntity instanceof PlayerEntity player) {
             Entity mount = player.getVehicle();
             if (!(mount instanceof Chocobo chocobo)) {
-                source.sendFeedback(Text.translatable("command." + DELCHOCO_ID + ".chocobo.not_riding_chocobo"), false);
+                source.sendFeedback(() -> Text.translatable("command." + DELCHOCO_ID + ".chocobo.not_riding_chocobo"), false);
                 return 0;
             } else {
-                source.sendFeedback(getText("get_health", chocobo, EntityAttributes.GENERIC_MAX_HEALTH), false);
-                source.sendFeedback(getText("get_resistance", chocobo, EntityAttributes.GENERIC_ARMOR), false);
-                source.sendFeedback(getText("get_speed", chocobo, EntityAttributes.GENERIC_MOVEMENT_SPEED), false);
-                source.sendFeedback(getText("get_stamina", chocobo, ModAttributes.CHOCOBO_STAMINA), false);
-                source.sendFeedback(getText("get_attack", chocobo, EntityAttributes.GENERIC_ATTACK_DAMAGE), false);
-                source.sendFeedback(getText(chocobo.getGenerationString()), false);
+                source.sendFeedback(() -> getText("get_health", chocobo, EntityAttributes.GENERIC_MAX_HEALTH), false);
+                source.sendFeedback(() -> getText("get_resistance", chocobo, EntityAttributes.GENERIC_ARMOR), false);
+                source.sendFeedback(() -> getText("get_speed", chocobo, EntityAttributes.GENERIC_MOVEMENT_SPEED), false);
+                source.sendFeedback(() -> getText("get_stamina", chocobo, ModAttributes.CHOCOBO_STAMINA), false);
+                source.sendFeedback(() -> getText("get_attack", chocobo, EntityAttributes.GENERIC_ATTACK_DAMAGE), false);
+                source.sendFeedback(() -> getText(chocobo.getGenerationString()), false);
             }
         }
         return 0;

@@ -18,5 +18,8 @@ public class chocoKB {
     private static boolean ChocoRShift() { return keyCheck(InputUtil.Type.KEYSYM, GLFW.GLFW_KEY_RIGHT_SHIFT); }
     public static boolean isChocoboWaterGlide() { if (isKB_KeyBindDown(L_ALT)) { return (RAlt() || LAlt()); } else { return LAlt(); } }
     public static boolean isChocoShiftDown() { if (isKB_KeyBindDown(L_SHIFT)) { return (ChocoLShift() || ChocoRShift()); } else  { return ChocoLShift(); } }
-    public static boolean hideChocoboMountInFirstPerson(@NotNull Chocobo chocobo) { return chocobo.isLogicalSideForUpdatingMovement() && !MinecraftClient.getInstance().gameRenderer.getCamera().isThirdPerson(); }
+    // Shows Chocobo if Has no riders
+    // if the rider isn't the controlling side for movement of the chocobo,
+    // & if the game camera is in third person (any camera that is not first person)
+    public static boolean showChocobo(@NotNull Chocobo chocobo) { return !chocobo.isLogicalSideForUpdatingMovement() || MinecraftClient.getInstance().gameRenderer.getCamera().isThirdPerson(); }
 }

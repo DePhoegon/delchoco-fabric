@@ -1,12 +1,15 @@
 {
-  "type": "minecraft:smithing",
+  "type": "minecraft:smithing_transform",
+  "addition": {
+    "item": "minecraft:iron_ingot"
+  },
   "base": {
     "item": "delchoco:choco_disguise_leather_leggings"
   },
-  "addition": {
-    "item": "minecraft:iron_leggings"
-  },
   "result": {
     "item": "delchoco:choco_disguise_iron_leggings"
+  },
+  "template": {
+    "item": "minecraft:iron_leggings"
   }
 }

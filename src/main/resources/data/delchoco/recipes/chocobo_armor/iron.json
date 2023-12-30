@@ -1,12 +1,15 @@
 {
-  "type": "minecraft:smithing",
+  "type": "minecraft:smithing_transform",
+  "addition": {
+    "item": "minecraft:iron_ingot"
+  },
   "base": {
     "item": "delchoco:chocobo_armor_chain"
   },
-  "addition": {
-    "item": "minecraft:iron_chestplate"
-  },
   "result": {
     "item": "delchoco:chocobo_armor_iron"
+  },
+  "template": {
+    "item": "minecraft:iron_chestplate"
   }
 }

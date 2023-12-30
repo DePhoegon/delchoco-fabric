@@ -20,7 +20,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.Map;
 
-import static com.dephoegon.delchoco.aid.chocoKB.hideChocoboMountInFirstPerson;
+import static com.dephoegon.delchoco.aid.chocoKB.showChocobo;
 
 public class ChocoboRenderer extends MobEntityRenderer<Chocobo, EntityModel<Chocobo>> {
     private static final Map<ChocoboColor, Identifier> CHOCOBO_PER_COLOR = Util.make(Maps.newHashMap(), (map) -> {
@@ -54,7 +54,6 @@ public class ChocoboRenderer extends MobEntityRenderer<Chocobo, EntityModel<Choc
     public static final float collarAlpha = 1;
     public static final float collarTellAlpha = .45F;
     public static final float saddleAlpha = 1;
-    private boolean isMale;
 
     public ChocoboRenderer(Context context) {
         super(context, new AdultChocoboModel<>(context.getPart(clientHandler.CHOCOBO_LAYER)), 0.75f);
@@ -70,11 +69,14 @@ public class ChocoboRenderer extends MobEntityRenderer<Chocobo, EntityModel<Choc
     }
     public void render(@NotNull Chocobo chocobo, float entityYaw, float partialTicks, MatrixStack matrixStack, VertexConsumerProvider bufferSource, int packedLight) {
         this.model = chocobo.isBaby() ? chicoboModel : chocoboModel;
-        if (hideChocoboMountInFirstPerson(chocobo)) { return; }
-        float factor = chocobo.getChocoboScale() == 0 ? 1 : Math.max(chocobo.getChocoboScaleMod(), .85F);
-        if (factor < .86F) { chocobo.setChocoboScale(true, -15, true); }
-        matrixStack.scale(factor, factor, factor);
-        super.render(chocobo, entityYaw, partialTicks, matrixStack, bufferSource, packedLight);
+        if (showChocobo(chocobo)) {
+            float factor = chocobo.getChocoboScale() == 0 ? 1 : Math.max(chocobo.getChocoboScaleMod(), .85F);
+            if (factor < .86F) {
+                chocobo.setChocoboScale(true, -15, true);
+            }
+            matrixStack.scale(factor, factor, factor);
+            super.render(chocobo, entityYaw, partialTicks, matrixStack, bufferSource, packedLight);
+        }
     }
     public Identifier getTexture(@NotNull Chocobo chocobo) {
         ChocoboColor color = chocobo.getChocoboColor();

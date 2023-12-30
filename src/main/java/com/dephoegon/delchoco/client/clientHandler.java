@@ -16,7 +16,7 @@ public class clientHandler {
     public static final EntityModelLayer CHOCO_DISGUISE_LAYER = new EntityModelLayer(new Identifier(DelChoco.DELCHOCO_ID, "main"), "choco_disguise");
 
     public static void ChocoboRendering() {
-        BlockRenderLayerMap.INSTANCE.putBlock(ModItems.GYSAHL_GREEN, RenderLayer.getCutout());
+        BlockRenderLayerMap.INSTANCE.putBlock(ModItems.GYSAHL_GREEN, RenderLayer.getCutoutMipped());
         registerLayerDefinitions();
     }
     public static void registerLayerDefinitions() {

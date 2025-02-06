@@ -47,6 +47,131 @@
       "entries": [
         {
           "type": "minecraft:item",
+          "name": "delchoco:lovely_gysahl_green"
+        }
+      ],
+      "conditions": [
+        {
+          "condition": "minecraft:block_state_property",
+          "block": "delchoco:gysahl_green",
+          "properties": {
+            "age": "4",
+            "biome": "1"
+          }
+        }
+      ]
+    },
+    {
+      "rolls": 1.0,
+      "bonus_rolls": 0.0,
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "conditions": [
+            {
+              "condition": "minecraft:random_chance",
+              "chance": 0.45
+            }
+          ],
+          "name": "delchoco:golden_gysahl_green"
+        }
+      ],
+      "conditions": [
+        {
+          "condition": "minecraft:block_state_property",
+          "block": "delchoco:gysahl_green",
+          "properties": {
+            "age": "4",
+            "biome": "2"
+          }
+        }
+      ]
+    },
+    {
+      "rolls": 1.0,
+      "bonus_rolls": 0.0,
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "conditions": [
+            {
+              "condition": "minecraft:random_chance",
+              "chance": 0.45
+            }
+          ],
+          "name": "delchoco:pink_gysahl_green"
+        }
+      ],
+      "conditions": [
+        {
+          "condition": "minecraft:block_state_property",
+          "block": "delchoco:gysahl_green",
+          "properties": {
+            "age": "4",
+            "biome": "3"
+          }
+        }
+      ]
+    },
+    {
+      "rolls": 1.0,
+      "bonus_rolls": 0.0,
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "conditions": [
+            {
+              "condition": "minecraft:random_chance",
+              "chance": 0.45
+            }
+          ],
+          "name": "delchoco:dead_pepper"
+        }
+      ],
+      "conditions": [
+        {
+          "condition": "minecraft:block_state_property",
+          "block": "delchoco:gysahl_green",
+          "properties": {
+            "age": "4",
+            "biome": "4"
+          }
+        }
+      ]
+    },
+    {
+      "rolls": 1.0,
+      "bonus_rolls": 0.0,
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "conditions": [
+            {
+              "condition": "minecraft:random_chance",
+              "chance": 0.45
+            }
+          ],
+          "name": "delchoco:spike_fruit"
+        }
+      ],
+      "conditions": [
+        {
+          "condition": "minecraft:block_state_property",
+          "block": "delchoco:gysahl_green",
+          "properties": {
+            "age": "4",
+            "biome": "5"
+          }
+        }
+      ]
+    },
+
+    {
+      "rolls": 1.0,
+      "bonus_rolls": 0.0,
+      "entries": [
+        {
+          "type": "minecraft:item",
           "conditions": [
             {
               "condition": "minecraft:random_chance",

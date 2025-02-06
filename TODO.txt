@@ -1,0 +1,2 @@
+TODO Tasks.txt
+Verify Tasks.txt & clear finished ones and finished tasks and clear them as finishing.

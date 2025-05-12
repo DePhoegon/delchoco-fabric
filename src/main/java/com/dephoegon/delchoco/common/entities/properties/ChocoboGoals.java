@@ -85,7 +85,10 @@ public class ChocoboGoals {
         }
 
         @Override
-        public boolean canStart() { return this.mob.isInLava() && this.chocobo.getRideTickDelay() >= 15; }
+        public boolean canStart() {
+            if (this.chocobo.isFireImmune()) { return false; }
+            return this.mob.isInLava() && this.chocobo.getRideTickDelay() >= 15;
+        }
 
         public void start() { canTeleport(); }
     }

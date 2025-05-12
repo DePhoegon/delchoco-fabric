@@ -45,6 +45,7 @@ import net.minecraft.entity.passive.LlamaEntity;
 import net.minecraft.entity.passive.PassiveEntity;
 import net.minecraft.entity.passive.TameableEntity;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.fluid.FluidState;
 import net.minecraft.inventory.Inventory;
 import net.minecraft.item.*;
 import net.minecraft.nbt.NbtCompound;
@@ -97,13 +98,11 @@ public class Chocobo extends TameableEntity implements Angerable {
     private int ticksUntilNextAlert;
     private int timeToRecalculatePath;
     @SuppressWarnings("rawtypes")
-    private FleeEntityGoal chocoboAvoidPlayerGoal;
     private WanderAroundFarGoal roamAround;
     private WanderAroundGoal roamAroundWB;
     private ChocoboLocalizedWonder localWonder;
     private ChocoboRandomStrollGoal localWonderWB;
     private FollowOwnerGoal follow;
-    private Goal avoidBlocks;
     private float wingRotation;
     private float destPos;
     private boolean isChocoboJumping;
@@ -246,17 +245,15 @@ public class Chocobo extends TameableEntity implements Angerable {
         super(entityType, world);
     }
     protected void initGoals() {
-        this.goalSelector.add(0, new SwimGoal(this));
+        //if (!this.canBreatheInWater()) { this.goalSelector.add(0, new SwimGoal(this)); }
         this.goalSelector.add(1, new ChocoboGoals.ChocoPanicGoal(this,1.5D));
         this.goalSelector.add(2, new MeleeAttackGoal(this,2F, true));
         this.goalSelector.add(3, new ChocoboMateGoal(this, 1.0D));
         // toggleable Goal 4, - Follow an owner (whistle [tamed])
         this.goalSelector.add(5, new ChocoboGoals.ChocoboLavaEscape(this));
         this.goalSelector.add(6, new TemptGoal(this, 1.2D, temptItems(), false));
-        // toggleable Goal 6, - Avoid Player Goal (non-tamed goal)
         // toggleable Goal 7, - Roam Around Goal (whistle toggle [tamed/non-tamed])
-        this.goalSelector.add(9, new FleeEntityGoal<>(this, LlamaEntity.class, 15F, 1.3F, 1.5F));
-        // toggleable Goal 10, - Avoid Blocks by Class<? extends Block>
+        // this.goalSelector.add(9, new FleeEntityGoal<>(this, LlamaEntity.class, 15F, 1.3F, 1.5F));
         this.goalSelector.add(11, new LookAroundGoal(this)); // moved after Roam, a little too stationary
         this.goalSelector.add(12, new LookAtEntityGoal(this, PlayerEntity.class, 6.0F));
         this.targetSelector.add(1, new ChocoboGoals.ChocoboOwnerHurtByGoal(this));
@@ -411,7 +408,7 @@ public class Chocobo extends TameableEntity implements Angerable {
         return stack.isOf(LOVELY_GYSAHL_GREEN);
     }
     private Ingredient temptItems() {
-        return Ingredient.ofItems(new ItemConvertible[]{GYSAHL_GREEN_ITEM, LOVELY_GYSAHL_GREEN, GOLDEN_GYSAHL_GREEN, PINK_GYSAHL_GREEN, DEAD_PEPPER, SPIKE_FRUIT, PICKLED_GYSAHL_RAW, PICKLED_GYSAHL_COOKED});
+        return Ingredient.ofItems(new ItemConvertible[]{GYSAHL_GREEN_ITEM, LOVELY_GYSAHL_GREEN, GOLDEN_GYSAHL_GREEN, PINK_GYSAHL_GREEN});
     }
     @Nullable
     public PassiveEntity createChild(ServerWorld world, PassiveEntity entity) {
@@ -419,6 +416,7 @@ public class Chocobo extends TameableEntity implements Angerable {
     }
     public EntityData initialize(ServerWorldAccess worldIn, LocalDifficulty difficultyIn, SpawnReason reason, @Nullable EntityData spawnDataIn, @Nullable NbtCompound dataTag) {
         this.setMale(this.world.random.nextBoolean());
+        this.stepHeight = maxStepUp;
         boolean skip = false; // default spawn
 
         final RegistryEntry<Biome> currentBiomes = this.world.getBiome(getBlockPos().down());
@@ -514,7 +512,7 @@ public class Chocobo extends TameableEntity implements Angerable {
     public void setChocoboColor(@NotNull ChocoboColor color) { this.dataTracker.set(PARAM_COLOR, color.ordinal()); }
     public void setCollarColor(Integer color) { this.dataTracker.set(PARAM_COLLAR_COLOR, color); }
     public Integer getCollarColor() { return this.dataTracker.get(PARAM_COLLAR_COLOR); }
-    public boolean isFireImmune() { return this.dataTracker.get(PARAM_IS_FLAME_BLOOD); }
+    public boolean isFireImmune() { return this.dataTracker.get(PARAM_IS_FLAME_BLOOD) || super.isFireImmune(); }
     public void setFlame(boolean flame) { this.dataTracker.set(PARAM_IS_FLAME_BLOOD, flame); }
     public void setWaterBreath(boolean waterBreath) { this.dataTracker.set(PARAM_IS_WATER_BREATH, waterBreath); }
     public void setWitherImmune(boolean witherImmune) { this.dataTracker.set(PARAM_WITHER_IMMUNE, witherImmune); }
@@ -560,7 +558,7 @@ public class Chocobo extends TameableEntity implements Angerable {
     public void setMale(boolean isMale) { this.dataTracker.set(PARAM_IS_MALE, isMale); }
     public void setFromEgg(boolean fromEgg) { this.dataTracker.set(PARAM_FROM_EGG, fromEgg); }
     public MovementType getMovementType() { return MovementType.values()[this.dataTracker.get(PARAM_MOVEMENT_TYPE)]; }
-    public void setMovementType(MovementType type) { this.dataTracker.set(PARAM_MOVEMENT_TYPE, type.ordinal()); setMovementAiByType(type); }
+    public void setMovementType(@NotNull MovementType type) { this.dataTracker.set(PARAM_MOVEMENT_TYPE, type.ordinal()); setMovementAiByType(type); }
     private void setMovementAiByType(@NotNull MovementType type) {
         BlockPos leashPoint = this.getLeashSpot();
         double length = this.getLeashDistance();
@@ -759,33 +757,66 @@ public class Chocobo extends TameableEntity implements Angerable {
     }
     public void tick() {
         super.tick();
-        this.fruitAteTimer = this.fruitAteTimer > 0 ? this.fruitAteTimer - 1 : 0;
-        floatChocobo();
-        LivingEntity owner = this.getOwner() != null ? this.getOwner() : null;
-        if (this.rideTickDelay < 0) {
-            Entity RidingPlayer = this.getPrimaryPassenger();
-            if (RidingPlayer != null) {
-                this.rideTickDelay = 5;
-                if (RidingPlayer instanceof PlayerEntity player) {
-                    this.setInvulnerable(player.isCreative());
-                    if (this.getHealth() != this.getMaxHealth() && player.getOffHandStack().getItem() == GYSAHL_GREEN_ITEM) {
-                        player.getOffHandStack().decrement(1);
-                        heal(chocoConfigHolder.chocoboHealAmount);
+        if (!this.getWorld().isClient()){
+            if (this.TimeSinceFeatherChance > 2999) {
+                this.TimeSinceFeatherChance = 0;
+                if ((float) random() < .25) { this.dropFeather(); }
+            } else { this.TimeSinceFeatherChance++; }
+            this.fruitAteTimer = this.fruitAteTimer > 0 ? this.fruitAteTimer - 1 : 0;
+            floatChocobo();
+            LivingEntity owner = this.getOwner() != null ? this.getOwner() : null;
+            if (this.rideTickDelay < 0) {
+                Entity RidingPlayer = this.getPrimaryPassenger();
+                if (RidingPlayer != null) {
+                    this.rideTickDelay = 5;
+                    if (RidingPlayer instanceof PlayerEntity player) {
+                        this.setInvulnerable(player.isCreative());
+                        if (this.getHealth() != this.getMaxHealth() && player.getOffHandStack().getItem() == GYSAHL_GREEN_ITEM) {
+                            player.getOffHandStack().decrement(1);
+                            heal(chocoConfigHolder.chocoboHealAmount);
+                        }
+                    } else {
+                        this.setInvulnerable(false);
                     }
-                } else { this.setInvulnerable(false); }
+                } else {
+                    this.setInvulnerable(false);
+                    this.rideTickDelay = 30;
+                }
             } else {
-                this.setInvulnerable(false);
-                this.rideTickDelay = 30;
+                this.rideTickDelay--;
             }
-        } else { this.rideTickDelay--; }
-        if (owner != null) {
-            if (this.followingMrHuman == 1) {
-                if (--this.timeToRecalculatePath <= 0) {
-                    this.getLookControl().lookAt(owner, 10.0F, (float) this.getMaxLookPitchChange());
+            if (owner != null) {
+                if (this.followingMrHuman == 1) {
                     if (--this.timeToRecalculatePath <= 0) {
-                        this.timeToRecalculatePath = this.randomIntInclusive(10, 40);
-                        if (this.squaredDistanceTo(owner) >= 288.0D) { this.teleportToOwner(owner);}
-                        else { this.navigation.startMovingTo(owner, this.followSpeedModifier); }
+                        this.getLookControl().lookAt(owner, 10.0F, (float) this.getMaxLookPitchChange());
+                        if (--this.timeToRecalculatePath <= 0) {
+                            this.timeToRecalculatePath = this.randomIntInclusive(10, 40);
+                            if (this.squaredDistanceTo(owner) >= 288.0D) {
+                                this.teleportToOwner(owner);
+                            } else {
+                                this.navigation.startMovingTo(owner, this.followSpeedModifier);
+                            }
+                        }
+                    }
+                }
+            }
+            if (this.age % 60 == 0) {
+                if (this.isFireImmune()) {
+                    this.addStatusEffect(new StatusEffectInstance(StatusEffects.FIRE_RESISTANCE, 100, 0, true, false));
+                    if (this.hasPassengers()) {
+                        Entity controller = this.getPrimaryPassenger();
+                        if (controller instanceof PlayerEntity) {
+                            ((PlayerEntity) controller).addStatusEffect(new StatusEffectInstance(StatusEffects.FIRE_RESISTANCE, 100, 0, true, false));
+                        }
+                    }
+                }
+                if (this.isWaterBreather()) {
+                    this.addStatusEffect(new StatusEffectInstance(StatusEffects.WATER_BREATHING, 100, 0, true, false));
+                    if (this.hasPassengers()) {
+                        Entity controller = this.getPrimaryPassenger();
+                        if (controller instanceof PlayerEntity) {
+                            ((PlayerEntity) controller).addStatusEffect(new StatusEffectInstance(StatusEffects.WATER_BREATHING, 100, 0, true, false));
+                        }
                     }
                 }
             }
@@ -855,37 +886,24 @@ public class Chocobo extends TameableEntity implements Angerable {
         this.dropStack(new ItemStack(CHOCOBO_FEATHER, 1), 0.0F);
     }
     protected boolean canStartRiding(@NotNull Entity entityIn) { return false; }
+    public boolean canWalkOnFluid(@NotNull FluidState state) {
+        if (state.isIn(FluidTags.LAVA)) { return this.isFireImmune(); }
+        if (state.isIn(FluidTags.WATER)) { return !this.isWaterBreather(); }
+        return super.canWalkOnFluid(state);
+    }
     public void tickMovement() {
         super.tickMovement();
-        this.setRotation(this.getYaw(), this.getPitch());
+        //this.setRotation(this.getYaw(), this.getPitch());
         this.regenerateStamina();
-        this.stepHeight = maxStepUp;
         this.fallDistance = 0f;
 
-        if (this.TimeSinceFeatherChance == 3000) {
-            this.TimeSinceFeatherChance = 0;
-            if ((float) random() < .25) { this.dropFeather(); }
-        } else { this.TimeSinceFeatherChance++; }
-
         //Change effects to chocobo colors
-        if (!this.getEntityWorld().isClient()) {
-            if (this.age % 60 == 0) {
-                if (this.isFireImmune()) {
-                    this.addStatusEffect(new StatusEffectInstance(StatusEffects.FIRE_RESISTANCE, 100, 0, true, false));
-                    if (this.hasPassengers()) {
-                        Entity controller = this.getPrimaryPassenger();
-                        if (controller instanceof PlayerEntity) { ((PlayerEntity) controller).addStatusEffect(new StatusEffectInstance(StatusEffects.FIRE_RESISTANCE, 100, 0, true, false)); }
-                    }
-                }
-                if (this.isWaterBreather()) {
-                    this.addStatusEffect(new StatusEffectInstance(StatusEffects.WATER_BREATHING, 100, 0, true, false));
-                    if (this.hasPassengers()) {
-                        Entity controller = this.getPrimaryPassenger();
-                        if (controller instanceof PlayerEntity) { ((PlayerEntity) controller).addStatusEffect(new StatusEffectInstance(StatusEffects.WATER_BREATHING, 100, 0, true, false)); }
-                    }
-                }
-            }
-        } else {
+        if (this.getEntityWorld().isClient() && this.isAlive()) {
+            /*
+            int i = this.getBreedingAge();
+            if (i < 0) { this.setBreedingAge(++i); }
+            else if (i > 0) { this.setBreedingAge(--i); }
+            */
             // Wing rotations, control packet
             // Client side
             this.destPos += (float) ((double) (this.onGround ? -1 : 4) * 0.3D);
@@ -1047,7 +1065,6 @@ public class Chocobo extends TameableEntity implements Angerable {
                             this.setLeashedDistance(0D);
                             if (this.isWaterBreather() && !this.world.getBiome(this.getSteppingPos()).isIn(IS_NETHER)) { this.goalSelector.add(8, roamAroundWB); }
                             else { this.goalSelector.add(8, roamAround); }
-                            if (this.goalSelector.getRunningGoals().noneMatch(t -> t.getGoal() == avoidBlocks)) { this.goalSelector.add(10, avoidBlocks); }
                             noRoam = false;
                         }
                         this.goalSelector.add(4, this.follow);
@@ -1101,6 +1118,7 @@ public class Chocobo extends TameableEntity implements Angerable {
             int hold = this.getBreedingAge();
             this.setBreedingAge(hold/2);
         }
+        super.onGrowUp();
     }
     public ActionResult interactAt(@NotNull PlayerEntity player, Vec3d vec, Hand hand) {
         ItemStack heldItemStack = player.getStackInHand(hand);
@@ -1226,63 +1244,56 @@ public class Chocobo extends TameableEntity implements Angerable {
     @SuppressWarnings("OptionalGetWithoutIsPresent")
     public boolean canSpawn(@NotNull WorldAccess worldIn, @NotNull SpawnReason spawnReasonIn) {
         RegistryKey<Biome> biomes = worldIn.getBiome(getBlockPos().down()).getKey().get();
-        int multi = IS_SPARSE().contains(biomes) ? 2 : IS_OCEAN().contains(biomes) ? 3 : 1;
-        int sizeCtrl = IS_SPARSE().contains(biomes) ? 8 : IS_OCEAN().contains(biomes) ? 8 : 15;
-        List<Chocobo> bob = worldIn.getNonSpectatingEntities(Chocobo.class, spawnControlBoxSize(new Box(getBlockPos()), multi));
-        if (bob.size() > sizeCtrl) { return false; }
-        if (isInNetherWorld(this)) { return true; }
-        if (isInEndWorld(this)) { return !worldIn.getBlockState(getBlockPos().down()).isAir(); }
-        if (IS_OCEAN().contains(biomes)) { return !isOceanBlocked(biomes, true); }
-        return super.canSpawn(worldIn, spawnReasonIn);
+        if (spawnReasonIn == SpawnReason.CHUNK_GENERATION) { return .05f > (float) Math.random(); } // Lag control - Limit Generational - Ignores Count
+
+        int multi = IS_SPARSE().contains(biomes) ? 8 : IS_OCEAN().contains(biomes) ? 10 : 4; // Multi gets put against (8*5)*multi
+        int sizeCtrl = IS_SPARSE().contains(biomes) ? 4 : IS_OCEAN().contains(biomes) ? 4 : 8;
+        if (spawnReasonIn != SpawnReason.SPAWN_EGG) {
+            List<Chocobo> bob = this.getWorld().getNonSpectatingEntities(Chocobo.class, spawnControlBoxSize(new Box(getBlockPos()), multi));
+            if (sizeCtrl > bob.size()) {
+                if (isInNetherWorld(this)) {
+                    if (this.isFireImmune()) {
+                        BlockPos.Mutable mutable = getBlockPos().mutableCopy();
+                        do { mutable.move(Direction.UP); }
+                        while (this.getWorld().getFluidState(mutable).isIn(FluidTags.LAVA));
+                        return this.getWorld().getBlockState(mutable).isAir();
+                    } else { return !worldIn.getBlockState(getBlockPos().down()).isAir() && !this.getWorld().getFluidState(getBlockPos().down()).isIn(FluidTags.LAVA) && this.getWorld().getBlockState(getBlockPos()).isAir(); }
+                }
+                if (isInEndWorld(this)) {
+                    return !worldIn.getBlockState(getBlockPos().down()).isAir() && !this.getWorld().getFluidState(getBlockPos().down()).isIn(FluidTags.LAVA) && this.getWorld().getBlockState(getBlockPos()).isAir();
+                }
+                if (IS_OCEAN().contains(biomes)) { return !isOceanBlocked(biomes, true); }
+            }
+        } else return super.canSpawn(worldIn, spawnReasonIn); // Used to apply size control to all but Spawn Egg & chunk generation & use super for Spawn egg
+        return false; // fail-safe to deny if it some how did not get caught by spawnReasonIn logic
     }
     protected void onTamedChanged() {
         super.onTamedChanged();
-        if(chocoboAvoidPlayerGoal == null) { chocoboAvoidPlayerGoal = new ChocoboGoals.ChocoboAvoidPlayer(this); }
         if (roamAround == null) { roamAround = new WanderAroundFarGoal(this, 1D); }
         if (roamAroundWB == null) { roamAroundWB = new WanderAroundGoal(this, 1D); }
-        if (avoidBlocks == null) { avoidBlocks = new ChocoboGoals.ChocoboAvoidBlockGoal(this,  avoidBlocks()); }
         if (follow == null) { follow = new FollowOwnerGoal(this, followSpeedModifier, 10.0F, 1000.0F, false); }
         this.clearWonders();
         if(this.isTamed()) {
-            this.goalSelector.remove(chocoboAvoidPlayerGoal);
             BlockPos leashPoint = this.getLeashSpot();
             double length = Math.max(2D, Math.min(this.getLeashDistance(), 21D));
             boolean skip = leashPoint.getY() > 4000;
-            if (skip) {
-                if (this.isWaterBreather() && !this.world.getBiome(this.getSteppingPos()).isIn(IS_NETHER)) {
-                    this.goalSelector.add(8, roamAroundWB);
-                } else {
-                    this.goalSelector.add(8, roamAround);
-                }
-            }
-            else {
-                if (this.isWaterBreather() && !this.world.getBiome(this.getSteppingPos()).isIn(IS_NETHER)) {
+            if (this.isWaterBreather() && !this.world.getBiome(this.getSteppingPos()).isIn(IS_NETHER)) {
+                if (skip) { this.goalSelector.add(8, roamAroundWB); }
+                else {
                     this.localWonderWB = new ChocoboRandomStrollGoal(this, 1D, leashPoint, length);
                     this.goalSelector.add(8, this.localWonderWB);
-                } else {
-                    this.localWonder = new ChocoboLocalizedWonder(this, 1D, leashPoint, length);
-                    this.goalSelector.add(8, this.localWonder);
                 }
+            } else if (skip) { this.goalSelector.add(8, roamAround); }
+            else {
+                this.localWonder = new ChocoboLocalizedWonder(this, 1D, leashPoint, length);
+                this.goalSelector.add(8, this.localWonder);
             }
         } else {
-            this.goalSelector.add(7, chocoboAvoidPlayerGoal);
             if (this.isWaterBreather() && !this.world.getBiome(this.getSteppingPos()).isIn(IS_NETHER)) {
                 this.goalSelector.add(8, roamAroundWB);
-            } else {
-                this.goalSelector.add(8, roamAround);
-            }
-        }
-        if (this.goalSelector.getRunningGoals().noneMatch(t -> t.getGoal() == avoidBlocks)) {
-            this.goalSelector.add(10, avoidBlocks);
+            } else { this.goalSelector.add(8, roamAround); }
         }
         noRoam = false;
-    }
-    private static @NotNull ArrayList<Class<? extends Block>> avoidBlocks() {
-        ArrayList<Class<? extends Block>> chk = new ArrayList<>();
-        chk.add(Blocks.COBBLESTONE_WALL.getClass());
-        chk.add(Blocks.WARPED_FENCE.getClass());
-        chk.add(Blocks.WARPED_FENCE_GATE.getClass());
-        return chk;
     }
     @Override
     public int getAngerTime() { return this.remainingPersistentAngerTime; }
@@ -1294,7 +1305,7 @@ public class Chocobo extends TameableEntity implements Angerable {
     @Override
     public void chooseRandomAngerTime() { this.setAngerTime(PERSISTENT_ANGER_TIME.get(this.random)); }
     protected void mobTick() {
-        this.tickAngerLogic((ServerWorld) this.world, true);
+        this.tickAngerLogic((ServerWorld) this.world, false);
         if (this.getTarget() != null) { this.maybeAlertOthers(); }
         if (this.hasAngerTime()) { this.playerHitTimer = this.age; }
     }
@@ -1314,10 +1325,8 @@ public class Chocobo extends TameableEntity implements Angerable {
                 .filter((p_34456_) -> !p_34456_.isTeamPlayer(Objects.requireNonNull(this.getTarget()).getScoreboardTeam()))
                 .forEach((p_34440_) -> p_34440_.setTarget(this.getTarget()));
     }
-    public boolean isPersistent() { return this.isTamed() || this.fromEgg() || this.isCustomNameVisible(); }
-    public boolean cannotDespawn() {
-        return this.hasVehicle() || this.isPersistent();
-    }
+    public boolean isPersistent() { return this.isTamed() || this.fromEgg() || this.hasCustomName() || this.isCustomNameVisible(); }
+    public boolean cannotDespawn() { return this.hasVehicle() || this.isPersistent(); }
     public boolean isDisallowedInPeaceful() { return super.isDisallowedInPeaceful(); }
     public boolean canImmediatelyDespawn(double pDistanceToClosestPlayer) { return true; }
     public void applyDamageEffects(LivingEntity attacker, Entity target) {

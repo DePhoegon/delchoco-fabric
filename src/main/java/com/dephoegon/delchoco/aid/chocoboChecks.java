@@ -1,8 +1,10 @@
 package com.dephoegon.delchoco.aid;
 
 import com.dephoegon.delchoco.common.entities.properties.ChocoboColor;
+import net.minecraft.entity.Entity;
 import net.minecraft.registry.RegistryKey;
-import net.minecraft.world.ServerWorldAccess;
+import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.world.ServerWorld;
 import net.minecraft.world.World;
 import net.minecraft.world.biome.Biome;
 import net.minecraft.world.biome.BiomeKeys;
@@ -12,13 +14,14 @@ import java.util.ArrayList;
 import java.util.Collection;
 
 public class chocoboChecks {
-    private static @NotNull ArrayList<ChocoboColor> wbChocobos() {
+    @NotNull
+    private static ArrayList<ChocoboColor> wbChocobos() {
         ArrayList<ChocoboColor> out = new ArrayList<>();
         out.add(ChocoboColor.BLUE);
         out.add(ChocoboColor.GOLD);
         return out;
     }
-    private static @NotNull ArrayList<ChocoboColor> wiChocobos() {
+    private static ArrayList<ChocoboColor> wiChocobos() {
         ArrayList<ChocoboColor> out = new ArrayList<>();
         out.add(ChocoboColor.BLACK);
         out.add(ChocoboColor.GOLD);
@@ -116,25 +119,33 @@ public class chocoboChecks {
         out.add(BiomeKeys.MUSHROOM_FIELDS);
         return out;
     }
-    public static boolean isOverworld(ServerWorldAccess world) {
-        if (world == null) { return false; }
-        return world.toServerWorld().getRegistryKey().equals(World.OVERWORLD);
+    private static boolean isInWorld(@NotNull Entity entity, RegistryKey<World> Dimension) {
+        World entityWorld = entity.getWorld();
+        MinecraftServer entityServer = entityWorld.getServer();
+        RegistryKey<World> localWorld = entityWorld.getRegistryKey();
+        ServerWorld serverWorld = entityServer == null ? null : entityServer.getWorld(localWorld);
+        if (serverWorld == null) { return false; }
+        RegistryKey<World> serverSideWorld = serverWorld.getRegistryKey();
+        return serverSideWorld == Dimension;
     }
-    public static boolean isNether(ServerWorldAccess world) {
-        if (world == null) { return false; }
-        return world.toServerWorld().getRegistryKey().equals(World.NETHER);
+    public static boolean isInOverWorld(Entity entity) {
+        if (entity == null) { return false; }
+        return isInWorld(entity, World.OVERWORLD);
     }
-    public static boolean isEnd(ServerWorldAccess world) {
-        if (world == null) { return false; }
-        return world.toServerWorld().getRegistryKey().equals(World.END);
+    public static boolean isInNetherWorld(Entity entity) {
+        if (entity == null) { return false; }
+        return isInWorld(entity, World.NETHER);
+    }
+    public static boolean isInEndWorld(Entity entity) {
+        if (entity == null) { return false; }
+        return isInWorld(entity, World.END);
     }
     public static boolean isOceanBlocked(RegistryKey<Biome> biomeRegistryKey, boolean allowBlue) {
         ArrayList<RegistryKey<Biome>> out = IS_OCEAN();
         boolean blocked = out.contains(biomeRegistryKey);
-        if (blocked && allowBlue) { return blueChocobo().contains(biomeRegistryKey); }
-        return blocked;
+        return allowBlue ? !blueChocobo().contains(biomeRegistryKey) : blocked;
     }
-    public static @NotNull Collection<RegistryKey<Biome>> vanillaBiomes() {
+    public static Collection<RegistryKey<Biome>> vanillaBiomes() {
         Collection<RegistryKey<Biome>> vanillaBiomes = new ArrayList<>();
         vanillaBiomes.add(BiomeKeys.THE_VOID);
         vanillaBiomes.add(BiomeKeys.PLAINS);

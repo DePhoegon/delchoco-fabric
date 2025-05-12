@@ -108,7 +108,6 @@ public class ChocoboSummoning {
     private @NotNull Text customName() { return summonItem.getName(); }
     private void summonChocobo(@NotNull World worldIn, BlockPos pos, PlayerEntity player) {
         if (!worldIn.isClient()) {
-            ServerWorldAccess serverWorldAccess = (ServerWorldAccess) worldIn;
             final Chocobo chocobo = ModEntities.CHOCOBO_ENTITY.create(worldIn);
             if (chocobo != null) {
                 if (player != null) { if (player.isInSneakingPose()) { chocobo.setBreedingAge(-7500); } }
@@ -129,7 +128,7 @@ public class ChocoboSummoning {
                 chocoboStatShake(GENERIC_ARMOR, "defense", chocobo);
                 chocoboStatShake(GENERIC_ARMOR_TOUGHNESS, "toughness", chocobo);
                 if (chocobo.getChocoboColor() == ChocoboColor.PURPLE) {
-                    int chance = isEnd(serverWorldAccess) ? 60 : 15;
+                    int chance = isInEndWorld(chocobo) ? 60 : 15;
                     if (random.nextInt(100)+1 < chance) {
                         chocobo.chocoboBackboneInv.setStack(random.nextInt(18), new ItemStack(ENDER_PEARL.getDefaultStack().split(random.nextInt(3) + 1).getItem()));
                     }

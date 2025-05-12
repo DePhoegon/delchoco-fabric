@@ -196,6 +196,6 @@ public class ChocoboConfig {
     public boolean tamedChocoboHittable = dTamedChocoboHittable;
 
     @Configurable
-    @Configurable.Comment("Allows Tamed Chocobos to have their inventory accessed by only the Owner")
-    public boolean ownerInventoryAccess = dOwnerOnlyInventoryAccess;
+    @Configurable.Comment("Allows Tamed Chocobos to have their inventory accessed and Ridden by only the Owner")
+    public boolean ownerOnlyInventoryAccess = dOwnerOnlyInventoryAccess;
 }

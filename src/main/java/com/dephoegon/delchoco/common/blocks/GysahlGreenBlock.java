@@ -2,37 +2,45 @@ package com.dephoegon.delchoco.common.blocks;
 
 import net.minecraft.block.*;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.mob.RavagerEntity;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemConvertible;
 import net.minecraft.item.ItemStack;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.state.StateManager;
 import net.minecraft.state.property.IntProperty;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.shape.VoxelShape;
-import net.minecraft.world.BlockView;
-import net.minecraft.world.GameRules;
-import net.minecraft.world.World;
-import net.minecraft.world.WorldView;
+import net.minecraft.world.*;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 
+import static com.dephoegon.delchoco.aid.gysahlGreenBiomes.getBiomeID;
+import static com.dephoegon.delchoco.aid.gysahlGreenBiomes.getGreenCount;
 import static com.dephoegon.delchoco.common.init.ModItems.GYSAHL_GREEN_SEEDS;
 
 public class GysahlGreenBlock extends PlantBlock
         implements Fertilizable {
     private static final VoxelShape[] AGE_TO_SHAPE = new VoxelShape[]{Block.createCuboidShape(0.0, 0.0, 0.0, 16.0, 2.0, 16.0), Block.createCuboidShape(0.0, 0.0, 0.0, 16.0, 4.0, 16.0), Block.createCuboidShape(0.0, 0.0, 0.0, 16.0, 6.0, 16.0), Block.createCuboidShape(0.0, 0.0, 0.0, 16.0, 8.0, 16.0), Block.createCuboidShape(0.0, 0.0, 0.0, 16.0, 10.0, 16.0), Block.createCuboidShape(0.0, 0.0, 0.0, 16.0, 12.0, 16.0), Block.createCuboidShape(0.0, 0.0, 0.0, 16.0, 14.0, 16.0), Block.createCuboidShape(0.0, 0.0, 0.0, 16.0, 16.0, 16.0)};
     public static final int MAX_AGE = 4;
+    public static final int MAX_BIOME = getGreenCount();
     public static final IntProperty AGE = IntProperty.of("age", 0, MAX_AGE);
+    public static final IntProperty BIOME = IntProperty.of("biome", 0, MAX_BIOME);
+    @SuppressWarnings("OptionalGetWithoutIsPresent")
+    protected int getBiomePlacedID(@NotNull WorldAccess world, @NotNull BlockPos pos) { return getBiomeID(world.getBiome(pos.down()).getKey().get()); }
     public GysahlGreenBlock(Settings settings) {
         super(settings);
-        this.setDefaultState((this.stateManager.getDefaultState()).with(this.getAgeProperty(), 0));
+        this.setDefaultState((this.stateManager.getDefaultState()).with(this.getAgeProperty(), 0).with(this.getBiomeProperty(), 0));
     }
     protected ItemConvertible getSeedsItem() { return GYSAHL_GREEN_SEEDS; }
     protected boolean canPlantOnTop(BlockState floor, BlockView world, BlockPos pos) { return floor != null && blockPlaceableOnList().contains(floor.getBlock().getDefaultState()); }
     public IntProperty getAgeProperty() { return AGE; }
+    public IntProperty getBiomeProperty() { return BIOME; }
     public int getMaxAge() { return MAX_AGE; }
     private @NotNull ArrayList<BlockState> blockPlaceableOnList() {
         ArrayList<BlockState> block_set = new ArrayList<>();
@@ -52,11 +60,20 @@ public class GysahlGreenBlock extends PlantBlock
         block_set.add(13, Blocks.TUFF.getDefaultState());
         return block_set;
     }
+    public void onPlaced(@NotNull World world, BlockPos pos, BlockState state, @Nullable LivingEntity placer, ItemStack itemStack) {
+        if (world.isClient) { super.onPlaced(world, pos, state, placer, itemStack); }
+        else  { super.onPlaced(world, pos, state.with(BIOME, getBiomePlacedID(world, pos)), placer, itemStack); }
+    }
+    public void onBreak(@NotNull World world, BlockPos pos, BlockState state, PlayerEntity player) {
+        if (world.isClient || state.get(BIOME) != 0) { super.onBreak(world, pos, state, player); }
+        else { super.onBreak(world, pos, state.with(BIOME, getBiomePlacedID(world, pos)), player); }
+    }
     @SuppressWarnings("deprecation")
     public VoxelShape getOutlineShape(@NotNull BlockState state, BlockView world, BlockPos pos, ShapeContext context) {
         return AGE_TO_SHAPE[state.get(this.getAgeProperty())];
     }
     protected int getAge(@NotNull BlockState state) { return state.get(this.getAgeProperty()); }
+    @SuppressWarnings("RedundantCast")
     public BlockState withAge(int age) { return (BlockState)this.getDefaultState().with(this.getAgeProperty(), age); }
     @SuppressWarnings("BooleanMethodIsAlwaysInverted")
     public boolean isMature(@NotNull BlockState state) { return state.get(this.getAgeProperty()) >= this.getMaxAge(); }
@@ -65,11 +82,17 @@ public class GysahlGreenBlock extends PlantBlock
         int j;
         int i = this.getAge(state) + this.getGrowthAmount(world);
         if (i > (j = this.getMaxAge())) { i = j; }
-        world.setBlockState(pos, this.withAge(i), Block.NOTIFY_LISTENERS);
+        world.setBlockState(pos, this.withAge(i).with(BIOME, getBiomePlacedID(world, pos)), Block.NOTIFY_LISTENERS);
     }
     protected int getGrowthAmount(@NotNull World world) { return MathHelper.nextInt(world.random, 2, 5); }
-    public boolean canPlaceAt(BlockState state, @NotNull WorldView world, @NotNull BlockPos pos) {
-        return blockPlaceableOnList().contains(world.getBlockState(pos.down()).getBlock().getDefaultState()) && world.getBlockState(pos).isAir();
+    public boolean canPlaceAt(BlockState state, @NotNull WorldView world, @NotNull BlockPos pos) { return isValidPlacementPosition(world, pos) && world.getBlockState(pos).isAir(); }
+    private boolean isValidPlacementPosition(@NotNull WorldView world, @NotNull BlockPos pos) { return blockPlaceableOnList().contains(world.getBlockState(pos.down()).getBlock().getDefaultState()); } // Checks if the block can be placed on the block below, specifically for the Gysahl Green Block & split from the canPlaceAt method to allow for the calling of getStateForNeighborUpdate to check for the base block & not needing to modify canPlaceAt to include a copy of itself.
+    public BlockState getStateForNeighborUpdate(@NotNull BlockState state, Direction direction, BlockState neighborState, @NotNull WorldAccess world, BlockPos pos, @NotNull BlockPos neighborPos) {
+        if (state.get(BIOME) == 0) {
+            state.with(BIOME, getBiomePlacedID(world, pos));
+        } // if the block was placed by world gen, set the biome property.
+        return isValidPlacementPosition(world, pos) ? state : super.getStateForNeighborUpdate(state, direction, neighborState, world, pos, neighborPos);
+        // The call to super is only needed to ensure use of vanilla code and will always result in failure (within the super) resulting in an Air Block. Vanilla code is used, in case of other mods somehow modifying this call in plantBlock
     }
     @SuppressWarnings("deprecation")
     public void onEntityCollision(BlockState state, World world, BlockPos pos, Entity entity) {
@@ -83,5 +106,5 @@ public class GysahlGreenBlock extends PlantBlock
 
     public boolean canGrow(World world, net.minecraft.util.math.random.Random random, BlockPos pos, BlockState state) { return true; }
     public void grow(ServerWorld world, net.minecraft.util.math.random.Random random, BlockPos pos, BlockState state) { this.applyGrowth(world, pos, state); }
-    protected void appendProperties(StateManager.@NotNull Builder<Block, BlockState> builder) { builder.add(AGE); }
+    protected void appendProperties(StateManager.@NotNull Builder<Block, BlockState> builder) { builder.add(AGE).add(BIOME); }
 }

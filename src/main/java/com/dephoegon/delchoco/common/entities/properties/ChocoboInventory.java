@@ -27,7 +27,7 @@ public class ChocoboInventory extends SimpleInventory {
         if (entity == null) { return true; }
         if (entity.isTamed()) {
             boolean isPlayer = entity.isOwner(player);
-            if (chocoConfigHolder.ownerInventoryAccess) { return isPlayer; } else { return true; }
+            if (chocoConfigHolder.ownerOnlyInventoryAccess) { return isPlayer; } else { return true; }
         } else { return false; }
     }
     public NbtCompound singleSlotToNBT() {

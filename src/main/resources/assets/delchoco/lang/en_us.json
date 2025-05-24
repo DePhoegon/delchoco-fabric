@@ -132,6 +132,5 @@
     "delchoco.leash.invalid": "Leash Distance Invalid",
 
 	"delchoco.key.category": "Chocobo Movement (Supports KeyBoard Keys Only)",
-	"delchoco.key.in_water_glide": "Water Breather - Glide in Water",
-	"delchoco.key.stop_in_air_glide": "In Air - Fall Faster"
+	"delchoco.key.in_water_glide": "Water Breather - Glide in Water"
 }

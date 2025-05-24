@@ -45,6 +45,8 @@ import net.minecraft.entity.passive.LlamaEntity;
 import net.minecraft.entity.passive.PassiveEntity;
 import net.minecraft.entity.passive.TameableEntity;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.entity.vehicle.BoatEntity;
+import net.minecraft.fluid.Fluid;
 import net.minecraft.fluid.FluidState;
 import net.minecraft.inventory.Inventory;
 import net.minecraft.item.*;
@@ -55,6 +57,7 @@ import net.minecraft.recipe.Ingredient;
 import net.minecraft.registry.RegistryKey;
 import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.registry.tag.FluidTags;
+import net.minecraft.registry.tag.TagKey;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.sound.SoundEvent;
@@ -76,7 +79,6 @@ import java.util.*;
 import static com.dephoegon.delbase.item.ShiftingDyes.*;
 import static com.dephoegon.delchoco.DelChoco.chocoConfigHolder;
 import static com.dephoegon.delchoco.DelChoco.worldConfigHolder;
-import static com.dephoegon.delchoco.aid.chocoKB.isChocoShiftDown;
 import static com.dephoegon.delchoco.aid.chocoKB.isChocoboWaterGlide;
 import static com.dephoegon.delchoco.aid.chocoboChecks.IS_OCEAN;
 import static com.dephoegon.delchoco.aid.chocoboChecks.*;
@@ -243,6 +245,7 @@ public class Chocobo extends TameableEntity implements Angerable {
     }
     public Chocobo(EntityType<? extends Chocobo> entityType, World world) {
         super(entityType, world);
+        this.stepHeight = maxStepUp;
     }
     protected void initGoals() {
         //if (!this.canBreatheInWater()) { this.goalSelector.add(0, new SwimGoal(this)); }
@@ -416,7 +419,6 @@ public class Chocobo extends TameableEntity implements Angerable {
     }
     public EntityData initialize(ServerWorldAccess worldIn, LocalDifficulty difficultyIn, SpawnReason reason, @Nullable EntityData spawnDataIn, @Nullable NbtCompound dataTag) {
         this.setMale(this.world.random.nextBoolean());
-        this.stepHeight = maxStepUp;
         boolean skip = false; // default spawn
 
         final RegistryEntry<Biome> currentBiomes = this.world.getBiome(getBlockPos().down());
@@ -614,6 +616,12 @@ public class Chocobo extends TameableEntity implements Angerable {
     public boolean isChocoboRideable(@NotNull PlayerEntity player) { return !player.isSneaking() && !this.isBaby() && this.isSaddled(); }
     public boolean canBeRiddenInWater() { return this.canBreatheInWater(); }
     public boolean canBreatheInWater() { return this.isWaterBreather(); }
+    protected boolean canStartRiding(@NotNull Entity entityIn) { return false; }
+    public boolean canWalkOnFluid(@NotNull FluidState state) {
+        if (state.isIn(FluidTags.LAVA)) { return this.isFireImmune(); }
+        if (state.isIn(FluidTags.WATER)) { return !this.isWaterBreather(); }
+        return super.canWalkOnFluid(state);
+    }
     public float getStamina() { return this.dataTracker.get(PARAM_STAMINA); }
     public void setStamina(float value) { this.dataTracker.set(PARAM_STAMINA, value); }
     public float getStaminaPercentage() { return (float) (this.getStamina() / Objects.requireNonNull(this.getAttributeInstance(ModAttributes.CHOCOBO_MAX_STAMINA)).getValue()); }
@@ -659,29 +667,54 @@ public class Chocobo extends TameableEntity implements Angerable {
     public Entity getPrimaryPassenger() { return this.getPassengerList().isEmpty() ? null : this.getPassengerList().get(0); }
     protected boolean updateWaterState() {
         this.fluidHeight.clear();
+        this.checkWaterState();
+        double d = this.world.getDimension().ultrawarm() ? 0.007 : 0.0023333333333333335;
+        boolean bl = false;
+        if (this.isFireImmune()) { bl = this.updateMovementInFluid(FluidTags.LAVA, d); }
+        return !this.isWaterBreather() && !this.isFireImmune() && (this.isInWater() || bl);
+        /*
+        this.fluidHeight.clear();
         this.updateInWaterStateAndDoWaterCurrentPushing();
-        boolean flag = this.updateMovementInFluid(FluidTags.LAVA, 0.085D);
-        return this.isTouchingWater() || flag;
+        return this.isInWater() || this.isInLava();
+        */
     }
+
+    void checkWaterState() {
+        if (this.isInWater()) { this.extinguish(); }
+        double speed = this.isWaterBreather() ? .45 : 0.014;
+        if (!this.isSubmergedInWater()) {
+            this.extinguish();
+            this.touchingWater = false;
+        } else if (this.updateMovementInFluid(FluidTags.WATER, speed)) {
+            if (!this.touchingWater && !this.firstUpdate) { this.onSwimmingStart(); }
+            this.onLanding();
+            this.touchingWater = true;
+            this.extinguish();
+        } else { this.touchingWater = false; }
+    }
+    public boolean isInWater() {
+        return !this.firstUpdate && this.fluidHeight.getDouble(FluidTags.WATER) > 0.0;
+    }
+    public boolean isSwimming() { return false; }
     private void updateInWaterStateAndDoWaterCurrentPushing() {
         if (!this.isWaterBreather()) {
-            if (this.getVehicle() instanceof Chocobo) { this.touchingWater = false; }
-            else if (this.updateMovementInFluid(FluidTags.WATER, 0.014D)) {
-                if (!this.touchingWater && !this.firstUpdate) { this.onSwimmingStart(); }
+            if (this.isInWater()) {
+                this.extinguish();
                 this.fallDistance = 0.0F;
-                this.touchingWater = true;
+                this.touchingWater = this.hasPassengers();
                 this.extinguish();
             } else { this.touchingWater = false; }
-        } else {
-            if (this.isTouchingWater()) {
-                this.touchingWater = false;
-                this.extinguish();
-                if (this.getVehicle() instanceof Chocobo) { if (this.getPrimaryPassenger() instanceof PlayerEntity rider) { rider.extinguish(); } }
-            }
+        }
+        if (this.isInWater()) {
+            this.extinguish();
+            if (this.hasPassengers()) { if (this.getPrimaryPassenger() instanceof PlayerEntity rider) { rider.extinguish(); } }
         }
     }
     public void travel(@NotNull Vec3d travelVector) {
         Vec3d newVector = travelVector;
+        if (!this.getWorld().isClient()) {
+            this.setMovementSpeed((float) Objects.requireNonNull(this.getAttributeInstance(EntityAttributes.GENERIC_MOVEMENT_SPEED)).getValue());
+        }
         if (this.getPrimaryPassenger() instanceof PlayerEntity rider) {
             this.prevY = rider.getYaw();
             this.prevPitch = rider.getPitch();
@@ -711,10 +744,7 @@ public class Chocobo extends TameableEntity implements Angerable {
                 if (rider.isTouchingWater()) {
                     Vec3d motion = getVelocity();
                     if (MinecraftClient.getInstance().options.jumpKey.isPressed()) { setVelocity(new Vec3d(motion.x, .5f, motion.z)); }
-                    else if (this.getVelocity().y < 0 && !this.isWaterBreather()) {
-                        int distance = WorldUtils.getDistanceToSurface(this.getBlockPos(), this.getEntityWorld());
-                        if (distance > 0) { setVelocity(new Vec3d(motion.x, .05f, motion.z)); }
-                    } else if (this.isWaterBreather() && isChocoboWaterGlide()) {
+                    else if (this.isWaterBreather() && isChocoboWaterGlide()) {
                         Vec3d waterMotion = getVelocity();
                         setVelocity(new Vec3d(waterMotion.x, waterMotion.y * 0.65F, waterMotion.z));
                     }
@@ -722,26 +752,21 @@ public class Chocobo extends TameableEntity implements Angerable {
                 if (rider.isInLava()) {
                     Vec3d motion = getVelocity();
                     if (MinecraftClient.getInstance().options.jumpKey.isPressed()) { setVelocity(new Vec3d(motion.x, .5f, motion.z)); }
-                    else if (this.isFireImmune() && this.getVelocity().y < 0) {
-                        int distance = WorldUtils.getDistanceToSurface(this.getBlockPos(), this.getEntityWorld());
-                        if (distance > 0) { setVelocity(new Vec3d(motion.x, .05f, motion.z)); }
-                    }
                 }
                 // Insert override for slow-fall Option on Chocobo
-                if (!this.onGround && !this.isTouchingWater() && !this.isInLava() && !isChocoShiftDown() && this.getVelocity().y < 0 &&
-                        this.useStamina(FloatChocoConfigGet(chocoConfigHolder.chocoboStaminaCostJump, dSTAMINA_GLIDE.getDefault()))) {
+                if (!this.isOnGround() && !this.isInWater() && !this.isInLava() && this.getVelocity().y < 0) {
                     if (MinecraftClient.getInstance().options.jumpKey.isPressed()) {
                         Vec3d motion = getVelocity();
                         setVelocity(new Vec3d(motion.x, motion.y * 0.65F, motion.z));
                     }
                 }
-                if ((this.isSprinting() && !this.useStamina(FloatChocoConfigGet(chocoConfigHolder.chocoboStaminaCostSprint, dSTAMINA_SPRINT.getDefault())) || (this.isSprinting() && this.isTouchingWater() && this.useStamina(FloatChocoConfigGet(chocoConfigHolder.chocoboStaminaCostSprint, dSTAMINA_SPRINT.getDefault()))))) { this.setSprinting(false); }
+                if (this.isSprinting() && this.isInWater()) { this.setSprinting(false); }
 
                 this.setMovementSpeed((float) Objects.requireNonNull(this.getAttributeInstance(EntityAttributes.GENERIC_MOVEMENT_SPEED)).getValue());
                 super.travel(newVector);
             }
         } else {
-            if (!this.onGround && !this.isTouchingWater() && !this.isInLava() && this.getVelocity().y < 0 && this.useStamina(FloatChocoConfigGet(chocoConfigHolder.chocoboStaminaCostGlide, dSTAMINA_SPRINT.getDefault()))) {
+            if (!this.onGround && !this.isInWater() && !this.isInLava() && this.getVelocity().y < 0) {
                 Vec3d motion = getVelocity();
                 setVelocity(new Vec3d(motion.x, motion.y * 0.65F, motion.z));
             }
@@ -763,7 +788,7 @@ public class Chocobo extends TameableEntity implements Angerable {
                 if ((float) random() < .25) { this.dropFeather(); }
             } else { this.TimeSinceFeatherChance++; }
             this.fruitAteTimer = this.fruitAteTimer > 0 ? this.fruitAteTimer - 1 : 0;
-            floatChocobo();
+            //floatChocobo();
             LivingEntity owner = this.getOwner() != null ? this.getOwner() : null;
             if (this.rideTickDelay < 0) {
                 Entity RidingPlayer = this.getPrimaryPassenger();
@@ -885,11 +910,13 @@ public class Chocobo extends TameableEntity implements Angerable {
         if (this.isBaby()) { return; }
         this.dropStack(new ItemStack(CHOCOBO_FEATHER, 1), 0.0F);
     }
-    protected boolean canStartRiding(@NotNull Entity entityIn) { return false; }
-    public boolean canWalkOnFluid(@NotNull FluidState state) {
-        if (state.isIn(FluidTags.LAVA)) { return this.isFireImmune(); }
-        if (state.isIn(FluidTags.WATER)) { return !this.isWaterBreather(); }
-        return super.canWalkOnFluid(state);
+    protected boolean chocoboRiderEffect(TagKey<Fluid> fluid) {
+        if (this.hasPassengers()) {
+            if (fluid == null) { return (!this.isInWater() && !this.isInLava()); }
+            if (fluid == FluidTags.LAVA && this.isFireImmune()) { return this.isInLava(); }
+            if (fluid == FluidTags.WATER && this.isWaterBreather()) { return this.isInWater(); }
+        }
+        return false;
     }
     public void tickMovement() {
         super.tickMovement();
@@ -899,6 +926,10 @@ public class Chocobo extends TameableEntity implements Angerable {
 
         //Change effects to chocobo colors
         if (this.getEntityWorld().isClient() && this.isAlive()) {
+            if (this.chocoboRiderEffect(FluidTags.WATER)) {
+                Entity controller = this.getPrimaryPassenger();
+                if (controller instanceof PlayerEntity) { ((PlayerEntity) controller).addStatusEffect(new StatusEffectInstance(StatusEffects.WATER_BREATHING, 100, 0, true, false)); }
+            }
             /*
             int i = this.getBreedingAge();
             if (i < 0) { this.setBreedingAge(++i); }

@@ -73,24 +73,24 @@ public class GysahlGreenBiomes {
         return out;
     }
     public static int getBiomeID(RegistryKey<Biome> biomeRegistryKey) {
-        int privbiome = 0;
-        if (LovelyGreenBiomes().contains(biomeRegistryKey)) { privbiome = 1; }
-        if (GoldenGysahlBiomes().contains(biomeRegistryKey)) { privbiome = 2; }
-        if (PinkGreenBiomes().contains(biomeRegistryKey)) { privbiome = 3; }
-        if (DeadGreenBiomes().contains(biomeRegistryKey)) { privbiome = 4; }
-        if (SpikeGreenBiomes().contains(biomeRegistryKey)) { privbiome = 5; }
-        return privbiome;
+        int privBiome = 1;
+        if (GoldenGysahlBiomes().contains(biomeRegistryKey)) { privBiome = 2; }
+        if (PinkGreenBiomes().contains(biomeRegistryKey)) { privBiome = 3; }
+        if (DeadGreenBiomes().contains(biomeRegistryKey)) { privBiome = 4; }
+        if (SpikeGreenBiomes().contains(biomeRegistryKey)) { privBiome = 5; }
+        if (LovelyGreenBiomes().contains(biomeRegistryKey)) { privBiome = 6; }
+        return privBiome;
     }
     // getGreenByproduct is left unused, but is here for future use. Intended for code based Item Dropping
     public static ItemStack getGreenByproduct(int biomeID) {
         return switch (biomeID) {
-            case 1 -> ModItems.LOVELY_GYSAHL_GREEN.getDefaultStack();
             case 2 -> ModItems.GOLDEN_GYSAHL_GREEN.getDefaultStack();
             case 3 -> ModItems.PINK_GYSAHL_GREEN.getDefaultStack();
             case 4 -> ModItems.DEAD_PEPPER.getDefaultStack();
             case 5 -> ModItems.SPIKE_FRUIT.getDefaultStack();
+            case 6 -> ModItems.LOVELY_GYSAHL_GREEN.getDefaultStack();
             default -> ItemStack.EMPTY;
         };
     }
-    public static int getGreenCount() { return 5; }
+    public static int getGreenCount() { return 6; }
 }

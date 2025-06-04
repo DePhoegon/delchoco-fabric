@@ -47,26 +47,6 @@
       "entries": [
         {
           "type": "minecraft:item",
-          "name": "delchoco:lovely_gysahl_green"
-        }
-      ],
-      "conditions": [
-        {
-          "condition": "minecraft:block_state_property",
-          "block": "delchoco:gysahl_green",
-          "properties": {
-            "age": "4",
-            "biome": "1"
-          }
-        }
-      ]
-    },
-    {
-      "rolls": 1.0,
-      "bonus_rolls": 0.0,
-      "entries": [
-        {
-          "type": "minecraft:item",
           "conditions": [
             {
               "condition": "minecraft:random_chance",
@@ -165,7 +145,26 @@
         }
       ]
     },
-
+    {
+      "rolls": 1.0,
+      "bonus_rolls": 0.0,
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "delchoco:lovely_gysahl_green"
+        }
+      ],
+      "conditions": [
+        {
+          "condition": "minecraft:block_state_property",
+          "block": "delchoco:gysahl_green",
+          "properties": {
+            "age": "4",
+            "biome": "6"
+          }
+        }
+      ]
+    },
     {
       "rolls": 1.0,
       "bonus_rolls": 0.0,

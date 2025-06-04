@@ -69,8 +69,8 @@ public class ChocoboStatSnapshot {
         this.attack = Objects.requireNonNull(chocobo.getAttributeInstance(EntityAttributes.GENERIC_ATTACK_DAMAGE)).getValue();
         this.defense = Objects.requireNonNull(chocobo.getAttributeInstance(EntityAttributes.GENERIC_ARMOR)).getValue();
         this.toughness = Objects.requireNonNull(chocobo.getAttributeInstance(EntityAttributes.GENERIC_ARMOR_TOUGHNESS)).getValue();
-        this.flameBlood = chocobo.isFireImmune();
-        this.waterBreath = chocobo.isWaterBreather();
+        this.flameBlood = chocobo.isFlameBlood();
+        this.waterBreath = chocobo.isWaterBloodChocobo();
         this.witherImmune = chocobo.isWitherImmune();
         this.poisonImmune = chocobo.isPoisonImmune();
         this.scale = 0;

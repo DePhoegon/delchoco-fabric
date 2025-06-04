@@ -21,6 +21,7 @@ public class ChocoList {
     public static void commonRegOrder() {
         itemGroupLogic.registerItemGroups();
         ModEntities.registerAttributes();
+        //MemoryTypes.registerAll();
         CommandRegistrationCallback.EVENT.register((dispatcher, dedicated, environment) -> chocoboTeams.commands(dispatcher));
         ModSounds.registerSounds();
         PacketManager.init();

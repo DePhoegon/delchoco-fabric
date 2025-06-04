@@ -131,7 +131,7 @@ public class chocoboChecks {
     public static boolean isOceanBlocked(RegistryKey<Biome> biomeRegistryKey, boolean allowBlue) {
         ArrayList<RegistryKey<Biome>> out = IS_OCEAN();
         boolean blocked = out.contains(biomeRegistryKey);
-        if (blocked && allowBlue) { return blueChocobo().contains(biomeRegistryKey); }
+        if (blocked && allowBlue) { return !blueChocobo().contains(biomeRegistryKey); }
         return blocked;
     }
     public static @NotNull Collection<RegistryKey<Biome>> vanillaBiomes() {

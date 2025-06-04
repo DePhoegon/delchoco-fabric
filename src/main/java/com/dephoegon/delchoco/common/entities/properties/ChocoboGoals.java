@@ -87,13 +87,13 @@ public class ChocoboGoals {
 
         public void start() { canTeleport(); }
     }
-    protected static double boundsFlip(Double vec3, int block, double limit) {
+    protected static int boundsFlip(double vec3, int block, int limit) {
         double positiveDif = positiveDifference(vec3, block);
-        if (limit > positiveDif) { return vec3; }
+        if (limit > positiveDif) { return (int) vec3; }
         return vec3 >= block ? block + limit : block - limit;
     }
-    protected static double positiveDifference(Double vec3, int block) {
-        double out = vec3 < block ? block - vec3 : vec3 - block;
+    protected static int positiveDifference(double vec3, int block) {
+        int out = (int) (vec3 < block ? block - vec3 : vec3 - block);
         return out < 0 ? out * -1 : out;
     }
     private static int boundedModifier(double lower, double upper) {
@@ -101,39 +101,36 @@ public class ChocoboGoals {
     }
     public static class ChocoboRoamWonder extends WanderAroundGoal {
         final Chocobo choco;
+        BlockPos blockPos;
+        int limit = 0;
+        double xSpot;
+        double zSpot;
+        int followMrHuman;
 
+        public void tick() {
+            followMrHuman = choco.isTamed() ? choco.followingMrHuman : 2;
+            limit = choco.getLeashDistance();
+            blockPos = choco.getLeashSpot();
+            this.stop();
+        }
         public ChocoboRoamWonder(Chocobo mob, double speed) {
             super(mob, speed, 120, !mob.cannotDespawn());
             this.choco = mob;
         }
         // using riding tick delay to limit movement starts to .5 seconds (10 ticks) out of 1.5 seconds (30 ticks)
         public boolean canStart() {
+            if (choco.followOwner() || choco.followLure()) { return false; }
             boolean staggeredStart = choco.getRideTickDelay() > 20;
-            if (staggeredStart) { return super.canStart(); } else { return false; }
-        }
-    }
-    public static class ChocoboLocalizedWonder extends WanderAroundGoal {
-        final Chocobo choco;
-        final BlockPos blockPos;
-        final double limit;
-        double xSpot;
-        double zSpot;
-        public ChocoboLocalizedWonder(Chocobo pMob, double pSpeedModifier, BlockPos position, Double RangeLimit) {
-            super(pMob, pSpeedModifier, 120, !pMob.cannotDespawn());
-            this.blockPos = position;
-            this.limit = RangeLimit;
-            this.choco = pMob;
-        }
-        // using riding tick delay to limit movement starts to .75 seconds (15 ticks) out of 1.5 seconds (30 ticks)
-        public boolean canStart() {
-            boolean staggeredStart = choco.getRideTickDelay() > 15;
             if (staggeredStart) { return super.canStart(); } else { return false; }
         }
         @Nullable
         protected Vec3d getPosition(Vec3d target) {
             Vec3d vec3 = target;
-            int x = boundedModifier(limit/2, limit);
-            int z = boundedModifier(limit/2, limit);
+            this.limit = choco.getLeashDistance();
+            if (this.limit < 2) { this.limit = 5; } // if the leash distance is less than 2, set it to 5
+            if (this.blockPos.getX() == 0 && this.blockPos.getZ() == 0) { this.blockPos = choco.getBlockPos(); } // if the leash spot is not set, use the chocobo's position
+            int x = boundedModifier((double) limit /2, limit);
+            int z = boundedModifier((double) limit /2, limit);
             if (vec3 == null) { vec3 = new Vec3d(this.blockPos.getX()+x, this.blockPos.getY(), this.blockPos.getZ()+z); }
             this.xSpot = boundsFlip(vec3.getX(), this.blockPos.getX(), this.limit);
             this.zSpot = boundsFlip(vec3.getZ(), this.blockPos.getZ(), this.limit);
@@ -142,7 +139,12 @@ public class ChocoboGoals {
         @Override
         @Nullable
         protected Vec3d getWanderTarget() {
-            return getPosition(NoPenaltyTargeting.find(this.mob, 10, 7));
+            return choco.isNoRoam() ? getPosition(NoPenaltyTargeting.find(this.choco, 10, 7)) : super.getWanderTarget();
+        }
+        @Override
+        public void stop() {
+            if (choco == null || choco.isRemoved() || choco.getWorld() == null) { super.stop(); }
+            else if (choco.followOwner() || choco.followLure()) { super.stop(); }
         }
     }
     public static class ChocoboOwnerHurtGoal extends AttackWithOwnerGoal {
@@ -225,7 +227,8 @@ public class ChocoboGoals {
     }
     @SuppressWarnings("rawtypes")
     public static class ChocoboAvoidPlayer extends FleeEntityGoal {
-        public ChocoboAvoidPlayer(PathAwareEntity pMob) {
+        private final Chocobo mob;
+        public ChocoboAvoidPlayer(Chocobo pMob) {
             //noinspection unchecked
             super(pMob, PlayerEntity.class, livingEntity -> {
                 if(livingEntity instanceof PlayerEntity player) {
@@ -239,6 +242,11 @@ public class ChocoboGoals {
                 }
                 return false;
             }, 10.0F, 1.0D, 1.2D, EntityPredicates.EXCEPT_CREATIVE_OR_SPECTATOR);
+            this.mob = pMob;
+        }
+        public boolean canStart() {
+            if (mob.isTamed()) { return false; }
+            return super.canStart();
         }
     } // keeping commented out.
     public static class ChocoboHurtByTargetGoal extends RevengeGoal {
@@ -248,6 +256,18 @@ public class ChocoboGoals {
             boolean canAttack = true;
             if (livingentity != null) { canAttack = AttackClassCheck(livingentity.getClass()); }
             if (canAttack) { return super.canStart(); } else { return false; }
+        }
+    }
+    public static class ChocoboFollowOwnerGoal extends FollowOwnerGoal {
+        private final Chocobo chocobo;
+        public ChocoboFollowOwnerGoal(Chocobo pMob, double pSpeedModifier, float pMinDist, float pMaxDist) {
+            super(pMob, pSpeedModifier, pMinDist, pMaxDist, true);
+            this.chocobo = pMob;
+        }
+        public boolean canStart() {
+            if (!chocobo.isTamed()) { return false; }
+            if (chocobo.followOwner()) { return super.canStart(); }
+            return false;
         }
     }
 }

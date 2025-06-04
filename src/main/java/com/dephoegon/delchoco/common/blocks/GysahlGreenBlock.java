@@ -30,10 +30,10 @@ public class GysahlGreenBlock extends PlantBlock
     public static final int MAX_AGE = 4;
     public static final int MAX_BIOME = getGreenCount(); // This is set in the GysahlGreenBiomes class where the biome checks are stored for biome set for each plant possibility to get from a the greens as a bonus.
     public static final IntProperty AGE = IntProperty.of("age", 0, MAX_AGE);
-    public static final IntProperty BIOME = IntProperty.of("biome", -1, MAX_BIOME); // -1 is used to indicate that the block has not been placed yet or was placed by world gen and used to allow onBreak (player call) to set the biome property in line with the break and provide the correct biome for the block.
+    public static final IntProperty BIOME = IntProperty.of("biome", 0, MAX_BIOME); // 0 is used to indicate that the block has not been placed yet or was placed by world gen and used to allow onBreak (player call) to set the biome property in line with the break and provide the correct biome for the block.
     public GysahlGreenBlock(Settings settings) {
         super(settings);
-        this.setDefaultState((this.stateManager.getDefaultState()).with(this.getAgeProperty(), 0).with(this.getBiomeProperty(), -1));
+        this.setDefaultState((this.stateManager.getDefaultState()).with(this.getAgeProperty(), 0).with(this.getBiomeProperty(), 0));
     }
     protected ItemConvertible getSeedsItem() { return GYSAHL_GREEN_SEEDS; }
     protected boolean canPlantOnTop(BlockState floor, BlockView world, BlockPos pos) { return floor != null && blockPlaceableOnList().contains(floor.getBlock().getDefaultState()); }
@@ -85,7 +85,7 @@ public class GysahlGreenBlock extends PlantBlock
     public boolean canPlaceAt(BlockState state, @NotNull WorldView world, @NotNull BlockPos pos) { return isValidPlacementPosition(world, pos) && world.getBlockState(pos).isAir(); }
     private boolean isValidPlacementPosition(@NotNull WorldView world, @NotNull BlockPos pos) { return blockPlaceableOnList().contains(world.getBlockState(pos.down()).getBlock().getDefaultState()); } // Checks if the block can be placed on the block below, specifically for the Gysahl Green Block & split from the canPlaceAt method to allow for the calling of getStateForNeighborUpdate to check for the base block & not needing to modify canPlaceAt to include a copy of itself.
     public BlockState getStateForNeighborUpdate(@NotNull BlockState state, Direction direction, BlockState neighborState, @NotNull WorldAccess world, BlockPos pos, @NotNull BlockPos neighborPos) {
-        if (state.get(BIOME) == -1) { state.with(BIOME, getBiomePlacedID(world, pos)); } // if the block was placed by world gen, set the biome property.
+        if (state.get(BIOME) == 0) { state.with(BIOME, getBiomePlacedID(world, pos)); } // if the block was placed by world gen, set the biome property.
         return isValidPlacementPosition(world, pos) ? state : super.getStateForNeighborUpdate(state, direction, neighborState, world, pos, neighborPos);
         // The call to super is only needed to ensure use of vanilla code and will always result in failure (within the super) resulting in an Air Block. Vanilla code is used, in case of other mods somehow modifying this call in plantBlock
     }

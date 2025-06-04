@@ -1,0 +1,66 @@
+-Logic Changing
+-- GysahlGreens got updated to drop other items for chocobo breeding/stats.
+// -- Gysahl Greens now drop from the crops based on biome.
+~~ Fixed Gysahl Green planting Bug related to int below 0
+
+-- Fixed chocoboChecks isOceanBlocked to properly return the correct value.
+
+- Preparation for Brains
+-- Added the Brain class for chocobos.
+~~ Class is complete, but not used yet.
+-- Added Helper methods to the Chocobo Entity to handle the Brain.
+~~ Helper methods include:
+// -- getPathfinderFavor()  || Corrected to return the favor of the pathfinder
+// -- canAttackwithOwner()
+~~ implemented using smarter checks
+// -- isWaterBreathing(), isFlameBlood(), isWaterBlooded(), isFireImmune()
+~~ isWaterBreathing() and isWaterBlooded() were split from isWaterBreathing().
+~~~~ isWaterBlooded() checks if the chocobo has permanent water breathing, which is stored in the entity data, and isWaterBreathing() checks if the chocobo has temporary or Permanent water breathing, which is not stored.
+~~ isFlameBlood() and isFireImmune() were split from isFireImmune().
+ ~~~ isFlameBlood() checks if the chocobo has permanent fire immunity, which is stored in the entity data, and isFireImmune() checks if the chocobo has temporary or Permanent fire immunity, which is not stored. isFireImmune() used like this because it is called in the EntityLivingBase class, which does not have access to the entity data.
+ // -- onStatusEffectAdded(), onStatusEffectRemoved()
+~~ onStatusEffectAdded() and onStatusEffectRemoved() were added as overloads to manually trigger the setPathfindingPenalty for the nodes that used conditional logic such as isFireImmune & isWaterBreathing.
+-- Added the initial setPathfindingPenalty() method to the Chocobo Entity Constructor.
+
+- Chocobo Entity Refactor
+-- Corrected Chocobo Entity Spawn to actually limit the amount of Chocobos spawned in a chunk.
+-- Removed improper getPathfindingFavor() method from the Chocobo Entity.
+-- Corrected & Updated the Logice for the Chocobo Entity in regards to Liquid interaction.
+
+
+
+
+- TODO
+// -- Add the Brain to the Chocobo Entity
+~~~ Get AlertOthers working with the Brain
+// -- Register the Brain in the Chocobo Entity
+// -- Refactor the Chocobo Entity Logic
+// ~~~ Remove targetgoals
+// ~~~ Look for redundant code that is covering the same logic conditions
+// -- Remove Chocobo Stamina
+// -- Look into the Chocobo Entity's data to see if there is anything that can be removed or simplified.
+~~ Look at Booleans that can be combined into one using Ints or Bytes.
+~~~~ Namely the checks for 'waterbreathing', 'flameblood', 'witherImmunity', 'PosionImmunity'
+// -- Look into the Chocobo Entity's data to see if there is anything that can be removed.
+~~ Look at Unused data that can be removed which is not used in the Chocobo Entity.
+~~~~ such as NestPosition
+// -- Look Into Leashing Chocobos
+// -- Section the Chocobo Entity's code by methods with similar purposes, & add comments to the sections.
+// -- Evaluate the Chocobo Stats & limits to see if caps should be raised or lowered.
+// -- Evaluate the Chocobo Armor/Weapons & see what can be done to balance them to the current stats of the Chocobo Entity.
+// -- Examine the CHocobo Vehicle Methods to see if something can be done to improve the logic or simplify it.
+// -- Examine the Chocobo Entity travel methods to see if something can be done to improve the logic or simplify it.
+// -- Examine the Chocobo Entity's Tick/tickMovement methods to see if something can be done to improve the logic or simplify it.
+// -- Examine the Chocobo Entity's floatchocobo methods to see if it's able to be removed.
+// -- Evaluate the Chocobo Entity's teleportToOwner method to see if it can be simplified or removed.
+// -- Evaluate the CHocobo Entity's setSprinting method to see if it can be simplified or removed.
+// -- Evaluate the Chocobo Entity's interactAt method to see if it can be simplified or removed.
+// -- Evaluate the Chocobo Entity's  persistence methods to see if it can be simplified or removed.
+
+
+-- TODO
+TEST ALL THE THINGS
+-- Ride Chocobos, in water, on land, in the lava, in the nether, in the end.
+-- Breed Chocobos, with different colors, with different items.
+-- Feed Chocobos, with different items, with different effects.
+-- Cap Chocobo Stats

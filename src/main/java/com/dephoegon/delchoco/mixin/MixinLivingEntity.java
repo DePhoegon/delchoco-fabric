@@ -19,14 +19,6 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Mixin(LivingEntity.class)
 public abstract class MixinLivingEntity {
-    @Inject(method = "onDeath", at = @At("HEAD"))
-    private void onDeath(@NotNull DamageSource source, CallbackInfo ci) {
-        // The entity has died
-        // The source of the damage is available in the 'source' parameter
-        Chocobo attacker = source.getAttacker() instanceof Chocobo ? (Chocobo) source.getAttacker() : null;
-        LivingEntity dead = source.getSource() instanceof LivingEntity ? (LivingEntity) source.getSource() : null;
-        ChocoboCombatEvents.onChocoboKill(attacker, dead);
-    }
     @Inject(method = "addStatusEffect(Lnet/minecraft/entity/effect/StatusEffectInstance;Lnet/minecraft/entity/Entity;)Z", at = @At("HEAD"), cancellable = true)
     private void onAddStatusEffect(StatusEffectInstance effect, @Nullable Entity source, CallbackInfoReturnable<Boolean> cir) {
         // The entity has died

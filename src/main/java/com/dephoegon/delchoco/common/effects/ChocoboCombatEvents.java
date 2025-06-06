@@ -206,7 +206,6 @@ public class ChocoboCombatEvents {
                 if (color == ChocoboColor.YELLOW) {
                     if (flowerChance()) {
                         Item flower = switch (random.nextInt(12) + 1) {
-                            default -> DANDELION;
                             case 2 -> POPPY;
                             case 3 -> BLUE_ORCHID;
                             case 4 -> ALLIUM;
@@ -218,6 +217,7 @@ public class ChocoboCombatEvents {
                             case 10 -> OXEYE_DAISY;
                             case 11 -> CORNFLOWER;
                             case 12 -> LILY_OF_THE_VALLEY;
+                            default -> DANDELION;
                         };
                         targetEntity.dropItem(flower);
                     }
@@ -245,7 +245,7 @@ public class ChocoboCombatEvents {
         };
         if (random.nextInt(1000)+1 < 85) { dyingChocobo.dropStack(egg); }
     }
-    private static boolean flowerChance() { return random.nextInt(100)+1 < 45; }
+    public static boolean flowerChance() { return random.nextInt(100)+1 < 45; }
     private static boolean onHitMobChance(int percentChance) { return random.nextInt(100)+1 < percentChance; }
     private static void onHitMobChance(int percentChance, Item item, Entity e) { if (random.nextInt(100)+1 < percentChance) { e.dropItem(item); } }
     private static ChocoboColor getNBTKEY_COLOR(@NotNull ItemStack item) {

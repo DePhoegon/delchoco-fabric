@@ -6,7 +6,6 @@ import com.dephoegon.delchoco.utils.RandomHelper;
 import net.minecraft.block.BlockState;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.ai.NoPenaltyTargeting;
-import net.minecraft.entity.ai.TargetPredicate;
 import net.minecraft.entity.ai.goal.*;
 import net.minecraft.entity.ai.pathing.LandPathNodeMaker;
 import net.minecraft.entity.ai.pathing.PathNodeType;
@@ -26,6 +25,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.ArrayList;
 import java.util.EnumSet;
 
+import static com.dephoegon.delchoco.common.entities.properties.ChocoboBrainAid.isAttackable;
 import static com.dephoegon.delchoco.utils.RandomHelper.random;
 import static net.minecraft.entity.ai.pathing.PathNodeType.WALKABLE;
 
@@ -148,65 +148,52 @@ public class ChocoboGoals {
         }
     }
     public static class ChocoboOwnerHurtGoal extends AttackWithOwnerGoal {
-        private final TameableEntity tameAnimal;
+        private final Chocobo chocobo;
         private LivingEntity attacking;
         private int lastAttackTime;
 
-        public ChocoboOwnerHurtGoal(TameableEntity pTameAnimal) {
+        public ChocoboOwnerHurtGoal(Chocobo pTameAnimal) {
             super(pTameAnimal);
-            this.tameAnimal = pTameAnimal;
+            this.chocobo = pTameAnimal;
             this.setControls(EnumSet.of(Goal.Control.TARGET));
         }
         public boolean canStart() {
-            if (tameAnimal.isTamed()) {
-                LivingEntity livingEntity = tameAnimal.getOwner();
-                if (livingEntity == null) { return false; }
-                this.attacking = livingEntity.getAttacking();
-                int i = livingEntity.getLastAttackTime();
-                if (AttackClassCheck(this.attacking.getClass())) {
-                    return i != this.lastAttackTime && this.canTrack(this.attacking, TargetPredicate.DEFAULT) && this.tameAnimal.canAttackWithOwner(this.attacking, livingEntity);
-                }
+            return super.canStart();
+            /*
+            if (chocobo.isTamed()) {
+                LivingEntity chocoboOwner = chocobo.getOwner();
+                if (chocoboOwner == null) { return false; }
+                this.attacking = chocoboOwner.getAttacking();
+                int i = chocoboOwner.getLastAttackTime();
+                DelChoco.LOGGER.info("ChocoboOwnerHurtGoal.canStart() - Chocobo: {} - Attacking: {} - Last Attack Time: {} - Can attack With Owner: {}", chocobo.getName().getString(), this.attacking != null ? this.attacking.getName().getString() : "null", i, chocobo.canAttackWithOwner(this.attacking, chocoboOwner));
+                return i != this.lastAttackTime && this.canTrack(this.attacking, TargetPredicate.DEFAULT) && this.chocobo.canAttackWithOwner(this.attacking, chocoboOwner);
             }
             return false;
-        }
-        @Override
-        public void start() {
-            this.mob.setTarget(this.attacking);
-            LivingEntity livingEntity = this.tameAnimal.getOwner();
-            if (livingEntity != null) { this.lastAttackTime = livingEntity.getLastAttackTime(); }
-            super.start();
+            */
         }
     }
     public static class ChocoboOwnerHurtByGoal extends TrackOwnerAttackerGoal {
-        private final TameableEntity tameAnimal;
+        private final Chocobo chocobo;
         private LivingEntity attacker;
         private int lastAttackedTime;
 
-        public ChocoboOwnerHurtByGoal(TameableEntity pTameAnimal) {
+        public ChocoboOwnerHurtByGoal(Chocobo pTameAnimal) {
             super(pTameAnimal);
-            this.tameAnimal = pTameAnimal;
+            this.chocobo = pTameAnimal;
             this.setControls(EnumSet.of(Goal.Control.TARGET));
         }
         public boolean canStart() {
-            if (tameAnimal.isTamed()) {
-                LivingEntity livingentity = tameAnimal.getOwner();
-                if (livingentity == null) { return false; }
-                this.attacker = livingentity.getAttacker();
-                int i = livingentity.getLastAttackedTime();
-                if (AttackClassCheck(this.attacker.getClass())) {
-                    return i != this.lastAttackedTime && this.canTrack(this.attacker, TargetPredicate.DEFAULT) && this.tameAnimal.canAttackWithOwner(this.attacker, livingentity);
-                }
+            return super.canStart();
+            /*
+            if (chocobo.isTamed()) {
+                LivingEntity chocoboOwner = chocobo.getOwner();
+                if (chocoboOwner == null) { return false; }
+                this.attacker = chocoboOwner.getAttacker() ;
+                int i = chocoboOwner.getLastAttackedTime();
+                return  i != this.lastAttackedTime && this.canTrack(this.attacker, TargetPredicate.DEFAULT) & isAttackable(this.attacker);
             }
             return false;
-        }
-        @Override
-        public void start() {
-            this.mob.setTarget(this.attacker);
-            LivingEntity livingEntity = this.tameAnimal.getOwner();
-            if (livingEntity != null) {
-                this.lastAttackedTime = livingEntity.getLastAttackedTime();
-            }
-            super.start();
+            */
         }
     }
     public static class ChocoPanicGoal extends EscapeDangerGoal {
@@ -218,10 +205,8 @@ public class ChocoboGoals {
         }
         private boolean dragonDamageCheck() {
             LivingEntity livingentity = this.entity.getAttacker();
-            boolean tame;
-            if (this.entity instanceof Chocobo chocobo) { tame = chocobo.isTamed(); } else { tame = false; }
-            if (livingentity != null && !tame) { return livingentity.getClass() == EnderDragonEntity.class; }
-            return false;
+            if (livingentity == null) { return false; }
+            return livingentity.getClass() == EnderDragonEntity.class;
         }
         protected boolean isInDanger() { return entity.shouldEscapePowderSnow() || entity.isOnFire() || dragonDamageCheck(); }
     }
@@ -252,10 +237,8 @@ public class ChocoboGoals {
     public static class ChocoboHurtByTargetGoal extends RevengeGoal {
         public ChocoboHurtByTargetGoal(PathAwareEntity pMob, Class<?>... pToIgnoreDamage) { super(pMob, pToIgnoreDamage); }
         public boolean canStart() {
-            LivingEntity livingentity = this.mob.getAttacker();
-            boolean canAttack = true;
-            if (livingentity != null) { canAttack = AttackClassCheck(livingentity.getClass()); }
-            if (canAttack) { return super.canStart(); } else { return false; }
+            LivingEntity chocoboAttacker = this.mob.getAttacker();
+            if (isAttackable(chocoboAttacker)) { return super.canStart(); } else { return false; }
         }
     }
     public static class ChocoboFollowOwnerGoal extends FollowOwnerGoal {

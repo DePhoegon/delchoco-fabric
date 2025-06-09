@@ -5,11 +5,16 @@ import com.dephoegon.delchoco.common.entities.properties.ChocoboColor;
 import net.minecraft.entity.EntityData;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.SpawnReason;
+import net.minecraft.entity.damage.DamageSource;
+import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.world.LocalDifficulty;
 import net.minecraft.world.ServerWorldAccess;
 import net.minecraft.world.World;
 import org.jetbrains.annotations.Nullable;
+
+import static com.dephoegon.delchoco.common.init.ModItems.FLAME_CHOCOBO_SPAWN_EGG;
+import static com.dephoegon.delchoco.common.init.ModItems.YELLOW_CHOCOBO_SPAWN_EGG;
 
 public class Flame extends Chocobo {
     public Flame(EntityType<? extends Chocobo> entityType, World world) {
@@ -27,4 +32,9 @@ public class Flame extends Chocobo {
         super.readCustomDataFromNbt(compound);
         this.setChocoboColor(ChocoboColor.FLAME);
     }
+    public void onDeath(DamageSource source) {
+        if (onDeathCheck(1000, 85)) {  this.dropStack(new ItemStack(FLAME_CHOCOBO_SPAWN_EGG)); }
+        super.onDeath(source);
+    }
+    public boolean isPersistent() { return this.isTamed() || this.isCustomNameVisible(); }
 }

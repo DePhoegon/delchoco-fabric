@@ -61,7 +61,7 @@ public class LayerChocoboTrims extends FeatureRenderer<Chocobo, EntityModel<Choc
                 rSwitch(matrixStackIn, bufferIn, packedLightIn, chocobo, untamedShow, UNTAMED_CHOCOBO_PLUMES.get(chocobo.getChocoboColor()), true);
                 if (chocobo.isTamed()) { rSwitch(matrixStackIn, bufferIn, packedLightIn, chocobo, tamedShow, TAMED_CHOCOBO_PLUMES.get(chocobo.getChocoboColor()), false); }
             }
-            if (chocobo.nonFlameFireImmune()) { rSwitch(matrixStackIn, bufferIn, packedLightIn, chocobo, 1F, chocobo.isBaby() ? CHICOBO_FLAME_EYES : CHOCOBO_FLAME_EYES, false); }
+            if (chocobo.isFireImmune()) { rSwitch(matrixStackIn, bufferIn, packedLightIn, chocobo, 1F, chocobo.isBaby() ? CHICOBO_FLAME_EYES : CHOCOBO_FLAME_EYES, false); }
         }
     }
     private void rSwitch(@NotNull MatrixStack matrixStackIn, @NotNull VertexConsumerProvider bufferIn, int packedLightIn, @NotNull Chocobo chocobo, float alpha, Identifier layer, boolean outline) {

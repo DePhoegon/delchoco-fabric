@@ -1,7 +1,6 @@
 // src/main/java/com/dephoegon/delchoco/common/entities/properties/ChocoboBrains.java
 package com.dephoegon.delchoco.common.entities.properties;
 
-import com.dephoegon.delchoco.DelChoco;
 import com.dephoegon.delchoco.common.entities.Chocobo;
 import com.dephoegon.delchoco.common.items.ChocoDisguiseItem;
 import com.dephoegon.delchoco.utils.RandomHelper;
@@ -11,7 +10,6 @@ import com.google.common.collect.ImmutableSet;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.FenceBlock;
 import net.minecraft.block.WallBlock;
-import net.minecraft.command.argument.ScoreHolderArgumentType;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.ai.NoPenaltyTargeting;
@@ -82,7 +80,7 @@ public class ChocoboBrains {
 
     private static void addFightActivities(Brain<Chocobo> brain, Chocobo chocobo) {
         brain.setTaskList(Activity.FIGHT, 0, ImmutableList.of(
-                ForgetAttackTargetTask.create(ChocoboBrainAid::isInvalidTarget)/*,
+                ForgetAttackTargetTask.create(ChocoboBrainAid::isInvalidTarget),
                 RangedApproachTask.create(1.2F),
                 AttackTask.create((int) (chocobo.getBoundingBox().getZLength()*1.5F), 1.2F)
                 /*MeleeAttackTask.create(20)*/
@@ -152,7 +150,7 @@ public class ChocoboBrains {
 
         @Override
         protected boolean shouldKeepRunning(ServerWorld world, Chocobo chocobo, long time) {
-            if (this.path == null || this.lookTargetPos == null) return false;
+            if (this.path == null || this.lookTargetPos == null) { return false; }
             Optional<WalkTarget> walkTargetOpt = chocobo.getBrain().getOptionalRegisteredMemory(MemoryModuleType.WALK_TARGET);
             EntityNavigation nav = chocobo.getNavigation();
             return walkTargetOpt.isPresent() && !nav.isIdle() && !hasReached(chocobo, walkTargetOpt.get());
@@ -242,35 +240,36 @@ public class ChocoboBrains {
 
         private boolean shouldPanicFromAttacker(Chocobo chocobo) {
             LivingEntity attacker = chocobo.getAttacker();
-            // Panic if there is an attacker and it is NOT attackable,  To include non-living entities (Mod Coverage)
-            return attacker != null && !ChocoboBrainAid.isAttackable(attacker);
-        }
+            if (attacker == null) { return false; } // No attacker, no panic
+                // Panic if there is an attacker and it is NOT attackable,  To include non-living entities (Mod Coverage)
+                return !ChocoboBrainAid.isAttackable(attacker);
+            }
 
-        protected boolean isInDanger(Chocobo chocobo) {
-            return chocobo.shouldEscapePowderSnow() || chocobo.isOnFire() || shouldPanicFromAttacker(chocobo);
-        }
+            protected boolean isInDanger (Chocobo chocobo){
+                return chocobo.shouldEscapePowderSnow() || chocobo.isOnFire() || shouldPanicFromAttacker(chocobo);
+            }
 
-        @Override
-        protected boolean shouldRun(ServerWorld world, Chocobo chocobo) {
-            return isInDanger(chocobo);
-        }
+            @Override
+            protected boolean shouldRun (ServerWorld world, Chocobo chocobo){
+                return isInDanger(chocobo);
+            }
 
-        @Override
-        protected void run(ServerWorld world, Chocobo chocobo, long time) {
-            Brain<?> brain = chocobo.getBrain();
-            // Clear targets and set panic activity
-            brain.forget(MemoryModuleType.PATH);
-            brain.forget(MemoryModuleType.WALK_TARGET);
-            brain.forget(MemoryModuleType.LOOK_TARGET);
-            brain.doExclusively(Activity.PANIC);
+            @Override
+            protected void run (ServerWorld world, Chocobo chocobo,long time){
+                Brain<?> brain = chocobo.getBrain();
+                // Clear targets and set panic activity
+                brain.forget(MemoryModuleType.PATH);
+                brain.forget(MemoryModuleType.WALK_TARGET);
+                brain.forget(MemoryModuleType.LOOK_TARGET);
+                brain.doExclusively(Activity.PANIC);
 
-            // Set a random walk target to make the chocobo run
-            Vec3d pos = NoPenaltyTargeting.find(chocobo, 10, 7);
-            if (pos != null) {
-                brain.remember(MemoryModuleType.WALK_TARGET, new WalkTarget(pos, speed, 0));
+                // Set a random walk target to make the chocobo run
+                Vec3d pos = NoPenaltyTargeting.find(chocobo, 10, 7);
+                if (pos != null) {
+                    brain.remember(MemoryModuleType.WALK_TARGET, new WalkTarget(pos, speed, 0));
+                }
             }
         }
-    }
 
     public static class OwnerHurtTask extends MultiTickTask<Chocobo> {
         private LivingEntity ownerTarget;
@@ -284,9 +283,8 @@ public class ChocoboBrains {
         protected boolean shouldRun(ServerWorld world, Chocobo chocobo) {
             if (chocobo.isTamed()) {
                 LivingEntity owner = chocobo.getOwner();
-                if (owner == null) return false;
+                if (owner == null) { return false; }
                 this.ownerTarget = owner.getAttacking();
-                DelChoco.LOGGER.info("Looking for owner attack target: " + this.ownerTarget);
                 int i = owner.getLastAttackTime();
                 if (isAttackable(this.ownerTarget)) {
                     // return i != this.lastAttackTime && chocobo.canAttackWithOwner(attacking, owner);
@@ -314,8 +312,9 @@ public class ChocoboBrains {
         protected boolean shouldRun(ServerWorld world, Chocobo chocobo) {
             if (chocobo.isTamed()) {
                 LivingEntity owner = chocobo.getOwner();
-                if (owner == null) return false;
+                if (owner == null) { return false; }
                 this.ownerAttacker = owner.getAttacker();
+                if (this.ownerAttacker == null) { return false; }
                 if (isAttackable(this.ownerAttacker)) {
                     //return i != this.lastAttackedTime && chocobo.canAttackWithOwner(attacker, owner);
                     return chocobo.canAttackWithOwner(ownerAttacker, owner);

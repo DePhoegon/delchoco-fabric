@@ -5,11 +5,15 @@ import com.dephoegon.delchoco.common.entities.properties.ChocoboColor;
 import net.minecraft.entity.EntityData;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.SpawnReason;
+import net.minecraft.entity.damage.DamageSource;
+import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.world.LocalDifficulty;
 import net.minecraft.world.ServerWorldAccess;
 import net.minecraft.world.World;
 import org.jetbrains.annotations.Nullable;
+
+import static com.dephoegon.delchoco.common.init.ModItems.RED_CHOCOBO_SPAWN_EGG;
 
 public class Red extends Chocobo {
     public Red(EntityType<? extends Chocobo> entityType, World world) {
@@ -26,5 +30,9 @@ public class Red extends Chocobo {
     public void readCustomDataFromNbt(NbtCompound compound) {
         super.readCustomDataFromNbt(compound);
         this.setChocoboColor(ChocoboColor.RED);
+    }
+    public void onDeath(DamageSource source) {
+        if (onDeathCheck(1000, 85)) {  this.dropStack(new ItemStack(RED_CHOCOBO_SPAWN_EGG)); }
+        super.onDeath(source);
     }
 }

@@ -18,10 +18,7 @@ import com.dephoegon.delchoco.common.items.ChocoboLeashPointer;
 import com.dephoegon.delchoco.common.items.ChocoboSaddleItem;
 import com.dephoegon.delchoco.common.items.ChocoboWeaponItems;
 import com.dephoegon.delchoco.mixin.ServerPlayerEntityAccessor;
-import com.dephoegon.delchoco.utils.WorldUtils;
 import com.google.common.collect.Maps;
-import net.minecraft.block.Block;
-import net.minecraft.block.Blocks;
 import net.minecraft.block.FluidBlock;
 import net.minecraft.block.ShapeContext;
 import net.minecraft.client.MinecraftClient;
@@ -41,15 +38,16 @@ import net.minecraft.entity.mob.EndermiteEntity;
 import net.minecraft.entity.mob.MobEntity;
 import net.minecraft.entity.mob.SilverfishEntity;
 import net.minecraft.entity.passive.AnimalEntity;
-import net.minecraft.entity.passive.LlamaEntity;
 import net.minecraft.entity.passive.PassiveEntity;
 import net.minecraft.entity.passive.TameableEntity;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.entity.vehicle.BoatEntity;
 import net.minecraft.fluid.Fluid;
 import net.minecraft.fluid.FluidState;
 import net.minecraft.inventory.Inventory;
-import net.minecraft.item.*;
+import net.minecraft.item.Item;
+import net.minecraft.item.ItemConvertible;
+import net.minecraft.item.ItemStack;
+import net.minecraft.item.NameTagItem;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtHelper;
 import net.minecraft.network.packet.s2c.play.OpenHorseScreenS2CPacket;
@@ -74,17 +72,21 @@ import net.minecraft.world.biome.Biome;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.*;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.UUID;
 
 import static com.dephoegon.delbase.item.ShiftingDyes.*;
 import static com.dephoegon.delchoco.DelChoco.chocoConfigHolder;
 import static com.dephoegon.delchoco.DelChoco.worldConfigHolder;
 import static com.dephoegon.delchoco.aid.chocoKB.isChocoboWaterGlide;
-import static com.dephoegon.delchoco.aid.chocoboChecks.IS_OCEAN;
 import static com.dephoegon.delchoco.aid.chocoboChecks.*;
+import static com.dephoegon.delchoco.aid.chocoboChecks.IS_OCEAN;
 import static com.dephoegon.delchoco.aid.dyeList.getDyeList;
 import static com.dephoegon.delchoco.aid.world.WorldConfig.FloatChocoConfigGet;
-import static com.dephoegon.delchoco.aid.world.dValues.defaultDoubles.*;
+import static com.dephoegon.delchoco.aid.world.dValues.defaultDoubles.dSTAMINA_JUMP;
+import static com.dephoegon.delchoco.aid.world.dValues.defaultDoubles.dSTAMINA_REGEN;
 import static com.dephoegon.delchoco.common.entities.breeding.BreedingHelper.getChocoName;
 import static com.dephoegon.delchoco.common.entities.breeding.ChocoboSnap.setChocoScale;
 import static com.dephoegon.delchoco.common.init.ModItems.*;
@@ -614,13 +616,21 @@ public class Chocobo extends TameableEntity implements Angerable {
         if (oldStack.getItem() != armorType.getItem()) { this.dataTracker.set(PARAM_ARMOR_ITEM, armorType.copy()); }
     }
     public boolean isChocoboRideable(@NotNull PlayerEntity player) { return !player.isSneaking() && !this.isBaby() && this.isSaddled(); }
-    public boolean canBeRiddenInWater() { return this.canBreatheInWater(); }
-    public boolean canBreatheInWater() { return this.isWaterBreather(); }
+    public boolean canBeRiddenInWater() { return this.canBreatheInWater() || this.isWaterBreather(); }
+    public boolean canBreatheInWater() {
+        // TODO -> logic to enable disable water breathing (controlling walking on water) on a temporary condition.
+        return this.isWaterBreather();
+    }
     protected boolean canStartRiding(@NotNull Entity entityIn) { return false; }
     public boolean canWalkOnFluid(@NotNull FluidState state) {
         if (state.isIn(FluidTags.LAVA)) { return this.isFireImmune(); }
-        if (state.isIn(FluidTags.WATER)) { return !this.isWaterBreather(); }
+        if (state.isIn(FluidTags.WATER)) { return !this.canBreatheInWater(); }
         return super.canWalkOnFluid(state);
+    }
+    public boolean canWalkOnFluid(TagKey<Fluid> Tag) {
+        if (this.isFireImmune()) { return Tag == FluidTags.LAVA; }
+        if (!this.canBreatheInWater()) { return Tag == FluidTags.WATER; }
+        return false;
     }
     public float getStamina() { return this.dataTracker.get(PARAM_STAMINA); }
     public void setStamina(float value) { this.dataTracker.set(PARAM_STAMINA, value); }
@@ -670,19 +680,14 @@ public class Chocobo extends TameableEntity implements Angerable {
         this.checkWaterState();
         double d = this.world.getDimension().ultrawarm() ? 0.007 : 0.0023333333333333335;
         boolean bl = false;
-        if (this.isFireImmune()) { bl = this.updateMovementInFluid(FluidTags.LAVA, d); }
+        if (!this.isFireImmune()) { bl = this.updateMovementInFluid(FluidTags.LAVA, d); }
         return !this.isWaterBreather() && !this.isFireImmune() && (this.isInWater() || bl);
-        /*
-        this.fluidHeight.clear();
-        this.updateInWaterStateAndDoWaterCurrentPushing();
-        return this.isInWater() || this.isInLava();
-        */
     }
 
     void checkWaterState() {
         if (this.isInWater()) { this.extinguish(); }
         double speed = this.isWaterBreather() ? .45 : 0.014;
-        if (!this.isSubmergedInWater()) {
+        if (this.canWalkOnFluid(FluidTags.WATER)) {
             this.extinguish();
             this.touchingWater = false;
         } else if (this.updateMovementInFluid(FluidTags.WATER, speed)) {
@@ -696,20 +701,6 @@ public class Chocobo extends TameableEntity implements Angerable {
         return !this.firstUpdate && this.fluidHeight.getDouble(FluidTags.WATER) > 0.0;
     }
     public boolean isSwimming() { return false; }
-    private void updateInWaterStateAndDoWaterCurrentPushing() {
-        if (!this.isWaterBreather()) {
-            if (this.isInWater()) {
-                this.extinguish();
-                this.fallDistance = 0.0F;
-                this.touchingWater = this.hasPassengers();
-                this.extinguish();
-            } else { this.touchingWater = false; }
-        }
-        if (this.isInWater()) {
-            this.extinguish();
-            if (this.hasPassengers()) { if (this.getPrimaryPassenger() instanceof PlayerEntity rider) { rider.extinguish(); } }
-        }
-    }
     public void travel(@NotNull Vec3d travelVector) {
         Vec3d newVector = travelVector;
         if (!this.getWorld().isClient()) {

@@ -131,7 +131,6 @@
   "delchoco.leash.none": "Sin puntos de correa establecidos",
   "delchoco.leash.invalid": "Distancia de la correa no válida",
 
-  "delchoco.key.category": "Chocobo Movement (solo admite teclas del teclado)",
-  "delchoco.key.in_water_glide": "Respirador de agua - Deslizarse en el agua",
-  "delchoco.key.stop_in_air_glide": "En el aire - Caiga más rápido"
+  "tooltip.key.category": "Delbase & DelChoco (solo admite teclas del teclado)",
+  "delchoco.key.in_water_glide": "Respirador de agua - Deslizarse en el agua"
 }

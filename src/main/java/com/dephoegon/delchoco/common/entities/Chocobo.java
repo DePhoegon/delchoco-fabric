@@ -17,7 +17,6 @@ import com.dephoegon.delchoco.mixin.ServerPlayerEntityAccessor;
 import com.dephoegon.delchoco.utils.RandomHelper;
 import com.dephoegon.delchoco.utils.WorldUtils;
 import com.mojang.serialization.Dynamic;
-import net.minecraft.block.BlockState;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.entity.*;
 import net.minecraft.entity.ai.brain.Brain;
@@ -47,7 +46,6 @@ import net.minecraft.nbt.NbtHelper;
 import net.minecraft.network.packet.s2c.play.OpenHorseScreenS2CPacket;
 import net.minecraft.registry.RegistryKey;
 import net.minecraft.registry.entry.RegistryEntry;
-import net.minecraft.registry.tag.FluidTags;
 import net.minecraft.scoreboard.Team;
 import net.minecraft.server.network.DebugInfoSender;
 import net.minecraft.server.network.ServerPlayerEntity;
@@ -68,7 +66,6 @@ import org.jetbrains.annotations.Nullable;
 import java.util.List;
 import java.util.Objects;
 
-import static com.dephoegon.delchoco.aid.chocoKB.isChocoShiftDown;
 import static com.dephoegon.delchoco.aid.chocoKB.isChocoboWaterGlide;
 import static com.dephoegon.delchoco.aid.chocoboChecks.*;
 import static com.dephoegon.delchoco.aid.dyeList.getDyeList;
@@ -166,13 +163,14 @@ public class Chocobo extends AbstractChocobo {
     }
     public Chocobo(EntityType<? extends Chocobo> entityType, World world) {
         super(entityType, world);
-        this.setPathfindingPenalty(PathNodeType.DAMAGE_FIRE, this.isFireImmune() ? -0.2F : 32.0F);
-        this.setPathfindingPenalty(PathNodeType.DANGER_FIRE, this.isFireImmune() ? -0.1F : 16.0F);
         this.setPathfindingPenalty(PathNodeType.FENCE,6.0F);
         this.setPathfindingPenalty(PathNodeType.DAMAGE_OTHER, 0.0F);
         this.setPathfindingPenalty(PathNodeType.DANGER_OTHER, 0.0F);
         this.setPathfindingPenalty(PathNodeType.DAMAGE_CAUTIOUS, this.isWitherImmune() ? 0.0F : 8.0F);
-        this.setPathfindingPenalty(PathNodeType.WATER, this.isWaterBreathing() ? -0.25F : -0.15F);
+        this.setPathfindingPenalty(PathNodeType.WATER, this.isWaterBreathing() ? -0.55F : -0.15F);
+        this.setPathfindingPenalty(PathNodeType.WATER_BORDER, this.isWaterBreathing() ? -0.55F : -0.25F);
+        this.setPathfindingPenalty(PathNodeType.DAMAGE_FIRE, this.isFireImmune() ? -0.2F : 32.0F);
+        this.setPathfindingPenalty(PathNodeType.DANGER_FIRE, this.isFireImmune() ? -0.1F : 16.0F);
         this.setPathfindingPenalty(PathNodeType.LAVA, this.isFireImmune() ? 0.0F : 16.0F);
     }
     public boolean canAttackWithOwner(LivingEntity target, LivingEntity owner) {
@@ -229,9 +227,7 @@ public class Chocobo extends AbstractChocobo {
     }
     @Override
     public float getPathfindingFavor(BlockPos pos, WorldView world) {
-        BlockState state = world.getBlockState(pos);
-        if (state.getFluidState().isIn(FluidTags.WATER)) { return this.isWaterBreathing() ? 0.5F : this.isFireImmune() ? 0.2F : 0.3F; }
-        if (this.isFireImmune() && state.getFluidState().isIn(FluidTags.LAVA)) { return 1.0F; }
+        // Left in for unique Chocobo Checks unable to be done in AbstractChocobo
         return super.getPathfindingFavor(pos, world);
     }
     public static DefaultAttributeContainer.Builder createAttributes() {
@@ -441,10 +437,7 @@ public class Chocobo extends AbstractChocobo {
                 if (rider.isTouchingWater()) {
                     Vec3d motion = getVelocity();
                     if (MinecraftClient.getInstance().options.jumpKey.isPressed()) { setVelocity(new Vec3d(motion.x, .5f, motion.z)); }
-                    else if (this.getVelocity().y < 0 && !this.isWaterBreathing()) {
-                        int distance = WorldUtils.getDistanceToSurface(this.getBlockPos(), this.getEntityWorld());
-                        if (distance > 0) { setVelocity(new Vec3d(motion.x, .05f, motion.z)); }
-                    } else if (this.isWaterBreathing() && isChocoboWaterGlide()) {
+                    else if (this.isWaterBreathing() && isChocoboWaterGlide()) {
                         Vec3d waterMotion = getVelocity();
                         setVelocity(new Vec3d(waterMotion.x, waterMotion.y * 0.65F, waterMotion.z));
                     }
@@ -458,7 +451,7 @@ public class Chocobo extends AbstractChocobo {
                     }
                 }
                 // Insert override for slow-fall Option on Chocobo
-                if (!this.isOnGround() && !this.isTouchingWater() && !this.isInLava() && !isChocoShiftDown() && this.getVelocity().y < 0) {
+                if (!this.isOnGround() && !this.isTouchingWater() && !this.isInLava() && this.getVelocity().y < 0) {
                     if (MinecraftClient.getInstance().options.jumpKey.isPressed()) {
                         Vec3d motion = getVelocity();
                         setVelocity(new Vec3d(motion.x, motion.y * 0.65F, motion.z));
@@ -534,16 +527,12 @@ public class Chocobo extends AbstractChocobo {
         //Change effects to chocobo colors
         if (!this.getEntityWorld().isClient()) {
             if (this.age % 60 == 0) {
-                if (this.isFireImmune()) {
-                    this.addStatusEffect(new StatusEffectInstance(StatusEffects.FIRE_RESISTANCE, 100, 0, true, false));
-                    if (this.hasPassengers()) {
+                if (this.hasPassengers()) {
+                    if (this.isFireImmune()) {
                         Entity controller = this.getPrimaryPassenger();
                         if (controller instanceof PlayerEntity) { ((PlayerEntity) controller).addStatusEffect(new StatusEffectInstance(StatusEffects.FIRE_RESISTANCE, 100, 0, true, false)); }
                     }
-                }
-                if (this.isWaterBreathing()) {
-                    this.addStatusEffect(new StatusEffectInstance(StatusEffects.WATER_BREATHING, 100, 0, true, false));
-                    if (this.hasPassengers()) {
+                    if (this.isWaterBreathing() && this.isSubmergedInWater()) {
                         Entity controller = this.getPrimaryPassenger();
                         if (controller instanceof PlayerEntity) { ((PlayerEntity) controller).addStatusEffect(new StatusEffectInstance(StatusEffects.WATER_BREATHING, 100, 0, true, false)); }
                     }

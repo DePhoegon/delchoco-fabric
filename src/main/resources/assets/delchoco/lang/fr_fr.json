@@ -131,7 +131,6 @@
   "delchoco.leash.none": "Aucun point de laisse défini",
   "delchoco.leash.invalid": "Distance de laisse non valide",
 
-  "delchoco.key.category": "Mouvement Chocobo (prend en charge les touches KeyBoard uniquement)",
-  "delchoco.key.in_water_glide": "Respirateur d’eau - Glissez dans l’eau",
-  "delchoco.key.stop_in_air_glide": "Dans l’air - Tomber plus vite"
+  "tooltip.key.category": "Delbase & DelChoco (prend en charge les touches KeyBoard uniquement)",
+  "delchoco.key.in_water_glide": "Respirateur d’eau - Glissez dans l’eau"
 }

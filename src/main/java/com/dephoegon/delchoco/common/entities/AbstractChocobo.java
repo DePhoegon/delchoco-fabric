@@ -10,6 +10,7 @@ import com.dephoegon.delchoco.common.items.ChocoboArmorItems;
 import com.dephoegon.delchoco.common.items.ChocoboWeaponItems;
 import com.dephoegon.delchoco.utils.RandomHelper;
 import com.google.common.collect.Maps;
+import net.minecraft.block.BlockState;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.EquipmentSlot;
@@ -34,9 +35,12 @@ import net.minecraft.entity.passive.IronGolemEntity;
 import net.minecraft.entity.passive.PassiveEntity;
 import net.minecraft.entity.passive.TameableEntity;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.fluid.Fluid;
+import net.minecraft.fluid.FluidState;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.registry.tag.FluidTags;
+import net.minecraft.registry.tag.TagKey;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.sound.SoundEvent;
 import net.minecraft.text.Text;
@@ -45,9 +49,12 @@ import net.minecraft.util.TimeHelper;
 import net.minecraft.util.Util;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Box;
+import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.math.intprovider.UniformIntProvider;
 import net.minecraft.world.EntityView;
 import net.minecraft.world.World;
+import net.minecraft.world.WorldView;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -295,23 +302,31 @@ public abstract class AbstractChocobo extends TameableEntity implements Angerabl
         return super.canHaveStatusEffect(potionEffect);
     }
     public void onStatusEffectApplied(@NotNull StatusEffectInstance effect, @Nullable Entity source) {
+        super.onStatusEffectApplied(effect, source);
         // Left uncompacted for readability and future expansion
-        if (effect.getEffectType() == StatusEffects.WATER_BREATHING) { this.setPathfindingPenalty(PathNodeType.WATER, -0.25F); }
+        if (effect.getEffectType() == StatusEffects.WATER_BREATHING) {
+            this.setPathfindingPenalty(PathNodeType.WATER, -0.55F);
+            this.setPathfindingPenalty(PathNodeType.WATER_BORDER, -0.55F);
+        }
         if (effect.getEffectType() == StatusEffects.FIRE_RESISTANCE) {
             this.setPathfindingPenalty(PathNodeType.DAMAGE_FIRE, -0.2F);
             this.setPathfindingPenalty(PathNodeType.DANGER_FIRE, -0.1F);
             this.setPathfindingPenalty(PathNodeType.LAVA, 0.0F);
         }
-        super.onStatusEffectApplied(effect, source);
+        this.setPathfindingPenalty(PathNodeType.DAMAGE_CAUTIOUS, this.isWitherImmune() ? 0.0F : 8.0F);
     }
     public void onStatusEffectRemoved(@NotNull StatusEffectInstance effect) {
-        if (effect.getEffectType() == StatusEffects.WATER_BREATHING) { this.setPathfindingPenalty(PathNodeType.WATER, this.isWaterBreathing() ? -0.25F : -0.15F); }
+        super.onStatusEffectRemoved(effect);
+        if (effect.getEffectType() == StatusEffects.WATER_BREATHING) {
+            this.setPathfindingPenalty(PathNodeType.WATER, this.isWaterBreathing() ? -0.55F : -0.15F);
+            this.setPathfindingPenalty(PathNodeType.WATER_BORDER, this.isWaterBreathing() ? -0.55F : -0.25F);
+        }
         if (effect.getEffectType() == StatusEffects.FIRE_RESISTANCE) {
             this.setPathfindingPenalty(PathNodeType.DAMAGE_FIRE, this.isFireImmune() ? -0.2F : 32.0F);
             this.setPathfindingPenalty(PathNodeType.DANGER_FIRE, this.isFireImmune() ? -0.1F : 16.0F);
             this.setPathfindingPenalty(PathNodeType.LAVA, this.isFireImmune() ? 0.0F : 16.0F);
         }
-        super.onStatusEffectRemoved(effect);
+        this.setPathfindingPenalty(PathNodeType.DAMAGE_CAUTIOUS, this.isWitherImmune() ? 0.0F : 8.0F);
     }
     public double getMountedHeightOffset() {
         double scaleZero = this.getChocoboScale() == 0 ? 1.7D : this.getChocoboScale() > 0 ? 1.55D : 1.85D;
@@ -332,19 +347,18 @@ public abstract class AbstractChocobo extends TameableEntity implements Angerabl
     }
     protected void updateInWaterStateAndDoWaterCurrentPushing() {
         if (!this.isWaterBreathing()) {
-            if (this.getVehicle() instanceof Chocobo) { this.touchingWater = false; }
-            else if (this.updateMovementInFluid(FluidTags.WATER, 0.014D)) {
+            if (this.updateMovementInFluid(FluidTags.WATER, 0.014D)) {
                 if (!this.touchingWater && !this.firstUpdate) { this.onSwimmingStart(); }
                 this.fallDistance = 0.0F;
                 this.touchingWater = true;
                 this.extinguish();
             } else { this.touchingWater = false; }
         } else {
-            if (this.isTouchingWater()) {
-                this.touchingWater = false;
+            if (this.updateMovementInFluid(FluidTags.WATER, 1D)) {
                 this.extinguish();
-                if (this.getVehicle() instanceof Chocobo) { if (this.getPrimaryPassenger() instanceof PlayerEntity rider) { rider.extinguish(); } }
-            }
+                this.touchingWater = true;
+                if (this.getPrimaryPassenger() instanceof PlayerEntity rider) {  rider.extinguish(); }
+            } else { this.touchingWater = false; }
         }
     }
     protected void updatePassengerPosition(Entity passenger, PositionUpdater positionUpdater) {
@@ -436,7 +450,26 @@ public abstract class AbstractChocobo extends TameableEntity implements Angerabl
         if (sprinting) { attributeInstance.addTemporaryModifier(CHOCOBO_SPRINTING_SPEED_BOOST); }
         // Set the sprinting speed boost, bypassing the LivingEntity's sprinting speed boost
     }
-    
+    public boolean canWalkOnFluid(FluidState state) {
+        if (state.isIn(FluidTags.LAVA)) { return this.isFireImmune(); }
+        if (state.isIn(FluidTags.WATER)) { return !this.canBreatheInWater(); }
+        return super.canWalkOnFluid(state);
+    }
+    public boolean shouldDismountUnderwater() {
+        // Left uncompacted for readability and future expansion
+        return !this.isWaterBreathing();
+    }
+    protected boolean shouldSwimInFluids() {
+        // Left uncompacted for readability and future expansion
+        return super.shouldSwimInFluids();
+    }
+    public float getPathfindingFavor(BlockPos pos, WorldView world) {
+        BlockState state = world.getBlockState(pos);
+        if (state.getFluidState().isIn(FluidTags.WATER)) { return this.isWaterBreathing() ? 0.5F : this.isFireImmune() ? 0.2F : 0.3F; }
+        if (this.isFireImmune() && state.getFluidState().isIn(FluidTags.LAVA)) { return 1.0F; }
+        return super.getPathfindingFavor(pos, world);
+    }
+
     // boolean checks for Chocobo properties
     public boolean isWaterBreathing() { return this.isWaterBloodChocobo() || this.hasStatusEffect(StatusEffects.WATER_BREATHING); }
     public boolean isWaterBloodChocobo() { return (this.dataTracker.get(PARAM_CHOCOBO_ABILITY_MASK) & MASK_CHOCOBO_WATER_BREATH) != 0; }
@@ -460,7 +493,10 @@ public abstract class AbstractChocobo extends TameableEntity implements Angerabl
     public ItemStack getSaddle() { return this.dataTracker.get(PARAM_SADDLE_ITEM); }
     public ItemStack getWeapon() { return this.dataTracker.get(PARAM_WEAPON_ITEM); }
     public ItemStack getArmorItemStack() { return this.dataTracker.get(PARAM_ARMOR_ITEM); }
-    public boolean canBreatheInWater() { return this.isWaterBreathing(); }
+    public boolean canBreatheInWater() {
+        // TODO -> logic to enable disable water breathing (controlling walking on water) on a temporary condition.
+        return this.isWaterBreathing();
+    }
     public int getGeneration() { return this.dataTracker.get(PARAM_GENERATION); }
     public String getGenerationString() {
         int gen = this.getGeneration();
@@ -477,7 +513,6 @@ public abstract class AbstractChocobo extends TameableEntity implements Angerabl
     public boolean followOwner() { return this.getMovementType() == MovementType.FOLLOW_OWNER; }
     public boolean followLure() { return this.getMovementType() == MovementType.FOLLOW_LURE; }
     public int getLeashDistance() { return this.dataTracker.get(PARAM_LEASH_LENGTH); }
-
     public int chocoStatMod() { return ChocoboConfig.DEFAULT_WEAPON_MOD.get(); }
     
     // setters for Chocobo properties
@@ -652,7 +687,7 @@ public abstract class AbstractChocobo extends TameableEntity implements Angerabl
         return (RandomHelper.random.nextInt(upper) + 1) < barrier;
     }
     protected int statCount(int stat, int check) { return stat - check; }
-    protected void tickActivities(Chocobo chocobo) {
+    protected void tickActivities(@NotNull Chocobo chocobo) {
         // Brain Logic
         Brain<Chocobo> brain = chocobo.getBrain();
         brain.tick((ServerWorld) chocobo.getWorld(), chocobo);
@@ -671,31 +706,30 @@ public abstract class AbstractChocobo extends TameableEntity implements Angerabl
     private static final int ARMOR_COST = 2;              // cost for armor update ("arm")
     private static final int STRENGTH_COST = 1;
     private static final int ALL_COST = STAMINA_COST + HEALTH_COST + ARMOR_TOUGHNESS_COST + ARMOR_COST + STRENGTH_COST;
+    protected static final String all = "all";
     protected static final String health = "hp";
     protected static final String strength = "str";
     protected static final String armor = "arm";
     protected static final String armorTough = "arm_tough";
     protected static final String dualDefense = "defences";
-    protected static final String all = "all";
 
     protected void increaseStat(Chocobo chocobo, String statName, int amount, PlayerEntity playerEntity) {
-        if (chocobo == null || statName == null || playerEntity == null) return;
-        if (amount <= 0) return; // Ensure amount is positive
-        if (!chocobo.isAlive() || !chocobo.isTamed()) return; // Ensure chocobo is alive and tamed
+        if (chocobo == null || statName == null || playerEntity == null) { return; }
+        if (amount <= 0) { return; } // Ensure amount is positive
+        if (!chocobo.isAlive() || !chocobo.isTamed()) { return; } // Ensure chocobo is alive and tamed
         int statValue;
-        int internalAmount = amount;
-        boolean isArmorToughnessMaxed = false;
-        boolean isArmorMaxed = false;
+        boolean isArmorToughnessNotMaxed = false;
+        boolean isArmorNotMaxed = false;
         switch (statName) {
             case all -> statValue = ALL_COST;
             case health -> statValue = HEALTH_COST;
             case strength -> statValue = STRENGTH_COST;
             case dualDefense -> {
-                if (ChocoboConfig.MAX_ARMOR_TOUGHNESS.get() <= chocobo.getAttributeValue(EntityAttributes.GENERIC_ARMOR_TOUGHNESS)) { isArmorToughnessMaxed = true; }
-                if (ChocoboConfig.MAX_ARMOR.get() <= chocobo.getAttributeValue(EntityAttributes.GENERIC_ARMOR)) { isArmorMaxed = true; }
-                if (isArmorToughnessMaxed && isArmorMaxed) { statValue = ARMOR_TOUGHNESS_COST + ARMOR_COST; } 
-                else if (isArmorMaxed)  { statValue = ARMOR_TOUGHNESS_COST; }
-                else if (isArmorToughnessMaxed) { statValue = ARMOR_COST;}
+                if (ChocoboConfig.MAX_ARMOR_TOUGHNESS.get() <= chocobo.getAttributeValue(EntityAttributes.GENERIC_ARMOR_TOUGHNESS)) { isArmorToughnessNotMaxed = true; }
+                if (ChocoboConfig.MAX_ARMOR.get() <= chocobo.getAttributeValue(EntityAttributes.GENERIC_ARMOR)) { isArmorNotMaxed = true; }
+                if (isArmorToughnessNotMaxed && isArmorNotMaxed) { statValue = ARMOR_TOUGHNESS_COST + ARMOR_COST; }
+                else if (isArmorNotMaxed)  { statValue = ARMOR_TOUGHNESS_COST; }
+                else if (isArmorToughnessNotMaxed) { statValue = ARMOR_COST;}
                 else { statValue = 0; }
             }
             case armor -> statValue = ARMOR_COST;
@@ -778,6 +812,60 @@ public abstract class AbstractChocobo extends TameableEntity implements Angerabl
         if (this.getEntityWorld().isClient()) { return; }
         if (this.isBaby()) { return; }
         this.dropStack(new ItemStack(CHOCOBO_FEATHER, 1), 0.0F);
+    }
+    public boolean updateMovementInFluid(TagKey<Fluid> tag, double speed) {
+        if (this.isRegionUnloaded()) { return false; }
+        Box box = this.getBoundingBox().contract(0.001);
+        int i = MathHelper.floor(box.minX);
+        int j = MathHelper.ceil(box.maxX);
+        int k = MathHelper.floor(box.minY);
+        int l = MathHelper.ceil(box.maxY);
+        int m = MathHelper.floor(box.minZ);
+        int n = MathHelper.ceil(box.maxZ);
+        double d = 0.0;
+        boolean bl = this.isPushedByFluids(tag);
+        boolean bl2 = false;
+        Vec3d vec3d = Vec3d.ZERO;
+        int o = 0;
+        BlockPos.Mutable mutable = new BlockPos.Mutable();
+        for (int p = i; p < j; ++p) {
+            for (int q = k; q < l; ++q) {
+                for (int r = m; r < n; ++r) {
+                    double e;
+                    mutable.set(p, q, r);
+                    FluidState fluidState = this.getWorld().getFluidState(mutable);
+                    if (!fluidState.isIn(tag) || !((e = (double)((float)q + fluidState.getHeight(this.getWorld(), mutable))) >= box.minY)) continue;
+                    bl2 = true;
+                    d = Math.max(e - box.minY, d);
+                    if (!bl) continue;
+                    Vec3d vec3d2 = fluidState.getVelocity(this.getWorld(), mutable);
+                    if (d < 0.4) { vec3d2 = vec3d2.multiply(d); }
+                    vec3d = vec3d.add(vec3d2);
+                    ++o;
+                }
+            }
+        }
+        if (vec3d.length() > 0.0) {
+            if (o > 0) { vec3d = vec3d.multiply(1.0 / (double)o); }
+            vec3d = vec3d.normalize();
+            Vec3d vec3d3 = this.getVelocity();
+            vec3d = vec3d.multiply(speed);
+            double f = 0.003;
+            if (Math.abs(vec3d3.x) < 0.003 && Math.abs(vec3d3.z) < 0.003 && vec3d.length() < 0.0045000000000000005) {
+                vec3d = vec3d.normalize().multiply(0.0045000000000000005);
+            }
+            this.setVelocity(this.getVelocity().add(vec3d));
+        }
+        this.fluidHeight.put(tag, d);
+        return bl2;
+    }
+    public boolean isPushedByFluids(TagKey<Fluid> key) {
+        if (this.isRegionUnloaded()) { return false; }
+        if (key == null) { return true; }
+        if (this.hasPassengers()) { return false; } // Chocobo cannot be pushed by fluids if it has passengers
+        if (key == FluidTags.WATER) { return !this.isWaterBreathing(); }
+        else if (key == FluidTags.LAVA) { return !this.isFireImmune(); }
+        return this.isPushedByFluids();
     }
 
     // Alert methods for Chocobo

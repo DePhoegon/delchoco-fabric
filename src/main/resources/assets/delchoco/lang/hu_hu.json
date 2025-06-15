@@ -131,7 +131,6 @@
   "delchoco.leash.none": "Nincsenek beállítva pórázpontok",
   "delchoco.leash.invalid": "Póráz távolság érvénytelen",
 
-  "delchoco.key.category": "Chocobo mozgás (csak a billentyűzet billentyűit támogatja)",
-  "delchoco.key.in_water_glide": "Water Breather - Csúszás a vízben",
-  "delchoco.key.stop_in_air_glide": "Levegőben - gyorsabban esik"
+  "tooltip.key.category": "Delbase & DelChoco (csak a billentyűzet billentyűit támogatja)",
+  "delchoco.key.in_water_glide": "Water Breather - Csúszás a vízben"
 }

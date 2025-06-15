@@ -132,7 +132,6 @@
   "delchoco.leash.none": "Geen lijnpunten set",
   "delchoco.leash.invalid": "Afstand aan de lijn ongeldig",
 
-  "delchoco.key.category": "Chocobo Movement (ondersteunt alleen KeyBoard-toetsen)",
-  "delchoco.key.in_water_glide": "Water Breather - Glijden in water",
-  "delchoco.key.stop_in_air_glide": "In de lucht - val sneller"
+  "tooltip.key.category": "Delbase & DelChoco (ondersteunt alleen KeyBoard-toetsen)",
+  "delchoco.key.in_water_glide": "Water Breather - Glijden in water"
 }

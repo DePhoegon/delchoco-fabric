@@ -12,21 +12,26 @@ import net.minecraft.block.FenceBlock;
 import net.minecraft.block.WallBlock;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.ai.FuzzyPositions;
+import net.minecraft.entity.ai.NavigationConditions;
 import net.minecraft.entity.ai.NoPenaltyTargeting;
 import net.minecraft.entity.ai.brain.*;
 import net.minecraft.entity.ai.brain.sensor.Sensor;
 import net.minecraft.entity.ai.brain.sensor.SensorType;
 import net.minecraft.entity.ai.brain.task.*;
 import net.minecraft.entity.ai.pathing.EntityNavigation;
+import net.minecraft.entity.ai.pathing.LandPathNodeMaker;
 import net.minecraft.entity.ai.pathing.Path;
 import net.minecraft.entity.ai.pathing.PathNodeType;
 import net.minecraft.entity.mob.MobEntity;
+import net.minecraft.entity.mob.PathAwareEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.Hand;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Optional;
 
@@ -124,7 +129,7 @@ public class ChocoboBrains {
             if (chocobo.getRideTickDelay() <= 20 || chocobo.followOwner() || chocobo.followLure()) {
                 return false;
             }
-            Vec3d pos = chocobo.isNoRoam() ? getPositionWithinLimit(world, chocobo) : NoPenaltyTargeting.find(chocobo, 10, 7);
+            Vec3d pos = chocobo.isNoRoam() ? getPositionWithinLimit(world, chocobo) : ChocoboNoPEnaltyTargeting.find(chocobo, 10, 7);
             if (pos != null) {
                 chocobo.getBrain().remember(MemoryModuleType.WALK_TARGET, new WalkTarget(pos, (float) speed, 0));
                 this.lookTargetPos = BlockPos.ofFloored(pos);
@@ -190,7 +195,7 @@ public class ChocoboBrains {
             BlockPos center = chocobo.getLeashSpot();
             int limit = chocobo.getLeashDistance();
             for (int i = 0; i < 10; i++) {
-                Vec3d candidate = NoPenaltyTargeting.find(chocobo, limit, 7);
+                Vec3d candidate = ChocoboNoPEnaltyTargeting.find(chocobo, limit, 7);
                 if (candidate == null) {
                     continue;
                 }
@@ -264,7 +269,7 @@ public class ChocoboBrains {
                 brain.doExclusively(Activity.PANIC);
 
                 // Set a random walk target to make the chocobo run
-                Vec3d pos = NoPenaltyTargeting.find(chocobo, 10, 7);
+                Vec3d pos = ChocoboNoPEnaltyTargeting.find(chocobo, 10, 7);
                 if (pos != null) {
                     brain.remember(MemoryModuleType.WALK_TARGET, new WalkTarget(pos, speed, 0));
                 }
@@ -505,6 +510,51 @@ public class ChocoboBrains {
                 }
                 return false;
             }));
+        }
+    }
+
+    public static class ChocoboNoPEnaltyTargeting extends NoPenaltyTargeting {
+        public static Vec3d find(Chocobo chocobo, int horizontalRange, int verticalRange) {
+            boolean bl = NavigationConditions.isPositionTargetInRange(chocobo, horizontalRange);
+
+            // Default behavior for normal terrain
+            return FuzzyPositions.guessBestPathTarget(chocobo, () -> {
+                BlockPos blockPos = FuzzyPositions.localFuzz(chocobo.getRandom(), horizontalRange, verticalRange);
+                return ChocoboNoPEnaltyTargeting.tryMake(chocobo, horizontalRange, bl, blockPos);
+            });
+        }
+        @Nullable
+        protected static BlockPos tryMake(Chocobo entity, int horizontalRange, boolean posTargetInRange, BlockPos fuzz) {
+            BlockPos blockPos = FuzzyPositions.towardTarget(entity, horizontalRange, entity.getRandom(), fuzz);
+            if (ChocoboNavigationConditions.isHeightInvalid(blockPos, entity)
+                    || ChocoboNavigationConditions.isPositionTargetOutOfWalkRange(posTargetInRange, entity, blockPos)
+                    || ChocoboNavigationConditions.isInvalidPosition(blockPos, entity)
+                    || ChocoboNavigationConditions.hasPathfindingPenalty(entity, blockPos)) { return null; }
+            return blockPos;
+        }
+    }
+
+    public static class ChocoboNavigationConditions extends NavigationConditions {
+        public static boolean isHeightInvalid(BlockPos pos, PathAwareEntity entity) {
+            return pos.getY() < entity.getWorld().getBottomY() || pos.getY() > entity.getWorld().getTopY();
+        }
+        public static boolean isPositionTargetOutOfWalkRange(boolean posTargetInRange, PathAwareEntity entity, BlockPos pos) {
+            return posTargetInRange && !entity.isInWalkTargetRange(pos);
+        }
+        public static boolean isInvalidPosition(BlockPos pos, Chocobo chocobo) {
+            return !ChocoboNavigationConditions.isValidPosition(pos, chocobo);
+        }
+        public static boolean hasPathfindingPenalty(PathAwareEntity entity, BlockPos pos) {
+            return entity.getPathfindingPenalty(LandPathNodeMaker.getLandNodeType(entity.getWorld(), pos.mutableCopy())) > 0.0f;
+        }
+        public static boolean isValidPosition(BlockPos pos, Chocobo chocobo) {
+            BlockPos blockPos = pos.down();
+            BlockState blockState = chocobo.getWorld().getBlockState(blockPos);
+
+            // Check for flat surface - including slabs
+            boolean isValidSurface = blockState.hasSolidTopSurface(chocobo.getWorld(), blockPos, chocobo);
+
+            return isValidSurface && chocobo.getWorld().isSpaceEmpty(chocobo, chocobo.getBoundingBox().offset(Vec3d.of(pos.subtract(chocobo.getBlockPos()))));
         }
     }
 }

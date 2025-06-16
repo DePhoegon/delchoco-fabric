@@ -1,7 +1,6 @@
 package com.dephoegon.delchoco.aid;
 
 import com.dephoegon.delchoco.aid.world.serverVariableAccess;
-import com.dephoegon.delchoco.client.gui.RenderChocoboOverlay;
 import com.dephoegon.delchoco.client.keybind.KeyBindManager;
 import com.dephoegon.delchoco.common.commands.chocoboTeams;
 import com.dephoegon.delchoco.common.handler.LootTableEventHandler;
@@ -16,12 +15,12 @@ public class ChocoList {
     public static void clientRegOrder() {
         KeyBindManager.registerKeyBinds();
         serverVariableAccess.clientInit();
-        RenderChocoboOverlay.onGuiInGameOverlayRender();
+        // RenderChocoboOverlay.onGuiInGameOverlayRender(); // Uncomment if you want to render the chocobo overlay, Stamina bar
     }
     public static void commonRegOrder() {
         itemGroupLogic.registerItemGroups();
         ModEntities.registerAttributes();
-        //MemoryTypes.registerAll();
+        // MemoryTypes.registerAll(); // Uncomment incase brain use of targeting entities is needed
         CommandRegistrationCallback.EVENT.register((dispatcher, dedicated, environment) -> chocoboTeams.commands(dispatcher));
         ModSounds.registerSounds();
         PacketManager.init();

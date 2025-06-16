@@ -11,7 +11,6 @@ import org.lwjgl.glfw.GLFW;
 @Environment(EnvType.CLIENT)
 public class KeyBindManager {
     public static final KeyBinding L_ALT = registerKB_Keys("delchoco.key.in_water_glide", GLFW.GLFW_KEY_LEFT_ALT);
-    public static final KeyBinding L_SHIFT = registerKB_Keys("delchoco.key.stop_in_air_glide", InputUtil.GLFW_KEY_LEFT_SHIFT);
 
     private static KeyBinding registerKB_Keys(String name, int keyCode) {
         return KeyBindingHelper.registerKeyBinding(new KeyBinding(name, InputUtil.Type.KEYSYM, keyCode, "tooltip.key.category"));

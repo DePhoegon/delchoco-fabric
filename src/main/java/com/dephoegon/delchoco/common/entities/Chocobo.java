@@ -223,7 +223,6 @@ public class Chocobo extends AbstractChocobo {
         this.targetSelector.add(5, new ActiveTargetGoal<>(this, EndermiteEntity.class, false));
         this.targetSelector.add(6, new ActiveTargetGoal<>(this, SilverfishEntity.class, false));
         this.targetSelector.add(7, new UniversalAngerGoal<>(this, true));
-
     }
     @Override
     public float getPathfindingFavor(BlockPos pos, WorldView world) {
@@ -384,7 +383,7 @@ public class Chocobo extends AbstractChocobo {
         // Left in for unique Chocobo Checks unable to be done in AbstractChocobo
         super.onStatusEffectRemoved(effect);
     }
-    public boolean nonFlameFireImmune() { return isFireImmune() && ChocoboColor.FLAME != getChocoboColor(); }
+    public boolean nonFlameFireImmune() { return this.isFireImmune() && ChocoboColor.FLAME != getChocoboColor(); }
     public double getMountedHeightOffset() {
         // Returns the height offset when mounted, used for riding Chocobos
         // Left in for unique Chocobo Checks unable to be done in AbstractChocobo

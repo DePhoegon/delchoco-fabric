@@ -66,6 +66,7 @@ public class chocoboChecks {
         out.add(BiomeKeys.SWAMP);
         out.add(BiomeKeys.LUSH_CAVES);
         out.add(BiomeKeys.DRIPSTONE_CAVES);
+        out.add(BiomeKeys.MANGROVE_SWAMP);
         return out;
     }
     private static @NotNull ArrayList<RegistryKey<Biome>> IS_HOT_OVERWORLD() {

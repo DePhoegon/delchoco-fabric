@@ -33,7 +33,7 @@
 		"minecraft": "~1.20",
 		"java": ">=17",
 		"fabric-api": "*",
-		"delbase": ">=1.5.1"
+		"delbase": ">=1.6.0"
 	},
 	"suggests": {
 		"another-mod": "delbase"

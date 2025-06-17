@@ -18,7 +18,11 @@ import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.ai.brain.Brain;
 import net.minecraft.entity.ai.brain.MemoryModuleType;
 import net.minecraft.entity.ai.pathing.LandPathNodeMaker;
+import net.minecraft.entity.ai.pathing.MobNavigation;
 import net.minecraft.entity.ai.pathing.PathNodeType;
+import net.minecraft.entity.ai.pathing.AmphibiousSwimNavigation;
+import net.minecraft.entity.ai.pathing.EntityNavigation;
+import net.minecraft.entity.ai.control.MoveControl;
 import net.minecraft.entity.attribute.EntityAttribute;
 import net.minecraft.entity.attribute.EntityAttributeInstance;
 import net.minecraft.entity.attribute.EntityAttributeModifier;
@@ -64,21 +68,6 @@ import java.util.Objects;
 import java.util.UUID;
 
 import static com.dephoegon.delbase.item.ShiftingDyes.*;
-import static com.dephoegon.delbase.item.ShiftingDyes.BLACK_SHIFT_DYE;
-import static com.dephoegon.delbase.item.ShiftingDyes.BLUE_SHIFT_DYE;
-import static com.dephoegon.delbase.item.ShiftingDyes.BROWN_SHIFT_DYE;
-import static com.dephoegon.delbase.item.ShiftingDyes.CYAN_SHIFT_DYE;
-import static com.dephoegon.delbase.item.ShiftingDyes.GRAY_SHIFT_DYE;
-import static com.dephoegon.delbase.item.ShiftingDyes.GREEN_SHIFT_DYE;
-import static com.dephoegon.delbase.item.ShiftingDyes.LIGHT_BLUE_SHIFT_DYE;
-import static com.dephoegon.delbase.item.ShiftingDyes.LIGHT_GRAY_SHIFT_DYE;
-import static com.dephoegon.delbase.item.ShiftingDyes.LIME_SHIFT_DYE;
-import static com.dephoegon.delbase.item.ShiftingDyes.MAGENTA_SHIFT_DYE;
-import static com.dephoegon.delbase.item.ShiftingDyes.ORANGE_SHIFT_DYE;
-import static com.dephoegon.delbase.item.ShiftingDyes.PINK_SHIFT_DYE;
-import static com.dephoegon.delbase.item.ShiftingDyes.PURPLE_SHIFT_DYE;
-import static com.dephoegon.delbase.item.ShiftingDyes.WHITE_SHIFT_DYE;
-import static com.dephoegon.delbase.item.ShiftingDyes.YELLOW_SHIFT_DYE;
 import static com.dephoegon.delchoco.aid.chocoboChecks.isWaterBreathingChocobo;
 import static com.dephoegon.delchoco.aid.chocoboChecks.isWitherImmuneChocobo;
 import static com.dephoegon.delchoco.common.entities.Chocobo.CHOCOBO_SPRINTING_SPEED_BOOST;
@@ -217,6 +206,16 @@ public abstract class AbstractChocobo extends TameableEntity implements Angerabl
 
     protected AbstractChocobo(EntityType<? extends TameableEntity> entityType, World world) {
         super(entityType, world);
+        // Movement Setting is done in the SetChocoboAbilityMask method & SetChocobo (called for all chocobos on spawning as part of setting the abilities & mask)
+    }
+
+    @Override
+    protected EntityNavigation createNavigation(World world) {
+        if (this.canWalkOnWater()) { // If it's a walker (i.e., !isWaterBreathing())
+            return new MobNavigation(this, world);
+        } else { // If it's a swimmer (i.e., isWaterBreathing())
+            return new AmphibiousSwimNavigation(this, world);
+        }
     }
 
     // Initialization of DataTracker for all Chocobo types
@@ -303,10 +302,10 @@ public abstract class AbstractChocobo extends TameableEntity implements Angerabl
     }
     public void onStatusEffectApplied(@NotNull StatusEffectInstance effect, @Nullable Entity source) {
         super.onStatusEffectApplied(effect, source);
-        // Left uncompacted for readability and future expansion
         if (effect.getEffectType() == StatusEffects.WATER_BREATHING) {
             this.setPathfindingPenalty(PathNodeType.WATER, -0.55F);
             this.setPathfindingPenalty(PathNodeType.WATER_BORDER, -0.55F);
+            this.updateNavigationAndMoveControl(true); // Force amphibious for effect duration
         }
         if (effect.getEffectType() == StatusEffects.FIRE_RESISTANCE) {
             this.setPathfindingPenalty(PathNodeType.DAMAGE_FIRE, -0.2F);
@@ -320,6 +319,7 @@ public abstract class AbstractChocobo extends TameableEntity implements Angerabl
         if (effect.getEffectType() == StatusEffects.WATER_BREATHING) {
             this.setPathfindingPenalty(PathNodeType.WATER, this.isWaterBreathing() ? -0.55F : -0.15F);
             this.setPathfindingPenalty(PathNodeType.WATER_BORDER, this.isWaterBreathing() ? -0.55F : -0.25F);
+            this.updateNavigationAndMoveControl(false); // Revert to default based on current state (innate abilities)
         }
         if (effect.getEffectType() == StatusEffects.FIRE_RESISTANCE) {
             this.setPathfindingPenalty(PathNodeType.DAMAGE_FIRE, this.isFireImmune() ? -0.2F : 32.0F);
@@ -452,7 +452,7 @@ public abstract class AbstractChocobo extends TameableEntity implements Angerabl
     }
     public boolean canWalkOnFluid(FluidState state) {
         if (state.isIn(FluidTags.LAVA)) { return this.isFireImmune(); }
-        if (state.isIn(FluidTags.WATER)) { return !this.canBreatheInWater(); }
+        if (state.isIn(FluidTags.WATER)) { return this.canWalkOnWater(); }
         return super.canWalkOnFluid(state);
     }
     public boolean shouldDismountUnderwater() {
@@ -465,8 +465,17 @@ public abstract class AbstractChocobo extends TameableEntity implements Angerabl
     }
     public float getPathfindingFavor(BlockPos pos, WorldView world) {
         BlockState state = world.getBlockState(pos);
-        if (state.getFluidState().isIn(FluidTags.WATER)) { return this.isWaterBreathing() ? 0.5F : this.isFireImmune() ? 0.2F : 0.3F; }
-        if (this.isFireImmune() && state.getFluidState().isIn(FluidTags.LAVA)) { return 1.0F; }
+        if (state.getFluidState().isIn(FluidTags.WATER)) {
+            if (this.canWalkOnWater()) { // Is a water-walker, not a swimmer. Should prefer land.
+                return 1.0F; // Positive value makes water less attractive
+            } else { // Is a swimmer (isWaterBreathing() is true)
+                // Swimming Chocobos should prefer pathing in water
+                return this.isWaterBreathing() ? -0.5F : 1F; // Negative value indicates strong preference for water
+            }
+        }
+        if (this.isFireImmune() && state.getFluidState().isIn(FluidTags.LAVA)) {
+            return 1.0F;
+        }
         return super.getPathfindingFavor(pos, world);
     }
 
@@ -543,6 +552,7 @@ public abstract class AbstractChocobo extends TameableEntity implements Angerabl
         if (waterBreath) { abilityMask |= MASK_CHOCOBO_WATER_BREATH; }
         else { abilityMask &= ~MASK_CHOCOBO_WATER_BREATH; }
         this.dataTracker.set(PARAM_CHOCOBO_ABILITY_MASK, abilityMask);
+        this.updateNavigationAndMoveControl(false); // Update based on new innate ability state
     }
     public void setWitherImmune(boolean witherImmune) {
         byte abilityMask = this.dataTracker.get(PARAM_CHOCOBO_ABILITY_MASK);
@@ -556,7 +566,10 @@ public abstract class AbstractChocobo extends TameableEntity implements Angerabl
         else { abilityMask &= ~MASK_CHOCOBO_POISON_IMMUNE; }
         this.dataTracker.set(PARAM_CHOCOBO_ABILITY_MASK, abilityMask);
     }
-    public void setChocoboAbilityMask(byte mask) { this.dataTracker.set(PARAM_CHOCOBO_ABILITY_MASK, mask); }
+    public void setChocoboAbilityMask(byte mask) {
+        this.dataTracker.set(PARAM_CHOCOBO_ABILITY_MASK, mask);
+        this.updateNavigationAndMoveControl(false); // Update based on new ability mask state
+    }
     public void setChocoboScale(boolean isMale, int overrideValue, boolean override) {
         int scale;
         if (override) { scale = overrideValue; } else { scale = setChocoScale(isMale); }
@@ -641,6 +654,7 @@ public abstract class AbstractChocobo extends TameableEntity implements Angerabl
         this.setWaterBreath(isWaterBreathingChocobo(color));
         this.setWitherImmune(isWitherImmuneChocobo(color));
         this.setPoisonImmune(chocoboChecks.isPoisonImmuneChocobo(color));
+        this.updateNavigationAndMoveControl(false); // Sets Default for chocobos on spawn, and updates based on new innate ability state
     }
     protected void setChocoboSpawnCheck(ChocoboColor color) {
         ChocoboColor chocobo = this.getChocoboColor();
@@ -905,5 +919,100 @@ public abstract class AbstractChocobo extends TameableEntity implements Angerabl
         // kept in for unique Chocobo Checks unable to be done in AbstractChocobo (Brains)
         //chocobo.getBrain().remember(MemoryModuleType.ATTACK_TARGET, attacker, 50L);
         chocobo.setTarget(attacker);
+    }
+
+    private void updateNavigationAndMoveControl(boolean forceAmphibiousDuringEffect) {
+        if (this.getWorld().isClient()) return;
+
+        EntityNavigation oldNavInstance = this.navigation;
+        Class<? extends EntityNavigation> oldNavClass = oldNavInstance.getClass();
+        EntityNavigation newNavInstance;
+
+        if (forceAmphibiousDuringEffect) {
+            newNavInstance = new AmphibiousSwimNavigation(this, this.getWorld());
+        } else {
+            newNavInstance = this.createNavigation(this.getWorld()); // Uses canWalkOnWater logic
+        }
+
+        if (newNavInstance.getClass() != oldNavClass) {
+            this.navigation = newNavInstance;
+            oldNavInstance.stop(); // Stop path on the old navigator instance
+            // The brain/tasks will eventually create a new path with the new navigator.
+        }
+
+        boolean shouldUseSwimControl;
+        if (forceAmphibiousDuringEffect) {
+            shouldUseSwimControl = true;
+        } else {
+            shouldUseSwimControl = !this.canWalkOnWater(); // True if swimmer based on current abilities
+        }
+
+        if (shouldUseSwimControl) {
+            if (!(this.moveControl instanceof ChocoboSwimMoveControl)) {
+                this.moveControl = new ChocoboSwimMoveControl(this);
+            }
+        } else { // Should use standard MoveControl (walker)
+            if (!(this.moveControl instanceof MoveControl) || this.moveControl instanceof ChocoboSwimMoveControl) {
+                this.moveControl = new MoveControl(this);
+            }
+            // If MobNavigation is active for a walker, ensure its internal canSwim is false.
+            // This helps prevent MobNavigation from trying its own swim logic if it was somehow enabled.
+            if (this.navigation instanceof MobNavigation mobNav) {
+                mobNav.setCanSwim(false);
+            }
+        }
+    }
+
+    // Inner class for custom swim move control
+    static class ChocoboSwimMoveControl extends MoveControl {
+        private final AbstractChocobo chocobo;
+
+        public ChocoboSwimMoveControl(AbstractChocobo chocobo) {
+            super(chocobo);
+            this.chocobo = chocobo;
+        }
+
+        @Override
+        public void tick() {
+            if (this.chocobo.isWaterBreathing() && this.chocobo.isTouchingWater()) {
+                if (this.state == MoveControl.State.MOVE_TO) {
+                    Vec3d targetPos = new Vec3d(this.targetX, this.targetY, this.targetZ);
+                    Vec3d chocoboPos = this.chocobo.getPos();
+                    Vec3d directionToTarget = targetPos.subtract(chocoboPos);
+                    double distanceToTargetSq = directionToTarget.lengthSquared();
+
+                    if (distanceToTargetSq < 0.01D) { // Arrived at target
+                        this.state = MoveControl.State.WAIT;
+                        this.chocobo.setMovementSpeed(0.0F);
+                        this.chocobo.setVelocity(this.chocobo.getVelocity().multiply(1.0, 0.5, 1.0)); // Dampen Y
+                        return;
+                    }
+
+                    double angleToTargetHorizontal = MathHelper.atan2(directionToTarget.z, directionToTarget.x);
+                    this.chocobo.setYaw(this.wrapDegrees(this.chocobo.getYaw(), (float) (angleToTargetHorizontal * 57.2957763671875D) - 90.0F, 90.0F));
+                    this.chocobo.bodyYaw = this.chocobo.getYaw();
+
+                    float currentSpeedSetting = (float) (this.speed * this.chocobo.getAttributeValue(EntityAttributes.GENERIC_MOVEMENT_SPEED));
+                    this.chocobo.setMovementSpeed(currentSpeedSetting); // For forward movement in MobEntity.travel
+
+                    // Vertical movement adjustment
+                    double dy = directionToTarget.y;
+                    if (Math.abs(dy) > 0.02D) { // Only apply if there's a meaningful vertical distance
+                        // Adjust Y velocity to move towards targetY
+                        // Factor determines how quickly it adjusts vertically.
+                        double verticalAdjustFactor = 0.15D; // Tunable
+                        double yVelocityChange = MathHelper.clamp(dy * verticalAdjustFactor, -currentSpeedSetting * 0.75D, currentSpeedSetting * 0.75D);
+                        this.chocobo.setVelocity(this.chocobo.getVelocity().add(0.0D, yVelocityChange, 0.0D));
+                    }
+                    // Horizontal movement is primarily driven by MobEntity.travel using the forward speed set above.
+                    // The Y velocity added here will be incorporated when MobEntity.travel calls this.entity.move().
+                } else { // State is WAIT or other
+                    this.chocobo.setMovementSpeed(0.0F);
+                }
+            } else {
+                // Not a swimmer or not in water, fall back to default behavior
+                super.tick();
+            }
+        }
     }
 }

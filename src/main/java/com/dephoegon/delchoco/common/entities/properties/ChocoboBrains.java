@@ -13,6 +13,7 @@ import net.minecraft.block.WallBlock;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.ai.FuzzyPositions;
+import net.minecraft.entity.ai.FuzzyTargeting;
 import net.minecraft.entity.ai.NavigationConditions;
 import net.minecraft.entity.ai.NoPenaltyTargeting;
 import net.minecraft.entity.ai.brain.*;
@@ -26,7 +27,9 @@ import net.minecraft.entity.ai.pathing.PathNodeType;
 import net.minecraft.entity.mob.MobEntity;
 import net.minecraft.entity.mob.PathAwareEntity;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.fluid.FluidState;
 import net.minecraft.item.ItemStack;
+import net.minecraft.registry.tag.FluidTags;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.Hand;
 import net.minecraft.util.math.BlockPos;
@@ -68,6 +71,7 @@ public class ChocoboBrains {
 
     private static void addCoreActivities(Brain<Chocobo> brain) {
         brain.setTaskList(Activity.CORE, 0, ImmutableList.of(
+                new TryFindLandTask(1.1f), // Attempts to find land if on water and should walk on it
                 // new OwnerHurtTask(),
                 // new OwnerHurtByTask(),
                 // new HurtByTargetTask(),
@@ -86,8 +90,8 @@ public class ChocoboBrains {
     private static void addFightActivities(Brain<Chocobo> brain, Chocobo chocobo) {
         brain.setTaskList(Activity.FIGHT, 0, ImmutableList.of(
                 ForgetAttackTargetTask.create(ChocoboBrainAid::isInvalidTarget),
-                RangedApproachTask.create(1.2F),
-                AttackTask.create((int) (chocobo.getBoundingBox().getZLength()*1.5F), 1.2F)
+                RangedApproachTask.create(1.2F), // Consider if this speed is appropriate for water
+                AttackTask.create((int) (chocobo.getBoundingBox().getZLength()*1.5F), 1.2F) // And this one
                 /*MeleeAttackTask.create(20)*/
         ), MemoryModuleType.ATTACK_TARGET);
     }
@@ -115,7 +119,7 @@ public class ChocoboBrains {
             super(ImmutableMap.of(
                     MemoryModuleType.CANT_REACH_WALK_TARGET_SINCE, MemoryModuleState.REGISTERED,
                     MemoryModuleType.PATH, MemoryModuleState.VALUE_ABSENT,
-                    MemoryModuleType.WALK_TARGET, MemoryModuleState.VALUE_ABSENT
+                    MemoryModuleType.WALK_TARGET, MemoryModuleState.VALUE_ABSENT // Ensure RoamTask only runs if no walk target
             ));
             this.speed = speed;
         }
@@ -126,10 +130,21 @@ public class ChocoboBrains {
                 this.pathUpdateCountdownTicks--;
                 return false;
             }
+            // TryFindLandTask has priority due to memory conditions.
+            // If this task runs, it means TryFindLandTask didn't (or failed to set a target).
             if (chocobo.getRideTickDelay() <= 20 || chocobo.followOwner() || chocobo.followLure()) {
                 return false;
             }
-            Vec3d pos = chocobo.isNoRoam() ? getPositionWithinLimit(world, chocobo) : ChocoboNoPEnaltyTargeting.find(chocobo, 10, 7);
+
+            Vec3d pos;
+            if (chocobo.isWaterBreathing() && chocobo.isSubmergedInWater()) { // Check if it's a swimmer and in water
+                // For swimmers in water, find a target suitable for swimming
+                pos = FuzzyTargeting.find(chocobo, 10, 7); // Use vanilla fuzzy targeting for swim
+            } else {
+                // Original logic for non-swimmers or swimmers on land
+                pos = chocobo.isNoRoam() ? getPositionWithinLimit(world, chocobo) : ChocoboNoPenaltyTargeting.find(chocobo, 10, 7);
+            }
+
             if (pos != null) {
                 chocobo.getBrain().remember(MemoryModuleType.WALK_TARGET, new WalkTarget(pos, (float) speed, 0));
                 this.lookTargetPos = BlockPos.ofFloored(pos);
@@ -195,7 +210,7 @@ public class ChocoboBrains {
             BlockPos center = chocobo.getLeashSpot();
             int limit = chocobo.getLeashDistance();
             for (int i = 0; i < 10; i++) {
-                Vec3d candidate = ChocoboNoPEnaltyTargeting.find(chocobo, limit, 7);
+                Vec3d candidate = ChocoboNoPenaltyTargeting.find(chocobo, limit, 7);
                 if (candidate == null) {
                     continue;
                 }
@@ -269,7 +284,12 @@ public class ChocoboBrains {
                 brain.doExclusively(Activity.PANIC);
 
                 // Set a random walk target to make the chocobo run
-                Vec3d pos = ChocoboNoPEnaltyTargeting.find(chocobo, 10, 7);
+                Vec3d pos;
+                if (chocobo.isWaterBreathing() && chocobo.isSubmergedInWater()) {
+                    pos = FuzzyTargeting.find(chocobo, 10, 7); // Find a 3D point in water for swimmers
+                } else {
+                    pos = ChocoboNoPenaltyTargeting.find(chocobo, 10, 7); // Original logic for land/surface
+                }
                 if (pos != null) {
                     brain.remember(MemoryModuleType.WALK_TARGET, new WalkTarget(pos, speed, 0));
                 }
@@ -513,14 +533,114 @@ public class ChocoboBrains {
         }
     }
 
-    public static class ChocoboNoPEnaltyTargeting extends NoPenaltyTargeting {
+    public static class TryFindLandTask extends MultiTickTask<Chocobo> {
+        private static final int SEARCH_RANGE_HORIZONTAL = 56; // Approx 3.5 chunks
+        private static final int SEARCH_RANGE_VERTICAL = 8; // Search up/down a bit
+        private final float speed;
+
+        public TryFindLandTask(float speed) {
+            super(ImmutableMap.of(
+                    MemoryModuleType.WALK_TARGET, MemoryModuleState.VALUE_ABSENT, // Only run if no walk target
+                    MemoryModuleType.ATTACK_TARGET, MemoryModuleState.VALUE_ABSENT, // Don't interrupt attacking
+                    MemoryModuleType.PATH, MemoryModuleState.VALUE_ABSENT // And no current path
+            ));
+            this.speed = speed;
+        }
+
+        @Override
+        protected boolean shouldRun(ServerWorld world, Chocobo chocobo) {
+            return chocobo.canWalkOnWater()
+                    && (chocobo.isTouchingWater() || chocobo.isSubmergedInWater())
+                    && (!chocobo.hasPlayerRider() || chocobo.getVehicle() == null)
+                    && !chocobo.followOwner();
+        }
+
+        @Override
+        protected void run(ServerWorld world, Chocobo chocobo, long time) {
+            BlockPos landPosCandidate = findGeometricallySuitableLandPos(chocobo, world, SEARCH_RANGE_HORIZONTAL, SEARCH_RANGE_VERTICAL);
+
+            if (landPosCandidate != null) {
+                Path path = chocobo.getNavigation().findPathTo(landPosCandidate, 0);
+
+                if (path != null && path.reachesTarget()) {
+                    // Path found to the candidate, set walk target
+                    chocobo.getBrain().remember(MemoryModuleType.WALK_TARGET, new WalkTarget(Vec3d.ofCenter(landPosCandidate), this.speed, 0));
+                } else {
+                    // No path found to this specific candidate, or path doesn't reach. Teleport.
+                    // isGeometricallySuitableLand should have ensured landPosCandidate is a safe spot.
+                    chocobo.refreshPositionAndAngles(landPosCandidate.getX() + 0.5, landPosCandidate.getY(), landPosCandidate.getZ() + 0.5, chocobo.getYaw(), chocobo.getPitch());
+                    chocobo.getNavigation().stop(); // Stop any current pathing after teleport
+                }
+            }
+            // If no landPosCandidate found by findGeometricallySuitableLandPos, this task does nothing further.
+            // RoamTask might pick up if its conditions are met.
+        }
+
+        @Nullable
+        private BlockPos findGeometricallySuitableLandPos(Chocobo chocobo, ServerWorld world, int horizontalRange, int verticalRange) {
+            for (int i = 0; i < 20; ++i) { // Try up to 20 times to find a suitable spot
+                BlockPos entityBlockPos = chocobo.getBlockPos();
+                // Generate a random position within the search range
+                int x = entityBlockPos.getX() + chocobo.getRandom().nextInt(horizontalRange * 2 + 1) - horizontalRange;
+                // Search vertically around the Chocobo's current Y level, allowing some up/down variation
+                int y = entityBlockPos.getY() + chocobo.getRandom().nextInt(verticalRange * 2 + 1) - verticalRange;
+                int z = entityBlockPos.getZ() + chocobo.getRandom().nextInt(horizontalRange * 2 + 1) - horizontalRange;
+                BlockPos candidatePos = new BlockPos(x, y, z);
+
+                if (isGeometricallySuitableLand(world, candidatePos, chocobo)) {
+                    return candidatePos; // Return the BlockPos if suitable
+                }
+            }
+            return null; // Failed to find suitable land in attempts
+        }
+
+        private boolean isGeometricallySuitableLand(ServerWorld world, BlockPos pos, Chocobo chocobo) {
+            // Check 1: Position itself should not be water (fluid)
+            FluidState fluidAtPos = world.getFluidState(pos);
+            if (fluidAtPos.isIn(FluidTags.WATER)) {
+                return false;
+            }
+
+            // Check 2: Block below should be solid enough to stand on.
+            BlockPos belowPos = pos.down();
+            BlockState belowState = world.getBlockState(belowPos);
+            // Material solid check is a good start. PathNodeType can give more info.
+            if (!belowState.hasSolidTopSurface(chocobo.getWorld(), belowPos, chocobo) && LandPathNodeMaker.getLandNodeType(world, belowPos.mutableCopy()) == PathNodeType.BLOCKED) {
+                return false; // Ground below is not solid or is blocked for pathing
+            }
+            // If the block below is water, then 'pos' is not truly "on land" relative to getting out of water.
+            if (world.getFluidState(belowPos).isIn(FluidTags.WATER)) {
+                return false;
+            }
+
+            // Check 3: The node type at the target position must be land-based and safe
+            PathNodeType nodeType = LandPathNodeMaker.getLandNodeType(world, pos.mutableCopy());
+            if (nodeType == PathNodeType.WATER || nodeType == PathNodeType.BLOCKED) {
+                // If the node is water or blocked, we cannot use this position
+                return false;
+            }
+            if ((nodeType == PathNodeType.LAVA || nodeType == PathNodeType.DAMAGE_FIRE || nodeType == PathNodeType.DANGER_FIRE) && !chocobo.isFireImmune()) {
+                return false;
+            }
+            // Ensure there's space for the chocobo (e.g. not inside a solid block)
+            // Check pathability of current block and block above
+            if (!world.getBlockState(pos).canPathfindThrough(world, pos, net.minecraft.entity.ai.pathing.NavigationType.LAND) ||
+                !world.getBlockState(pos.up()).canPathfindThrough(world, pos.up(), net.minecraft.entity.ai.pathing.NavigationType.LAND)) {
+                return false;
+            }
+            // All checks passed, this is a geometrically suitable land position (path not checked here)
+            return true;
+        }
+    }
+
+    public static class ChocoboNoPenaltyTargeting extends NoPenaltyTargeting {
         public static Vec3d find(Chocobo chocobo, int horizontalRange, int verticalRange) {
             boolean bl = NavigationConditions.isPositionTargetInRange(chocobo, horizontalRange);
 
             // Default behavior for normal terrain
             return FuzzyPositions.guessBestPathTarget(chocobo, () -> {
                 BlockPos blockPos = FuzzyPositions.localFuzz(chocobo.getRandom(), horizontalRange, verticalRange);
-                return ChocoboNoPEnaltyTargeting.tryMake(chocobo, horizontalRange, bl, blockPos);
+                return ChocoboNoPenaltyTargeting.tryMake(chocobo, horizontalRange, bl, blockPos);
             });
         }
         @Nullable

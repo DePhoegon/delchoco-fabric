@@ -472,6 +472,10 @@ public abstract class AbstractChocobo extends TameableEntity implements Angerabl
 
     // boolean checks for Chocobo properties
     public boolean isWaterBreathing() { return this.isWaterBloodChocobo() || this.hasStatusEffect(StatusEffects.WATER_BREATHING); }
+    public boolean canWalkOnWater() {
+        // TODO -> logic to enable disable walking on water (controlling water breathing) on a temporary condition.
+        return !this.isWaterBreathing();
+    }
     public boolean isWaterBloodChocobo() { return (this.dataTracker.get(PARAM_CHOCOBO_ABILITY_MASK) & MASK_CHOCOBO_WATER_BREATH) != 0; }
     public boolean isWitherImmune() { return (this.dataTracker.get(PARAM_CHOCOBO_ABILITY_MASK) & MASK_CHOCOBO_WITHER_IMMUNE) != 0; }
     public boolean isPoisonImmune() { return (this.dataTracker.get(PARAM_CHOCOBO_ABILITY_MASK) & MASK_CHOCOBO_POISON_IMMUNE) != 0; }

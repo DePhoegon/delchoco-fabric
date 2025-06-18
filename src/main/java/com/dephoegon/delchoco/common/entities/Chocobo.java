@@ -72,6 +72,7 @@ import static com.dephoegon.delchoco.aid.dyeList.getDyeList;
 import static com.dephoegon.delchoco.common.effects.ChocoboCombatEvents.flowerChance;
 import static com.dephoegon.delchoco.common.entities.breeding.BreedingHelper.getChocoName;
 import static com.dephoegon.delchoco.common.init.ModItems.*;
+import static java.lang.Math.floor;
 import static java.lang.Math.random;
 import static net.minecraft.entity.SpawnGroup.CREATURE;
 import static net.minecraft.item.Items.*;
@@ -225,19 +226,16 @@ public class Chocobo extends AbstractChocobo {
         this.targetSelector.add(7, new UniversalAngerGoal<>(this, true));
     }
     @Override
-    public float getPathfindingFavor(BlockPos pos, WorldView world) {
-        // Left in for unique Chocobo Checks unable to be done in AbstractChocobo
-        return super.getPathfindingFavor(pos, world);
-    }
+    public float getPathfindingFavor(BlockPos pos, WorldView world) { return super.getPathfindingFavor(pos, world); }
     public static DefaultAttributeContainer.Builder createAttributes() {
         return MobEntity.createMobAttributes()
                 .add(EntityAttributes.GENERIC_MOVEMENT_SPEED, ChocoboConfig.DEFAULT_SPEED.get() / 100f)
                 .add(EntityAttributes.GENERIC_MAX_HEALTH, ChocoboConfig.DEFAULT_HEALTH.get())
                 .add(EntityAttributes.GENERIC_ARMOR, ChocoboConfig.DEFAULT_ARMOR.get())
                 .add(EntityAttributes.GENERIC_ARMOR_TOUGHNESS, ChocoboConfig.DEFAULT_ARMOR_TOUGHNESS.get())
-                .add(EntityAttributes.GENERIC_ATTACK_SPEED)
+                .add(EntityAttributes.GENERIC_ATTACK_SPEED, ChocoboConfig.DEFAULT_ATTACK_SPEED.get())
                 .add(EntityAttributes.GENERIC_ATTACK_DAMAGE, ChocoboConfig.DEFAULT_ATTACK_DAMAGE.get())
-                .add(EntityAttributes.GENERIC_FOLLOW_RANGE, EntityAttributes.GENERIC_FOLLOW_RANGE.getDefaultValue()*3);
+                .add(EntityAttributes.GENERIC_FOLLOW_RANGE, floor(EntityAttributes.GENERIC_FOLLOW_RANGE.getDefaultValue()*1.5)); // 32 blocks, 1.5x the vanilla value
     }
     protected void initDataTracker() {
         super.initDataTracker();
@@ -256,7 +254,6 @@ public class Chocobo extends AbstractChocobo {
         this.setChocoboScale(false, compound.getInt(NBTKEY_CHOCOBO_SCALE), true);
         this.setChocoboScaleMod(compound.getFloat(NBTKEY_CHOCOBO_SCALE_MOD));
         this.setCollarColor(compound.getInt(NBTKEY_CHOCOBO_COLLAR));
-        //this.setLeashSpot(compound.getInt(NBTKEY_CHOCOBO_LEASH_BLOCK_X), compound.getInt(NBTKEY_CHOCOBO_LEASH_BLOCK_Y), compound.getInt(NBTKEY_CHOCOBO_LEASH_BLOCK_Z));
         this.setLeashSpot(NbtHelper.toBlockPos(compound.getCompound(NBTKEY_CHOCOBO_LEASH_BLOCK)));
         this.setLeashedDistance(compound.getDouble(NBTKEY_CHOCOBO_LEASH_DISTANCE));
     }
@@ -273,9 +270,6 @@ public class Chocobo extends AbstractChocobo {
         compound.putInt(NBTKEY_CHOCOBO_SCALE, this.getChocoboScale());
         compound.putFloat(NBTKEY_CHOCOBO_SCALE_MOD, this.getChocoboScaleMod());
         compound.putInt(NBTKEY_CHOCOBO_COLLAR, this.getCollarColor());
-        //compound.putInt(NBTKEY_CHOCOBO_LEASH_BLOCK_X, this.getLeashSpot().getX());
-        //compound.putInt(NBTKEY_CHOCOBO_LEASH_BLOCK_Y, this.getLeashSpot().getY());
-        //compound.putInt(NBTKEY_CHOCOBO_LEASH_BLOCK_Z, this.getLeashSpot().getZ());
         compound.put(NBTKEY_CHOCOBO_LEASH_BLOCK, NbtHelper.fromBlockPos(this.getLeashSpot()));
         compound.putDouble(NBTKEY_CHOCOBO_LEASH_DISTANCE, this.getLeashDistance());
     }

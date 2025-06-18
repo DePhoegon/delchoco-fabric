@@ -1,6 +1,7 @@
 // src/main/java/com/dephoegon/delchoco/common/entities/properties/ChocoboBrains.java
 package com.dephoegon.delchoco.common.entities.properties;
 
+import com.dephoegon.delchoco.common.entities.AbstractChocobo;
 import com.dephoegon.delchoco.common.entities.Chocobo;
 import com.dephoegon.delchoco.common.items.ChocoDisguiseItem;
 import com.dephoegon.delchoco.utils.RandomHelper;
@@ -20,10 +21,12 @@ import net.minecraft.entity.ai.brain.*;
 import net.minecraft.entity.ai.brain.sensor.Sensor;
 import net.minecraft.entity.ai.brain.sensor.SensorType;
 import net.minecraft.entity.ai.brain.task.*;
+import net.minecraft.entity.ai.control.MoveControl;
 import net.minecraft.entity.ai.pathing.EntityNavigation;
 import net.minecraft.entity.ai.pathing.LandPathNodeMaker;
 import net.minecraft.entity.ai.pathing.Path;
 import net.minecraft.entity.ai.pathing.PathNodeType;
+import net.minecraft.entity.attribute.EntityAttributes;
 import net.minecraft.entity.mob.MobEntity;
 import net.minecraft.entity.mob.PathAwareEntity;
 import net.minecraft.entity.player.PlayerEntity;
@@ -33,7 +36,9 @@ import net.minecraft.registry.tag.FluidTags;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.Hand;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Optional;
@@ -58,7 +63,7 @@ public class ChocoboBrains {
     );
 
     public static Brain<?> makeBrain(Brain<Chocobo> brain, Chocobo choco) {
-        addCoreActivities(brain);
+        addCoreActivities(brain, choco);
         addIdleActivities(brain);
         // addFightActivities(brain, choco);
         addPanicActivities(brain);
@@ -69,9 +74,9 @@ public class ChocoboBrains {
         return brain;
     }
 
-    private static void addCoreActivities(Brain<Chocobo> brain) {
+    private static void addCoreActivities(Brain<Chocobo> brain, Chocobo chocobo) {
         brain.setTaskList(Activity.CORE, 0, ImmutableList.of(
-                new TryFindLandTask(1.1f), // Attempts to find land if on water and should walk on it
+                new TryFindLandTask(1.1f, chocobo),
                 // new OwnerHurtTask(),
                 // new OwnerHurtByTask(),
                 // new HurtByTargetTask(),
@@ -211,9 +216,7 @@ public class ChocoboBrains {
             int limit = chocobo.getLeashDistance();
             for (int i = 0; i < 10; i++) {
                 Vec3d candidate = ChocoboNoPenaltyTargeting.find(chocobo, limit, 7);
-                if (candidate == null) {
-                    continue;
-                }
+                if (candidate == null) { continue; }
 
                 BlockPos candidatePos = BlockPos.ofFloored(candidate);
 
@@ -228,23 +231,15 @@ public class ChocoboBrains {
                         }
                     }
                 }
-                if (nearWallOrFence) {
-                    continue;
-                }
-                if (chocobo.canWonder()) {
-                    return candidate;
-                }
+                if (nearWallOrFence) { continue; }
+                if (chocobo.canWonder()) { return candidate; }
 
                 double distSq = center.getSquaredDistance(candidate.x, candidate.y, candidate.z);
-                if (distSq > limit * limit) {
-                    continue;
-                }
+                if (distSq > limit * limit) { continue; }
 
                 // Pathfinding check (optional, for extra safety)
                 Path path = chocobo.getNavigation().findPathTo(candidatePos, 0);
-                if (path != null && path.reachesTarget()) {
-                    return candidate;
-                }
+                if (path != null && path.reachesTarget()) { return candidate; }
             }
             return null;
         }
@@ -534,21 +529,24 @@ public class ChocoboBrains {
     }
 
     public static class TryFindLandTask extends MultiTickTask<Chocobo> {
-        private static final int SEARCH_RANGE_HORIZONTAL = 56; // Approx 3.5 chunks
+        private static Chocobo chocoboEntity; // Vertical range for land search
+        @SuppressWarnings("DataFlowIssue")
+        private static final int SEARCH_RANGE_HORIZONTAL = (int) chocoboEntity.getAttributeValue(EntityAttributes.GENERIC_FOLLOW_RANGE);
         private static final int SEARCH_RANGE_VERTICAL = 8; // Search up/down a bit
         private final float speed;
 
-        public TryFindLandTask(float speed) {
+        public TryFindLandTask(float speed, Chocobo chocobo) {
             super(ImmutableMap.of(
                     MemoryModuleType.WALK_TARGET, MemoryModuleState.VALUE_ABSENT, // Only run if no walk target
                     MemoryModuleType.ATTACK_TARGET, MemoryModuleState.VALUE_ABSENT, // Don't interrupt attacking
                     MemoryModuleType.PATH, MemoryModuleState.VALUE_ABSENT // And no current path
             ));
             this.speed = speed;
+            chocoboEntity = chocobo;
         }
 
         @Override
-        protected boolean shouldRun(ServerWorld world, Chocobo chocobo) {
+        protected boolean shouldRun(ServerWorld world, @NotNull Chocobo chocobo) {
             return chocobo.canWalkOnWater()
                     && (chocobo.isTouchingWater() || chocobo.isSubmergedInWater())
                     && (!chocobo.hasPlayerRider() || chocobo.getVehicle() == null)
@@ -587,9 +585,7 @@ public class ChocoboBrains {
                 int z = entityBlockPos.getZ() + chocobo.getRandom().nextInt(horizontalRange * 2 + 1) - horizontalRange;
                 BlockPos candidatePos = new BlockPos(x, y, z);
 
-                if (isGeometricallySuitableLand(world, candidatePos, chocobo)) {
-                    return candidatePos; // Return the BlockPos if suitable
-                }
+                if (isGeometricallySuitableLand(world, candidatePos, chocobo)) { return candidatePos; }
             }
             return null; // Failed to find suitable land in attempts
         }
@@ -675,6 +671,58 @@ public class ChocoboBrains {
             boolean isValidSurface = blockState.hasSolidTopSurface(chocobo.getWorld(), blockPos, chocobo);
 
             return isValidSurface && chocobo.getWorld().isSpaceEmpty(chocobo, chocobo.getBoundingBox().offset(Vec3d.of(pos.subtract(chocobo.getBlockPos()))));
+        }
+    }
+
+    public static class ChocoboSwimMoveControl extends MoveControl {
+        private final AbstractChocobo chocobo;
+
+        public ChocoboSwimMoveControl(AbstractChocobo chocobo) {
+            super(chocobo);
+            this.chocobo = chocobo;
+        }
+
+        @Override
+        public void tick() {
+            if (this.chocobo.isWaterBreathing() && this.chocobo.isTouchingWater()) {
+                if (this.state == MoveControl.State.MOVE_TO) {
+                    Vec3d targetPos = new Vec3d(this.targetX, this.targetY, this.targetZ);
+                    Vec3d chocoboPos = this.chocobo.getPos();
+                    Vec3d directionToTarget = targetPos.subtract(chocoboPos);
+                    double distanceToTargetSq = directionToTarget.lengthSquared();
+
+                    if (distanceToTargetSq < 0.01D) { // Arrived at target
+                        this.state = MoveControl.State.WAIT;
+                        // this.chocobo.setMovementSpeed(0.0F);
+                        this.chocobo.setVelocity(this.chocobo.getVelocity().multiply(1.0, 0.5, 1.0)); // Dampen Y
+                        return;
+                    }
+
+                    double angleToTargetHorizontal = MathHelper.atan2(directionToTarget.z, directionToTarget.x);
+                    this.chocobo.setYaw(this.wrapDegrees(this.chocobo.getYaw(), (float) (angleToTargetHorizontal * 57.2957763671875D) - 90.0F, 90.0F));
+                    this.chocobo.bodyYaw = this.chocobo.getYaw();
+
+                    float currentSpeedSetting = (float) (this.speed * this.chocobo.getAttributeValue(EntityAttributes.GENERIC_MOVEMENT_SPEED));
+                    // this.chocobo.setMovementSpeed(currentSpeedSetting); // For forward movement in MobEntity.travel
+
+                    // Vertical movement adjustment
+                    double dy = directionToTarget.y;
+                    if (Math.abs(dy) > 0.02D) { // Only apply if there's a meaningful vertical distance
+                        // Adjust Y velocity to move towards targetY
+                        // Factor determines how quickly it adjusts vertically.
+                        double verticalAdjustFactor = 0.15D; // Tunable
+                        double yVelocityChange = MathHelper.clamp(dy * verticalAdjustFactor, -currentSpeedSetting * 0.75D, currentSpeedSetting * 0.75D);
+                        this.chocobo.setVelocity(this.chocobo.getVelocity().add(0.0D, yVelocityChange, 0.0D));
+                    }
+                    // Horizontal movement is primarily driven by MobEntity.travel using the forward speed set above.
+                    // The Y velocity added here will be incorporated when MobEntity.travel calls this.entity.move().
+                } else { // State is WAIT or other
+                    this.chocobo.setMovementSpeed(0.0F);
+                }
+            } else {
+                // Not a swimmer or not in water, fall back to default behavior
+                super.tick();
+            }
         }
     }
 }

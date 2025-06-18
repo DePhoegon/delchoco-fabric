@@ -4,6 +4,7 @@ import com.dephoegon.delchoco.DelChoco;
 import com.dephoegon.delchoco.aid.chocoboChecks;
 import com.dephoegon.delchoco.aid.world.ChocoboConfig;
 import com.dephoegon.delchoco.common.entities.properties.ChocoboBrainAid;
+import com.dephoegon.delchoco.common.entities.properties.ChocoboBrains;
 import com.dephoegon.delchoco.common.entities.properties.ChocoboColor;
 import com.dephoegon.delchoco.common.entities.properties.MovementType;
 import com.dephoegon.delchoco.common.items.ChocoboArmorItems;
@@ -17,12 +18,8 @@ import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.ai.brain.Brain;
 import net.minecraft.entity.ai.brain.MemoryModuleType;
-import net.minecraft.entity.ai.pathing.LandPathNodeMaker;
-import net.minecraft.entity.ai.pathing.MobNavigation;
-import net.minecraft.entity.ai.pathing.PathNodeType;
-import net.minecraft.entity.ai.pathing.AmphibiousSwimNavigation;
-import net.minecraft.entity.ai.pathing.EntityNavigation;
 import net.minecraft.entity.ai.control.MoveControl;
+import net.minecraft.entity.ai.pathing.*;
 import net.minecraft.entity.attribute.EntityAttribute;
 import net.minecraft.entity.attribute.EntityAttributeInstance;
 import net.minecraft.entity.attribute.EntityAttributeModifier;
@@ -455,10 +452,7 @@ public abstract class AbstractChocobo extends TameableEntity implements Angerabl
         if (state.isIn(FluidTags.WATER)) { return this.canWalkOnWater(); }
         return super.canWalkOnFluid(state);
     }
-    public boolean shouldDismountUnderwater() {
-        // Left uncompacted for readability and future expansion
-        return !this.isWaterBreathing();
-    }
+    public boolean shouldDismountUnderwater() { return this.canWalkOnWater(); }
     protected boolean shouldSwimInFluids() {
         // Left uncompacted for readability and future expansion
         return super.shouldSwimInFluids();
@@ -466,16 +460,10 @@ public abstract class AbstractChocobo extends TameableEntity implements Angerabl
     public float getPathfindingFavor(BlockPos pos, WorldView world) {
         BlockState state = world.getBlockState(pos);
         if (state.getFluidState().isIn(FluidTags.WATER)) {
-            if (this.canWalkOnWater()) { // Is a water-walker, not a swimmer. Should prefer land.
-                return 1.0F; // Positive value makes water less attractive
-            } else { // Is a swimmer (isWaterBreathing() is true)
-                // Swimming Chocobos should prefer pathing in water
-                return this.isWaterBreathing() ? -0.5F : 1F; // Negative value indicates strong preference for water
-            }
+            if (this.canWalkOnWater()) { return 1.0F; }
+            else { return this.isWaterBreathing() ? -0.5F : 1F; }
         }
-        if (this.isFireImmune() && state.getFluidState().isIn(FluidTags.LAVA)) {
-            return 1.0F;
-        }
+        if (this.isFireImmune() && state.getFluidState().isIn(FluidTags.LAVA)) { return 1.0F; }
         return super.getPathfindingFavor(pos, world);
     }
 
@@ -526,7 +514,7 @@ public abstract class AbstractChocobo extends TameableEntity implements Angerabl
     public boolean followOwner() { return this.getMovementType() == MovementType.FOLLOW_OWNER; }
     public boolean followLure() { return this.getMovementType() == MovementType.FOLLOW_LURE; }
     public int getLeashDistance() { return this.dataTracker.get(PARAM_LEASH_LENGTH); }
-    public int chocoStatMod() { return ChocoboConfig.DEFAULT_WEAPON_MOD.get(); }
+    public int chocoStatMod() { return ChocoboConfig.DEFAULT_GEAR_MOD.get(); }
     
     // setters for Chocobo properties
     public void setMale(boolean isMale) {
@@ -922,97 +910,32 @@ public abstract class AbstractChocobo extends TameableEntity implements Angerabl
     }
 
     private void updateNavigationAndMoveControl(boolean forceAmphibiousDuringEffect) {
-        if (this.getWorld().isClient()) return;
+        if (this.getWorld().isClient()) { return; }
 
         EntityNavigation oldNavInstance = this.navigation;
         Class<? extends EntityNavigation> oldNavClass = oldNavInstance.getClass();
         EntityNavigation newNavInstance;
 
-        if (forceAmphibiousDuringEffect) {
-            newNavInstance = new AmphibiousSwimNavigation(this, this.getWorld());
-        } else {
-            newNavInstance = this.createNavigation(this.getWorld()); // Uses canWalkOnWater logic
-        }
+        if (forceAmphibiousDuringEffect) { newNavInstance = new AmphibiousSwimNavigation(this, this.getWorld()); }
+        else { newNavInstance = this.createNavigation(this.getWorld()); }
 
         if (newNavInstance.getClass() != oldNavClass) {
             this.navigation = newNavInstance;
-            oldNavInstance.stop(); // Stop path on the old navigator instance
-            // The brain/tasks will eventually create a new path with the new navigator.
+            oldNavInstance.stop();
         }
 
         boolean shouldUseSwimControl;
-        if (forceAmphibiousDuringEffect) {
-            shouldUseSwimControl = true;
-        } else {
-            shouldUseSwimControl = !this.canWalkOnWater(); // True if swimmer based on current abilities
-        }
+        if (forceAmphibiousDuringEffect) { shouldUseSwimControl = true; }
+        else { shouldUseSwimControl = !this.canWalkOnWater(); }
 
         if (shouldUseSwimControl) {
-            if (!(this.moveControl instanceof ChocoboSwimMoveControl)) {
-                this.moveControl = new ChocoboSwimMoveControl(this);
+            if (!(this.moveControl instanceof ChocoboBrains.ChocoboSwimMoveControl)) {
+                this.moveControl = new ChocoboBrains.ChocoboSwimMoveControl(this);
+                this.getNavigation().setCanSwim(true);
             }
-        } else { // Should use standard MoveControl (walker)
-            if (!(this.moveControl instanceof MoveControl) || this.moveControl instanceof ChocoboSwimMoveControl) {
-                this.moveControl = new MoveControl(this);
-            }
-            // If MobNavigation is active for a walker, ensure its internal canSwim is false.
-            // This helps prevent MobNavigation from trying its own swim logic if it was somehow enabled.
-            if (this.navigation instanceof MobNavigation mobNav) {
-                mobNav.setCanSwim(false);
-            }
-        }
-    }
-
-    // Inner class for custom swim move control
-    static class ChocoboSwimMoveControl extends MoveControl {
-        private final AbstractChocobo chocobo;
-
-        public ChocoboSwimMoveControl(AbstractChocobo chocobo) {
-            super(chocobo);
-            this.chocobo = chocobo;
-        }
-
-        @Override
-        public void tick() {
-            if (this.chocobo.isWaterBreathing() && this.chocobo.isTouchingWater()) {
-                if (this.state == MoveControl.State.MOVE_TO) {
-                    Vec3d targetPos = new Vec3d(this.targetX, this.targetY, this.targetZ);
-                    Vec3d chocoboPos = this.chocobo.getPos();
-                    Vec3d directionToTarget = targetPos.subtract(chocoboPos);
-                    double distanceToTargetSq = directionToTarget.lengthSquared();
-
-                    if (distanceToTargetSq < 0.01D) { // Arrived at target
-                        this.state = MoveControl.State.WAIT;
-                        this.chocobo.setMovementSpeed(0.0F);
-                        this.chocobo.setVelocity(this.chocobo.getVelocity().multiply(1.0, 0.5, 1.0)); // Dampen Y
-                        return;
-                    }
-
-                    double angleToTargetHorizontal = MathHelper.atan2(directionToTarget.z, directionToTarget.x);
-                    this.chocobo.setYaw(this.wrapDegrees(this.chocobo.getYaw(), (float) (angleToTargetHorizontal * 57.2957763671875D) - 90.0F, 90.0F));
-                    this.chocobo.bodyYaw = this.chocobo.getYaw();
-
-                    float currentSpeedSetting = (float) (this.speed * this.chocobo.getAttributeValue(EntityAttributes.GENERIC_MOVEMENT_SPEED));
-                    this.chocobo.setMovementSpeed(currentSpeedSetting); // For forward movement in MobEntity.travel
-
-                    // Vertical movement adjustment
-                    double dy = directionToTarget.y;
-                    if (Math.abs(dy) > 0.02D) { // Only apply if there's a meaningful vertical distance
-                        // Adjust Y velocity to move towards targetY
-                        // Factor determines how quickly it adjusts vertically.
-                        double verticalAdjustFactor = 0.15D; // Tunable
-                        double yVelocityChange = MathHelper.clamp(dy * verticalAdjustFactor, -currentSpeedSetting * 0.75D, currentSpeedSetting * 0.75D);
-                        this.chocobo.setVelocity(this.chocobo.getVelocity().add(0.0D, yVelocityChange, 0.0D));
-                    }
-                    // Horizontal movement is primarily driven by MobEntity.travel using the forward speed set above.
-                    // The Y velocity added here will be incorporated when MobEntity.travel calls this.entity.move().
-                } else { // State is WAIT or other
-                    this.chocobo.setMovementSpeed(0.0F);
-                }
-            } else {
-                // Not a swimmer or not in water, fall back to default behavior
-                super.tick();
-            }
+        } else {
+            if (this.moveControl == null || this.moveControl instanceof ChocoboBrains.ChocoboSwimMoveControl) { this.moveControl = new MoveControl(this); }
+            if (this.navigation instanceof MobNavigation mobNav) { mobNav.setCanSwim(false); }
         }
     }
 }

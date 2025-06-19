@@ -76,7 +76,7 @@ public class ChocoboBrains {
 
     private static void addCoreActivities(Brain<Chocobo> brain, Chocobo chocobo) {
         brain.setTaskList(Activity.CORE, 0, ImmutableList.of(
-                // new TryFindLandTask(1.1f),
+                new TryFindLandTask(1.1f),
                 // new OwnerHurtTask(),
                 // new OwnerHurtByTask(),
                 // new HurtByTargetTask(),
@@ -543,7 +543,9 @@ public class ChocoboBrains {
 
         @Override
         protected boolean shouldRun(ServerWorld world, @NotNull Chocobo choco) {
+            // 5 minutes = 5 * 60 * 20 = 6000 ticks.
             return choco.canWalkOnWater()
+                    && choco.getTicksOnWater() > 6000
                     && (choco.isTouchingWater() || choco.isSubmergedInWater())
                     && (!choco.hasPlayerRider() || choco.getVehicle() == null)
                     && !choco.followOwner();

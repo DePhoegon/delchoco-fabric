@@ -74,6 +74,7 @@ import static com.dephoegon.delchoco.common.entities.breeding.BreedingHelper.get
 import static com.dephoegon.delchoco.common.init.ModItems.*;
 import static java.lang.Math.floor;
 import static java.lang.Math.random;
+import static net.minecraft.entity.MovementType.SELF;
 import static net.minecraft.entity.SpawnGroup.CREATURE;
 import static net.minecraft.item.Items.*;
 import static net.minecraft.registry.tag.BiomeTags.IS_BADLANDS;
@@ -401,24 +402,27 @@ public class Chocobo extends AbstractChocobo {
         super.updateInWaterStateAndDoWaterCurrentPushing();
     }
     public void travel(@NotNull Vec3d travelVector) {
-        Vec3d newVector = travelVector;
-        if (this.getPrimaryPassenger() instanceof PlayerEntity rider) {
-            this.prevY = rider.getYaw();
-            this.prevPitch = rider.getPitch();
-            this.setYaw(rider.getYaw());
-            this.setPitch(rider.getPitch());
-            this.setRotation(this.getYaw(), this.getPitch());
-            this.headYaw = this.getYaw();
-            this.bodyYaw = this.getYaw();
+        if (this.isAlive()) {
+            if (this.getPrimaryPassenger() instanceof PlayerEntity rider) {
+                this.prevY = rider.getYaw();
+                this.prevPitch = rider.getPitch();
+                this.setYaw(rider.getYaw());
+                this.setPitch(rider.getPitch());
+                this.setRotation(this.getYaw(), this.getPitch());
+                this.headYaw = this.getYaw();
+                this.bodyYaw = this.getYaw();
 
-            newVector = new Vec3d(rider.sidewaysSpeed * 0.5F, newVector.y, rider.forwardSpeed); //Strafe - Vertical - Forward
+                Vec3d newVector = new Vec3d(rider.sidewaysSpeed * 0.5F, travelVector.y, rider.forwardSpeed); //Strafe - Vertical - Forward
 
-            // reduce movement speed by 75% if moving backwards
-            if (newVector.getZ() <= 0.0D) { newVector = new Vec3d(newVector.x, newVector.y, newVector.z * 0.25F); }
+                // reduce movement speed by 75% if moving backwards
+                if (newVector.getZ() <= 0.0D) {
+                    newVector = new Vec3d(newVector.x, newVector.y, newVector.z * 0.25F);
+                }
 
-            if (this.isOnGround()) { this.isChocoboJumping = false; }
+                if (this.isOnGround()) {
+                    this.isChocoboJumping = false;
+                }
 
-            if (this.isLogicalSideForUpdatingMovement()) {
                 if (MinecraftClient.getInstance().options.jumpKey.isPressed()) {
                     // jump logic
                     if (!this.isChocoboJumping && this.isOnGround()) {
@@ -432,14 +436,14 @@ public class Chocobo extends AbstractChocobo {
                     float verticalMovement = 0.0f;
                     if (MinecraftClient.getInstance().options.jumpKey.isPressed()) { // Move up
                         verticalMovement = 0.5f;
-                    } else if (MinecraftClient.getInstance().options.sneakKey.isPressed()){ // Move down
+                    } else if (MinecraftClient.getInstance().options.sneakKey.isPressed()) { // Move down
                         verticalMovement = -0.5f;
                     } else if (isChocoboWaterGlide()) { // Glide/neutral buoyancy
-                         motion = getVelocity();
-                         // Apply slight upward force to counteract gravity if gliding, or maintain current y if stable
-                         // This can be adjusted for desired "glide" effect.
-                         // For now, let's reduce downward pull significantly.
-                         verticalMovement = (float) (motion.y * 0.65F); // Keep some of the existing y-velocity for smoother transitions
+                        motion = getVelocity();
+                        // Apply slight upward force to counteract gravity if gliding, or maintain current y if stable
+                        // This can be adjusted for desired "glide" effect.
+                        // For now, let's reduce downward pull significantly.
+                        verticalMovement = (float) (motion.y * 0.65F); // Keep some of the existing y-velocity for smoother transitions
                     }
                     // If not jumping or sneaking, and not gliding, it will use the y from travelVector (usually gravity or AI input)
                     // For player-controlled swimming, we override y more directly.
@@ -448,18 +452,22 @@ public class Chocobo extends AbstractChocobo {
                     }
                 } else if (rider.isTouchingWater()) { // Player is in water BUT Chocobo walks on water
                     Vec3d motion = getVelocity();
-                    if (MinecraftClient.getInstance().options.jumpKey.isPressed()) { setVelocity(new Vec3d(motion.x, .5f, motion.z)); }
-                    else if (this.isWaterBreathing() && isChocoboWaterGlide()) {
+                    if (MinecraftClient.getInstance().options.jumpKey.isPressed()) {
+                        setVelocity(new Vec3d(motion.x, .5f, motion.z));
+                    } else if (this.isWaterBreathing() && isChocoboWaterGlide()) {
                         Vec3d waterMotion = getVelocity();
                         setVelocity(new Vec3d(waterMotion.x, waterMotion.y * 0.65F, waterMotion.z));
                     }
                 }
                 if (rider.isInLava()) {
                     Vec3d motion = getVelocity();
-                    if (MinecraftClient.getInstance().options.jumpKey.isPressed()) { setVelocity(new Vec3d(motion.x, .5f, motion.z)); }
-                    else if (this.isFireImmune() && this.getVelocity().y < 0) {
+                    if (MinecraftClient.getInstance().options.jumpKey.isPressed()) {
+                        setVelocity(new Vec3d(motion.x, .5f, motion.z));
+                    } else if (this.isFireImmune() && this.getVelocity().y < 0) {
                         int distance = WorldUtils.getDistanceToSurface(this.getBlockPos(), this.getEntityWorld());
-                        if (distance > 0) { setVelocity(new Vec3d(motion.x, .05f, motion.z)); }
+                        if (distance > 0) {
+                            setVelocity(new Vec3d(motion.x, .05f, motion.z));
+                        }
                     }
                 }
                 // Insert override for slow-fall Option on Chocobo
@@ -469,38 +477,26 @@ public class Chocobo extends AbstractChocobo {
                         setVelocity(new Vec3d(motion.x, motion.y * 0.65F, motion.z));
                     }
                 }
-                if (MinecraftClient.getInstance().options.sprintKey.isPressed()) { this.setSprinting(this.isOnGround()); }
-                else { this.setSprinting(false); }
+                if (MinecraftClient.getInstance().options.sprintKey.isPressed()) {
+                    this.setSprinting(this.isOnGround());
+                } else { this.setSprinting(false); }
 
                 this.setMovementSpeed((float) Objects.requireNonNull(this.getAttributeInstance(EntityAttributes.GENERIC_MOVEMENT_SPEED)).getValue());
                 super.travel(newVector);
-            }
-        } else { // Unridden logic
-            if (this.isTouchingWater() && this.isWaterBreathing()) { // Is a swimmer and in water
-                // Allow normal AI-controlled swimming by passing the original travelVector from AI
-                super.travel(travelVector);
-            } else if (this.isTouchingWater() && !this.isWaterBreathing()){ // Is a water-walker and in water (e.g. fell in)
-                // TryFindLandTask should be the primary way for these to get out.
-                // For AI-driven travel while in water, let MobEntity's logic handle it.
-                super.travel(travelVector);
-            }
-            // Slow fall logic: only if not on ground, not in water, not in lava, and currently falling
-            else if (!this.isOnGround() && !this.isTouchingWater() && !this.isInLava() && this.getVelocity().y < 0.0D) {
-                Vec3d currentVelocity = this.getVelocity();
-                // Apply slow fall modification to current velocity's Y component
-                this.setVelocity(currentVelocity.x, currentVelocity.y * 0.65D, currentVelocity.z);
-                // Still process the AI's intended movement (travelVector) via super.travel()
-                // This ensures horizontal movement and any AI-driven downward thrust are still applied.
-                super.travel(travelVector);
-            } else { // On ground, or in lava (if immune), or other general cases
-                // Default to MobEntity\'s travel logic.
-                // If it's a water-breathing Chocobo in water, MobEntity.travel will handle swimming physics.
-                super.travel(travelVector);
+            } else { // Unridden logic
+                if (this.isWaterBreathing() && this.isSubmergedInWater()) {
+                    this.updateVelocity(this.getMovementSpeed(), travelVector);
+                    this.move(SELF, this.getVelocity());
+                    this.setVelocity(this.getVelocity().multiply(0.9D));
+                } else {
+                    super.travel(travelVector);
+                }
             }
         }
     }
     public void tick() {
         super.tick();
+        if (this.getWorld().isClient()) { return; }
         this.fruitAteTimer = this.fruitAteTimer > 0 ? this.fruitAteTimer - 1 : 0;
         LivingEntity owner = this.getOwner() != null ? this.getOwner() : null;
         if (this.rideTickDelay < 0) {
@@ -548,25 +544,6 @@ public class Chocobo extends AbstractChocobo {
             this.TimeSinceFeatherChance = 0;
             if ((float) random() < .25) { this.dropFeather(); }
         } else { this.TimeSinceFeatherChance++; }
-
-        // Server-side logic for unridden Chocobo water behavior
-        if (!this.getWorld().isClient && !this.hasPassengers()) {
-            // If Chocobo is of a type that swims (isWaterBreathing -> !canWalkOnWater)
-            // and is in water, with no current target (either direct or brain memory) or path, it should drift down.
-            /*
-            if (this.isTouchingWater() && !this.canWalkOnWater() && // !canWalkOnWater() implies isWaterBreathing()
-                (this.getTarget() == null && getBrain().getOptionalRegisteredMemory(MemoryModuleType.ATTACK_TARGET).isEmpty()) &&
-                getBrain().getOptionalRegisteredMemory(MemoryModuleType.WALK_TARGET).isEmpty() &&
-                (!this.getNavigation().isFollowingPath() || this.getNavigation().isIdle())) {
-
-                Vec3d currentVelocity = this.getVelocity();
-                // Apply a gentle downward force if not already moving upwards significantly due to AI.
-                if (currentVelocity.y < 0.05D) { // Allow small upward movements from pathing, but generally drift down.
-                    this.setVelocity(currentVelocity.x, Math.max(currentVelocity.y - 0.03D, -0.2D), currentVelocity.z); // Drift down, cap speed
-                }
-            }
-            */
-        }
 
         //Change effects to chocobo colors
         if (!this.getEntityWorld().isClient()) {

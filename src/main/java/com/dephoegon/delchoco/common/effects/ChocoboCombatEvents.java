@@ -1,93 +1,26 @@
 package com.dephoegon.delchoco.common.effects;
 
 import com.dephoegon.delchoco.aid.world.ChocoboConfig;
-import com.dephoegon.delchoco.common.entities.Chocobo;
 import com.dephoegon.delchoco.common.entities.properties.ChocoboColor;
-import com.dephoegon.delchoco.common.init.ModItems;
 import com.dephoegon.delchoco.common.items.ChocoDisguiseItem;
-import net.minecraft.entity.Entity;
 import net.minecraft.entity.EquipmentSlot;
-import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.entity.damage.DamageTypes;
 import net.minecraft.entity.effect.StatusEffect;
 import net.minecraft.entity.effect.StatusEffectInstance;
 import net.minecraft.entity.effect.StatusEffects;
-import net.minecraft.entity.mob.CaveSpiderEntity;
-import net.minecraft.entity.mob.SkeletonEntity;
-import net.minecraft.entity.mob.SpiderEntity;
-import net.minecraft.entity.mob.WitherSkeletonEntity;
-import net.minecraft.entity.passive.IronGolemEntity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.registry.tag.DamageTypeTags;
-import net.minecraft.scoreboard.Team;
-import net.minecraft.util.Hand;
 import org.jetbrains.annotations.NotNull;
 
 import static com.dephoegon.delchoco.aid.chocoboChecks.isPoisonImmuneChocobo;
 import static com.dephoegon.delchoco.aid.chocoboChecks.isWitherImmuneChocobo;
 import static com.dephoegon.delchoco.common.entities.properties.ChocoboColor.*;
-import static com.dephoegon.delchoco.common.init.ModItems.*;
 import static com.dephoegon.delchoco.common.items.ChocoDisguiseItem.NBTKEY_COLOR;
 import static com.dephoegon.delchoco.utils.RandomHelper.random;
-import static net.minecraft.item.Items.*;
 
 public class ChocoboCombatEvents {
-    /**
-     * @return False if the attack should be canceled, True if it should go through
-     * @implNote  Chance of dropping Chocobo feathers on Chocobo being hit
-     * Intended to be used in the Chocobo#applyDamageEffects override method
-     */
-    public static boolean onChocoboCombatGetHit(LivingEntity attackerEntity, Chocobo chocoboTarget){
-        if (chocoboTarget != null) {
-            if (random.nextInt(100) + 1 > 35) {
-                chocoboTarget.dropItem(ModItems.CHOCOBO_FEATHER);
-            }
-        }
-        if (chocoboTarget != null && chocoboTarget.isTamed()) {
-            PlayerEntity source = attackerEntity instanceof PlayerEntity play ? play : null;
-            PlayerEntity owner = chocoboTarget.getOwner() instanceof PlayerEntity play ? play : null;
-            Team group = owner != null ? (Team) owner.getScoreboardTeam() : null;
-            if (source != null) { boolean shift = ChocoboConfig.SHIFT_HIT_BYPASS.get() && source.isSneaking();
-                boolean teams = group != null && source.getScoreboardTeam() == group;
-                if (!shift) {
-                    if (owner == source || teams) { return ChocoboConfig.OWN_CHOCOBO_HITTABLE.get(); }
-                    return ChocoboConfig.TAMED_CHOCOBO_HITTABLE.get();
-                }
-            }
-        }
-        return true;
-    }
-
-    /**
-     * @implNote Chance of dropping items on mob hit, enabled with config setting "extraChocoboResourcesOnHit"
-     * Intended to be used in the Entity#applyDamageEffects mixin method
-     */
-    public static void onChocoboCombatHit(@NotNull Chocobo chocoboAttacker, Entity targetEntity) {
-        if (ChocoboConfig.EXTRA_CHOCOBO_RESOURCES_HIT.get()) {
-            LivingEntity target = targetEntity instanceof LivingEntity living ? living : null;
-            if (target instanceof SpiderEntity e) { onHitMobChance(10, STRING, e); }
-            if (target instanceof CaveSpiderEntity e) { onHitMobChance(5, FERMENTED_SPIDER_EYE, e); }
-            if (target instanceof SkeletonEntity e) { onHitMobChance(10, BONE, e); }
-            if (target instanceof WitherSkeletonEntity e) { onHitMobChance(10, CHARCOAL, e); }
-            if (target instanceof IronGolemEntity e) { onHitMobChance(5, POPPY, e); }
-            if (target != null && target.getEquippedStack(EquipmentSlot.MAINHAND) != ItemStack.EMPTY) {
-                if (onHitMobChance(30)) {
-                    target.dropItem(target.getEquippedStack(EquipmentSlot.MAINHAND).getItem());
-                    target.setStackInHand(Hand.MAIN_HAND, ItemStack.EMPTY);
-                }
-            }
-            if (target != null && target.getEquippedStack(EquipmentSlot.OFFHAND) != ItemStack.EMPTY) {
-                if (onHitMobChance(10)) {
-                    target.dropItem(target.getEquippedStack(EquipmentSlot.OFFHAND).getItem());
-                    target.setStackInHand(Hand.OFF_HAND, ItemStack.EMPTY);
-                }
-            }
-        }
-    }
 
     /**
      * @return True if the Player is immune to the DamageSource, False if not
@@ -124,130 +57,7 @@ public class ChocoboCombatEvents {
         }
         return false;
     }
-
-    /**
-     * @implNote  Chance of dropping items on mob kill, enabled with config setting "extraChocoboResourcesOnKill"
-     * Intended to be used in the LivingEntity#onDeath mixin method
-     */
-    public static void onChocoboKill(Chocobo chocoboAttacker, Entity targetEntity) {
-        if (chocoboAttacker != null && targetEntity != null) {
-            if (ChocoboConfig.EXTRA_CHOCOBO_RESOURCES_KILL.get()) {
-                ChocoboColor color = chocoboAttacker.getChocoboColor();
-                if (targetEntity instanceof SpiderEntity) {
-                    if (.20f > (float) Math.random()) { targetEntity.dropItem(COBWEB); }
-                }
-                if (color == ChocoboColor.BLACK) {
-                    if (flowerChance()) {
-                        if (.50f > (float) Math.random()) { targetEntity.dropItem(WITHER_ROSE); }
-                        else { targetEntity.dropItem(DEAD_BUSH); }
-                    }
-                }
-                if (color == ChocoboColor.FLAME) {
-                    if (flowerChance()) {
-                        if (.50f > (float) Math.random()) { targetEntity.dropItem(CRIMSON_FUNGUS); }
-                        else { targetEntity.dropItem(WARPED_FUNGUS); }
-                    } else {
-                        if (.10f > (float) Math.random()) { targetEntity.dropItem(MAGMA_CREAM); }
-                    }
-                }
-                if (color == ChocoboColor.GREEN) {
-                    if (flowerChance()) {
-                        if (.34f > (float) Math.random()) { targetEntity.dropItem(SPORE_BLOSSOM); }
-                        else {
-                            if (.51f > (float) Math.random()) { targetEntity.dropItem(SMALL_DRIPLEAF); }
-                            else { targetEntity.dropItem(MOSS_BLOCK); }
-                        }
-                    }
-                }
-                if (color == ChocoboColor.WHITE) {
-                    if (flowerChance()) {
-                        if (.34f > (float) Math.random()) { targetEntity.dropItem(SNOWBALL); }
-                        else {
-                            if (.51f > (float) Math.random()) { targetEntity.dropItem(LILY_OF_THE_VALLEY); }
-                            else { targetEntity.dropItem(OXEYE_DAISY); }
-                        }
-                    } else if (.41f > (float) Math.random()) { targetEntity.dropItem(BONE_MEAL); }
-                }
-                if (color == ChocoboColor.GOLD) {
-                    if (flowerChance()) { targetEntity.dropItem(SUNFLOWER);}
-                    else {
-                        if (.03f > (float) Math.random()) { targetEntity.dropItem(GOLD_NUGGET); }
-                    }
-                }
-                if (color == ChocoboColor.BLUE) {
-                    if (flowerChance()) {
-                        if (.50f > (float) Math.random()) { targetEntity.dropItem(KELP); }
-                        else { targetEntity.dropItem(SEA_PICKLE); }
-                        if (.10f > (float) Math.random()) { targetEntity.dropItem(NAUTILUS_SHELL); }
-                    }
-                }
-                if (color == ChocoboColor.PINK) {
-                    if (flowerChance()) {
-                        if (.34f > (float) Math.random()) { targetEntity.dropItem(BROWN_MUSHROOM); }
-                        else {
-                            if (.51f > (float) Math.random()) { targetEntity.dropItem(RED_MUSHROOM); }
-                            else { targetEntity.dropItem(ALLIUM); }
-                        }
-                    }
-                }
-                if (color == ChocoboColor.RED) {
-                    if (flowerChance()) {
-                        if (.34f > (float) Math.random()) { targetEntity.dropItem(STICK); }
-                        else {
-                            if (.51f > (float) Math.random()) { targetEntity.dropItem(BAMBOO); }
-                            else { targetEntity.dropItem(VINE); }
-                        }
-                    }
-                }
-                if (color == ChocoboColor.PURPLE) {
-                    if (flowerChance()) { targetEntity.dropItem(CHORUS_FLOWER); }
-                    else if (.09f > (float) Math.random()) { targetEntity.dropItem(ENDER_PEARL); }
-                }
-                if (color == ChocoboColor.YELLOW) {
-                    if (flowerChance()) {
-                        Item flower = switch (random.nextInt(12) + 1) {
-                            case 2 -> POPPY;
-                            case 3 -> BLUE_ORCHID;
-                            case 4 -> ALLIUM;
-                            case 5 -> AZURE_BLUET;
-                            case 6 -> RED_TULIP;
-                            case 7 -> ORANGE_TULIP;
-                            case 8 -> WHITE_TULIP;
-                            case 9 -> PINK_TULIP;
-                            case 10 -> OXEYE_DAISY;
-                            case 11 -> CORNFLOWER;
-                            case 12 -> LILY_OF_THE_VALLEY;
-                            default -> DANDELION;
-                        };
-                        targetEntity.dropItem(flower);
-                    }
-                }
-            }
-        }
-    }
-
-    /**
-     * @implNote Chance to drop a Chocobo spawn egg of the same color
-     * Intended to be used in the Chocobo#onDeath override method
-     */
-    public static void onChocoboDeath(@NotNull Chocobo dyingChocobo) {
-        @NotNull ItemStack egg = switch (dyingChocobo.getChocoboColor()) {
-            case YELLOW -> new ItemStack(YELLOW_CHOCOBO_SPAWN_EGG);
-            case WHITE -> new ItemStack(WHITE_CHOCOBO_SPAWN_EGG);
-            case GREEN -> new ItemStack(GREEN_CHOCOBO_SPAWN_EGG);
-            case FLAME -> new ItemStack(FLAME_CHOCOBO_SPAWN_EGG);
-            case BLACK -> new ItemStack(BLACK_CHOCOBO_SPAWN_EGG);
-            case GOLD -> new ItemStack(GOLD_CHOCOBO_SPAWN_EGG);
-            case BLUE -> new ItemStack(BLUE_CHOCOBO_SPAWN_EGG);
-            case RED -> new ItemStack(RED_CHOCOBO_SPAWN_EGG);
-            case PINK -> new ItemStack(PINK_CHOCOBO_SPAWN_EGG);
-            case PURPLE -> new ItemStack(PURPLE_CHOCOBO_SPAWN_EGG);
-        };
-        if (random.nextInt(1000)+1 < 85) { dyingChocobo.dropStack(egg); }
-    }
     public static boolean flowerChance() { return random.nextInt(100)+1 < 45; }
-    private static boolean onHitMobChance(int percentChance) { return random.nextInt(100)+1 < percentChance; }
-    private static void onHitMobChance(int percentChance, Item item, Entity e) { if (random.nextInt(100)+1 < percentChance) { e.dropItem(item); } }
     private static ChocoboColor getNBTKEY_COLOR(@NotNull ItemStack item) {
         NbtCompound tag = item.getNbt();
         if (tag != null && tag.contains(NBTKEY_COLOR)) { return getColorFromName(tag.getString(NBTKEY_COLOR)); }

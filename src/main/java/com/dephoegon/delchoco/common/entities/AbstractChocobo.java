@@ -3,6 +3,7 @@ package com.dephoegon.delchoco.common.entities;
 import com.dephoegon.delchoco.DelChoco;
 import com.dephoegon.delchoco.aid.chocoboChecks;
 import com.dephoegon.delchoco.aid.world.ChocoboConfig;
+import com.dephoegon.delchoco.common.entities.pathing.ChocoboAmphibiousSwimNavigation;
 import com.dephoegon.delchoco.common.entities.properties.ChocoboBrainAid;
 import com.dephoegon.delchoco.common.entities.properties.ChocoboBrains;
 import com.dephoegon.delchoco.common.entities.properties.ChocoboColor;
@@ -17,7 +18,10 @@ import net.minecraft.entity.*;
 import net.minecraft.entity.ai.brain.Brain;
 import net.minecraft.entity.ai.brain.MemoryModuleType;
 import net.minecraft.entity.ai.control.MoveControl;
-import net.minecraft.entity.ai.pathing.*;
+import net.minecraft.entity.ai.pathing.AmphibiousSwimNavigation;
+import net.minecraft.entity.ai.pathing.EntityNavigation;
+import net.minecraft.entity.ai.pathing.LandPathNodeMaker;
+import net.minecraft.entity.ai.pathing.PathNodeType;
 import net.minecraft.entity.attribute.EntityAttribute;
 import net.minecraft.entity.attribute.EntityAttributeInstance;
 import net.minecraft.entity.attribute.EntityAttributeModifier;
@@ -184,11 +188,7 @@ public abstract class AbstractChocobo extends TameableEntity implements Angerabl
 
     @Override
     protected EntityNavigation createNavigation(World world) {
-        if (this.canWalkOnWater()) {
-            return new MobNavigation(this, world);
-        } else {
-            return new AmphibiousSwimNavigation(this, world);
-        }
+        return new ChocoboAmphibiousSwimNavigation(this, world);
     }
 
     // Initialization of DataTracker for all Chocobo types
@@ -907,7 +907,7 @@ public abstract class AbstractChocobo extends TameableEntity implements Angerabl
         Class<? extends EntityNavigation> oldNavClass = oldNavInstance.getClass();
         EntityNavigation newNavInstance;
 
-        if (forceAmphibiousDuringEffect) { newNavInstance = new AmphibiousSwimNavigation(this, this.getWorld()); }
+        if (forceAmphibiousDuringEffect) { newNavInstance = new ChocoboAmphibiousSwimNavigation(this, this.getWorld()); }
         else { newNavInstance = this.createNavigation(this.getWorld()); }
 
         if (newNavInstance.getClass() != oldNavClass) {
@@ -926,7 +926,7 @@ public abstract class AbstractChocobo extends TameableEntity implements Angerabl
             }
         } else {
             if (this.moveControl == null || this.moveControl instanceof ChocoboBrains.ChocoboSwimMoveControl) { this.moveControl = new MoveControl(this); }
-            if (this.navigation instanceof MobNavigation mobNav) { mobNav.setCanSwim(false); }
+            if (this.navigation instanceof AmphibiousSwimNavigation mobNav) { mobNav.setCanSwim(false); }
         }
     }
 }

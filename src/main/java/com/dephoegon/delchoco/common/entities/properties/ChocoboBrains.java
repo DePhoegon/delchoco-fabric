@@ -23,7 +23,6 @@ import net.minecraft.entity.ai.brain.sensor.SensorType;
 import net.minecraft.entity.ai.brain.task.*;
 import net.minecraft.entity.ai.control.MoveControl;
 import net.minecraft.entity.ai.pathing.EntityNavigation;
-import net.minecraft.entity.ai.pathing.LandPathNodeMaker;
 import net.minecraft.entity.ai.pathing.Path;
 import net.minecraft.entity.ai.pathing.PathNodeType;
 import net.minecraft.entity.attribute.EntityAttributes;
@@ -44,6 +43,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.Optional;
 
 import static com.dephoegon.delchoco.common.entities.properties.ChocoboBrainAid.isAttackable;
+import static net.minecraft.entity.ai.pathing.NavigationType.LAND;
 
 public class ChocoboBrains {
 
@@ -76,7 +76,7 @@ public class ChocoboBrains {
 
     private static void addCoreActivities(Brain<Chocobo> brain, Chocobo chocobo) {
         brain.setTaskList(Activity.CORE, 0, ImmutableList.of(
-                new TryFindLandTask(1.1f, chocobo),
+                // new TryFindLandTask(1.1f),
                 // new OwnerHurtTask(),
                 // new OwnerHurtByTask(),
                 // new HurtByTargetTask(),
@@ -529,33 +529,30 @@ public class ChocoboBrains {
     }
 
     public static class TryFindLandTask extends MultiTickTask<Chocobo> {
-        private static Chocobo chocoboEntity; // Vertical range for land search
-        @SuppressWarnings("DataFlowIssue")
-        private static final int SEARCH_RANGE_HORIZONTAL = (int) chocoboEntity.getAttributeValue(EntityAttributes.GENERIC_FOLLOW_RANGE);
         private static final int SEARCH_RANGE_VERTICAL = 8; // Search up/down a bit
         private final float speed;
 
-        public TryFindLandTask(float speed, Chocobo chocobo) {
+        public TryFindLandTask(float speed) {
             super(ImmutableMap.of(
                     MemoryModuleType.WALK_TARGET, MemoryModuleState.VALUE_ABSENT, // Only run if no walk target
                     MemoryModuleType.ATTACK_TARGET, MemoryModuleState.VALUE_ABSENT, // Don't interrupt attacking
                     MemoryModuleType.PATH, MemoryModuleState.VALUE_ABSENT // And no current path
             ));
             this.speed = speed;
-            chocoboEntity = chocobo;
         }
 
         @Override
-        protected boolean shouldRun(ServerWorld world, @NotNull Chocobo chocobo) {
-            return chocobo.canWalkOnWater()
-                    && (chocobo.isTouchingWater() || chocobo.isSubmergedInWater())
-                    && (!chocobo.hasPlayerRider() || chocobo.getVehicle() == null)
-                    && !chocobo.followOwner();
+        protected boolean shouldRun(ServerWorld world, @NotNull Chocobo choco) {
+            return choco.canWalkOnWater()
+                    && (choco.isTouchingWater() || choco.isSubmergedInWater())
+                    && (!choco.hasPlayerRider() || choco.getVehicle() == null)
+                    && !choco.followOwner();
         }
 
         @Override
-        protected void run(ServerWorld world, Chocobo chocobo, long time) {
-            BlockPos landPosCandidate = findGeometricallySuitableLandPos(chocobo, world, SEARCH_RANGE_HORIZONTAL, SEARCH_RANGE_VERTICAL);
+        protected void run(ServerWorld world, @NotNull Chocobo chocobo, long time) {
+            int searchRangeHorizontal = (int) chocobo.getAttributeValue(EntityAttributes.GENERIC_FOLLOW_RANGE);
+            BlockPos landPosCandidate = findGeometricallySuitableLandPos(chocobo, world, searchRangeHorizontal, SEARCH_RANGE_VERTICAL);
 
             if (landPosCandidate != null) {
                 Path path = chocobo.getNavigation().findPathTo(landPosCandidate, 0);
@@ -593,37 +590,31 @@ public class ChocoboBrains {
         private boolean isGeometricallySuitableLand(ServerWorld world, BlockPos pos, Chocobo chocobo) {
             // Check 1: Position itself should not be water (fluid)
             FluidState fluidAtPos = world.getFluidState(pos);
-            if (fluidAtPos.isIn(FluidTags.WATER)) {
-                return false;
-            }
+            if (fluidAtPos.isIn(FluidTags.WATER)) { return false; }
 
             // Check 2: Block below should be solid enough to stand on.
             BlockPos belowPos = pos.down();
             BlockState belowState = world.getBlockState(belowPos);
             // Material solid check is a good start. PathNodeType can give more info.
-            if (!belowState.hasSolidTopSurface(chocobo.getWorld(), belowPos, chocobo) && LandPathNodeMaker.getLandNodeType(world, belowPos.mutableCopy()) == PathNodeType.BLOCKED) {
-                return false; // Ground below is not solid or is blocked for pathing
-            }
+            if (!belowState.hasSolidTopSurface(chocobo.getWorld(), belowPos, chocobo) && chocobo.getNavigation().getNodeMaker().getDefaultNodeType(world, belowPos.getX(), belowPos.getY(), belowPos.getZ()) == PathNodeType.BLOCKED)
+            { return false; }
             // If the block below is water, then 'pos' is not truly "on land" relative to getting out of water.
-            if (world.getFluidState(belowPos).isIn(FluidTags.WATER)) {
-                return false;
-            }
+            if (world.getFluidState(belowPos).isIn(FluidTags.WATER)) { return false; }
 
             // Check 3: The node type at the target position must be land-based and safe
-            PathNodeType nodeType = LandPathNodeMaker.getLandNodeType(world, pos.mutableCopy());
+            PathNodeType nodeType = chocobo.getNavigation().getNodeMaker().getDefaultNodeType(world, pos.getX(), pos.getY(), pos.getZ());
             if (nodeType == PathNodeType.WATER || nodeType == PathNodeType.BLOCKED) {
                 // If the node is water or blocked, we cannot use this position
                 return false;
             }
-            if ((nodeType == PathNodeType.LAVA || nodeType == PathNodeType.DAMAGE_FIRE || nodeType == PathNodeType.DANGER_FIRE) && !chocobo.isFireImmune()) {
-                return false;
-            }
+            if ((nodeType == PathNodeType.LAVA || nodeType == PathNodeType.DAMAGE_FIRE || nodeType == PathNodeType.DANGER_FIRE) && !chocobo.isFireImmune())
+            { return false; }
+
             // Ensure there's space for the chocobo (e.g. not inside a solid block)
-            // Check pathability of current block and block above
-            if (!world.getBlockState(pos).canPathfindThrough(world, pos, net.minecraft.entity.ai.pathing.NavigationType.LAND) ||
-                !world.getBlockState(pos.up()).canPathfindThrough(world, pos.up(), net.minecraft.entity.ai.pathing.NavigationType.LAND)) {
-                return false;
-            }
+            // Check path-ability of current block and block above
+            if (!world.getBlockState(pos).canPathfindThrough(world, pos, LAND) ||
+                !world.getBlockState(pos.up()).canPathfindThrough(world, pos.up(), LAND))
+            { return false; }
             // All checks passed, this is a geometrically suitable land position (path not checked here)
             return true;
         }
@@ -661,7 +652,7 @@ public class ChocoboBrains {
             return !ChocoboNavigationConditions.isValidPosition(pos, chocobo);
         }
         public static boolean hasPathfindingPenalty(PathAwareEntity entity, BlockPos pos) {
-            return entity.getPathfindingPenalty(LandPathNodeMaker.getLandNodeType(entity.getWorld(), pos.mutableCopy())) > 0.0f;
+            return entity.getPathfindingPenalty(entity.getNavigation().getNodeMaker().getDefaultNodeType(entity.getWorld(), pos.getX(), pos.getY(), pos.getZ())) > 0.0f;
         }
         public static boolean isValidPosition(BlockPos pos, Chocobo chocobo) {
             BlockPos blockPos = pos.down();

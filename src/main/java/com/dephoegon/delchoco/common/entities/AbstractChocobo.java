@@ -75,6 +75,7 @@ import static com.dephoegon.delchoco.common.entities.Chocobo.CHOCOBO_SPRINTING_S
 import static com.dephoegon.delchoco.common.entities.breeding.ChocoboSnap.setChocoScale;
 import static com.dephoegon.delchoco.common.init.ModItems.*;
 import static com.dephoegon.delchoco.common.init.ModSounds.AMBIENT_SOUND;
+import static net.minecraft.entity.MovementType.SELF;
 import static net.minecraft.item.Items.*;
 
 public abstract class AbstractChocobo extends TameableEntity implements Angerable {
@@ -84,10 +85,10 @@ public abstract class AbstractChocobo extends TameableEntity implements Angerabl
     protected int remainingPersistentAngerTime;
     protected int ticksUntilNextAlert;
     protected int timeToRecalculatePath;
-    protected float wingRotation;
-    protected float destPos;
-    protected boolean isChocoboJumping;
-    protected float wingRotDelta;
+    public float wingRotation;
+    public float destinationPos;
+    public boolean isChocoboJumping;
+    public float wingRotDelta;
     public int ticksOnWater = 0;
     // protected BlockPos nestPos;
     public int TimeSinceFeatherChance = 0;
@@ -186,6 +187,47 @@ public abstract class AbstractChocobo extends TameableEntity implements Angerabl
 
 
     protected AbstractChocobo(EntityType<? extends TameableEntity> entityType, World world) { super(entityType, world); }
+
+    @Override
+    public void travel(@NotNull Vec3d travelInput) {
+        if (this.isAlive() && this.isSubmergedInWater() && this.isWaterBreathing()) {
+            // Check if the chocobo is near a land edge and trying to climb out
+            boolean tryingToClimbOut = false;
+
+            if (this.getTarget() != null || this.hasPassengers()) { // In combat or with rider
+                // Check if there's land nearby and slightly above the current position
+                BlockPos currentPos = this.getBlockPos();
+                for (int dx = -1; dx <= 1 && !tryingToClimbOut; dx++) {
+                    for (int dz = -1; dz <= 1; dz++) {
+                        if (dx == 0 && dz == 0) { continue; } // Skip current position
+                        BlockPos checkPos = currentPos.add(dx, 1, dz);
+                        if (!this.getWorld().getFluidState(checkPos).isIn(FluidTags.WATER) &&
+                            this.getWorld().getBlockState(checkPos.down()).hasSolidTopSurface(this.getWorld(), checkPos.down(), this)) {
+                            // Found solid land nearby and above water level
+                            tryingToClimbOut = true;
+                            Vec3d motion = this.getVelocity();
+                            // Give a boost upward and slightly toward the land
+                            double upwardBoost = 0.4; // Additional vertical momentum
+                            this.setVelocity(motion.x + (dx * 0.1), Math.max(motion.y, upwardBoost), motion.z + (dz * 0.1));
+                            break;
+                        }
+                    }
+                }
+            }
+
+            if (this.getControllingPassenger() == null && this.moveControl instanceof ChocoboBrains.ChocoboSwimMoveControl) { // AI-controlled swimmer
+                this.updateVelocity(this.getMovementSpeed(), travelInput);
+                Vec3d velocity = this.getVelocity();
+                this.setVelocity(velocity.x, this.upwardSpeed, velocity.z);
+                this.move(SELF, this.getVelocity());
+                this.setVelocity(this.getVelocity().multiply(0.9D));
+            } else { // Player-controlled or not a swimmer
+                super.travel(travelInput);
+            }
+        } else {
+            super.travel(travelInput);
+        }
+    }
 
     @Override
     protected EntityNavigation createNavigation(World world) {

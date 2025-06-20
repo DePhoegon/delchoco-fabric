@@ -92,15 +92,6 @@ public class ChocoboBrains {
         ));
     }
 
-    private static void addFightActivities(Brain<Chocobo> brain, Chocobo chocobo) {
-        brain.setTaskList(Activity.FIGHT, 0, ImmutableList.of(
-                ForgetAttackTargetTask.create(ChocoboBrainAid::isInvalidTarget),
-                RangedApproachTask.create(1.2F), // Consider if this speed is appropriate for water
-                AttackTask.create((int) (chocobo.getBoundingBox().getZLength()*1.5F), 1.2F) // And this one
-                /*MeleeAttackTask.create(20)*/
-        ), MemoryModuleType.ATTACK_TARGET);
-    }
-
     private static void addPanicActivities(Brain<Chocobo> brain) {
         brain.setTaskList(Activity.PANIC, 10, ImmutableList.of(
                 new PanicTask(1.3F)
@@ -677,43 +668,43 @@ public class ChocoboBrains {
 
         @Override
         public void tick() {
-            if (this.chocobo.isWaterBreathing() && this.chocobo.isTouchingWater()) {
+            if (this.chocobo.isWaterBreathing() && this.chocobo.isSubmergedInWater()) {
                 if (this.state == MoveControl.State.MOVE_TO) {
-                    Vec3d targetPos = new Vec3d(this.targetX, this.targetY, this.targetZ);
-                    Vec3d chocoboPos = this.chocobo.getPos();
-                    Vec3d directionToTarget = targetPos.subtract(chocoboPos);
-                    double distanceToTargetSq = directionToTarget.lengthSquared();
-
-                    if (distanceToTargetSq < 0.01D) { // Arrived at target
+                    Vec3d vec3d = new Vec3d(this.targetX - this.chocobo.getX(), this.targetY - this.chocobo.getY(), this.targetZ - this.chocobo.getZ());
+                    double d = vec3d.length();
+                    if (d < 1.0E-7) {
+                        this.entity.setForwardSpeed(0.0f);
                         this.state = MoveControl.State.WAIT;
-                        // this.chocobo.setMovementSpeed(0.0F);
-                        this.chocobo.setVelocity(this.chocobo.getVelocity().multiply(1.0, 0.5, 1.0)); // Dampen Y
                         return;
                     }
 
-                    double angleToTargetHorizontal = MathHelper.atan2(directionToTarget.z, directionToTarget.x);
-                    this.chocobo.setYaw(this.wrapDegrees(this.chocobo.getYaw(), (float) (angleToTargetHorizontal * 57.2957763671875D) - 90.0F, 90.0F));
+                    float yawToTarget = (float)(MathHelper.atan2(vec3d.z, vec3d.x) * 57.2957763671875) - 90.0f;
+                    this.chocobo.setYaw(this.wrapDegrees(this.chocobo.getYaw(), yawToTarget, 90.0f));
                     this.chocobo.bodyYaw = this.chocobo.getYaw();
 
-                    float currentSpeedSetting = (float) (this.speed * this.chocobo.getAttributeValue(EntityAttributes.GENERIC_MOVEMENT_SPEED));
-                    // this.chocobo.setMovementSpeed(currentSpeedSetting); // For forward movement in MobEntity.travel
-
-                    // Vertical movement adjustment
-                    double dy = directionToTarget.y;
-                    if (Math.abs(dy) > 0.02D) { // Only apply if there's a meaningful vertical distance
-                        // Adjust Y velocity to move towards targetY
-                        // Factor determines how quickly it adjusts vertically.
-                        double verticalAdjustFactor = 0.15D; // Tunable
-                        double yVelocityChange = MathHelper.clamp(dy * verticalAdjustFactor, -currentSpeedSetting * 0.75D, currentSpeedSetting * 0.75D);
-                        this.chocobo.setVelocity(this.chocobo.getVelocity().add(0.0D, yVelocityChange, 0.0D));
+                    float headYaw = this.chocobo.getYaw();
+                    if (this.chocobo.getRandom().nextFloat() < 0.15f) {
+                        headYaw += (this.chocobo.getRandom().nextFloat() - 0.5f) * 15.0f;
                     }
-                    // Horizontal movement is primarily driven by MobEntity.travel using the forward speed set above.
-                    // The Y velocity added here will be incorporated when MobEntity.travel calls this.entity.move().
-                } else { // State is WAIT or other
-                    this.chocobo.setMovementSpeed(0.0F);
+                    this.chocobo.headYaw = this.wrapDegrees(this.chocobo.headYaw, headYaw, 5.0f);
+
+                    float speed = (float)(this.speed * this.chocobo.getAttributeValue(EntityAttributes.GENERIC_MOVEMENT_SPEED));
+
+                    float pitchToTarget = -((float)(MathHelper.atan2(vec3d.y, vec3d.horizontalLength()) * 57.2957763671875));
+                    this.chocobo.setPitch(this.wrapDegrees(this.chocobo.getPitch(), pitchToTarget, 10.0f));
+
+                    float cosPitch = MathHelper.cos(this.chocobo.getPitch() * ((float)Math.PI / 180));
+                    float sinPitch = MathHelper.sin(this.chocobo.getPitch() * ((float)Math.PI / 180));
+
+                    this.chocobo.setForwardSpeed(cosPitch * speed);
+                    this.chocobo.setUpwardSpeed(-sinPitch * speed);
+
+                } else {
+                    this.chocobo.setSidewaysSpeed(0.0f);
+                    this.chocobo.setUpwardSpeed(0.0f);
+                    this.chocobo.setForwardSpeed(0.0f);
                 }
             } else {
-                // Not a swimmer or not in water, fall back to default behavior
                 super.tick();
             }
         }

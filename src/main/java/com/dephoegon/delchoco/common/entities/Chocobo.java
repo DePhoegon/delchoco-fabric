@@ -56,7 +56,6 @@ import net.minecraft.util.Hand;
 import net.minecraft.util.collection.DefaultedList;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Box;
-import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.*;
 import net.minecraft.world.biome.Biome;
@@ -74,7 +73,6 @@ import static com.dephoegon.delchoco.common.entities.breeding.BreedingHelper.get
 import static com.dephoegon.delchoco.common.init.ModItems.*;
 import static java.lang.Math.floor;
 import static java.lang.Math.random;
-import static net.minecraft.entity.MovementType.SELF;
 import static net.minecraft.entity.SpawnGroup.CREATURE;
 import static net.minecraft.item.Items.*;
 import static net.minecraft.registry.tag.BiomeTags.IS_BADLANDS;
@@ -378,7 +376,6 @@ public class Chocobo extends AbstractChocobo {
         // Left in for unique Chocobo Checks unable to be done in AbstractChocobo
         super.onStatusEffectRemoved(effect);
     }
-    public boolean nonFlameFireImmune() { return this.isFireImmune() && ChocoboColor.FLAME != getChocoboColor(); }
     public double getMountedHeightOffset() {
         // Returns the height offset when mounted, used for riding Chocobos
         // Left in for unique Chocobo Checks unable to be done in AbstractChocobo
@@ -470,11 +467,15 @@ public class Chocobo extends AbstractChocobo {
                         }
                     }
                 }
-                // Insert override for slow-fall Option on Chocobo
+                // Implement gliding mechanics when mounted
                 if (!this.isOnGround() && !this.isTouchingWater() && !this.isInLava() && this.getVelocity().y < 0) {
+                    Vec3d motion = getVelocity();
                     if (MinecraftClient.getInstance().options.jumpKey.isPressed()) {
-                        Vec3d motion = getVelocity();
-                        setVelocity(new Vec3d(motion.x, motion.y * 0.65F, motion.z));
+                        // When space key is pressed while falling, reduce fall speed by 60% (to 40% of normal)
+                        setVelocity(new Vec3d(motion.x, motion.y * 0.4F, motion.z));
+                    } else {
+                        // When mounted but not pressing space, reduce fall speed by 20% (to 80% of normal)
+                        setVelocity(new Vec3d(motion.x, motion.y * 0.8F, motion.z));
                     }
                 }
                 if (MinecraftClient.getInstance().options.sprintKey.isPressed()) {
@@ -483,14 +484,15 @@ public class Chocobo extends AbstractChocobo {
 
                 this.setMovementSpeed((float) Objects.requireNonNull(this.getAttributeInstance(EntityAttributes.GENERIC_MOVEMENT_SPEED)).getValue());
                 super.travel(newVector);
-            } else { // Unridden logic
-                if (this.isWaterBreathing() && this.isSubmergedInWater()) {
-                    this.updateVelocity(this.getMovementSpeed(), travelVector);
-                    this.move(SELF, this.getVelocity());
-                    this.setVelocity(this.getVelocity().multiply(0.9D));
-                } else {
-                    super.travel(travelVector);
+            } else {
+                // Unmounted chocobo - apply slow fall effect when falling
+                if (!this.isOnGround() && !this.isTouchingWater() && !this.isInLava() && this.getVelocity().y < 0) {
+                    Vec3d motion = getVelocity();
+                    // Slow fall by 40-60% when not mounted (using 50% as middle ground)
+                    float fallReductionFactor = 0.5F; // Fall at 50% normal speed
+                    setVelocity(new Vec3d(motion.x, motion.y * fallReductionFactor, motion.z));
                 }
+                super.travel(travelVector);
             }
         }
     }
@@ -536,7 +538,6 @@ public class Chocobo extends AbstractChocobo {
     protected boolean canStartRiding(@NotNull Entity entityIn) { return false; }
     public void tickMovement() {
         super.tickMovement();
-        this.setRotation(this.getYaw(), this.getPitch());
         this.setStepHeight(maxStepUp);
         this.fallDistance = 0f;
 
@@ -545,7 +546,6 @@ public class Chocobo extends AbstractChocobo {
             if ((float) random() < .25) { this.dropFeather(); }
         } else { this.TimeSinceFeatherChance++; }
 
-        //Change effects to chocobo colors
         if (!this.getEntityWorld().isClient()) {
             if (this.age % 60 == 0) {
                 if (this.hasPassengers()) {
@@ -558,26 +558,6 @@ public class Chocobo extends AbstractChocobo {
                         if (controller instanceof PlayerEntity) { ((PlayerEntity) controller).addStatusEffect(new StatusEffectInstance(StatusEffects.WATER_BREATHING, 100, 0, true, false)); }
                     }
                 }
-            }
-        } else {
-            // Wing rotations, control packet
-            // Client side
-            this.destPos += (float) ((double) (this.isOnGround() ? -1 : 4) * 0.3D);
-            this.destPos = MathHelper.clamp(destPos, 0f, 1f);
-
-            if (!this.isOnGround()) { this.wingRotDelta = Math.min(wingRotation, 1f); }
-            this.wingRotDelta *= 0.9F;
-            this.wingRotation += this.wingRotDelta * 2.0F;
-
-            if (this.isOnGround()) {
-                double d1 = this.getX() - this.prevX;
-                double d0 = this.getZ() - this.prevZ;
-                float f4 = ((float)Math.sqrt(d1 * d1 + d0 * d0)) * 4.0F;
-                if (f4 > 1.0F) { f4 = 1.0F; }
-                this.limbAnimator.updateLimbs(f4, 0.4F);
-            } else {
-                this.limbAnimator.setSpeed(0);
-                this.limbAnimator.updateLimbs(0,0);
             }
         }
     }

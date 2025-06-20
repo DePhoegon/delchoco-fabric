@@ -64,6 +64,7 @@ import net.minecraft.world.WorldView;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -74,6 +75,7 @@ import static com.dephoegon.delchoco.aid.chocoboChecks.isWaterBreathingChocobo;
 import static com.dephoegon.delchoco.aid.chocoboChecks.isWitherImmuneChocobo;
 import static com.dephoegon.delchoco.common.entities.Chocobo.CHOCOBO_SPRINTING_SPEED_BOOST;
 import static com.dephoegon.delchoco.common.entities.breeding.ChocoboSnap.setChocoScale;
+import static com.dephoegon.delchoco.common.entities.properties.ChocoboBrainAid.requiresSwimmingToTarget;
 import static com.dephoegon.delchoco.common.init.ModItems.*;
 import static com.dephoegon.delchoco.common.init.ModSounds.AMBIENT_SOUND;
 import static net.minecraft.entity.MovementType.SELF;
@@ -949,12 +951,10 @@ public abstract class AbstractChocobo extends TameableEntity implements Angerabl
     // Alert methods for Chocobo
     protected void alertOthers(PlayerEntity forgivenPlayer, @NotNull Chocobo alertingChocobo) {
         if ((alertingChocobo.ticksUntilNextAlert > 0 && forgivenPlayer == null) || (forgivenPlayer != null && !this.getWorld().getGameRules().getBoolean(GameRules.FORGIVE_DEAD_PLAYERS))) { return; }
-        // double followRange = Math.min(alertingChocobo.getAttributeValue(EntityAttributes.GENERIC_FOLLOW_RANGE), 16.0);
-        double followRange = EntityAttributes.GENERIC_FOLLOW_RANGE.getDefaultValue();
+        double followRange = alertingChocobo.getAttributeValue(EntityAttributes.GENERIC_FOLLOW_RANGE); // Get the follow range from the chocobo's attributes
 
         Box alertBox = Box.from(alertingChocobo.getPos()).expand(followRange, 15.0D, followRange);
         List<Chocobo> nearbyChocobos = alertingChocobo.getWorld().getNonSpectatingEntities(Chocobo.class, alertBox);
-        int alertLimit = Math.min(nearbyChocobos.size(), 15);
 
         if (forgivenPlayer != null) {
             for (Chocobo chocobo : nearbyChocobos) { chocobo.forgive(forgivenPlayer); } // Forgive all chocobos in the area if a player is specified, kept despite cpu cost to prevent player from being attacked by all chocobos in the area after being forgiven
@@ -962,14 +962,41 @@ public abstract class AbstractChocobo extends TameableEntity implements Angerabl
             LivingEntity attacker = alertingChocobo.getTarget();
             if (attacker == null) { return; }
 
-            // Only alert chocobos that are within defined chunk distances
-            // 1.5 chunks from alerting chocobo (24 blocks, 576 squared)
-            // 3 chunks from attacker (32 blocks, 1024 squared)
-            for (int i = 0; i < alertLimit; i++) {
-                Chocobo chocobo = nearbyChocobos.get(i);
+            // Setup lists for filtering
+            List<Chocobo> filteredChocobos = new ArrayList<>(nearbyChocobos);
+            List<Chocobo> tempList = new ArrayList<>();
+
+            // Filter 1: Basics for all chocobos
+            for (Chocobo chocobo : filteredChocobos) {
                 if (chocobo != alertingChocobo &&
-                    chocobo.shouldAlert(chocobo, attacker) &&
-                    (chocobo.squaredDistanceTo(alertingChocobo) < 576.0 ||
+                    !chocobo.isAttacking() &&
+                    !chocobo.isBaby())
+                { tempList.add(chocobo); }
+            }
+
+            // Filter Reset
+            filteredChocobos = new ArrayList<>(tempList);
+            tempList.clear();
+
+            if (requiresSwimmingToTarget(attacker)) {
+                // Swimming Target Filter
+                for (Chocobo chocobo : filteredChocobos) {
+                    if (ChocoboBrainAid.isAttackable(attacker, chocobo.canWalkOnWater())) { tempList.add(chocobo); }
+                }
+
+                // Filter Reset
+                filteredChocobos = new ArrayList<>(tempList);
+                tempList.clear();
+            }
+
+            // Now determine the alert limit with the final filtered list
+            int alertLimit = Math.min(filteredChocobos.size(), 15);
+
+            // Only alert chocobos that are within defined chunk distances
+            // 3 chunks (32 blocks, 1024 squared), List limited 48 blocks squared around the alerting chocobo initially and slimmed down to 15 or less chocobos
+            for (int i = 0; i < alertLimit; i++) {
+                Chocobo chocobo = filteredChocobos.get(i);
+                if ((chocobo.squaredDistanceTo(alertingChocobo) < 1024.0 ||
                      chocobo.squaredDistanceTo(attacker) < 1024.0)) {
                     chocobo.ticksUntilNextAlert = 30 + chocobo.getRandom().nextInt(20);
                     chocobo.alertChocobo(chocobo, attacker);
@@ -996,7 +1023,6 @@ public abstract class AbstractChocobo extends TameableEntity implements Angerabl
         //chocobo.getBrain().remember(MemoryModuleType.ATTACK_TARGET, attacker, 50L);
         chocobo.setTarget(attacker);
     }
-
     private void updateNavigationAndMoveControl(boolean forceAmphibiousDuringEffect) {
         if (this.getWorld().isClient()) { return; }
 
@@ -1025,5 +1051,11 @@ public abstract class AbstractChocobo extends TameableEntity implements Angerabl
             if (this.moveControl == null || this.moveControl instanceof ChocoboBrains.ChocoboSwimMoveControl) { this.moveControl = new MoveControl(this); }
             if (this.navigation instanceof AmphibiousSwimNavigation mobNav) { mobNav.setCanSwim(false); }
         }
+    }
+    @SuppressWarnings("RedundantIfStatement")
+    public boolean isTemptable() {
+        if (this.isBaby()) { return false; }
+        // Left this method empty for now, future use for tempting chocobos in more complex ways
+        return true;
     }
 }

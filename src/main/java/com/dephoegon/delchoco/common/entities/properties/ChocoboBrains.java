@@ -40,8 +40,11 @@ import net.minecraft.util.math.Vec3d;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.List;
 import java.util.Optional;
+import java.util.function.Predicate;
 
+import static com.dephoegon.delchoco.common.entities.properties.ChocoboBrainAid.ChocoboTemptItems;
 import static net.minecraft.entity.ai.pathing.NavigationType.LAND;
 
 public class ChocoboBrains {
@@ -64,6 +67,7 @@ public class ChocoboBrains {
     public static Brain<?> makeBrain(Brain<Chocobo> brain) {
         addCoreActivities(brain);
         addIdleActivities(brain);
+        addTemptActivities(brain);
         addPanicActivities(brain);
         addAvoidPlayerActivities(brain);
         brain.setCoreActivities(ImmutableSet.of(Activity.CORE));
@@ -97,6 +101,12 @@ public class ChocoboBrains {
         brain.setTaskList(Activity.AVOID, -1, ImmutableList.of(
                 new AvoidPlayerTask(12F, 1.1F, 1.3F)
         ), MemoryModuleType.AVOID_TARGET);
+    }
+
+    private static void addTemptActivities(Brain<Chocobo> brain) {
+        brain.setTaskList(Activity.IDLE, 5, ImmutableList.of(
+                new ChocoboTemptTask() // Higher priority than roaming (10) but lower than panic
+        ));
     }
 
     public static class RoamTask extends MultiTickTask<Chocobo> {
@@ -619,6 +629,114 @@ public class ChocoboBrains {
             } else {
                 super.tick();
             }
+        }
+    }
+
+    public static class ChocoboTemptTask extends MultiTickTask<Chocobo> {
+        private static final double TEMPT_SPEED = 1.25;
+        private static final float FOLLOW_RANGE = 10.0F;
+        private static final ImmutableList<ItemStack> TEMPT_ITEMS = ChocoboTemptItems();
+
+        private final Predicate<Chocobo> canBeTempted;
+        private PlayerEntity targetPlayer;
+        private int cooldown = 0;
+
+        public ChocoboTemptTask() { this(AbstractChocobo::isTemptable); }
+
+        public ChocoboTemptTask(Predicate<Chocobo> canBeTempted) {
+            super(ImmutableMap.of(
+                    MemoryModuleType.WALK_TARGET, MemoryModuleState.VALUE_ABSENT, // Only run if no walk target
+                    MemoryModuleType.LOOK_TARGET, MemoryModuleState.REGISTERED,
+                    MemoryModuleType.ATTACK_TARGET, MemoryModuleState.VALUE_ABSENT // Don't interrupt attacking
+            ));
+            this.canBeTempted = canBeTempted;
+        }
+        @Override
+        protected boolean shouldRun(ServerWorld world, Chocobo chocobo) {
+            if (!this.canBeTempted.test(chocobo)) { return false; }
+
+            if (this.cooldown > 0) {
+                this.cooldown--;
+                return false;
+            }
+
+            // Special check for tamed chocobos - they should always have an owner
+            if (chocobo.isTamed() && chocobo.getOwner() == null) { chocobo.setTamed(false); }
+
+            // Look for players with tempting items within range
+            List<PlayerEntity> nearbyPlayers = world.getEntitiesByClass(
+                    PlayerEntity.class,
+                    chocobo.getBoundingBox().expand(FOLLOW_RANGE),
+                    player -> !player.isSpectator() && !player.isCreative()
+            );
+
+            // For tamed chocobos, only their owner can tempt them
+            // Return early if the chocobo is tamed (and has an owner) but the owner isn't nearby
+            if (chocobo.isTamed()) {
+                boolean ownerPresent = false;
+                for (PlayerEntity player : nearbyPlayers) {
+                    if (chocobo.isOwner(player)) {
+                        ownerPresent = true;
+                        break;
+                    }
+                }
+                if (!ownerPresent) { return false; } // Owner is not present, can't be tempted
+            }
+
+            // Process players - first with tempting item wins
+            for (PlayerEntity player : nearbyPlayers) {
+                // Skip if tamed and this player isn't the owner
+                if (chocobo.isTamed() && !chocobo.isOwner(player)) { continue; }
+
+                // Checks the main hand and offhand for tempting items
+                boolean hasTemptItem = isTemptingItem(player.getMainHandStack()) || isTemptingItem(player.getOffHandStack());
+
+                if (hasTemptItem) {
+                    this.targetPlayer = player;
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        @Override
+        protected void run(ServerWorld world, Chocobo chocobo, long time) {
+            if (this.targetPlayer != null) {
+                // Set walk target to player with tempting item
+                Vec3d targetPos = this.targetPlayer.getPos();
+                chocobo.getBrain().remember(
+                        MemoryModuleType.WALK_TARGET,
+                        new WalkTarget(targetPos, (float) TEMPT_SPEED, 2)
+                );
+            }
+        }
+
+        @Override
+        protected boolean shouldKeepRunning(ServerWorld world, Chocobo chocobo, long time) {
+            if (this.targetPlayer == null || !this.targetPlayer.isAlive() ||
+                    this.targetPlayer.isSpectator() || this.targetPlayer.isCreative())
+            { return false; }
+
+            // Check if player still has tempting item
+            return isTemptingItem(this.targetPlayer.getMainHandStack()) ||
+                    isTemptingItem(this.targetPlayer.getOffHandStack());
+        }
+
+        @Override
+        protected void finishRunning(ServerWorld world, Chocobo chocobo, long time) {
+            this.targetPlayer = null;
+            this.cooldown = 100; // 5-second cooldown before trying to tempt again
+            chocobo.getBrain().forget(MemoryModuleType.WALK_TARGET);
+        }
+
+        private boolean isTemptingItem(ItemStack stack) {
+            if (stack.isEmpty()) { return false; }
+
+            for (ItemStack temptItem : TEMPT_ITEMS) {
+                if (ItemStack.areItemsEqual(temptItem, stack)) { return true; }
+            }
+            return false;
         }
     }
 }

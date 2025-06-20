@@ -9,6 +9,9 @@ import net.minecraft.util.math.MathHelper;
 import org.jetbrains.annotations.NotNull;
 
 public class ChicoboModel<T extends Chocobo> extends EntityModel<Chocobo> {
+    // Adding constant for conversion from degrees to radians
+    private static final float DEG_TO_RAD = (float) Math.PI / 180.0F;
+
     private final ModelPart root;
 
     private final ModelPart head;
@@ -100,10 +103,13 @@ public class ChicoboModel<T extends Chocobo> extends EntityModel<Chocobo> {
     }
     @Override
     public void setAngles(Chocobo entity, float limbSwing, float limbSwingAmount, float ageInTicks, float netHeadYaw, float headPitch) {
-        head.pitch = -(headPitch / 57.29578F);
-        head.yaw = netHeadYaw / 57.29578F;
-        leg_right.pitch = MathHelper.cos(limbSwing * 0.6662F) * 1.4F * limbSwingAmount;
-        leg_left.yaw = MathHelper.cos(limbSwing * 0.6662F + 3.141593F) * 1.4F * limbSwingAmount;
+        // Convert angles directly using the constant instead of magic numbers
+        head.pitch = -headPitch * DEG_TO_RAD;
+        head.yaw = netHeadYaw * DEG_TO_RAD;
+
+        float limbSwingFactor = limbSwing * 0.6662F;
+        leg_right.pitch = MathHelper.cos(limbSwingFactor) * 1.4F * limbSwingAmount;
+        leg_left.yaw = MathHelper.cos(limbSwingFactor + MathHelper.PI) * 1.4F * limbSwingAmount;
     }
 
     @Override

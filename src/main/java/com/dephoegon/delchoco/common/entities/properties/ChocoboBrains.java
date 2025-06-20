@@ -20,20 +20,20 @@ import net.minecraft.entity.ai.NoPenaltyTargeting;
 import net.minecraft.entity.ai.brain.*;
 import net.minecraft.entity.ai.brain.sensor.Sensor;
 import net.minecraft.entity.ai.brain.sensor.SensorType;
-import net.minecraft.entity.ai.brain.task.*;
+import net.minecraft.entity.ai.brain.task.LookAroundTask;
+import net.minecraft.entity.ai.brain.task.LookAtMobTask;
+import net.minecraft.entity.ai.brain.task.MultiTickTask;
 import net.minecraft.entity.ai.control.MoveControl;
 import net.minecraft.entity.ai.pathing.EntityNavigation;
 import net.minecraft.entity.ai.pathing.Path;
 import net.minecraft.entity.ai.pathing.PathNodeType;
 import net.minecraft.entity.attribute.EntityAttributes;
-import net.minecraft.entity.mob.MobEntity;
 import net.minecraft.entity.mob.PathAwareEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.fluid.FluidState;
 import net.minecraft.item.ItemStack;
 import net.minecraft.registry.tag.FluidTags;
 import net.minecraft.server.world.ServerWorld;
-import net.minecraft.util.Hand;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
@@ -42,7 +42,6 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.Optional;
 
-import static com.dephoegon.delchoco.common.entities.properties.ChocoboBrainAid.isAttackable;
 import static net.minecraft.entity.ai.pathing.NavigationType.LAND;
 
 public class ChocoboBrains {
@@ -62,10 +61,9 @@ public class ChocoboBrains {
             SensorType.HURT_BY
     );
 
-    public static Brain<?> makeBrain(Brain<Chocobo> brain, Chocobo choco) {
-        addCoreActivities(brain, choco);
+    public static Brain<?> makeBrain(Brain<Chocobo> brain) {
+        addCoreActivities(brain);
         addIdleActivities(brain);
-        // addFightActivities(brain, choco);
         addPanicActivities(brain);
         addAvoidPlayerActivities(brain);
         brain.setCoreActivities(ImmutableSet.of(Activity.CORE));
@@ -74,12 +72,9 @@ public class ChocoboBrains {
         return brain;
     }
 
-    private static void addCoreActivities(Brain<Chocobo> brain, Chocobo chocobo) {
+    private static void addCoreActivities(Brain<Chocobo> brain) {
         brain.setTaskList(Activity.CORE, 0, ImmutableList.of(
                 new TryFindLandTask(1.1f),
-                // new OwnerHurtTask(),
-                // new OwnerHurtByTask(),
-                // new HurtByTargetTask(),
                 new RoamTask(1F),
                 new FollowOwnerTask(1.6, 10.0F, 300.0F, true)
         ));
@@ -106,7 +101,9 @@ public class ChocoboBrains {
 
     public static class RoamTask extends MultiTickTask<Chocobo> {
         private static final int MAX_UPDATE_COUNTDOWN = 40;
+        private static final int PATH_CACHE_TICKS = 100; // Cache paths for longer periods
         private int pathUpdateCountdownTicks = 0;
+        private int pathCacheExpiryTicks = 0;
         private Path path;
         private BlockPos lookTargetPos;
         private final double speed;
@@ -126,6 +123,13 @@ public class ChocoboBrains {
                 this.pathUpdateCountdownTicks--;
                 return false;
             }
+
+            // Don't recalculate the path if we already have a cached valid path
+            if (this.path != null && this.pathCacheExpiryTicks > 0) {
+                this.pathCacheExpiryTicks--;
+                return false;
+            }
+
             // TryFindLandTask has priority due to memory conditions.
             // If this task runs, it means TryFindLandTask didn't (or failed to set a target).
             if (chocobo.getRideTickDelay() <= 20 || chocobo.followOwner() || chocobo.followLure()) {
@@ -156,8 +160,17 @@ public class ChocoboBrains {
             if (walkTargetOpt.isPresent()) {
                 WalkTarget walkTarget = walkTargetOpt.get();
                 BlockPos targetPos = walkTarget.getLookTarget().getBlockPos();
-                this.path = chocobo.getNavigation().findPathTo(targetPos, 0);
-                if (this.path != null) {
+
+                // Only compute a new path if we don't have a valid cached one
+                if (this.path == null || this.pathCacheExpiryTicks <= 0 || !this.path.reachesTarget()) {
+                    this.path = chocobo.getNavigation().findPathTo(targetPos, 0);
+                    if (this.path != null) {
+                        this.pathCacheExpiryTicks = PATH_CACHE_TICKS;
+                        brain.remember(MemoryModuleType.PATH, this.path);
+                        chocobo.getNavigation().startMovingAlong(this.path, this.speed);
+                    }
+                } else {
+                    // Use the cached path
                     brain.remember(MemoryModuleType.PATH, this.path);
                     chocobo.getNavigation().startMovingAlong(this.path, this.speed);
                 }
@@ -184,6 +197,7 @@ public class ChocoboBrains {
 
         @Override
         protected void finishRunning(ServerWorld world, Chocobo chocobo, long time) {
+            //noinspection OptionalGetWithoutIsPresent
             if (chocobo.getBrain().hasMemoryModule(MemoryModuleType.WALK_TARGET)
                     && !hasReached(chocobo, chocobo.getBrain().getOptionalRegisteredMemory(MemoryModuleType.WALK_TARGET).get())
                     && chocobo.getNavigation().isNearPathStartPos()) {
@@ -195,10 +209,9 @@ public class ChocoboBrains {
             this.path = null;
         }
 
+        @SuppressWarnings("BooleanMethodIsAlwaysInverted")
         private boolean hasReached(Chocobo chocobo, WalkTarget walkTarget) {
-            if (walkTarget == null || walkTarget.getLookTarget() == null) {
-                return true;
-            }
+            if (walkTarget == null || walkTarget.getLookTarget() == null) { return true; }
             return walkTarget.getLookTarget().getBlockPos().getManhattanDistance(chocobo.getBlockPos()) <= walkTarget.getCompletionRange();
         }
 
@@ -247,8 +260,8 @@ public class ChocoboBrains {
         private boolean shouldPanicFromAttacker(Chocobo chocobo) {
             LivingEntity attacker = chocobo.getAttacker();
             if (attacker == null) { return false; } // No attacker, no panic
-                // Panic if there is an attacker and it is NOT attackable,  To include non-living entities (Mod Coverage)
-                return !ChocoboBrainAid.isAttackable(attacker);
+                // Panic if there is an attacker, and it is NOT attackable. To include non-living entities (Mod Coverage)
+                return !ChocoboBrainAid.isAttackable(attacker, chocobo.canWalkOnWater());
             }
 
             protected boolean isInDanger (Chocobo chocobo){
@@ -281,85 +294,6 @@ public class ChocoboBrains {
                 }
             }
         }
-
-    public static class OwnerHurtTask extends MultiTickTask<Chocobo> {
-        private LivingEntity ownerTarget;
-        private int lastAttackTime;
-
-        public OwnerHurtTask() {
-            super(ImmutableMap.of());
-        }
-
-        @Override
-        protected boolean shouldRun(ServerWorld world, Chocobo chocobo) {
-            if (chocobo.isTamed()) {
-                LivingEntity owner = chocobo.getOwner();
-                if (owner == null) { return false; }
-                this.ownerTarget = owner.getAttacking();
-                int i = owner.getLastAttackTime();
-                if (isAttackable(this.ownerTarget)) {
-                    // return i != this.lastAttackTime && chocobo.canAttackWithOwner(attacking, owner);
-                    return chocobo.canAttackWithOwner(ownerTarget, owner);
-                }
-            }
-            return false;
-        }
-
-        @Override
-        protected void run(ServerWorld world, Chocobo chocobo, long time) {
-            chocobo.getBrain().remember(MemoryModuleType.ATTACK_TARGET, this.ownerTarget, 200L);
-        }
-    }
-
-    public static class OwnerHurtByTask extends MultiTickTask<Chocobo> {
-        private LivingEntity ownerAttacker;
-        private int lastAttackedTime;
-
-        public OwnerHurtByTask() {
-            super(ImmutableMap.of());
-        }
-
-        @Override
-        protected boolean shouldRun(ServerWorld world, Chocobo chocobo) {
-            if (chocobo.isTamed()) {
-                LivingEntity owner = chocobo.getOwner();
-                if (owner == null) { return false; }
-                this.ownerAttacker = owner.getAttacker();
-                if (this.ownerAttacker == null) { return false; }
-                if (isAttackable(this.ownerAttacker)) {
-                    //return i != this.lastAttackedTime && chocobo.canAttackWithOwner(attacker, owner);
-                    return chocobo.canAttackWithOwner(ownerAttacker, owner);
-                }
-            }
-            return false;
-        }
-
-        @Override
-        protected void run(ServerWorld world, Chocobo chocobo, long time) {
-            chocobo.getBrain().remember(MemoryModuleType.ATTACK_TARGET, this.ownerAttacker, 200L);
-        }
-    }
-
-    public static class HurtByTargetTask extends MultiTickTask<Chocobo> {
-        public HurtByTargetTask() {
-            super(ImmutableMap.of());
-        }
-
-        @Override
-        protected boolean shouldRun(ServerWorld world, Chocobo chocobo) {
-            return chocobo.getBrain()
-                    .getOptionalRegisteredMemory(MemoryModuleType.HURT_BY_ENTITY)
-                    .filter(ChocoboBrainAid::isAttackable)
-                    .isPresent();
-        }
-
-        @Override
-        protected void run(ServerWorld world, Chocobo chocobo, long time) {
-            chocobo.getBrain()
-                    .getOptionalRegisteredMemory(MemoryModuleType.HURT_BY_ENTITY)
-                    .ifPresent(target -> chocobo.getBrain().remember(MemoryModuleType.ATTACK_TARGET, target, 200L));
-        }
-    }
 
     public static class AvoidPlayerTask extends MultiTickTask<Chocobo> {
         private final float distance;
@@ -499,26 +433,6 @@ public class ChocoboBrains {
         }
     }
 
-    public static class ChocoboFightTask extends MeleeAttackTask {
-        public static SingleTickTask<MobEntity> create(int cooldown) {
-            return TaskTriggerer.task(context -> context.group(context.queryMemoryOptional(MemoryModuleType.LOOK_TARGET), context.queryMemoryValue(MemoryModuleType.ATTACK_TARGET), context.queryMemoryAbsent(MemoryModuleType.ATTACK_COOLING_DOWN), context.queryMemoryValue(MemoryModuleType.VISIBLE_MOBS)).apply(context, (lookTarget, attackTarget, attackCoolingDown, visibleMobs) -> (world, entity, time) -> {
-                LivingEntity livingEntity = (LivingEntity) context.getValue(attackTarget);
-                if (ChocoboBrainAid.isInvalidTarget(livingEntity)) {
-                    lookTarget.forget();
-                    return false;
-                }
-                if (/* removed ranged check */entity.isInAttackRange(livingEntity) && ((LivingTargetCache) context.getValue(visibleMobs)).contains(livingEntity)) {
-                    lookTarget.remember(new EntityLookTarget(livingEntity, true));
-                    entity.swingHand(Hand.MAIN_HAND);
-                    entity.tryAttack(livingEntity);
-                    attackCoolingDown.remember(true, cooldown);
-                    return true;
-                }
-                return false;
-            }));
-        }
-    }
-
     public static class TryFindLandTask extends MultiTickTask<Chocobo> {
         private static final int SEARCH_RANGE_VERTICAL = 8; // Search up/down a bit
         private final float speed;
@@ -554,7 +468,7 @@ public class ChocoboBrains {
                     // Path found to the candidate, set walk target
                     chocobo.getBrain().remember(MemoryModuleType.WALK_TARGET, new WalkTarget(Vec3d.ofCenter(landPosCandidate), this.speed, 0));
                 } else {
-                    // No path found to this specific candidate, or path doesn't reach. Teleport.
+                    // No path found to this specific candidate, or a path doesn't reach. Teleport.
                     // isGeometricallySuitableLand should have ensured landPosCandidate is a safe spot.
                     chocobo.refreshPositionAndAngles(landPosCandidate.getX() + 0.5, landPosCandidate.getY(), landPosCandidate.getZ() + 0.5, chocobo.getYaw(), chocobo.getPitch());
                     chocobo.getNavigation().stop(); // Stop any current pathing after teleport
@@ -565,7 +479,7 @@ public class ChocoboBrains {
         }
 
         @Nullable
-        private BlockPos findGeometricallySuitableLandPos(Chocobo chocobo, ServerWorld world, int horizontalRange, int verticalRange) {
+        private BlockPos findGeometricallySuitableLandPos(Chocobo chocobo, ServerWorld world, int horizontalRange, @SuppressWarnings("SameParameterValue") int verticalRange) {
             for (int i = 0; i < 20; ++i) { // Try up to 20 times to find a suitable spot
                 BlockPos entityBlockPos = chocobo.getBlockPos();
                 // Generate a random position within the search range
@@ -603,13 +517,11 @@ public class ChocoboBrains {
             if ((nodeType == PathNodeType.LAVA || nodeType == PathNodeType.DAMAGE_FIRE || nodeType == PathNodeType.DANGER_FIRE) && !chocobo.isFireImmune())
             { return false; }
 
-            // Ensure there's space for the chocobo (e.g. not inside a solid block)
+            // Ensure there's space for the chocobo (e.g., not inside a solid block)
             // Check path-ability of current block and block above
-            if (!world.getBlockState(pos).canPathfindThrough(world, pos, LAND) ||
-                !world.getBlockState(pos.up()).canPathfindThrough(world, pos.up(), LAND))
-            { return false; }
+            return world.getBlockState(pos).canPathfindThrough(world, pos, LAND) &&
+                    world.getBlockState(pos.up()).canPathfindThrough(world, pos.up(), LAND);
             // All checks passed, this is a geometrically suitable land position (path not checked here)
-            return true;
         }
     }
 

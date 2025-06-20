@@ -10,6 +10,17 @@ import net.minecraft.util.math.Vec3d;
 import org.jetbrains.annotations.NotNull;
 
 public class AdultChocoboModel<T extends Chocobo> extends EntityModel<Chocobo> {
+    // Constants to avoid magic numbers and repeated calculations
+    private static final float DEG_TO_RAD = (float) Math.PI / 180.0F;
+    private static final float PI = (float) Math.PI;
+    private static final float PI_HALF = PI / 2.0F;
+    private static final float DEFAULT_LEG_PITCH = 0.2094395F;
+    private static final float LIMB_SWING_SPEED = 0.6662F;
+
+    // Cached angle values for better performance
+    private static final float WING_IDLE_Y_RIGHT = -0.0174533F;
+    private static final float WING_IDLE_Y_LEFT = 0.0174533F;
+
     private final ModelPart root;
     private final ModelPart wing_left;
     private final ModelPart wing_right;
@@ -24,8 +35,8 @@ public class AdultChocoboModel<T extends Chocobo> extends EntityModel<Chocobo> {
     private float destinationPos;
     private float wingRotDelta;
     private boolean isChocoboJumping;
-    private float swimAnimationTicks = 0.0F; // Added for continuous swimming animation
-    private float rainShakeTimer = 0.0F; // Rain animation timer
+    private float swimAnimationTicks = 0.0F;
+    private float rainShakeTimer = 0.0F;
 
     public AdultChocoboModel(@NotNull ModelPart root) {
         this.root = root.getChild("root");
@@ -212,7 +223,10 @@ public class AdultChocoboModel<T extends Chocobo> extends EntityModel<Chocobo> {
 
         return TexturedModelData.of(meshDefinition, 128, 128);
     }
-    public void render(@NotNull MatrixStack poseStack, @NotNull VertexConsumer consumer, int packedLightIn, int packedOverlayIn, float red, float green, float blue, float alpha) { this.root.render(poseStack, consumer, packedLightIn, packedOverlayIn, red, green, blue, alpha); }
+    public void render(@NotNull MatrixStack poseStack, @NotNull VertexConsumer consumer, int packedLightIn, int packedOverlayIn, float red, float green, float blue, float alpha) {
+        this.root.render(poseStack, consumer, packedLightIn, packedOverlayIn, red, green, blue, alpha);
+    }
+
     private void setRotateAngle(@NotNull ModelPart modelRenderer, float x, float y, float z) {
         modelRenderer.pitch = x;
         modelRenderer.yaw = y;
@@ -221,164 +235,178 @@ public class AdultChocoboModel<T extends Chocobo> extends EntityModel<Chocobo> {
 
     public void animateModel(@NotNull Chocobo entityIn, float limbSwing, float limbSwingAmount, float partialTick) {
         super.animateModel(entityIn, limbSwing, limbSwingAmount, partialTick);
-        float pi = (float) Math.PI;
 
-        // Update animation variables from entity
+        // Update animation variables from entity - this remains necessary
         this.wingRotation = entityIn.wingRotation;
         this.destinationPos = entityIn.destinationPos;
         this.wingRotDelta = entityIn.wingRotDelta;
         this.isChocoboJumping = entityIn.isChocoboJumping;
 
-        // Check if the chocobo is swimming
+        // Cache state checks to avoid repeated method calls
         boolean isSwimming = entityIn.isTouchingWater() && entityIn.isWaterBreathing();
+        boolean isRainedOn = entityIn.isTouchingWaterOrRain(); // isSwiming goes first, then isRainedOn & does not matter if the wings get animated from swimming or rain
+        boolean isOnGround = entityIn.isOnGround();
 
-        // Check if the chocobo is being rained on but not in water
-        boolean isRainedOn = entityIn.isTouchingWaterOrRain(); // isBeingRainedOn() is a private method in the Entity class, so we use isTouchingWaterOrRain() instead
-
-        // Update wing animation variables
+        // Update wing animation variables - optimized logic
         if (isSwimming) {
-            this.destinationPos += 0.2F;
-            if (this.wingRotDelta < 1.0F) { this.wingRotDelta = 1.0F; }
-
-            // Increment swim animation ticks for continuous leg movement while in water
+            this.destinationPos = Math.min(this.destinationPos + 0.2F, 1.0F);
+            this.wingRotDelta = Math.max(this.wingRotDelta, 1.0F);
             this.swimAnimationTicks += 0.15F;
-            // Reset rain timer when swimming
             this.rainShakeTimer = 0.0F;
         } else if (isRainedOn) {
-            // When being rained on, increase the rain shake timer for wing flapping animation
             this.rainShakeTimer += 0.1F;
-            // Ensure wingRotDelta is high enough for more pronounced wing movement
-            if (this.wingRotDelta < 0.8F) { this.wingRotDelta = 0.8F; }
-            this.destinationPos += 0.1F; // More moderate wing movement than swimming
+            this.wingRotDelta = Math.max(this.wingRotDelta, 0.8F);
+            this.destinationPos = Math.min(this.destinationPos + 0.1F, 1.0F);
             this.swimAnimationTicks = 0.0F;
         } else {
-            // Reset both animation timers when not swimming or being rained on
             this.swimAnimationTicks = 0.0F;
             this.rainShakeTimer = 0.0F;
-            this.destinationPos += (float) ((double) (entityIn.isOnGround() ? -1 : 4) * 0.3D);
-            if (!entityIn.isOnGround()) { this.wingRotDelta = Math.min(this.wingRotation, 1f); }
+
+            // Optimize by using direct math instead of casting to double and back
+            float destPosChange = isOnGround ? -0.3F : 1.2F;
+            this.destinationPos += destPosChange;
+
+            if (!isOnGround) {
+                this.wingRotDelta = Math.min(this.wingRotation, 1f);
+            }
         }
 
+        // Common calculations done once
         this.destinationPos = MathHelper.clamp(this.destinationPos, 0.0F, 1.0F);
-        this.wingRotDelta = (float)((double)this.wingRotDelta * 0.9D);
+        this.wingRotDelta *= 0.9F;
         this.wingRotation += this.wingRotDelta * 2.0F;
 
-        // Leg animations depending on movement state
+        // Leg animations with optimized logic
+        animateLegs(entityIn, limbSwing, limbSwingAmount, isSwimming);
+
+        // Wing animations
+        animateWings(entityIn, limbSwing, limbSwingAmount, isOnGround, isSwimming, isRainedOn);
+    }
+
+    // Extract leg animation logic to a separate method for better organization
+    private void animateLegs(Chocobo entityIn, float limbSwing, float limbSwingAmount, boolean isSwimming) {
         if (isSwimming) {
-            // Swimming leg animation - alternating kick pattern
-            float swimSpeed = 0.6662F * 1.5F; // Faster leg movement for swimming
-            float swimStrength = Math.max(limbSwingAmount, 0.4F); // Ensure minimum movement while in water
+            // Swimming leg animation - optimize calculations
+            float swimSpeed = LIMB_SWING_SPEED * 1.5F;
+            float swimStrength = Math.max(limbSwingAmount, 0.4F);
 
-            if (Math.abs(entityIn.getVelocity().x) < 0.05F && Math.abs(entityIn.getVelocity().z) < 0.05F) {
-                // When stationary in water, use time-based animation instead of movement-based
-                float paddleSpeed = 0.6662F * 1.2F;
-                float paddleStrength = 0.6F; // Strong enough to be visible but not excessive
 
-                // Use swim animation ticks for continuous movement even when stationary
-                this.setRightLegXRotation(MathHelper.cos(this.swimAnimationTicks * paddleSpeed) * paddleStrength);
-                this.setLeftLegXRotation(MathHelper.cos(this.swimAnimationTicks * paddleSpeed + pi) * paddleStrength);
+            boolean offGround = !entityIn.isOnGround();
+
+            if (offGround) {
+                // Stationary swimming animation
+                float paddleSpeed = LIMB_SWING_SPEED * 1.2F;
+                float paddleStrength = 0.6F;
+
+                setRightLegXRotation(MathHelper.cos(this.swimAnimationTicks * paddleSpeed) * paddleStrength);
+                setLeftLegXRotation(MathHelper.cos(this.swimAnimationTicks * paddleSpeed + PI) * paddleStrength);
             } else {
-                // When actually moving, blend movement-based and time-based animation
-                // This ensures smooth transitions between stationary and moving states
-                this.setRightLegXRotation(MathHelper.cos(limbSwing * swimSpeed) * 1.2F * swimStrength);
-                this.setLeftLegXRotation(MathHelper.cos(limbSwing * swimSpeed + pi) * 1.2F * swimStrength);
+                // Moving swimming animation
+                setRightLegXRotation(MathHelper.cos(limbSwing * swimSpeed) * 1.2F * swimStrength);
+                setLeftLegXRotation(MathHelper.cos(limbSwing * swimSpeed + PI) * 1.2F * swimStrength);
             }
         } else {
             // Normal walking animation
-            this.setRightLegXRotation(MathHelper.cos(limbSwing * 0.6662F) * 0.8F * limbSwingAmount);
-            this.setLeftLegXRotation(MathHelper.cos(limbSwing * 0.6662F + pi) * 0.8F * limbSwingAmount);
+            float walkSpeed = limbSwing * LIMB_SWING_SPEED;
+            float walkStrength = 0.8F * limbSwingAmount;
+
+            setRightLegXRotation(MathHelper.cos(walkSpeed) * walkStrength);
+            setLeftLegXRotation(MathHelper.cos(walkSpeed + PI) * walkStrength);
         }
+    }
 
-        // Wing animation based on movement and environment
-        float right_wing_y = -0.0174533F;
-        float left_wing_y = 0.0174533F;
-        float left_swing_mod = 90 + MathHelper.cos(limbSwing * 0.6662F + pi) * 1.4F * limbSwingAmount;
-        float right_swing_mod = -90 + MathHelper.cos(limbSwing * 0.6662F) * 1.4F * limbSwingAmount;
+    // Extract wing animation logic to a separate method
+    private void animateWings(Chocobo entityIn, float limbSwing, float limbSwingAmount,
+                              boolean isOnGround, boolean isSwimming, boolean isRainedOn) {
 
-        // Gliding takes priority over rain animation
-        if (!entityIn.isOnGround()) {
+        // Calculate values used for both wings once
+        float limbSwingCos = MathHelper.cos(limbSwing * LIMB_SWING_SPEED);
+        float limbSwingCosPi = MathHelper.cos(limbSwing * LIMB_SWING_SPEED + PI);
+        float limbSwingMod = 1.4F * limbSwingAmount;
+
+        float leftSwingMod = 90 + limbSwingCosPi * limbSwingMod;
+        float rightSwingMod = -90 + limbSwingCos * limbSwingMod;
+
+        if (!isOnGround) {
             if (isSwimming) {
-                // Swimming wing animation - more horizontal wing position
-                setRotateAngle(this.wing_right, (pi / 2F) - (pi / 12), right_wing_y, right_swing_mod);
-                setRotateAngle(this.wing_left, (pi / 2F) - (pi / 12), left_wing_y, left_swing_mod);
+                // Swimming wing position - more horizontal
+                float horizontalPitch = PI_HALF - (PI / 12);
+                setRotateAngle(this.wing_right, horizontalPitch, WING_IDLE_Y_RIGHT, rightSwingMod);
+                setRotateAngle(this.wing_left, horizontalPitch, WING_IDLE_Y_LEFT, leftSwingMod);
             } else {
-                // Flying wing animation - properly flapping wings
-                float fallingWingCycle = MathHelper.sin(entityIn.age * this.wingRotation);
-
+                // Flying wing animation - flapping
+                float wingCycle = MathHelper.sin(entityIn.age * this.wingRotation);
                 float basePitch = 0.15F;
 
-                // For rain animation, wings should move slightly outward
-                float rightWingExtension = 0.6F - fallingWingCycle * 0.5F; // Slightly extended
-                float leftWingExtension = -0.6F + fallingWingCycle * 0.5F;   // Slightly extended
+                // Wing extension calculations
+                float rightWingExtension = 0.6F - wingCycle * 0.5F;
+                float leftWingExtension = -0.6F + wingCycle * 0.5F;
                 float randomVariation = MathHelper.sin(this.rainShakeTimer * 1.6F) * 0.05F;
 
-                setRotateAngle(this.wing_right, basePitch, right_wing_y, rightWingExtension - randomVariation);
-                setRotateAngle(this.wing_left, basePitch, left_wing_y, leftWingExtension + randomVariation);
+                setRotateAngle(this.wing_right, basePitch, WING_IDLE_Y_RIGHT, rightWingExtension - randomVariation);
+                setRotateAngle(this.wing_left, basePitch, WING_IDLE_Y_LEFT, leftWingExtension + randomVariation);
 
-                // Different leg positions for flying
-                this.setLeftLegXRotation(0.6F);
-                this.setRightLegXRotation(0.6F);
+                // Different leg positions for flying - constant value instead of recalculation
+                this.leg_left.pitch = DEFAULT_LEG_PITCH + 0.6F;
+                this.leg_right.pitch = DEFAULT_LEG_PITCH + 0.6F;
             }
         } else if (isRainedOn) {
             // Rain shake animation - light wing movements
             float rainShakeCycle = MathHelper.sin(this.rainShakeTimer * 0.8F);
-
-            // For rain animation, wings should move slightly outward
-            float rightWingExtension = 0.4F - rainShakeCycle * 0.15F; // Slightly extended
-            float leftWingExtension = -0.4F + rainShakeCycle * 0.15F;   // Slightly extended
+            float rightWingExtension = 0.4F - rainShakeCycle * 0.15F;
+            float leftWingExtension = -0.4F + rainShakeCycle * 0.15F;
             float randomVariation = MathHelper.sin(this.rainShakeTimer * 1.6F) * 0.05F;
 
-            setRotateAngle(this.wing_right, 0.1F, right_wing_y, rightWingExtension - randomVariation);
-            setRotateAngle(this.wing_left, 0.1F, left_wing_y, leftWingExtension + randomVariation);
+            setRotateAngle(this.wing_right, 0.1F, WING_IDLE_Y_RIGHT, rightWingExtension - randomVariation);
+            setRotateAngle(this.wing_left, 0.1F, WING_IDLE_Y_LEFT, leftWingExtension + randomVariation);
         } else {
             // Idle animation - gentle wing movements when grounded
             float idleWingMovement = MathHelper.sin(entityIn.age * 0.05F) * 0.05F;
-
-            // When idle, wings should be mostly folded but with slight natural movement
             float rightWingIdle = -0.25F - idleWingMovement * 0.5F;
             float leftWingIdle = 0.25F + idleWingMovement * 0.5F;
 
-            setRotateAngle(this.wing_right, 0.1F, right_wing_y, rightWingIdle);
-            setRotateAngle(this.wing_left, 0.1F, left_wing_y, leftWingIdle);
+            setRotateAngle(this.wing_right, 0.1F, WING_IDLE_Y_RIGHT, rightWingIdle);
+            setRotateAngle(this.wing_left, 0.1F, WING_IDLE_Y_LEFT, leftWingIdle);
         }
     }
 
     public void setAngles(@NotNull Chocobo entityIn, float limbSwing, float limbSwingAmount, float ageInTicks, float netHeadYaw, float headPitch) {
-        // ageInTicks = wing z movement (flutter)
-        // netHeadYaw = head y movement
-        // headPitch = head x movement
-        // cos(limbSwing) and limbSwingAmount = leg movement
-        float pi = (float) Math.PI;
+        // Head rotation - convert angles once
+        float headYawRad = netHeadYaw * DEG_TO_RAD;
+        float headPitchRad = headPitch * DEG_TO_RAD;
 
-        // Head rotation
-        head.pitch = headPitch * (pi / 180F);
-        head.yaw = netHeadYaw * (pi / 180F);
+        head.pitch = headPitchRad;
+        head.yaw = headYawRad;
 
-        // Neck follows head slightly
-        neck.pitch = (-0.8F*(netHeadYaw * (pi / 180F)))/8;
-        neck.yaw = (netHeadYaw * (pi / 180F))/9;
+        // Neck follows head slightly - optimize calculation
+        neck.pitch = (-0.8F * headYawRad) / 8;
+        neck.yaw = headYawRad / 9;
 
         // Adjust neck position based on movement
-        Vec3d motion = entityIn.getVelocity();
-        if (Math.abs(motion.x) > 0.1F || Math.abs(motion.z) > 0.1F) {
+        Vec3d velocity = entityIn.getVelocity();
+        float velocityMagnitude = (float)(Math.abs(velocity.x) + Math.abs(velocity.z));
+
+        if (velocityMagnitude > 0.1F) {
             // When moving, neck is more forward
-            if (entityIn.hasPassengers()) {
-                neck.pitch = -0.2F; // Less extreme forward tilt when ridden
-            } else {
-                neck.pitch = -0.3F; // More dynamic forward tilt when running free
-            }
+            neck.pitch = entityIn.hasPassengers() ? -0.2F : -0.3F;
         } else {
             // When idle, neck is more upright
             neck.pitch = 0.1F;
         }
 
         // Additional wing flutter for idle animation when on ground
-        if (entityIn.isOnGround() && Math.abs(motion.x) < 0.05F && Math.abs(motion.z) < 0.05F) {
+        if (entityIn.isOnGround() && velocityMagnitude < 0.05F) {
             float idleWingFlutter = MathHelper.sin(ageInTicks * 0.05F) * 0.05F;
-            setRotateAngle(this.wing_right, idleWingFlutter, -0.0174533F, 0F);
-            setRotateAngle(this.wing_left, idleWingFlutter, 0.0174533F, 0F);
+            setRotateAngle(this.wing_right, idleWingFlutter, WING_IDLE_Y_RIGHT, 0F);
+            setRotateAngle(this.wing_left, idleWingFlutter, WING_IDLE_Y_LEFT, 0F);
         }
     }
-    private void setLeftLegXRotation(float deltaX) { this.leg_left.pitch = 0.2094395F + deltaX; }
-    private void setRightLegXRotation(float deltaX) { this.leg_right.pitch = 0.2094395F + deltaX; }
+
+    private void setLeftLegXRotation(float deltaX) {
+        this.leg_left.pitch = DEFAULT_LEG_PITCH + deltaX;
+    }
+
+    private void setRightLegXRotation(float deltaX) {
+        this.leg_right.pitch = DEFAULT_LEG_PITCH + deltaX;
+    }
 }

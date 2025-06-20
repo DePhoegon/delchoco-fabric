@@ -58,6 +58,7 @@ import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.math.intprovider.UniformIntProvider;
 import net.minecraft.world.EntityView;
+import net.minecraft.world.GameRules;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldView;
 import org.jetbrains.annotations.NotNull;
@@ -194,7 +195,7 @@ public abstract class AbstractChocobo extends TameableEntity implements Angerabl
             // Check if the chocobo is near a land edge and trying to climb out
             boolean tryingToClimbOut = false;
 
-            if (this.getTarget() != null || this.hasPassengers()) { // In combat or with rider
+            if (this.getTarget() != null || this.hasPassengers()) { // In combat or with rider,
                 // Check if there's land nearby and slightly above the current position
                 BlockPos currentPos = this.getBlockPos();
                 for (int dx = -1; dx <= 1 && !tryingToClimbOut; dx++) {
@@ -766,7 +767,7 @@ public abstract class AbstractChocobo extends TameableEntity implements Angerabl
     protected static final String armorTough = "arm_tough";
     protected static final String dualDefense = "defences";
 
-    protected void increaseStat(Chocobo chocobo, String statName, int amount, PlayerEntity playerEntity) {
+    protected void increaseStat(Chocobo chocobo, String statName, @SuppressWarnings("SameParameterValue") int amount, PlayerEntity playerEntity) {
         if (chocobo == null || statName == null || playerEntity == null) { return; }
         if (amount <= 0) { return; } // Ensure amount is positive
         if (!chocobo.isAlive() || !chocobo.isTamed()) { return; } // Ensure chocobo is alive and tamed
@@ -869,27 +870,47 @@ public abstract class AbstractChocobo extends TameableEntity implements Angerabl
     public boolean updateMovementInFluid(TagKey<Fluid> tag, double speed) {
         if (this.isRegionUnloaded()) { return false; }
         Box box = this.getBoundingBox().contract(0.001);
+
+        // Performance optimization: Only check a subset of blocks in the bounding box
+        // Sample key points instead of every block in the box
         int i = MathHelper.floor(box.minX);
         int j = MathHelper.ceil(box.maxX);
         int k = MathHelper.floor(box.minY);
         int l = MathHelper.ceil(box.maxY);
         int m = MathHelper.floor(box.minZ);
         int n = MathHelper.ceil(box.maxZ);
+
+        // Only sample up to 12 points in the bounding box instead of all blocks
+        int sampleCountX = Math.max(1, (j - i) / 2);
+        int sampleCountY = Math.max(1, (l - k) / 2);
+        int sampleCountZ = Math.max(1, (n - m) / 2);
+
         double d = 0.0;
         boolean bl = this.isPushedByFluids(tag);
         boolean bl2 = false;
         Vec3d vec3d = Vec3d.ZERO;
         int o = 0;
         BlockPos.Mutable mutable = new BlockPos.Mutable();
-        for (int p = i; p < j; ++p) {
-            for (int q = k; q < l; ++q) {
-                for (int r = m; r < n; ++r) {
+
+        // Sample points throughout the bounding box rather than checking every block
+        for (int dx = 0; dx <= sampleCountX; ++dx) {
+            for (int dy = 0; dy <= sampleCountY; ++dy) {
+                for (int dz = 0; dz <= sampleCountZ; ++dz) {
                     double e;
-                    mutable.set(p, q, r);
+                    int px = i + (dx * (j - i)) / sampleCountX;
+                    int py = k + (dy * (l - k)) / sampleCountY;
+                    int pz = m + (dz * (n - m)) / sampleCountZ;
+
+                    mutable.set(px, py, pz);
                     FluidState fluidState = this.getWorld().getFluidState(mutable);
-                    if (!fluidState.isIn(tag) || !((e = (float)q + fluidState.getHeight(this.getWorld(), mutable)) >= box.minY)) { continue; }
+
+                    if (!fluidState.isIn(tag) || !((e = (float)py + fluidState.getHeight(this.getWorld(), mutable)) >= box.minY)) {
+                        continue;
+                    }
+
                     bl2 = true;
                     d = Math.max(e - box.minY, d);
+
                     if (!bl) continue;
                     Vec3d vec3d2 = fluidState.getVelocity(this.getWorld(), mutable);
                     if (d < 0.4) { vec3d2 = vec3d2.multiply(d); }
@@ -898,13 +919,18 @@ public abstract class AbstractChocobo extends TameableEntity implements Angerabl
                 }
             }
         }
+
         if (vec3d.length() > 0.0) {
-            if (o > 0) { vec3d = vec3d.multiply(1.0 / (double)o); }
+            if (o > 0) {
+                vec3d = vec3d.multiply(1.0 / (double)o);
+            }
             vec3d = vec3d.normalize();
             Vec3d vec3d3 = this.getVelocity();
             vec3d = vec3d.multiply(speed);
-            if (Math.abs(vec3d3.x) < 0.003 && Math.abs(vec3d3.z) < 0.003 && vec3d.length() < 0.0045000000000000005) {
-                vec3d = vec3d.normalize().multiply(0.0045000000000000005);
+
+            // Apply fluid physics only when meaningful movement is possible
+            if (Math.abs(vec3d3.x) < 0.003 && Math.abs(vec3d3.z) < 0.003 && vec3d.length() < 0.0045) {
+                vec3d = vec3d.normalize().multiply(0.0045);
             }
             this.setVelocity(this.getVelocity().add(vec3d));
         }
@@ -914,7 +940,7 @@ public abstract class AbstractChocobo extends TameableEntity implements Angerabl
     public boolean isPushedByFluids(TagKey<Fluid> key) {
         if (this.isRegionUnloaded()) { return false; }
         if (key == null) { return true; }
-        if (this.hasPassengers()) { return false; } // Chocobo cannot be pushed by fluids if it has passengers
+        if (this.hasPassengers()) { return false; } // Fluids cannot push a Chocobo if it has passengers
         if (key == FluidTags.WATER) { return !this.isWaterBreathing(); }
         else if (key == FluidTags.LAVA) { return !this.isFireImmune(); }
         return this.isPushedByFluids();
@@ -922,18 +948,34 @@ public abstract class AbstractChocobo extends TameableEntity implements Angerabl
 
     // Alert methods for Chocobo
     protected void alertOthers(PlayerEntity forgivenPlayer, @NotNull Chocobo alertingChocobo) {
-        double followRange = alertingChocobo.getAttributeValue(EntityAttributes.GENERIC_FOLLOW_RANGE);
-        Box alertBox = Box.from(alertingChocobo.getPos()).expand(followRange, 10.0D, followRange);
+        if ((alertingChocobo.ticksUntilNextAlert > 0 && forgivenPlayer == null) || (forgivenPlayer != null && !this.getWorld().getGameRules().getBoolean(GameRules.FORGIVE_DEAD_PLAYERS))) { return; }
+        // double followRange = Math.min(alertingChocobo.getAttributeValue(EntityAttributes.GENERIC_FOLLOW_RANGE), 16.0);
+        double followRange = EntityAttributes.GENERIC_FOLLOW_RANGE.getDefaultValue();
+
+        Box alertBox = Box.from(alertingChocobo.getPos()).expand(followRange, 15.0D, followRange);
         List<Chocobo> nearbyChocobos = alertingChocobo.getWorld().getNonSpectatingEntities(Chocobo.class, alertBox);
+        int alertLimit = Math.min(nearbyChocobos.size(), 15);
 
         if (forgivenPlayer != null) {
-            for (Chocobo chocobo : nearbyChocobos) { chocobo.forgive(forgivenPlayer); }
+            for (Chocobo chocobo : nearbyChocobos) { chocobo.forgive(forgivenPlayer); } // Forgive all chocobos in the area if a player is specified, kept despite cpu cost to prevent player from being attacked by all chocobos in the area after being forgiven
         } else {
             LivingEntity attacker = alertingChocobo.getTarget();
             if (attacker == null) { return; }
-            for (Chocobo chocobo : nearbyChocobos) {
-                if (chocobo.shouldAlert(chocobo, attacker)) { chocobo.alertChocobo(chocobo, attacker); }
+
+            // Only alert chocobos that are within defined chunk distances
+            // 1.5 chunks from alerting chocobo (24 blocks, 576 squared)
+            // 3 chunks from attacker (32 blocks, 1024 squared)
+            for (int i = 0; i < alertLimit; i++) {
+                Chocobo chocobo = nearbyChocobos.get(i);
+                if (chocobo != alertingChocobo &&
+                    chocobo.shouldAlert(chocobo, attacker) &&
+                    (chocobo.squaredDistanceTo(alertingChocobo) < 576.0 ||
+                     chocobo.squaredDistanceTo(attacker) < 1024.0)) {
+                    chocobo.ticksUntilNextAlert = 30 + chocobo.getRandom().nextInt(20);
+                    chocobo.alertChocobo(chocobo, attacker);
+                }
             }
+            alertingChocobo.ticksUntilNextAlert = ALERT_INTERVAL.get(alertingChocobo.random);
         }
     }
     protected void maybeAlertOthers(@NotNull Chocobo alertingChocobo) {
@@ -946,7 +988,7 @@ public abstract class AbstractChocobo extends TameableEntity implements Angerabl
     protected boolean shouldAlert(Chocobo chocobo, LivingEntity attacker) {
         return chocobo != attacker
                 && !chocobo.isAttacking()
-                && ChocoboBrainAid.isAttackable(attacker)
+                && ChocoboBrainAid.isAttackable(attacker, chocobo.canWalkOnWater())
                 && !chocobo.isBaby();
     }
     protected void alertChocobo(Chocobo chocobo, LivingEntity attacker) {

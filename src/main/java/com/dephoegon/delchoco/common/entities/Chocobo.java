@@ -6,6 +6,7 @@ import com.dephoegon.delchoco.aid.world.WorldConfig;
 import com.dephoegon.delchoco.common.entities.breeding.ChocoboMateGoal;
 import com.dephoegon.delchoco.common.entities.properties.*;
 import com.dephoegon.delchoco.common.entities.properties.MovementType;
+import com.dephoegon.delchoco.common.init.ModEntities;
 import com.dephoegon.delchoco.common.init.ModItems;
 import com.dephoegon.delchoco.common.init.ModSounds;
 import com.dephoegon.delchoco.common.inventory.SaddlebagContainer;
@@ -20,9 +21,7 @@ import com.mojang.serialization.Dynamic;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.entity.*;
 import net.minecraft.entity.ai.brain.Brain;
-import net.minecraft.entity.ai.goal.ActiveTargetGoal;
-import net.minecraft.entity.ai.goal.MeleeAttackGoal;
-import net.minecraft.entity.ai.goal.UniversalAngerGoal;
+import net.minecraft.entity.ai.goal.*;
 import net.minecraft.entity.ai.pathing.PathNodeType;
 import net.minecraft.entity.attribute.DefaultAttributeContainer;
 import net.minecraft.entity.attribute.EntityAttributeModifier;
@@ -70,6 +69,8 @@ import static com.dephoegon.delchoco.aid.chocoboChecks.*;
 import static com.dephoegon.delchoco.aid.dyeList.getDyeList;
 import static com.dephoegon.delchoco.common.effects.ChocoboCombatEvents.flowerChance;
 import static com.dephoegon.delchoco.common.entities.breeding.BreedingHelper.getChocoName;
+import static com.dephoegon.delchoco.common.entities.properties.ChocoboBrainAid.invalidRevengeTargets;
+import static com.dephoegon.delchoco.common.entities.properties.ChocoboBrainAid.validRevengeAllies;
 import static com.dephoegon.delchoco.common.init.ModItems.*;
 import static java.lang.Math.floor;
 import static java.lang.Math.random;
@@ -141,12 +142,6 @@ public class Chocobo extends AbstractChocobo {
                 this.chocoboWeaponInv,
                 this.chocoboArmorInv
         };
-        /*
-        inventoryDropClear(this.chocoboBackboneInv, this);
-        inventoryDropClear(this.chocoboSaddleInv, this);
-        inventoryDropClear(this.chocoboWeaponInv, this);
-        inventoryDropClear(this.chocoboArmorInv, this);
-        */
         for (Inventory inventory : inventories) {
             this.inventoryDropClear(inventory, this);
         }
@@ -184,14 +179,14 @@ public class Chocobo extends AbstractChocobo {
             return false;
         }
         if (chocoboOwner == otherOwner) { return false; } //TODO: introduce the config check to do bypass hit by owner
-        if (ChocoboBrainAid.isAttackable(target)) {
+        if (ChocoboBrainAid.isAttackable(target, this.canWalkOnWater())) {
             if (otherOwner != null) { return chocoboOwner.shouldDamagePlayer(otherOwner); }
             else { return true; }
         }
         return false;
     }
     protected Brain.Profile<Chocobo> createBrainProfile() { return Brain.createProfile(ChocoboBrains.CHOCOBO_MODULES, ChocoboBrains.CHOCOBO_SENSORS); }
-    protected Brain<?> deserializeBrain(Dynamic<?> dynamic) { return ChocoboBrains.makeBrain(this.createBrainProfile().deserialize(dynamic), this); }
+    protected Brain<?> deserializeBrain(Dynamic<?> dynamic) { return ChocoboBrains.makeBrain(this.createBrainProfile().deserialize(dynamic)); }
     @SuppressWarnings("unchecked")
     public Brain<Chocobo> getBrain() {
         return (Brain<Chocobo>) super.getBrain();
@@ -201,28 +196,17 @@ public class Chocobo extends AbstractChocobo {
         DebugInfoSender.sendBrainDebugData(this);
     }
     protected void initGoals() {
-        super.initGoals(); // returns super, custom goals & targets are commented out to test Brains
+        super.initGoals(); // returns super, custom goals and targets are commented out to test Brains
 
-        //this.goalSelector.add(1, new ChocoboGoals.ChocoPanicGoal(this,1.5D));
         this.goalSelector.add(1, new MeleeAttackGoal(this,2F, false));
         this.goalSelector.add(2, new ChocoboMateGoal(this, 1.0D));
-        /*
-        this.goalSelector.add(4, new ChocoboGoals.ChocoboLavaEscape(this));
-        this.goalSelector.add(5, new ChocoboGoals.ChocoboFollowOwnerGoal(this, 1.6, 10F, 300F));
-        this.goalSelector.add(6, new TemptGoal(this, 1.2D, Ingredient.ofStacks(GYSAHL_GREEN_ITEM.getDefaultStack()), false));
-        this.goalSelector.add(8, new ChocoboGoals.ChocoboAvoidPlayer(this));
-        this.goalSelector.add(9, new ChocoboGoals.ChocoboRoamWonder(this, 1.0D)); // Roam & Wonder, uses MovementType check to allow to start & if it limits the roaming
-        //this.goalSelector.add(9, new FleeEntityGoal<>(this, LlamaEntity.class, 15F, 1.3F, 1.5F));
-        this.goalSelector.add(10, new LookAtEntityGoal(this, PlayerEntity.class, 6.0F));
-        this.goalSelector.add(11, new LookAroundGoal(this)); // moved after Roam, a little too stationary
-        */
-        this.targetSelector.add(1, new ChocoboGoals.ChocoboOwnerHurtByGoal(this));
-        this.targetSelector.add(2, new ChocoboGoals.ChocoboOwnerHurtGoal(this));
-        this.targetSelector.add(3, new ChocoboGoals.ChocoboHurtByTargetGoal(this, Chocobo.class).setGroupRevenge(Chocobo.class));
+        this.targetSelector.add(1, new TrackOwnerAttackerGoal(this));
+        this.targetSelector.add(2, new AttackWithOwnerGoal(this));
+        this.targetSelector.add(3, new RevengeGoal(this, invalidRevengeTargets(this.canWalkOnWater())).setGroupRevenge(validRevengeAllies()));
         this.targetSelector.add(4, new ActiveTargetGoal<>(this, PlayerEntity.class, 10, true, false, this::shouldAngerAt));
-        this.targetSelector.add(5, new ActiveTargetGoal<>(this, EndermiteEntity.class, false));
-        this.targetSelector.add(6, new ActiveTargetGoal<>(this, SilverfishEntity.class, false));
-        this.targetSelector.add(7, new UniversalAngerGoal<>(this, true));
+        this.targetSelector.add(5, new UniversalAngerGoal<>(this, false));
+        this.targetSelector.add(6, new ActiveTargetGoal<>(this, EndermiteEntity.class, false));
+        this.targetSelector.add(7, new ActiveTargetGoal<>(this, SilverfishEntity.class, false));
     }
     @Override
     public float getPathfindingFavor(BlockPos pos, WorldView world) { return super.getPathfindingFavor(pos, world); }
@@ -428,7 +412,7 @@ public class Chocobo extends AbstractChocobo {
                         this.isChocoboJumping = true;
                     }
                 }
-                if (rider.isTouchingWater() && this.isWaterBreathing()) { // Player is in water AND Chocobo can breathe underwater
+                if (rider.isTouchingWater() && this.isWaterBreathing()) { // Player is in the water AND Chocobo can breathe underwater
                     Vec3d motion = getVelocity();
                     float verticalMovement = 0.0f;
                     if (MinecraftClient.getInstance().options.jumpKey.isPressed()) { // Move up
@@ -437,13 +421,8 @@ public class Chocobo extends AbstractChocobo {
                         verticalMovement = -0.5f;
                     } else if (isChocoboWaterGlide()) { // Glide/neutral buoyancy
                         motion = getVelocity();
-                        // Apply slight upward force to counteract gravity if gliding, or maintain current y if stable
-                        // This can be adjusted for desired "glide" effect.
-                        // For now, let's reduce downward pull significantly.
-                        verticalMovement = (float) (motion.y * 0.65F); // Keep some of the existing y-velocity for smoother transitions
+                        verticalMovement = (float) (motion.y * 0.65F);
                     }
-                    // If not jumping or sneaking, and not gliding, it will use the y from travelVector (usually gravity or AI input)
-                    // For player-controlled swimming, we override y more directly.
                     if (MinecraftClient.getInstance().options.jumpKey.isPressed() || MinecraftClient.getInstance().options.sneakKey.isPressed() || isChocoboWaterGlide()) {
                         setVelocity(new Vec3d(motion.x, verticalMovement, motion.z));
                     }
@@ -471,7 +450,7 @@ public class Chocobo extends AbstractChocobo {
                 if (!this.isOnGround() && !this.isTouchingWater() && !this.isInLava() && this.getVelocity().y < 0) {
                     Vec3d motion = getVelocity();
                     if (MinecraftClient.getInstance().options.jumpKey.isPressed()) {
-                        // When space key is pressed while falling, reduce fall speed by 60% (to 40% of normal)
+                        // When the space key is pressed while falling, reduce fall speed by 60% (to 40% of normal)
                         setVelocity(new Vec3d(motion.x, motion.y * 0.4F, motion.z));
                     } else {
                         // When mounted but not pressing space, reduce fall speed by 20% (to 80% of normal)
@@ -913,9 +892,65 @@ public class Chocobo extends AbstractChocobo {
         super.applyDamageEffects(attacker, target);
     }
 
+    /**
+     * Counts all loaded Chocobos in the world and returns counts of wild and tamed
+     * @return int[2] array with [0]=wild count, [1]=tamed count
+     */
+    private int[] countLoadedChocobos() {
+        // Performance optimization: Only do this check occasionally for wild chocobos
+        if ((this.isTamed() || this.isBaby()) && this.age % 400 != 0) { return null; }
+
+        int wildCount = 0;
+        int tamedCount = 0;
+
+        // Use entity type predicate for faster filtering
+        for (Chocobo chocobo : this.getWorld().getEntitiesByType(
+                ModEntities.CHOCOBO_ENTITY,
+                new Box(-Double.MAX_VALUE/2, this.getWorld().getBottomY(), -Double.MAX_VALUE/2, Double.MAX_VALUE/2, this.getWorld().getTopY(), Double.MAX_VALUE/2),
+                entity -> true)) {
+            if (chocobo.isTamed()) { tamedCount++; }
+            else if (!chocobo.isBaby()) { wildCount++; }
+        }
+        return new int[]{wildCount, tamedCount};
+    }
+
     public void checkDespawn() {
-        if (this.getWorld().getDifficulty() == Difficulty.PEACEFUL && this.isDisallowedInPeaceful()) { this.discard(); }
-        else if (!this.isPersistent() && !this.cannotDespawn()) {
+        // Standard despawn logic
+        if (this.getWorld().getDifficulty() == Difficulty.PEACEFUL && this.isDisallowedInPeaceful()) {
+            this.discard();
+            return;
+        }
+
+        // Only apply population control to non-persistent chocobos (CannotDespawn includes persistent ones)
+        if (!this.cannotDespawn()) {
+            // Global population control
+            if (WorldConfig.CHOCOBO_ENABLE_WILD_SPAWN_LIMIT.get() && !this.isTamed() && !this.isBaby()) {
+                int[] counts = countLoadedChocobos();
+                if (counts != null) {
+                    int wildCount = counts[0];
+                    int tamedCount = counts[1];
+
+                    // Determine the current wild chocobo limit based on tamed count
+                    int currentWildLimit = tamedCount >= WorldConfig.CHOCOBO_SPAWN_MAX_WILD_NUMBER.get() ?
+                                           WorldConfig.CHOCOBO_SPAWN_REDUCED_WILD_NUMBER.get() :
+                                           WorldConfig.CHOCOBO_SPAWN_MAX_WILD_NUMBER.get();
+
+                    // If we're over the limit, increase despawn chance significantly
+                    if (wildCount > currentWildLimit) {
+                        // More aggressive despawn if we're significantly over the limit
+                        int excessChocobos = wildCount - currentWildLimit;
+                        int limitGraceBreedChocobos = this.getGeneration() > 1 ? WorldConfig.CHOCOBO_SPAWN_DESPAWN_CHANCE_FOR_BREED.get() : 75;
+                        int despawnChance = Math.min(5 + (excessChocobos * 2), limitGraceBreedChocobos); // Cap at 75% chance
+
+                        if (this.random.nextInt(100) < despawnChance) {
+                            this.discard();
+                            return;
+                        }
+                    }
+                }
+            }
+
+            // Standard vanilla-like despawn logic
             Entity entity = this.getWorld().getClosestPlayer(this, -1.0D);
             if (entity != null) {
                 double d0 = entity.squaredDistanceTo(this);
@@ -925,7 +960,7 @@ public class Chocobo extends AbstractChocobo {
 
                 int k = (CREATURE.getImmediateDespawnRange()*2);
                 int l = k * k;
-                if (this.despawnCounter > 600 && this.random.nextInt(800) == 0 && d0 > (double)l && this.canImmediatelyDespawn(d0)) { this.discard();}
+                if (this.despawnCounter > 600 && this.random.nextInt(800) == 0 && d0 > (double)l && this.canImmediatelyDespawn(d0)) { this.discard(); }
                 else if (d0 < (double)l) { this.despawnCounter = 0; }
             }
         } else { this.despawnCounter = 0; }

@@ -22,6 +22,13 @@ public class WorldConfig {
     public static final ForgeConfigSpec.ConfigValue<Boolean> CHOCOBO_SPAWN_SWITCH_OVERWORLD;
     public static final ForgeConfigSpec.ConfigValue<Boolean> CHOCOBO_SPAWN_SWITCH_NETHER;
     public static final ForgeConfigSpec.ConfigValue<Boolean> CHOCOBO_SPAWN_SWITCH_THE_END;
+    public static final ForgeConfigSpec.ConfigValue<Boolean> CHOCOBO_ENABLE_WILD_SPAWN_LIMIT;
+    public static final ForgeConfigSpec.ConfigValue<Integer> CHOCOBO_SPAWN_MAX_WILD_NUMBER;
+    public static final ForgeConfigSpec.ConfigValue<Integer> CHOCOBO_SPAWN_REDUCED_WILD_NUMBER;
+    public static final ForgeConfigSpec.ConfigValue<Integer> CHOCOBO_SPAWN_TAMED_NUMBER_THRESHOLD;
+    public static final ForgeConfigSpec.ConfigValue<Integer> CHOCOBO_SPAWN_DESPAWN_CHANCE_FOR_BREED;
+
+
     static {
         BUILDER.push("DelChoco World Configs");
 
@@ -39,7 +46,13 @@ public class WorldConfig {
         CHOCOBO_SPAWN_SWITCH_THE_END = BUILDER.comment("Can Chocobo Spawn in the The End").define("The End Chocobo Spawn", true);
 
         BUILDER.pop();
+        BUILDER.push("DelChoco Wild Chocobo Spawn Limits");
+        CHOCOBO_ENABLE_WILD_SPAWN_LIMIT = BUILDER.comment("Enable Wild Chocobo Spawn Limits").define("Wild Chocobo Spawn Limit Switch", true);
+        CHOCOBO_SPAWN_MAX_WILD_NUMBER = BUILDER.comment("The Maximum number of Wild Chocobos that can spawn in loaded chunks").defineInRange("Wild Chocobo Max Spawn Number", 40, 20, 60);
+        CHOCOBO_SPAWN_REDUCED_WILD_NUMBER = BUILDER.comment("The Reduced number of Wild Chocobos that can spawn in loaded chunks").defineInRange("Wild Chocobo Reduced Spawn Number", 30, 10, 50);
+        CHOCOBO_SPAWN_TAMED_NUMBER_THRESHOLD = BUILDER.comment("The number of Tamed Chocobos that exist in a chunk before the reduced Wild Chocobo Spawn Limits are applied").defineInRange("Wild Chocobo Tamed Spawn Number Threshold", 45, 10, 100);
         SPEC = BUILDER.build();
+        CHOCOBO_SPAWN_DESPAWN_CHANCE_FOR_BREED = BUILDER.comment("The chance of a Chocobo that was Breed to Despawn when not tamed & the wild limit is exceeded").defineInRange("Wild Chocobo Despawn Chance for Breed", 5, 0, 75);
     }
 
 

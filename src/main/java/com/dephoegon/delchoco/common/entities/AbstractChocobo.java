@@ -44,6 +44,8 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemConvertible;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
+import net.minecraft.nbt.NbtCompound;
+import net.minecraft.nbt.NbtHelper;
 import net.minecraft.registry.tag.FluidTags;
 import net.minecraft.registry.tag.TagKey;
 import net.minecraft.server.world.ServerWorld;
@@ -64,11 +66,7 @@ import net.minecraft.world.WorldView;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.UUID;
+import java.util.*;
 
 import static com.dephoegon.delbase.item.ShiftingDyes.*;
 import static com.dephoegon.delchoco.aid.chocoboChecks.isWaterBreathingChocobo;
@@ -97,6 +95,7 @@ public abstract class AbstractChocobo extends TameableEntity implements Angerabl
     public int TimeSinceFeatherChance = 0;
     protected int rideTickDelay = 0;
     public int followingMrHuman = 2;
+    private ItemStack lastSaddleStack = ItemStack.EMPTY;
     protected final double followSpeedModifier = 2.0D;
     protected static final float maxStepUp = 1.5f;
     protected final UniformIntProvider ALERT_INTERVAL = TimeHelper.betweenSeconds(4, 6);
@@ -140,16 +139,16 @@ public abstract class AbstractChocobo extends TameableEntity implements Angerabl
     });
 
     // NBT Keys for Chocobo
-    protected static final String NBTKEY_CHOCOBO_COLOR = "Color";
-    protected static final String NBTKEY_MOVEMENT_TYPE = "MovementType";
+    protected static final String NBTKEY_CHOCOBO_PROPERTIES = "ChocoboProperties";
     protected static final String NBTKEY_SADDLE_ITEM = "Saddle";
     protected static final String NBTKEY_WEAPON_ITEM = "Weapon";
     protected static final String NBTKEY_ARMOR_ITEM = "Armor";
+    protected static final String NBTKEY_HEAD_ITEM = "Head";
+    protected static final String NBTKEY_LEGS_ITEM = "Legs";
+    protected static final String NBTKEY_FEET_ITEM = "Feet";
     protected static final String NBTKEY_INVENTORY = "Inventory";
     protected static final String NBTKEY_CHOCOBO_GENERATION = "Generation";
-    protected static final String NBTKEY_CHOCOBO_COLLAR = "Collar";
     protected static final String NBTKEY_CHOCOBO_SCALE = "Scale";
-    protected static final String NBTKEY_CHOCOBO_SCALE_MOD = "ScaleMod";
     protected static final String NBTKEY_CHOCOBO_LEASH_BLOCK = "LeashBlock";
     protected static final String NBTKEY_CHOCOBO_LEASH_DISTANCE = "LeashDistance";
     protected static final String NBTKEY_CHOCOBO_ABILITY_MASK = "AbilityMask";
@@ -157,22 +156,34 @@ public abstract class AbstractChocobo extends TameableEntity implements Angerabl
 
     protected static final UniformIntProvider PERSISTENT_ANGER_TIME = TimeHelper.betweenSeconds(20, 39);
     protected static final TrackedData<Integer> DATA_REMAINING_ANGER_TIME = DataTracker.registerData(AbstractChocobo.class, TrackedDataHandlerRegistry.INTEGER);
-    protected static final TrackedData<Integer> PARAM_COLOR = DataTracker.registerData(AbstractChocobo.class, TrackedDataHandlerRegistry.INTEGER);
-    protected static final TrackedData<Integer> PARAM_MOVEMENT_TYPE = DataTracker.registerData(AbstractChocobo.class, TrackedDataHandlerRegistry.INTEGER);
+    protected static final TrackedData<Integer> PARAM_CHOCOBO_PROPERTIES = DataTracker.registerData(AbstractChocobo.class, TrackedDataHandlerRegistry.INTEGER);
     protected static final TrackedData<ItemStack> PARAM_SADDLE_ITEM = DataTracker.registerData(AbstractChocobo.class, TrackedDataHandlerRegistry.ITEM_STACK);
-    protected static final TrackedData<ItemStack> PARAM_WEAPON_ITEM = DataTracker.registerData(AbstractChocobo.class, TrackedDataHandlerRegistry.ITEM_STACK);
     protected static final TrackedData<ItemStack> PARAM_ARMOR_ITEM = DataTracker.registerData(AbstractChocobo.class, TrackedDataHandlerRegistry.ITEM_STACK);
-    protected static final TrackedData<Integer> PARAM_COLLAR_COLOR = DataTracker.registerData(AbstractChocobo.class, TrackedDataHandlerRegistry.INTEGER);
+    protected static final TrackedData<ItemStack> PARAM_WEAPON_ITEM = DataTracker.registerData(AbstractChocobo.class, TrackedDataHandlerRegistry.ITEM_STACK);
+    protected static final TrackedData<ItemStack> PARAM_HEAD_ITEM = DataTracker.registerData(AbstractChocobo.class, TrackedDataHandlerRegistry.ITEM_STACK);
+    protected static final TrackedData<ItemStack> PARAM_LEGS_ITEM = DataTracker.registerData(AbstractChocobo.class, TrackedDataHandlerRegistry.ITEM_STACK);
+    protected static final TrackedData<ItemStack> PARAM_FEET_ITEM = DataTracker.registerData(AbstractChocobo.class, TrackedDataHandlerRegistry.ITEM_STACK);
+    private static final int MASK_COLOR = 0xF;
+    private static final int MASK_MOVEMENT_TYPE = 0x3;
+    private static final int MASK_COLLAR_COLOR = 0x1F;
+    private static final int SHIFT_COLOR = 0;
+    private static final int SHIFT_MOVEMENT_TYPE = 4;
+    private static final int SHIFT_COLLAR_COLOR = 6;
     protected final static TrackedData<Integer> PARAM_GENERATION = DataTracker.registerData(AbstractChocobo.class, TrackedDataHandlerRegistry.INTEGER);
     protected final static TrackedData<Byte> PARAM_CHOCOBO_ABILITY_MASK = DataTracker.registerData(AbstractChocobo.class, TrackedDataHandlerRegistry.BYTE);
     protected static final TrackedData<Integer> PARAM_SCALE = DataTracker.registerData(AbstractChocobo.class, TrackedDataHandlerRegistry.INTEGER);
-    protected static final TrackedData<Float> PARAM_SCALE_MOD = DataTracker.registerData(AbstractChocobo.class, TrackedDataHandlerRegistry.FLOAT);
     protected static final TrackedData<BlockPos> PARAM_LEASH_BLOCK = DataTracker.registerData(AbstractChocobo.class, TrackedDataHandlerRegistry.BLOCK_POS);
     protected static final TrackedData<Integer> PARAM_LEASH_LENGTH = DataTracker.registerData(AbstractChocobo.class, TrackedDataHandlerRegistry.INTEGER);
 
 
 
     // Hardcoded Chocobo Values
+    public static final int SADDLE_SLOT = 0;
+    public static final int ARMOR_SLOT = 1;
+    public static final int WEAPON_SLOT = 2;
+    public static final int HEAD_SLOT = 3;
+    public static final int LEGS_SLOT = 4;
+    public static final int FEET_SLOT = 5;
     public static final int tier_one_chocobo_inv_slot_count = 15; // 3*5
     public static final int tier_two_chocobo_inv_slot_count = 45; //5*9
     public final int top_tier_chocobo_inv_slot_count = tier_two_chocobo_inv_slot_count;
@@ -187,46 +198,24 @@ public abstract class AbstractChocobo extends TameableEntity implements Angerabl
     protected static final UUID CHOCOBO_WEAPON_DAM_MOD_UUID = UUID.fromString("b9f0dc43-15a7-49f5-815c-915322c30402");
     protected static final UUID CHOCOBO_WEAPON_SPD_MOD_UUID = UUID.fromString("46c84540-15f7-4f22-9da9-ebc23d2353af");
     protected static final UUID CHOCOBO_SPRINTING_BOOST_ID = UUID.fromString("03ba3167-393e-4362-92b8-909841047640");
+    protected static final UUID CHOCOBO_HEAD_ARMOR_MOD_UUID = UUID.fromString("d03d8021-8839-4377-ac23-ed723ece6454");
+    protected static final UUID CHOCOBO_HEAD_ARMOR_TOUGH_MOD_UUID = UUID.fromString("e7dcb185-7182-4a28-83ae-d1a2de9c022d");
+    protected static final UUID CHOCOBO_LEGS_ARMOR_MOD_UUID = UUID.fromString("f03d8021-8839-4377-ac23-ed723ece6454");
+    protected static final UUID CHOCOBO_LEGS_ARMOR_TOUGH_MOD_UUID = UUID.fromString("07dcb185-7182-4a28-83ae-d1a2de9c022d");
+    protected static final UUID CHOCOBO_FEET_ARMOR_MOD_UUID = UUID.fromString("103d8021-8839-4377-ac23-ed723ece6454");
+    protected static final UUID CHOCOBO_FEET_ARMOR_TOUGH_MOD_UUID = UUID.fromString("17dcb185-7182-4a28-83ae-d1a2de9c022d");
 
 
-    protected AbstractChocobo(EntityType<? extends TameableEntity> entityType, World world) { super(entityType, world); }
+    protected AbstractChocobo(EntityType<? extends TameableEntity> entityType, World world) {
+        super(entityType, world);
+    }
 
     @Override
     public void travel(@NotNull Vec3d travelInput) {
         if (this.isAlive() && this.isSubmergedInWater() && this.isWaterBreathing()) {
-            // Check if the chocobo is near a land edge and trying to climb out
-            boolean tryingToClimbOut = false;
-
-            if (this.getTarget() != null || this.hasPassengers()) { // In combat or with rider,
-                // Check if there's land nearby and slightly above the current position
-                BlockPos currentPos = this.getBlockPos();
-                for (int dx = -1; dx <= 1 && !tryingToClimbOut; dx++) {
-                    for (int dz = -1; dz <= 1; dz++) {
-                        if (dx == 0 && dz == 0) { continue; } // Skip current position
-                        BlockPos checkPos = currentPos.add(dx, 1, dz);
-                        if (!this.getWorld().getFluidState(checkPos).isIn(FluidTags.WATER) &&
-                            this.getWorld().getBlockState(checkPos.down()).hasSolidTopSurface(this.getWorld(), checkPos.down(), this)) {
-                            // Found solid land nearby and above water level
-                            tryingToClimbOut = true;
-                            Vec3d motion = this.getVelocity();
-                            // Give a boost upward and slightly toward the land
-                            double upwardBoost = 0.4; // Additional vertical momentum
-                            this.setVelocity(motion.x + (dx * 0.1), Math.max(motion.y, upwardBoost), motion.z + (dz * 0.1));
-                            break;
-                        }
-                    }
-                }
-            }
-
-            if (this.getControllingPassenger() == null && this.moveControl instanceof ChocoboBrains.ChocoboSwimMoveControl) { // AI-controlled swimmer
-                this.updateVelocity(this.getMovementSpeed(), travelInput);
-                Vec3d velocity = this.getVelocity();
-                this.setVelocity(velocity.x, this.upwardSpeed, velocity.z);
-                this.move(SELF, this.getVelocity());
-                this.setVelocity(this.getVelocity().multiply(0.9D));
-            } else { // Player-controlled or not a swimmer
-                super.travel(travelInput);
-            }
+            this.updateVelocity(this.getMovementSpeed(), travelInput);
+            this.move(SELF, this.getVelocity());
+            this.setVelocity(this.getVelocity().multiply(0.9D));
         } else {
             super.travel(travelInput);
         }
@@ -239,25 +228,81 @@ public abstract class AbstractChocobo extends TameableEntity implements Angerabl
 
     // Initialization of DataTracker for all Chocobo types
     protected void initDataTracker() {
-        this.dataTracker.startTracking(PARAM_COLLAR_COLOR, 0);
-        this.dataTracker.startTracking(PARAM_COLOR, ChocoboColor.YELLOW.ordinal());
-        this.dataTracker.startTracking(PARAM_MOVEMENT_TYPE, MovementType.WANDER.ordinal());
-        this.dataTracker.startTracking(PARAM_SADDLE_ITEM, ItemStack.EMPTY);
-        this.dataTracker.startTracking(PARAM_ARMOR_ITEM, ItemStack.EMPTY);
-        this.dataTracker.startTracking(PARAM_WEAPON_ITEM, ItemStack.EMPTY);
+        this.dataTracker.startTracking(PARAM_CHOCOBO_PROPERTIES, 0);
         this.dataTracker.startTracking(PARAM_GENERATION, 0);
         this.dataTracker.startTracking(PARAM_CHOCOBO_ABILITY_MASK, (byte) 0);
         this.dataTracker.startTracking(PARAM_SCALE, 0);
-        this.dataTracker.startTracking(PARAM_SCALE_MOD, 1f);
         this.dataTracker.startTracking(DATA_REMAINING_ANGER_TIME, 0);
         this.dataTracker.startTracking(PARAM_LEASH_BLOCK, new BlockPos(0, 50000, 0));
         this.dataTracker.startTracking(PARAM_LEASH_LENGTH, 0);
+        this.dataTracker.startTracking(PARAM_SADDLE_ITEM, ItemStack.EMPTY);
+        this.dataTracker.startTracking(PARAM_ARMOR_ITEM, ItemStack.EMPTY);
+        this.dataTracker.startTracking(PARAM_WEAPON_ITEM, ItemStack.EMPTY);
+        this.dataTracker.startTracking(PARAM_HEAD_ITEM, ItemStack.EMPTY);
+        this.dataTracker.startTracking(PARAM_LEGS_ITEM, ItemStack.EMPTY);
+        this.dataTracker.startTracking(PARAM_FEET_ITEM, ItemStack.EMPTY);
         super.initDataTracker();
+    }
+
+    @Override
+    public void writeCustomDataToNbt(NbtCompound nbt) {
+        // Keep Leash related and if statements controlled Writes together for clarity
+        if (!this.getLeashSpot().equals(new BlockPos(0, 50000, 0))) { nbt.put(NBTKEY_CHOCOBO_LEASH_BLOCK, NbtHelper.fromBlockPos(this.getLeashSpot())); }
+        if (this.getLeashDistance() > 0) { nbt.putInt(NBTKEY_CHOCOBO_LEASH_DISTANCE, this.getLeashDistance()); }
+        if (!this.getSaddle().isEmpty()) { nbt.put(NBTKEY_SADDLE_ITEM, this.getSaddle().writeNbt(new NbtCompound())); }
+        if (!this.getArmorItemStack().isEmpty()) { nbt.put(NBTKEY_ARMOR_ITEM, this.getArmorItemStack().writeNbt(new NbtCompound())); }
+        if (!this.getWeapon().isEmpty()) { nbt.put(NBTKEY_WEAPON_ITEM, this.getWeapon().writeNbt(new NbtCompound())); }
+        if (!this.getHeadArmor().isEmpty()) { nbt.put(NBTKEY_HEAD_ITEM, this.getHeadArmor().writeNbt(new NbtCompound())); }
+        if (!this.getLegsArmor().isEmpty()) { nbt.put(NBTKEY_LEGS_ITEM, this.getLegsArmor().writeNbt(new NbtCompound())); }
+        if (!this.getFeetArmor().isEmpty()) { nbt.put(NBTKEY_FEET_ITEM, this.getFeetArmor().writeNbt(new NbtCompound())); }
+        super.writeCustomDataToNbt(nbt);
+    }
+
+    @Override
+    public void readCustomDataFromNbt(NbtCompound nbt) {
+        // Keep Leash related and if statements controlled Reads together for clarity
+        if (nbt.contains(NBTKEY_CHOCOBO_LEASH_BLOCK)) { this.setLeashSpot(NbtHelper.toBlockPos(nbt.getCompound(NBTKEY_CHOCOBO_LEASH_BLOCK))); }
+        this.setLeashedDistance(nbt.getInt(NBTKEY_CHOCOBO_LEASH_DISTANCE));
+        if (nbt.contains(NBTKEY_SADDLE_ITEM, 10)) { this.setSaddle(ItemStack.fromNbt(nbt.getCompound(NBTKEY_SADDLE_ITEM))); }
+        if (nbt.contains(NBTKEY_ARMOR_ITEM, 10)) { this.setArmor(ItemStack.fromNbt(nbt.getCompound(NBTKEY_ARMOR_ITEM))); }
+        if (nbt.contains(NBTKEY_WEAPON_ITEM, 10)) { this.setWeapon(ItemStack.fromNbt(nbt.getCompound(NBTKEY_WEAPON_ITEM))); }
+        if (nbt.contains(NBTKEY_HEAD_ITEM, 10)) { this.setHeadArmor(ItemStack.fromNbt(nbt.getCompound(NBTKEY_HEAD_ITEM))); }
+        if (nbt.contains(NBTKEY_LEGS_ITEM, 10)) { this.setLegsArmor(ItemStack.fromNbt(nbt.getCompound(NBTKEY_LEGS_ITEM))); }
+        if (nbt.contains(NBTKEY_FEET_ITEM, 10)) { this.setFeetArmor(ItemStack.fromNbt(nbt.getCompound(NBTKEY_FEET_ITEM))); }
+        super.readCustomDataFromNbt(nbt);
+        this.lastSaddleStack = this.getSaddle().copy();
+    }
+
+    @Override
+    public void onTrackedDataSet(TrackedData<?> data) {
+        if (this.getWorld().isClient) {
+            super.onTrackedDataSet(data);
+            return;
+        }
+        if (PARAM_ARMOR_ITEM.equals(data)) {
+            this.setChocoboArmorStats(this.getArmorItemStack());
+        } else if (PARAM_WEAPON_ITEM.equals(data)) {
+            this.setChocoboWeaponStats(this.getWeapon());
+        } else if (PARAM_HEAD_ITEM.equals(data)) {
+            this.setChocoboHeadArmorStats(this.getHeadArmor());
+        } else if (PARAM_LEGS_ITEM.equals(data)) {
+            this.setChocoboLegsArmorStats(this.getLegsArmor());
+        } else if (PARAM_FEET_ITEM.equals(data)) {
+            this.setChocoboFeetArmorStats(this.getFeetArmor());
+        } else if (PARAM_SADDLE_ITEM.equals(data)) {
+            ItemStack oldSaddle = this.lastSaddleStack;
+            ItemStack newSaddle = this.getSaddle();
+            if (!ItemStack.areEqual(oldSaddle, newSaddle)) {
+                this.lastSaddleStack = newSaddle.copy();
+                onSaddleChanged(oldSaddle, newSaddle);
+            }
+        }
+        super.onTrackedDataSet(data);
     }
 
     // hook for Chocobo types, left for override
     public boolean isSitting() { return false; }
-    public boolean isPersistent() { return this.isTamed() || this.fromEgg() || this.isCustomNameVisible(); }
+    public boolean isPersistent() { return this.isTamed() || this.isCustomNameVisible(); }
     public boolean cannotDespawn() { return this.hasVehicle() || this.isPersistent(); }
     public boolean canImmediatelyDespawn(double pDistanceToClosestPlayer) { return !this.cannotDespawn(); }
     public boolean isDisallowedInPeaceful() { return false; }
@@ -404,6 +449,7 @@ public abstract class AbstractChocobo extends TameableEntity implements Angerabl
     }
     public boolean canBeLeashedBy(PlayerEntity player) { return false; }
     public PassiveEntity createChild(ServerWorld world, PassiveEntity entity) { return null; }
+    protected void onSaddleChanged(ItemStack oldSaddle, ItemStack newSaddle) { }
     protected void dropLoot(@NotNull DamageSource source, boolean causedByPlayer) {
         // Left uncompacted for readability and future expansion
         super.dropLoot(source, causedByPlayer);
@@ -458,10 +504,6 @@ public abstract class AbstractChocobo extends TameableEntity implements Angerabl
         if (this.getWorld().isClient) { super.tick(); return; }
         if (this.canWalkOnWater() && this.isTouchingWater() && !this.hasVehicle() && !this.hasPassengers()) { this.ticksOnWater++; }
         else { this.ticksOnWater = 0; }
-        if (this.age % 100 == 0) {
-            this.gearSlotChecks();
-            this.verifyChocoboGearModifiers();
-        }
         super.tick();
     }
     public void setSprinting(boolean sprinting) {
@@ -502,24 +544,36 @@ public abstract class AbstractChocobo extends TameableEntity implements Angerabl
     public boolean isWitherImmune() { return (this.dataTracker.get(PARAM_CHOCOBO_ABILITY_MASK) & MASK_CHOCOBO_WITHER_IMMUNE) != 0; }
     public boolean isPoisonImmune() { return (this.dataTracker.get(PARAM_CHOCOBO_ABILITY_MASK) & MASK_CHOCOBO_POISON_IMMUNE) != 0; }
     public int getChocoboScale() { return this.dataTracker.get(PARAM_SCALE); }
-    public float getChocoboScaleMod() { return this.dataTracker.get(PARAM_SCALE_MOD); }
+    public float getChocoboScaleMod() { return ScaleMod(getChocoboScale()); }
     public boolean isMale() { return (this.dataTracker.get(PARAM_CHOCOBO_ABILITY_MASK) & MASK_CHOCOBO_IS_MALE) != 0; }
     public boolean fromEgg() { return (this.dataTracker.get(PARAM_CHOCOBO_ABILITY_MASK) & MASK_CHOCOBO_FROM_EGG) != 0; }
     
     // getters for Chocobo properties
-    public MovementType getMovementType() { return MovementType.values()[this.dataTracker.get(PARAM_MOVEMENT_TYPE)]; }
+    public MovementType getMovementType() { return MovementType.values()[(this.dataTracker.get(PARAM_CHOCOBO_PROPERTIES) >> SHIFT_MOVEMENT_TYPE) & MASK_MOVEMENT_TYPE]; }
     public boolean isFireImmune() { return this.isFlameBlood() || super.isFireImmune(); }
     public boolean isFlameBlood() { return (this.dataTracker.get(PARAM_CHOCOBO_ABILITY_MASK) & MASK_CHOCOBO_FLAME_BLOOD) != 0; }
     public byte getChocoboAbilityMask() { return this.dataTracker.get(PARAM_CHOCOBO_ABILITY_MASK); }
     public boolean isSaddled() { return !this.getSaddle().isEmpty(); }
     public boolean isArmored() { return !this.getArmorItemStack().isEmpty(); }
     public boolean isArmed() { return !this.getWeapon().isEmpty(); }
+    public boolean isHeadArmored() { return !this.getHeadArmor().isEmpty(); }
+    public boolean isLegsArmored() { return !this.getLegsArmor().isEmpty(); }
+    public boolean isFeetArmored() { return !this.getFeetArmor().isEmpty(); }
     public boolean isChocoboArmor(@NotNull ItemStack pStack) { return pStack.getItem() instanceof ChocoboArmorItems; }
     public boolean isChocoWeapon(@NotNull ItemStack pStack) { return pStack.getItem() instanceof ChocoboWeaponItems; }
     public int getTicksOnWater() { return this.ticksOnWater; }
     public ItemStack getSaddle() { return this.dataTracker.get(PARAM_SADDLE_ITEM); }
     public ItemStack getWeapon() { return this.dataTracker.get(PARAM_WEAPON_ITEM); }
     public ItemStack getArmorItemStack() { return this.dataTracker.get(PARAM_ARMOR_ITEM); }
+    public ItemStack getHeadArmor() { return this.dataTracker.get(PARAM_HEAD_ITEM); }
+    public ItemStack getLegsArmor() { return this.dataTracker.get(PARAM_LEGS_ITEM); }
+    public ItemStack getFeetArmor() { return this.dataTracker.get(PARAM_FEET_ITEM); }
+    public void setSaddle(ItemStack pStack) { this.dataTracker.set(PARAM_SADDLE_ITEM, pStack); }
+    public void setWeapon(ItemStack pStack) { this.dataTracker.set(PARAM_WEAPON_ITEM, pStack); }
+    public void setArmor(ItemStack pStack) { this.dataTracker.set(PARAM_ARMOR_ITEM, pStack); }
+    public void setHeadArmor(ItemStack pStack) { this.dataTracker.set(PARAM_HEAD_ITEM, pStack); }
+    public void setLegsArmor(ItemStack pStack) { this.dataTracker.set(PARAM_LEGS_ITEM, pStack); }
+    public void setFeetArmor(ItemStack pStack) { this.dataTracker.set(PARAM_FEET_ITEM, pStack); }
     public boolean canBreatheInWater() {
         // TODO -> logic to enable disable water breathing (controlling walking on water) on a temporary condition.
         return this.isWaterBreathing();
@@ -529,11 +583,10 @@ public abstract class AbstractChocobo extends TameableEntity implements Angerabl
         int gen = this.getGeneration();
         return Integer.toString(gen);
     }
-    public ChocoboColor getChocoboColor() { return ChocoboColor.values()[this.dataTracker.get(PARAM_COLOR)]; }
+    public ChocoboColor getChocoboColor() { return ChocoboColor.values()[(this.dataTracker.get(PARAM_CHOCOBO_PROPERTIES) >> SHIFT_COLOR) & MASK_COLOR]; }
     public int getAngerTime() { return this.remainingPersistentAngerTime; }
-    public double getFollowSpeedModifier() { return this.followSpeedModifier; }
     public UUID getAngryAt() { return this.persistentAngerTarget; }
-    public Integer getCollarColor() { return this.dataTracker.get(PARAM_COLLAR_COLOR); }
+    public Integer getCollarColor() { return (this.dataTracker.get(PARAM_CHOCOBO_PROPERTIES) >> SHIFT_COLLAR_COLOR) & MASK_COLLAR_COLOR; }
     public BlockPos getLeashSpot() { return this.dataTracker.get(PARAM_LEASH_BLOCK); }
     public boolean canWonder() { return this.getMovementType() == MovementType.WANDER; }
     public boolean isNoRoam() { return this.getMovementType() == MovementType.STANDSTILL; }
@@ -588,11 +641,15 @@ public abstract class AbstractChocobo extends TameableEntity implements Angerabl
     public void setChocoboScale(boolean isMale, int overrideValue, boolean override) {
         int scale;
         if (override) { scale = overrideValue; } else { scale = setChocoScale(isMale); }
-        this.setChocoboScaleMod(ScaleMod(scale));
         this.dataTracker.set(PARAM_SCALE, scale);
     }
-    public void setChocoboScaleMod(float value) { this.dataTracker.set(PARAM_SCALE_MOD, value); }
-    public void setMovementType(@NotNull MovementType type) { this.dataTracker.set(PARAM_MOVEMENT_TYPE, type.ordinal()); setMovementAiByType(type); }
+    public void setMovementType(@NotNull MovementType type) {
+        int properties = this.dataTracker.get(PARAM_CHOCOBO_PROPERTIES);
+        properties &= ~(MASK_MOVEMENT_TYPE << SHIFT_MOVEMENT_TYPE);
+        properties |= (type.ordinal() & MASK_MOVEMENT_TYPE) << SHIFT_MOVEMENT_TYPE;
+        this.dataTracker.set(PARAM_CHOCOBO_PROPERTIES, properties);
+        setMovementAiByType(type);
+    }
     protected void setMovementAiByType(@NotNull MovementType type) {
         switch (type) {
             case STANDSTILL -> this.followingMrHuman = 3;
@@ -606,35 +663,42 @@ public abstract class AbstractChocobo extends TameableEntity implements Angerabl
             case 2 -> MovementType.STANDSTILL;
             default -> MovementType.WANDER;
         };
-        this.dataTracker.set(PARAM_MOVEMENT_TYPE, type.ordinal());
+        setMovementType(type);
     }
-    protected void setSaddleType(@NotNull ItemStack saddleStack) {
-        ItemStack oldStack = getSaddle();
-        if (oldStack.getItem() != saddleStack.getItem()) { this.dataTracker.set(PARAM_SADDLE_ITEM, saddleStack.copy()); }
+
+    @Override
+    public void equipStack(EquipmentSlot slot, ItemStack stack) {
+        super.equipStack(slot, stack);
+        if (this.getWorld().isClient()) { return; }
+        switch (slot) {
+            case MAINHAND -> {
+                if (!ItemStack.areEqual(stack, this.getWeapon())) {
+                    this.setWeapon(stack.copy());
+                }
+            }
+            case CHEST -> {
+                if (!ItemStack.areEqual(stack, this.getArmorItemStack())) {
+                    this.setArmor(stack.copy());
+                }
+            }
+            case HEAD -> {
+                if (!ItemStack.areEqual(stack, this.getHeadArmor())) {
+                    this.setHeadArmor(stack.copy());
+                }
+            }
+            case LEGS -> {
+                if (!ItemStack.areEqual(stack, this.getLegsArmor())) {
+                    this.setLegsArmor(stack.copy());
+                }
+            }
+            case FEET -> {
+                if (!ItemStack.areEqual(stack, this.getFeetArmor())) {
+                    this.setFeetArmor(stack.copy());
+                }
+            }
+        }
     }
-    protected void gearSlotChecks() {
-        ItemStack armor = this.getArmorItemStack();
-        ItemStack weapon = this.getWeapon();
-        // Chest/Main_hand Items should not be different from the stored stacks.
-        if (armor != this.getEquippedStack(EquipmentSlot.CHEST)) { this.setArmor(armor); }
-        if (weapon != this.getEquippedStack(EquipmentSlot.MAINHAND)) { this.setWeapon(weapon); }
-    }
-    protected void setWeaponType(@NotNull ItemStack weaponType) {
-        ItemStack oldStack = getWeapon();
-        if (oldStack.getItem() != weaponType.getItem()) { this.dataTracker.set(PARAM_WEAPON_ITEM, weaponType.copy()); }
-    }
-    protected void setArmorType(@NotNull ItemStack armorType) {
-        ItemStack oldStack = getArmorItemStack();
-        if (oldStack.getItem() != armorType.getItem()) { this.dataTracker.set(PARAM_ARMOR_ITEM, armorType.copy()); }
-    }
-    protected void setArmor(ItemStack pStack) {
-        this.equipStack(EquipmentSlot.CHEST, pStack);
-        this.setEquipmentDropChance(EquipmentSlot.CHEST, 0.0F);
-    }
-    protected void setWeapon(ItemStack pStack) {
-        this.equipStack(EquipmentSlot.MAINHAND, pStack);
-        this.setEquipmentDropChance(EquipmentSlot.MAINHAND, 0.0F);
-    }
+
     public void setChocoboArmorStats(ItemStack pStack) {
         if (!this.getWorld().isClient()) {
             Objects.requireNonNull(this.getAttributeInstance(EntityAttributes.GENERIC_ARMOR)).removeModifier(CHOCOBO_CHEST_ARMOR_MOD_UUID);
@@ -645,8 +709,8 @@ public abstract class AbstractChocobo extends TameableEntity implements Angerabl
                 float t = ((ChocoboArmorItems)pStack.getItem()).getToughness()*chocoStatMod();
                 if (p != 0) { Objects.requireNonNull(this.getAttributeInstance(EntityAttributes.GENERIC_ARMOR)).addPersistentModifier(new EntityAttributeModifier(CHOCOBO_CHEST_ARMOR_MOD_UUID, "Chocobo Armor Bonus", p, EntityAttributeModifier.Operation.ADDITION)); }
                 if (t != 0) { Objects.requireNonNull(this.getAttributeInstance(EntityAttributes.GENERIC_ARMOR_TOUGHNESS)).addPersistentModifier(new EntityAttributeModifier(CHOCOBO_CHEST_ARMOR_TOUGH_MOD_UUID, "Chocobo Armor Toughness", t, EntityAttributeModifier.Operation.ADDITION)); }
-                this.setArmor(pStack);
             }
+            super.equipStack(EquipmentSlot.CHEST, pStack);
         }
     }
     public void setChocoboWeaponStats(ItemStack pStack) {
@@ -658,23 +722,68 @@ public abstract class AbstractChocobo extends TameableEntity implements Angerabl
                 float s = ((ChocoboWeaponItems)pStack.getItem()).getAttackSpeed()*chocoStatMod();
                 if (a != 0) { Objects.requireNonNull(this.getAttributeInstance(EntityAttributes.GENERIC_ATTACK_DAMAGE)).addPersistentModifier(new EntityAttributeModifier(CHOCOBO_WEAPON_DAM_MOD_UUID, "Chocobo Attack Bonus", a, EntityAttributeModifier.Operation.ADDITION)); }
                 if (s != 0) { Objects.requireNonNull(this.getAttributeInstance(EntityAttributes.GENERIC_ATTACK_SPEED)).addPersistentModifier(new EntityAttributeModifier(CHOCOBO_WEAPON_SPD_MOD_UUID, "Chocobo Attack Speed Bonus", s, EntityAttributeModifier.Operation.ADDITION)); }
-                this.setWeapon(pStack);
             }
+            super.equipStack(EquipmentSlot.MAINHAND, pStack);
         }
     }
-    protected void verifyChocoboGearModifiers() {
+    public void setChocoboHeadArmorStats(ItemStack pStack) {
         if (!this.getWorld().isClient()) {
-            this.setChocoboArmorStats(this.getArmorItemStack());
-            this.setChocoboWeaponStats(this.getWeapon());
+            Objects.requireNonNull(this.getAttributeInstance(EntityAttributes.GENERIC_ARMOR)).removeModifier(CHOCOBO_HEAD_ARMOR_MOD_UUID);
+            Objects.requireNonNull(this.getAttributeInstance(EntityAttributes.GENERIC_ARMOR_TOUGHNESS)).removeModifier(CHOCOBO_HEAD_ARMOR_TOUGH_MOD_UUID);
+            if (this.isChocoboArmor(pStack)) {
+                this.setEquipmentDropChance(EquipmentSlot.HEAD, 0.0F);
+                int p = ((ChocoboArmorItems)pStack.getItem()).getDefense()*chocoStatMod();
+                float t = ((ChocoboArmorItems)pStack.getItem()).getToughness()*chocoStatMod();
+                if (p != 0) { Objects.requireNonNull(this.getAttributeInstance(EntityAttributes.GENERIC_ARMOR)).addPersistentModifier(new EntityAttributeModifier(CHOCOBO_HEAD_ARMOR_MOD_UUID, "Chocobo Head Armor Bonus", p, EntityAttributeModifier.Operation.ADDITION)); }
+                if (t != 0) { Objects.requireNonNull(this.getAttributeInstance(EntityAttributes.GENERIC_ARMOR_TOUGHNESS)).addPersistentModifier(new EntityAttributeModifier(CHOCOBO_HEAD_ARMOR_TOUGH_MOD_UUID, "Chocobo Head Armor Toughness", t, EntityAttributeModifier.Operation.ADDITION)); }
+            }
+            super.equipStack(EquipmentSlot.HEAD, pStack);
+        }
+    }
+    public void setChocoboLegsArmorStats(ItemStack pStack) {
+        if (!this.getWorld().isClient()) {
+            Objects.requireNonNull(this.getAttributeInstance(EntityAttributes.GENERIC_ARMOR)).removeModifier(CHOCOBO_LEGS_ARMOR_MOD_UUID);
+            Objects.requireNonNull(this.getAttributeInstance(EntityAttributes.GENERIC_ARMOR_TOUGHNESS)).removeModifier(CHOCOBO_LEGS_ARMOR_TOUGH_MOD_UUID);
+            if (this.isChocoboArmor(pStack)) {
+                this.setEquipmentDropChance(EquipmentSlot.LEGS, 0.0F);
+                int p = ((ChocoboArmorItems)pStack.getItem()).getDefense()*chocoStatMod();
+                float t = ((ChocoboArmorItems)pStack.getItem()).getToughness()*chocoStatMod();
+                if (p != 0) { Objects.requireNonNull(this.getAttributeInstance(EntityAttributes.GENERIC_ARMOR)).addPersistentModifier(new EntityAttributeModifier(CHOCOBO_LEGS_ARMOR_MOD_UUID, "Chocobo Legs Armor Bonus", p, EntityAttributeModifier.Operation.ADDITION)); }
+                if (t != 0) { Objects.requireNonNull(this.getAttributeInstance(EntityAttributes.GENERIC_ARMOR_TOUGHNESS)).addPersistentModifier(new EntityAttributeModifier(CHOCOBO_LEGS_ARMOR_TOUGH_MOD_UUID, "Chocobo Legs Armor Toughness", t, EntityAttributeModifier.Operation.ADDITION)); }
+            }
+            super.equipStack(EquipmentSlot.LEGS, pStack);
+        }
+    }
+    public void setChocoboFeetArmorStats(ItemStack pStack) {
+        if (!this.getWorld().isClient()) {
+            Objects.requireNonNull(this.getAttributeInstance(EntityAttributes.GENERIC_ARMOR)).removeModifier(CHOCOBO_FEET_ARMOR_MOD_UUID);
+            Objects.requireNonNull(this.getAttributeInstance(EntityAttributes.GENERIC_ARMOR_TOUGHNESS)).removeModifier(CHOCOBO_FEET_ARMOR_TOUGH_MOD_UUID);
+            if (this.isChocoboArmor(pStack)) {
+                this.setEquipmentDropChance(EquipmentSlot.FEET, 0.0F);
+                int p = ((ChocoboArmorItems)pStack.getItem()).getDefense()*chocoStatMod();
+                float t = ((ChocoboArmorItems)pStack.getItem()).getToughness()*chocoStatMod();
+                if (p != 0) { Objects.requireNonNull(this.getAttributeInstance(EntityAttributes.GENERIC_ARMOR)).addPersistentModifier(new EntityAttributeModifier(CHOCOBO_FEET_ARMOR_MOD_UUID, "Chocobo Feet Armor Bonus", p, EntityAttributeModifier.Operation.ADDITION)); }
+                if (t != 0) { Objects.requireNonNull(this.getAttributeInstance(EntityAttributes.GENERIC_ARMOR_TOUGHNESS)).addPersistentModifier(new EntityAttributeModifier(CHOCOBO_FEET_ARMOR_TOUGH_MOD_UUID, "Chocobo Feet Armor Toughness", t, EntityAttributeModifier.Operation.ADDITION)); }
+            }
+            super.equipStack(EquipmentSlot.FEET, pStack);
         }
     }
     public void setGeneration(int value) { this.dataTracker.set(PARAM_GENERATION, value); }
     public void setAngerTime(int angerTime) { this.remainingPersistentAngerTime = angerTime; }
     public void setAngryAt(@Nullable UUID angryAt) { this.persistentAngerTarget = angryAt; }
-    public void setChocoboColor(@NotNull ChocoboColor color) { this.dataTracker.set(PARAM_COLOR, color.ordinal()); }
-    public void setCollarColor(Integer color) { this.dataTracker.set(PARAM_COLLAR_COLOR, color); }
-    // TODO - Convert double to int for leash distance, Fix where it is called.
-    protected void setLeashedDistance(double distance) { this.dataTracker.set(PARAM_LEASH_LENGTH, (int) distance); }
+    public void setChocoboColor(@NotNull ChocoboColor color) {
+        int properties = this.dataTracker.get(PARAM_CHOCOBO_PROPERTIES);
+        properties &= ~(MASK_COLOR << SHIFT_COLOR);
+        properties |= (color.ordinal() & MASK_COLOR) << SHIFT_COLOR;
+        this.dataTracker.set(PARAM_CHOCOBO_PROPERTIES, properties);
+    }
+    public void setCollarColor(Integer color) {
+        int properties = this.dataTracker.get(PARAM_CHOCOBO_PROPERTIES);
+        properties &= ~(MASK_COLLAR_COLOR << SHIFT_COLLAR_COLOR);
+        properties |= (color & MASK_COLLAR_COLOR) << SHIFT_COLLAR_COLOR;
+        this.dataTracker.set(PARAM_CHOCOBO_PROPERTIES, properties);
+    }
+    protected void setLeashedDistance(int distance) { this.dataTracker.set(PARAM_LEASH_LENGTH, distance); }
     protected void setLeashSpot(BlockPos blockPos) { this.dataTracker.set(PARAM_LEASH_BLOCK, blockPos); }
     public void setChocobo(ChocoboColor color) {
         this.setChocoboColor(color);
@@ -1011,12 +1120,6 @@ public abstract class AbstractChocobo extends TameableEntity implements Angerabl
             if (alertingChocobo.getVisibilityCache().canSee(alertingChocobo.getTarget())) { alertOthers(null, alertingChocobo); }
             this.ticksUntilNextAlert = ALERT_INTERVAL.get(alertingChocobo.random);
         }
-    }
-    protected boolean shouldAlert(Chocobo chocobo, LivingEntity attacker) {
-        return chocobo != attacker
-                && !chocobo.isAttacking()
-                && ChocoboBrainAid.isAttackable(attacker, chocobo.canWalkOnWater())
-                && !chocobo.isBaby();
     }
     protected void alertChocobo(Chocobo chocobo, LivingEntity attacker) {
         // kept in for unique Chocobo Checks unable to be done in AbstractChocobo (Brains)

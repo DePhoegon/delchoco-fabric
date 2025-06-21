@@ -14,11 +14,36 @@ import static com.dephoegon.delchoco.common.inventory.ChocoboEquipmentSlot.*;
 
 public class SaddlebagContainer extends ScreenHandler {
     private final Chocobo chocobo;
+    private int syncTimer = 0;
+
     public SaddlebagContainer(int syncId, PlayerInventory playerInventory, Chocobo chocoboEntity) {
         super(null, syncId);
         this.chocobo = chocoboEntity;
         refreshSlots(chocobo, playerInventory);
     }
+
+    public Chocobo getChocobo() {
+        return this.chocobo;
+    }
+
+    @Override
+    public void onClosed(PlayerEntity player) {
+        super.onClosed(player);
+        // The inventory is directly manipulated, so no special sync is needed on close.
+        // The sorting is visual only.
+    }
+
+    @Override
+    public void sendContentUpdates() {
+        super.sendContentUpdates();
+        this.syncTimer++;
+        if (this.syncTimer >= 200 + chocobo.getRandom().nextInt(100)) { // 10-15 seconds
+            this.syncTimer = 0;
+            // No explicit sync needed as we are directly using the chocobo's inventory.
+            // If there were a temporary inventory, we would sync it here.
+        }
+    }
+
     public void refreshSlots(@NotNull Chocobo chocobo, PlayerInventory playerInventory) {
         this.slots.clear();
 
@@ -26,36 +51,43 @@ public class SaddlebagContainer extends ScreenHandler {
         ItemStack saddleStack = chocobo.getSaddle();
         int slotOneX = -16;
         int slotOneY = 18-20;
-        this.addSlot(new ChocoboEquipmentSlot(chocobo.chocoboSaddleInv, 0, slotOneX, slotOneY, saddleType));
-        this.addSlot(new ChocoboEquipmentSlot(chocobo.chocoboArmorInv, 0, 2*18+slotOneX, slotOneY, armorType));
-        this.addSlot(new ChocoboEquipmentSlot(chocobo.chocoboWeaponInv, 0, 4*18+slotOneX, slotOneY, weaponType));
+        this.addSlot(new ChocoboEquipmentSlot(chocobo.chocoboGearInventory, Chocobo.SADDLE_SLOT, slotOneX, slotOneY, SADDLE));
+        this.addSlot(new ChocoboEquipmentSlot(chocobo.chocoboGearInventory, Chocobo.ARMOR_SLOT, 2*18+slotOneX, slotOneY, CHEST));
+        this.addSlot(new ChocoboEquipmentSlot(chocobo.chocoboGearInventory, Chocobo.WEAPON_SLOT, 4*18+slotOneX, slotOneY, WEAPON));
+        /*
+        // Commented out as these slots are not used in the current implementation - The gear for them does not exist currently. I will uncomment this when the gear is added.
+        this.addSlot(new ChocoboEquipmentSlot(chocobo.chocoboGearInventory, Chocobo.HEAD_SLOT, 6*18+slotOneX, slotOneY, HEAD));
+        this.addSlot(new ChocoboEquipmentSlot(chocobo.chocoboGearInventory, Chocobo.LEGS_SLOT, 8*18+slotOneX, slotOneY, LEGS));
+        this.addSlot(new ChocoboEquipmentSlot(chocobo.chocoboGearInventory, Chocobo.FEET_SLOT, 10*18+slotOneX, slotOneY, FEET));
+        */
         if(!saddleStack.isEmpty() && saddleStack.getItem() instanceof ChocoboSaddleItem saddleItem) {
             int saddleSize = saddleItem.getInventorySize();
             switch (saddleSize) {
-                case 15 -> bindInventorySmall(saddleStack, chocobo.chocoboTierOneInv);
-                case 45 -> bindInventoryBig(saddleStack, chocobo.chocoboTierTwoInv);
+                case 15 -> bindInventorySmall(chocobo.chocoboInventory);
+                case 45 -> bindInventoryBig(chocobo.chocoboInventory);
             }
         }
     }
-    private void bindInventorySmall(@NotNull ItemStack saddle, Inventory inventory) {
-        if (!(saddle.isEmpty())) {
-            for (int row = 0; row < 3; row++) {
-                for (int col = 0; col < 5; col++) {
-                    this.addSlot(new Slot(inventory, row * 5 + col, 44 + col * 18, 36 + row * 18));
-                    if (row * 5 + col < 5) { inventory.setStack(row * 5 + col, chocobo.chocoboBackboneInv.getStack(row * 5 + col+11)); }
-                    if (row * 5 + col > 4 && row * 5 + col < 10) { inventory.setStack(row * 5 + col, chocobo.chocoboBackboneInv.getStack(row * 5 + col+15)); }
-                    if (row * 5 + col > 9) { inventory.setStack(row * 5 + col, chocobo.chocoboBackboneInv.getStack(row * 5 + col+19)); }
+    private void bindInventorySmall(Inventory inventory) {
+        for (int row = 0; row < 3; row++) {
+            for (int col = 0; col < 5; col++) {
+                int guiSlotIndex = row * 5 + col;
+                int backingSlotIndex;
+                if (guiSlotIndex < 5) {
+                    backingSlotIndex = guiSlotIndex + 11;
+                } else if (guiSlotIndex < 10) {
+                    backingSlotIndex = guiSlotIndex + 15;
+                } else {
+                    backingSlotIndex = guiSlotIndex + 19;
                 }
+                this.addSlot(new Slot(inventory, backingSlotIndex, 44 + col * 18, 36 + row * 18));
             }
         }
     }
-    private void bindInventoryBig(@NotNull ItemStack saddle, Inventory inventory) {
-        if (!(saddle.isEmpty())) {
-            for (int row = 0; row < 5; row++) {
-                for (int col = 0; col < 9; col++) {
-                    this.addSlot(new Slot(inventory, row * 9 + col, 8 + col * 18, 18 + row * 18));
-                    inventory.setStack(row * 9 + col, chocobo.chocoboBackboneInv.getStack(row * 9 + col));
-                }
+    private void bindInventoryBig(Inventory inventory) {
+        for (int row = 0; row < 5; row++) {
+            for (int col = 0; col < 9; col++) {
+                this.addSlot(new Slot(inventory, row * 9 + col, 8 + col * 18, 18 + row * 18));
             }
         }
     }

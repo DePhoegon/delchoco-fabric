@@ -582,6 +582,7 @@ public class ChocoboBrains {
 
     public static class ChocoboSwimMoveControl extends MoveControl {
         private final AbstractChocobo chocobo;
+        private int bounceCounter;
 
         public ChocoboSwimMoveControl(AbstractChocobo chocobo) {
             super(chocobo);
@@ -598,6 +599,17 @@ public class ChocoboBrains {
                         this.entity.setForwardSpeed(0.0f);
                         this.state = MoveControl.State.WAIT;
                         return;
+                    }
+
+                    // Drowned-like bobbing/bouncing behavior
+                    if (vec3d.y > 0 && this.chocobo.getVelocity().y < 0.1) { // Moving up
+                        if (this.bounceCounter <= 0) {
+                            this.chocobo.addVelocity(0, 0.3, 0); // Larger bounce
+                            this.bounceCounter = 10; // Cooldown for the bounce
+                        }
+                    }
+                    if (this.bounceCounter > 0) {
+                        this.bounceCounter--;
                     }
 
                     float yawToTarget = (float)(MathHelper.atan2(vec3d.z, vec3d.x) * 57.2957763671875) - 90.0f;

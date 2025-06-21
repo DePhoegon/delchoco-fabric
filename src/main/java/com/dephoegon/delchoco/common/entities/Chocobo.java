@@ -41,7 +41,7 @@ import net.minecraft.inventory.Inventory;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
-import net.minecraft.nbt.NbtHelper;
+import net.minecraft.nbt.NbtList;
 import net.minecraft.network.packet.s2c.play.OpenHorseScreenS2CPacket;
 import net.minecraft.registry.RegistryKey;
 import net.minecraft.registry.entry.RegistryEntry;
@@ -52,7 +52,6 @@ import net.minecraft.server.world.ServerWorld;
 import net.minecraft.text.Text;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.Hand;
-import net.minecraft.util.collection.DefaultedList;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Box;
 import net.minecraft.util.math.Vec3d;
@@ -83,70 +82,16 @@ public class Chocobo extends AbstractChocobo {
     protected static final EntityAttributeModifier CHOCOBO_SPRINTING_SPEED_BOOST = (new EntityAttributeModifier(CHOCOBO_SPRINTING_BOOST_ID, "Chocobo sprinting speed boost", 0.5, EntityAttributeModifier.Operation.MULTIPLY_TOTAL));
 
     // Inventory Related
-    public final ChocoboInventory chocoboBackboneInv = new ChocoboInventory(top_tier_chocobo_inv_slot_count, this) {
-        public boolean isValid(int slot, ItemStack stack) { return false; }
-        public boolean canPlayerUse(PlayerEntity player) { return false; }
-        public void setStack(int var1, ItemStack var2) {
-            super.setStack(var1, var2);
-            chocoboFeatherPick(this, this.getChocobo().chocoboTierOneInv, var1);
-            chocoboFeatherPick(this, this.getChocobo().chocoboTierTwoInv, var1);
-            this.getChocobo().chocoboBackBoneList.set(var1, var2);
-        }
-    };
-    public final ChocoboInventory chocoboTierOneInv = new ChocoboInventory(tier_one_chocobo_inv_slot_count, this) {
-        public void setStack(int var1, ItemStack var2) {
-            super.setStack(var1, var2);
-            chocoboFeatherPick(this, this.getChocobo().chocoboBackboneInv, var1);
-        }
-    };
-    public final ChocoboInventory chocoboTierTwoInv = new ChocoboInventory(tier_two_chocobo_inv_slot_count, this) {
-        public void setStack(int var1, ItemStack var2) {
-            super.setStack(var1, var2);
-            chocoboFeatherPick(this, this.getChocobo().chocoboBackboneInv, var1);
-        }
-    };
-    public final ChocoboInventory chocoboArmorInv = new ChocoboInventory(1, this) {
-        public boolean isValid(int slot, @NotNull ItemStack stack) { return stack.isEmpty() || stack.getItem() instanceof ChocoboArmorItems; }
-        public int getMaxCountPerStack() { return 1; }
-        public void setStack(int slot, ItemStack itemStack) {
-            super.setStack(slot, itemStack);
-            this.getChocobo().setArmorType(itemStack);
-            this.getChocobo().setChocoboArmorStats(itemStack);
-        }
-    };
-    public final ChocoboInventory chocoboWeaponInv = new ChocoboInventory(1, this) {
-        public boolean isValid(int slot, @NotNull ItemStack stack) { return stack.isEmpty() || stack.getItem() instanceof ChocoboWeaponItems; }
-        public int getMaxCountPerStack() { return 1; }
-        public void setStack(int slot, ItemStack itemStack) {
-            super.setStack(slot, itemStack);
-            this.getChocobo().setWeaponType(itemStack);
-            this.getChocobo().setChocoboWeaponStats(itemStack);
-        }
-    };
-    public final ChocoboInventory chocoboSaddleInv = new ChocoboInventory(1, this) {
-        public boolean isValid(int slot, @NotNull ItemStack stack) { return stack.isEmpty() || stack.getItem() instanceof ChocoboSaddleItem; }
-        public int getMaxCountPerStack() { return 1; }
-        public void setStack(int slot, ItemStack itemStack) {
-            super.setStack(slot, itemStack);
-            inventoryDropClear(this.getChocobo().chocoboBackboneInv, this.getChocobo());
-            this.getChocobo().setSaddleType(itemStack);
-        }
-    };
-    public final DefaultedList<ItemStack> chocoboBackBoneList = DefaultedList.ofSize(top_tier_chocobo_inv_slot_count, ItemStack.EMPTY);
+    public final ChocoboInventory chocoboInventory = new ChocoboInventory(top_tier_chocobo_inv_slot_count, this);
+    public final ChocoboGearInventory chocoboGearInventory = new ChocoboGearInventory(this);
 
     // Chocobo Related
     protected void dropLoot(@NotNull DamageSource source, boolean causedByPlayer)  {
-        Inventory[] inventories = new Inventory[] {
-                this.chocoboBackboneInv,
-                this.chocoboSaddleInv,
-                this.chocoboWeaponInv,
-                this.chocoboArmorInv
-        };
-        for (Inventory inventory : inventories) {
-            this.inventoryDropClear(inventory, this);
-        }
-        this.chocoboTierOneInv.clear();
-        this.chocoboTierTwoInv.clear();
+        // Drop saddle, weapon, armor, and main inventory.
+        // The items in the equipment slots (MAINHAND, CHEST) are phantom and will not drop.
+        this.inventoryDropClear(this.chocoboInventory, this);
+        this.inventoryDropClear(this.chocoboGearInventory, this);
+
         super.dropLoot(source, causedByPlayer);
     }
     protected void inventoryDropClear(@NotNull Inventory inventory, Entity entity) {
@@ -155,6 +100,19 @@ public class Chocobo extends AbstractChocobo {
             if (!itemStack.isEmpty()) { entity.dropStack(itemStack); }
         }
         inventory.clear();
+    }
+    @Override
+    protected void onSaddleChanged(ItemStack oldSaddle, ItemStack newSaddle) {
+        if (this.getWorld().isClient()) { return; }
+        super.onSaddleChanged(oldSaddle, newSaddle);
+        inventoryDropClear(this.chocoboInventory, this);
+        if (this.getWorld() instanceof ServerWorld serverWorld) {
+            for (ServerPlayerEntity serverPlayer : serverWorld.getPlayers()) {
+                if (serverPlayer.currentScreenHandler instanceof SaddlebagContainer container && container.getChocobo() == this) {
+                    serverPlayer.closeHandledScreen();
+                }
+            }
+        }
     }
     public Chocobo(EntityType<? extends Chocobo> entityType, World world) {
         super(entityType, world);
@@ -224,50 +182,69 @@ public class Chocobo extends AbstractChocobo {
         super.initDataTracker();
         // Moved to AbstractChocobo Left in Override for future use
     }
-    public void readCustomDataFromNbt(NbtCompound compound) {
-        super.readCustomDataFromNbt(compound);
-        this.setChocoboColor(ChocoboColor.values()[compound.getByte(NBTKEY_CHOCOBO_COLOR)]);
-        this.setMovementType(MovementType.values()[compound.getByte(NBTKEY_MOVEMENT_TYPE)]);
-        this.chocoboSaddleInv.singleSlotFromNBT(compound.getCompound(NBTKEY_SADDLE_ITEM));
-        this.chocoboWeaponInv.singleSlotFromNBT(compound.getCompound(NBTKEY_WEAPON_ITEM));
-        this.chocoboArmorInv.singleSlotFromNBT(compound.getCompound(NBTKEY_ARMOR_ITEM));
-        ChocoboBackboneFromNBT(compound);
-        this.setChocoboAbilityMask(compound.getByte(NBTKEY_CHOCOBO_ABILITY_MASK));
+    public void readCustomDataFromNbt(@NotNull NbtCompound compound) {
+        this.dataTracker.set(PARAM_CHOCOBO_PROPERTIES, compound.getInt(NBTKEY_CHOCOBO_PROPERTIES));
         this.setGeneration(compound.getInt(NBTKEY_CHOCOBO_GENERATION));
+        this.setChocoboAbilityMask(compound.getByte(NBTKEY_CHOCOBO_ABILITY_MASK));
         this.setChocoboScale(false, compound.getInt(NBTKEY_CHOCOBO_SCALE), true);
-        this.setChocoboScaleMod(compound.getFloat(NBTKEY_CHOCOBO_SCALE_MOD));
-        this.setCollarColor(compound.getInt(NBTKEY_CHOCOBO_COLLAR));
-        this.setLeashSpot(NbtHelper.toBlockPos(compound.getCompound(NBTKEY_CHOCOBO_LEASH_BLOCK)));
-        this.setLeashedDistance(compound.getDouble(NBTKEY_CHOCOBO_LEASH_DISTANCE));
-    }
-    public void writeCustomDataToNbt(NbtCompound compound) {
-        super.writeCustomDataToNbt(compound);
-        compound.putByte(NBTKEY_CHOCOBO_COLOR, (byte) this.getChocoboColor().ordinal());
-        compound.putByte(NBTKEY_MOVEMENT_TYPE, (byte) this.getMovementType().ordinal());
-        compound.put(NBTKEY_SADDLE_ITEM, this.chocoboSaddleInv.singleSlotToNBT());
-        compound.put(NBTKEY_ARMOR_ITEM, this.chocoboArmorInv.singleSlotToNBT());
-        compound.put(NBTKEY_WEAPON_ITEM, this.chocoboWeaponInv.singleSlotToNBT());
-        ChocoboBackboneToNBT(compound);
-        compound.putByte(NBTKEY_CHOCOBO_ABILITY_MASK, this.getChocoboAbilityMask());
-        compound.putInt(NBTKEY_CHOCOBO_GENERATION, this.getGeneration());
-        compound.putInt(NBTKEY_CHOCOBO_SCALE, this.getChocoboScale());
-        compound.putFloat(NBTKEY_CHOCOBO_SCALE_MOD, this.getChocoboScaleMod());
-        compound.putInt(NBTKEY_CHOCOBO_COLLAR, this.getCollarColor());
-        compound.put(NBTKEY_CHOCOBO_LEASH_BLOCK, NbtHelper.fromBlockPos(this.getLeashSpot()));
-        compound.putDouble(NBTKEY_CHOCOBO_LEASH_DISTANCE, this.getLeashDistance());
-    }
-    public void ChocoboBackboneToNBT(NbtCompound compound) {
-        for (int i = 0; i < this.chocoboBackboneInv.size(); ++i) {
-            ItemStack itemStack = this.chocoboBackBoneList.get(i);
-            if (!itemStack.isEmpty()) { compound.put(NBTKEY_INVENTORY+"_slot-"+i, itemStack.writeNbt(new NbtCompound())); }
+        ChocoboInventoryFromNBT(compound);
+        if (compound.contains("ChocoboGearInventory", 9)) {
+            NbtList nbtList = compound.getList("ChocoboGearInventory", 10);
+            this.chocoboGearInventory.clear();
+            for (int i = 0; i < nbtList.size(); ++i) {
+                NbtCompound nbtCompound = nbtList.getCompound(i);
+                int j = nbtCompound.getByte("Slot") & 255;
+                if (j < this.chocoboGearInventory.size()) {
+                    this.chocoboGearInventory.setStack(j, ItemStack.fromNbt(nbtCompound));
+                }
+            }
         }
+        this.readAngerFromNbt(this.getWorld(), compound);
+        super.readCustomDataFromNbt(compound);
     }
-    public void ChocoboBackboneFromNBT(NbtCompound compound) {
-        for (int i = 0; i < this.chocoboBackboneInv.size(); ++i) {
-            if (compound.contains(NBTKEY_INVENTORY+"_slot-"+i)) {
-                ItemStack itemStack = ItemStack.fromNbt(compound.getCompound(NBTKEY_INVENTORY + "_slot-" + i));
-                this.chocoboBackboneInv.setStack(i, itemStack);
-                this.chocoboBackBoneList.set(i, itemStack);
+    public void writeCustomDataToNbt(@NotNull NbtCompound compound) {
+        compound.putInt(NBTKEY_CHOCOBO_PROPERTIES, this.dataTracker.get(PARAM_CHOCOBO_PROPERTIES));
+        compound.putInt(NBTKEY_CHOCOBO_GENERATION, this.getGeneration());
+        compound.putByte(NBTKEY_CHOCOBO_ABILITY_MASK, this.getChocoboAbilityMask());
+        compound.putInt(NBTKEY_CHOCOBO_SCALE, this.getChocoboScale());
+        ChocoboInventoryToNBT(compound);
+        NbtList nbtList = new NbtList();
+        for (int i = 0; i < this.chocoboGearInventory.size(); ++i) {
+            ItemStack itemStack = this.chocoboGearInventory.getStack(i);
+            if (!itemStack.isEmpty()) {
+                NbtCompound nbtCompound = new NbtCompound();
+                nbtCompound.putByte("Slot", (byte)i);
+                itemStack.writeNbt(nbtCompound);
+                nbtList.add(nbtCompound);
+            }
+        }
+        if (!nbtList.isEmpty()) { compound.put("ChocoboGearInventory", nbtList); }
+        this.writeAngerToNbt(compound);
+        super.writeCustomDataToNbt(compound);
+    }
+    public void ChocoboInventoryToNBT(NbtCompound compound) {
+        NbtList nbtList = new NbtList();
+        for (int i = 0; i < this.chocoboInventory.size(); ++i) {
+            ItemStack itemStack = this.chocoboInventory.getStack(i);
+            if (!itemStack.isEmpty()) {
+                NbtCompound nbtCompound = new NbtCompound();
+                nbtCompound.putByte("Slot", (byte)i);
+                itemStack.writeNbt(nbtCompound);
+                nbtList.add(nbtCompound);
+            }
+        }
+        if (!nbtList.isEmpty()) { compound.put(NBTKEY_INVENTORY, nbtList); }
+    }
+    public void ChocoboInventoryFromNBT(NbtCompound compound) {
+        if (compound.contains(NBTKEY_INVENTORY, 9)) { // 9 = NbtList.getType()
+            NbtList nbtList = compound.getList(NBTKEY_INVENTORY, 10); // 10 = NbtCompound.getType()
+            this.chocoboInventory.clear();
+            for (int i = 0; i < nbtList.size(); ++i) {
+                NbtCompound nbtCompound = nbtList.getCompound(i);
+                int j = nbtCompound.getByte("Slot") & 255;
+                if (j < this.chocoboInventory.size()) {
+                    this.chocoboInventory.setStack(j, ItemStack.fromNbt(nbtCompound));
+                }
             }
         }
     }
@@ -298,9 +275,7 @@ public class Chocobo extends AbstractChocobo {
             if (isGreenChocoboBiomes(biomeRegistryKey)) { setChocoboSpawnCheck(ChocoboColor.GREEN); }
             if (isHotOverWorld(biomeRegistryKey) && !isSavanna(biomeRegistryKey)) { setChocoboSpawnCheck(ChocoboColor.BLACK); }
             this.setChocoboScale(this.isMale(), 0, false);
-        } else if (reason == SpawnReason.SPAWNER) {
-            this.setChocoboScale(this.isMale(), 0, false);
-        }
+        } else if (reason == SpawnReason.SPAWNER) { this.setChocoboScale(this.isMale(), 0, false); }
         chocoboStatShake(EntityAttributes.GENERIC_MAX_HEALTH, "health");
         chocoboStatShake(EntityAttributes.GENERIC_ATTACK_DAMAGE, "attack");
         chocoboStatShake(EntityAttributes.GENERIC_ARMOR, "defense");
@@ -308,13 +283,13 @@ public class Chocobo extends AbstractChocobo {
         if (getChocoboColor() == ChocoboColor.PURPLE) {
             int chance = isEnd(worldIn) ? 60 : 15;
             if (random.nextInt(100)+1 < chance) {
-                this.chocoboBackboneInv.setStack(random.nextInt(18), new ItemStack(ENDER_PEARL.getDefaultStack().split(random.nextInt(3) + 1).getItem()));
+                this.chocoboInventory.setStack(random.nextInt(18), new ItemStack(ENDER_PEARL.getDefaultStack().split(random.nextInt(3) + 1).getItem()));
             }
             if (random.nextInt(100)+1 < chance) {
-                this.chocoboBackboneInv.setStack(random.nextInt(9)+18, new ItemStack(ENDER_PEARL.getDefaultStack().split(random.nextInt(3) + 1).getItem()));
+                this.chocoboInventory.setStack(random.nextInt(9)+18, new ItemStack(ENDER_PEARL.getDefaultStack().split(random.nextInt(3) + 1).getItem()));
             }
             if (random.nextInt(100)+1 < chance) {
-                this.chocoboBackboneInv.setStack(random.nextInt(18)+27, new ItemStack(ENDER_PEARL.getDefaultStack().split(random.nextInt(3) + 1).getItem()));
+                this.chocoboInventory.setStack(random.nextInt(18)+27, new ItemStack(ENDER_PEARL.getDefaultStack().split(random.nextInt(3) + 1).getItem()));
             }
         }
         return super.initialize(worldIn, difficultyIn, reason, spawnDataIn, dataTag);
@@ -369,7 +344,7 @@ public class Chocobo extends AbstractChocobo {
         BlockPos spot = this.getBlockPos();
         double length = 5D;
         this.setLeashSpot(spot);
-        this.setLeashedDistance(length);
+        this.setLeashedDistance((int) length);
         this.setMovementType(MovementType.STANDSTILL); // stand still
         this.setMovementTypeByFollowMrHuman(this.followingMrHuman);
         super.dismountVehicle();
@@ -540,7 +515,7 @@ public class Chocobo extends AbstractChocobo {
             }
         }
     }
-    private boolean interactInvRide(PlayerEntity player, ItemStack stack) {
+    private boolean interactInvRide(PlayerEntity player, @NotNull ItemStack stack) {
         Item pStack = stack.getItem();
         if (this.getEntityWorld().isClient()) { return false; }
         if (this.isBaby()) {
@@ -630,20 +605,35 @@ public class Chocobo extends AbstractChocobo {
         if (this.getEntityWorld().isClient()) { return false; }
         if (this.isBaby()) { return false; }
         if (pStack instanceof ChocoboSaddleItem && !this.isSaddled()) {
-            this.setSaddleType(stack);
-            this.chocoboSaddleInv.setStack(0, stack.copy().split(1));
+            this.chocoboGearInventory.setStack(SADDLE_SLOT, stack.copy().split(1));
             player.getMainHandStack().decrement(1);
             return true;
         }
-        if (pStack instanceof ChocoboArmorItems && !this.isArmored()) {
-            this.setArmorType(stack);
-            this.chocoboArmorInv.setStack(0, stack.copy().split(1));
-            player.getMainHandStack().decrement(1);
-            return true;
+        if (pStack instanceof ChocoboArmorItems armor) {
+            EquipmentSlot slotType = armor.getSlotType();
+            if (slotType == EquipmentSlot.CHEST && !this.isArmored()) {
+                this.chocoboGearInventory.setStack(ARMOR_SLOT, stack.copy().split(1));
+                player.getMainHandStack().decrement(1);
+                return true;
+            }
+            if (slotType == EquipmentSlot.HEAD && !this.isHeadArmored()) {
+                this.chocoboGearInventory.setStack(HEAD_SLOT, stack.copy().split(1));
+                player.getMainHandStack().decrement(1);
+                return true;
+            }
+            if (slotType == EquipmentSlot.LEGS && !this.isLegsArmored()) {
+                this.chocoboGearInventory.setStack(LEGS_SLOT, stack.copy().split(1));
+                player.getMainHandStack().decrement(1);
+                return true;
+            }
+            if (slotType == EquipmentSlot.FEET && !this.isFeetArmored()) {
+                this.chocoboGearInventory.setStack(FEET_SLOT, stack.copy().split(1));
+                player.getMainHandStack().decrement(1);
+                return true;
+            }
         }
         if (pStack instanceof ChocoboWeaponItems && !this.isArmed()) {
-            this.setWeaponType(stack);
-            this.chocoboWeaponInv.setStack(0, stack.copy().split(1));
+            this.chocoboGearInventory.setStack(WEAPON_SLOT, stack.copy().split(1));
             player.getMainHandStack().decrement(1);
             return true;
         }
@@ -688,7 +678,7 @@ public class Chocobo extends AbstractChocobo {
                 String name = this.getCustomName() == null ? this.getName().getString() : this.getCustomName().getString();
                 player.sendMessage(Text.literal(name + " Area Set: "+dist+ " around X: " + center.getX() + " Z: " + center.getZ()), true);
                 this.setLeashSpot(center);
-                this.setLeashedDistance(dist);
+                this.setLeashedDistance((int) dist);
                 return true;
             }
         }
@@ -709,7 +699,7 @@ public class Chocobo extends AbstractChocobo {
                     this.setMovementType(MovementType.STANDSTILL);
                     BlockPos leashPoint = this.getSteppingPos();
                     double distance = 10D;
-                    this.setLeashedDistance(distance);
+                    this.setLeashedDistance((int) distance);
                     this.setLeashSpot(leashPoint);
                     player.sendMessage(Text.translatable(DelChoco.DELCHOCO_ID + ".entity_chocobo.chocobo_stay_cmd"), true);
                 }
@@ -742,32 +732,12 @@ public class Chocobo extends AbstractChocobo {
         return super.interactAt(player, vec, hand);
     }
     private void displayChocoboInventory(@NotNull ServerPlayerEntity player) {
-        if (player.currentScreenHandler != player.playerScreenHandler) {
-            player.closeHandledScreen();
-        }
+        if (player.currentScreenHandler != player.playerScreenHandler) { player.closeHandledScreen(); }
         ((ServerPlayerEntityAccessor) player).callIncrementScreenHandlerSyncId();
         int syncId = ((ServerPlayerEntityAccessor) player).getScreenHandlerSyncId();
-        player.networkHandler.sendPacket(new OpenHorseScreenS2CPacket(syncId, this.chocoboBackboneInv.size(), this.getId()));
+        player.networkHandler.sendPacket(new OpenHorseScreenS2CPacket(syncId, this.chocoboInventory.size(), this.getId()));
         player.currentScreenHandler = new SaddlebagContainer(syncId, player.getInventory(), this);
         ((ServerPlayerEntityAccessor) player).callOnScreenHandlerOpened(player.currentScreenHandler);
-    }
-    private void chocoboFeatherPick(@NotNull Inventory sendingInv, @NotNull Inventory receivingInv, int slot) {
-        boolean isReverseTierOne = sendingInv.size() > receivingInv.size();
-        boolean isTierOne = sendingInv.size() < receivingInv.size();
-        boolean pick = true;
-        int slotAdjust = slot;
-        if (isTierOne) {
-            if (slot < 5) { slotAdjust = slot + 11; }
-            if (slot > 4 && slot < 10) { slotAdjust = slot + 15; }
-            if (slot > 9) { slotAdjust = slot + 19; }
-        }
-        if (isReverseTierOne) {
-            if (slot > 10 && slot < 16) { slotAdjust = slot-11; }
-            if (slot > 19 && slot < 25) { slotAdjust = slot-15; }
-            if (slot > 28 && slot < 34) { slotAdjust = slot-19; }
-            pick = slotAdjust != slot;
-        }
-        if (pick) { if (receivingInv.getStack(slotAdjust) != sendingInv.getStack(slot)) { receivingInv.setStack(slotAdjust, sendingInv.getStack(slot)); } }
     }
     public int getMinAmbientSoundDelay() { return (24 * (int) (random() * 100)); }
     @SuppressWarnings("OptionalGetWithoutIsPresent")

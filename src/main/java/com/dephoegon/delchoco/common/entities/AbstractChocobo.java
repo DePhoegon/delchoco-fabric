@@ -95,7 +95,7 @@ public abstract class AbstractChocobo extends TameableEntity implements Angerabl
     public int TimeSinceFeatherChance = 0;
     protected int rideTickDelay = 0;
     public int followingMrHuman = 2;
-    private ItemStack lastSaddleStack = ItemStack.EMPTY;
+    protected ItemStack lastSaddleStack = ItemStack.EMPTY;
     protected final double followSpeedModifier = 2.0D;
     protected static final float maxStepUp = 1.5f;
     protected final UniformIntProvider ALERT_INTERVAL = TimeHelper.betweenSeconds(4, 6);
@@ -147,6 +147,7 @@ public abstract class AbstractChocobo extends TameableEntity implements Angerabl
     protected static final String NBTKEY_LEGS_ITEM = "Legs";
     protected static final String NBTKEY_FEET_ITEM = "Feet";
     protected static final String NBTKEY_INVENTORY = "Inventory";
+    protected static final String NBTKEY_INVENTORY_GEAR = "ChocoboGearInventory";
     protected static final String NBTKEY_CHOCOBO_GENERATION = "Generation";
     protected static final String NBTKEY_CHOCOBO_SCALE = "Scale";
     protected static final String NBTKEY_CHOCOBO_LEASH_BLOCK = "LeashBlock";
@@ -178,12 +179,6 @@ public abstract class AbstractChocobo extends TameableEntity implements Angerabl
 
 
     // Hardcoded Chocobo Values
-    public static final int SADDLE_SLOT = 0;
-    public static final int ARMOR_SLOT = 1;
-    public static final int WEAPON_SLOT = 2;
-    public static final int HEAD_SLOT = 3;
-    public static final int LEGS_SLOT = 4;
-    public static final int FEET_SLOT = 5;
     public static final int tier_one_chocobo_inv_slot_count = 15; // 3*5
     public static final int tier_two_chocobo_inv_slot_count = 45; //5*9
     public final int top_tier_chocobo_inv_slot_count = tier_two_chocobo_inv_slot_count;
@@ -275,30 +270,29 @@ public abstract class AbstractChocobo extends TameableEntity implements Angerabl
 
     @Override
     public void onTrackedDataSet(TrackedData<?> data) {
-        if (this.getWorld().isClient) {
-            super.onTrackedDataSet(data);
-            return;
-        }
-        if (PARAM_ARMOR_ITEM.equals(data)) {
-            this.setChocoboArmorStats(this.getArmorItemStack());
-        } else if (PARAM_WEAPON_ITEM.equals(data)) {
-            this.setChocoboWeaponStats(this.getWeapon());
-        } else if (PARAM_HEAD_ITEM.equals(data)) {
-            this.setChocoboHeadArmorStats(this.getHeadArmor());
-        } else if (PARAM_LEGS_ITEM.equals(data)) {
-            this.setChocoboLegsArmorStats(this.getLegsArmor());
-        } else if (PARAM_FEET_ITEM.equals(data)) {
-            this.setChocoboFeetArmorStats(this.getFeetArmor());
-        } else if (PARAM_SADDLE_ITEM.equals(data)) {
-            ItemStack oldSaddle = this.lastSaddleStack;
-            ItemStack newSaddle = this.getSaddle();
-            if (!ItemStack.areEqual(oldSaddle, newSaddle)) {
-                this.lastSaddleStack = newSaddle.copy();
-                onSaddleChanged(oldSaddle, newSaddle);
+        if (!this.firstUpdate) {
+            if (PARAM_SADDLE_ITEM.equals(data)) {
+                ItemStack currentSaddle = this.getSaddle();
+                if (!this.getWorld().isClient() && !ItemStack.areEqual(currentSaddle, this.lastSaddleStack)) {
+                    this.onSaddleChanged();
+                }
+                this.lastSaddleStack = currentSaddle.copy();
+            } else if (PARAM_ARMOR_ITEM.equals(data)) {
+                this.setChocoboArmorStats(this.getArmorItemStack());
+            } else if (PARAM_WEAPON_ITEM.equals(data)) {
+                this.setChocoboWeaponStats(this.getWeapon());
+            } else if (PARAM_HEAD_ITEM.equals(data)) {
+                this.setChocoboHeadArmorStats(this.getHeadArmor());
+            } else if (PARAM_LEGS_ITEM.equals(data)) {
+                this.setChocoboLegsArmorStats(this.getLegsArmor());
+            } else if (PARAM_FEET_ITEM.equals(data)) {
+                this.setChocoboFeetArmorStats(this.getFeetArmor());
             }
         }
         super.onTrackedDataSet(data);
     }
+
+    public void onSaddleChanged() { }
 
     // hook for Chocobo types, left for override
     public boolean isSitting() { return false; }
@@ -449,7 +443,6 @@ public abstract class AbstractChocobo extends TameableEntity implements Angerabl
     }
     public boolean canBeLeashedBy(PlayerEntity player) { return false; }
     public PassiveEntity createChild(ServerWorld world, PassiveEntity entity) { return null; }
-    protected void onSaddleChanged(ItemStack oldSaddle, ItemStack newSaddle) { }
     protected void dropLoot(@NotNull DamageSource source, boolean causedByPlayer) {
         // Left uncompacted for readability and future expansion
         super.dropLoot(source, causedByPlayer);

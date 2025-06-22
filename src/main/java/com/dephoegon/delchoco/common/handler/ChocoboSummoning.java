@@ -131,13 +131,13 @@ public class ChocoboSummoning {
                 if (chocobo.getChocoboColor() == ChocoboColor.PURPLE) {
                     int chance = isEnd(serverWorldAccess) ? 60 : 15;
                     if (random.nextInt(100)+1 < chance) {
-                        chocobo.chocoboBackboneInv.setStack(random.nextInt(18), new ItemStack(ENDER_PEARL.getDefaultStack().split(random.nextInt(3) + 1).getItem()));
+                        chocobo.chocoboInventory.setStack(random.nextInt(18), new ItemStack(ENDER_PEARL.getDefaultStack().split(random.nextInt(3) + 1).getItem()));
                     }
                     if (random.nextInt(100)+1 < chance) {
-                        chocobo.chocoboBackboneInv.setStack(random.nextInt(9)+18, new ItemStack(ENDER_PEARL.getDefaultStack().split(random.nextInt(3) + 1).getItem()));
+                        chocobo.chocoboInventory.setStack(random.nextInt(9)+18, new ItemStack(ENDER_PEARL.getDefaultStack().split(random.nextInt(3) + 1).getItem()));
                     }
                     if (random.nextInt(100)+1 < chance) {
-                        chocobo.chocoboBackboneInv.setStack(random.nextInt(18)+27, new ItemStack(ENDER_PEARL.getDefaultStack().split(random.nextInt(3) + 1).getItem()));
+                        chocobo.chocoboInventory.setStack(random.nextInt(18)+27, new ItemStack(ENDER_PEARL.getDefaultStack().split(random.nextInt(3) + 1).getItem()));
                     }
                 }
                 chocobo.setChocoboScale(chocobo.isMale(), 0, false);

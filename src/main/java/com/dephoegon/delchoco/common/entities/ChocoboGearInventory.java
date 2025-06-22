@@ -7,6 +7,8 @@ import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.inventory.SimpleInventory;
 import net.minecraft.item.ItemStack;
 
+import static com.dephoegon.delchoco.common.inventory.ChocoboEquipmentSlot.*;
+
 public class ChocoboGearInventory extends SimpleInventory {
     private final Chocobo chocobo;
 
@@ -18,27 +20,25 @@ public class ChocoboGearInventory extends SimpleInventory {
 
     private void onInventoryChanged() {
         if (!chocobo.getWorld().isClient()) {
-            chocobo.setSaddle(getStack(Chocobo.SADDLE_SLOT));
-            chocobo.setArmor(getStack(Chocobo.ARMOR_SLOT));
-            chocobo.setWeapon(getStack(Chocobo.WEAPON_SLOT));
-            chocobo.setHeadArmor(getStack(Chocobo.HEAD_SLOT));
-            chocobo.setLegsArmor(getStack(Chocobo.LEGS_SLOT));
-            chocobo.setFeetArmor(getStack(Chocobo.FEET_SLOT));
+            chocobo.setSaddle(getStack(SADDLE_SLOT));
+            chocobo.setArmor(getStack(ARMOR_SLOT));
+            chocobo.setWeapon(getStack(WEAPON_SLOT));
+            chocobo.setHeadArmor(getStack(HEAD_SLOT));
+            chocobo.setLegsArmor(getStack(LEGS_SLOT));
+            chocobo.setFeetArmor(getStack(FEET_SLOT));
         }
     }
 
     @Override
     public boolean isValid(int slot, ItemStack stack) {
-        if (stack.isEmpty()) {
-            return true;
-        }
+        if (stack.isEmpty()) { return true; }
         return switch (slot) {
-            case Chocobo.SADDLE_SLOT -> stack.getItem() instanceof ChocoboSaddleItem;
-            case Chocobo.WEAPON_SLOT -> stack.getItem() instanceof ChocoboWeaponItems;
-            case Chocobo.ARMOR_SLOT -> stack.getItem() instanceof ChocoboArmorItems && ((ChocoboArmorItems) stack.getItem()).getSlotType() == EquipmentSlot.CHEST;
-            case Chocobo.HEAD_SLOT -> stack.getItem() instanceof ChocoboArmorItems && ((ChocoboArmorItems) stack.getItem()).getSlotType() == EquipmentSlot.HEAD;
-            case Chocobo.LEGS_SLOT -> stack.getItem() instanceof ChocoboArmorItems && ((ChocoboArmorItems) stack.getItem()).getSlotType() == EquipmentSlot.LEGS;
-            case Chocobo.FEET_SLOT -> stack.getItem() instanceof ChocoboArmorItems && ((ChocoboArmorItems) stack.getItem()).getSlotType() == EquipmentSlot.FEET;
+            case SADDLE_SLOT -> stack.getItem() instanceof ChocoboSaddleItem;
+            case WEAPON_SLOT -> stack.getItem() instanceof ChocoboWeaponItems;
+            case ARMOR_SLOT -> stack.getItem() instanceof ChocoboArmorItems && ((ChocoboArmorItems) stack.getItem()).getSlotType() == EquipmentSlot.CHEST;
+            case HEAD_SLOT -> stack.getItem() instanceof ChocoboArmorItems && ((ChocoboArmorItems) stack.getItem()).getSlotType() == EquipmentSlot.HEAD;
+            case LEGS_SLOT -> stack.getItem() instanceof ChocoboArmorItems && ((ChocoboArmorItems) stack.getItem()).getSlotType() == EquipmentSlot.LEGS;
+            case FEET_SLOT -> stack.getItem() instanceof ChocoboArmorItems && ((ChocoboArmorItems) stack.getItem()).getSlotType() == EquipmentSlot.FEET;
             default -> false;
         };
     }

@@ -8,6 +8,7 @@ import net.minecraft.inventory.Inventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.screen.ScreenHandler;
 import net.minecraft.screen.slot.Slot;
+import net.minecraft.server.network.ServerPlayerEntity;
 import org.jetbrains.annotations.NotNull;
 
 import static com.dephoegon.delchoco.common.inventory.ChocoboEquipmentSlot.*;
@@ -15,16 +16,16 @@ import static com.dephoegon.delchoco.common.inventory.ChocoboEquipmentSlot.*;
 public class SaddlebagContainer extends ScreenHandler {
     private final Chocobo chocobo;
     private int syncTimer = 0;
+    private final PlayerInventory playerInventory;
 
     public SaddlebagContainer(int syncId, PlayerInventory playerInventory, Chocobo chocoboEntity) {
         super(null, syncId);
         this.chocobo = chocoboEntity;
+        this.playerInventory = playerInventory;
         refreshSlots(chocobo, playerInventory);
     }
 
-    public Chocobo getChocobo() {
-        return this.chocobo;
-    }
+    public Chocobo getChocobo() { return this.chocobo; }
 
     @Override
     public void onClosed(PlayerEntity player) {
@@ -35,13 +36,17 @@ public class SaddlebagContainer extends ScreenHandler {
 
     @Override
     public void sendContentUpdates() {
-        super.sendContentUpdates();
         this.syncTimer++;
-        if (this.syncTimer >= 200 + chocobo.getRandom().nextInt(100)) { // 10-15 seconds
+        if (this.syncTimer >= 15) { // 15 calls then trigger
             this.syncTimer = 0;
-            // No explicit sync needed as we are directly using the chocobo's inventory.
-            // If there were a temporary inventory, we would sync it here.
+            if (this.chocobo.getWorld().isClient()) { return; } // No sync on the client side
+            syncInventory(false); // Sync inventory to server
         }
+    }
+    public void syncInventory(boolean forceClose) {
+        if (playerInventory.player.getWorld().isClient()) { return; } // No sync on the client side
+        super.sendContentUpdates();
+        if (forceClose) { ((ServerPlayerEntity)playerInventory.player).closeHandledScreen(); }
     }
 
     public void refreshSlots(@NotNull Chocobo chocobo, PlayerInventory playerInventory) {
@@ -51,14 +56,14 @@ public class SaddlebagContainer extends ScreenHandler {
         ItemStack saddleStack = chocobo.getSaddle();
         int slotOneX = -16;
         int slotOneY = 18-20;
-        this.addSlot(new ChocoboEquipmentSlot(chocobo.chocoboGearInventory, Chocobo.SADDLE_SLOT, slotOneX, slotOneY, SADDLE));
-        this.addSlot(new ChocoboEquipmentSlot(chocobo.chocoboGearInventory, Chocobo.ARMOR_SLOT, 2*18+slotOneX, slotOneY, CHEST));
-        this.addSlot(new ChocoboEquipmentSlot(chocobo.chocoboGearInventory, Chocobo.WEAPON_SLOT, 4*18+slotOneX, slotOneY, WEAPON));
+        this.addSlot(new ChocoboEquipmentSlot(chocobo, chocobo.chocoboGearInventory, SADDLE_SLOT, slotOneX, slotOneY));
+        this.addSlot(new ChocoboEquipmentSlot(chocobo, chocobo.chocoboGearInventory, WEAPON_SLOT, 4*18+slotOneX, slotOneY));
+        this.addSlot(new ChocoboEquipmentSlot(chocobo, chocobo.chocoboGearInventory, ARMOR_SLOT, 2*18+slotOneX, slotOneY));
         /*
         // Commented out as these slots are not used in the current implementation - The gear for them does not exist currently. I will uncomment this when the gear is added.
-        this.addSlot(new ChocoboEquipmentSlot(chocobo.chocoboGearInventory, Chocobo.HEAD_SLOT, 6*18+slotOneX, slotOneY, HEAD));
-        this.addSlot(new ChocoboEquipmentSlot(chocobo.chocoboGearInventory, Chocobo.LEGS_SLOT, 8*18+slotOneX, slotOneY, LEGS));
-        this.addSlot(new ChocoboEquipmentSlot(chocobo.chocoboGearInventory, Chocobo.FEET_SLOT, 10*18+slotOneX, slotOneY, FEET));
+        this.addSlot(new ChocoboEquipmentSlot(chocobo, chocobo.chocoboGearInventory, HEAD_SLOT, 6*18+slotOneX, slotOneY, HEAD));
+        this.addSlot(new ChocoboEquipmentSlot(chocobo, chocobo.chocoboGearInventory, LEGS_SLOT, 8*18+slotOneX, slotOneY, LEGS));
+        this.addSlot(new ChocoboEquipmentSlot(chocobo, chocobo.chocoboGearInventory, FEET_SLOT, 10*18+slotOneX, slotOneY, FEET));
         */
         if(!saddleStack.isEmpty() && saddleStack.getItem() instanceof ChocoboSaddleItem saddleItem) {
             int saddleSize = saddleItem.getInventorySize();

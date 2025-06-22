@@ -71,6 +71,7 @@ import static com.dephoegon.delchoco.common.entities.breeding.BreedingHelper.get
 import static com.dephoegon.delchoco.common.entities.properties.ChocoboBrainAid.invalidRevengeTargets;
 import static com.dephoegon.delchoco.common.entities.properties.ChocoboBrainAid.validRevengeAllies;
 import static com.dephoegon.delchoco.common.init.ModItems.*;
+import static com.dephoegon.delchoco.common.inventory.ChocoboEquipmentSlot.*;
 import static java.lang.Math.floor;
 import static java.lang.Math.random;
 import static net.minecraft.entity.SpawnGroup.CREATURE;
@@ -84,6 +85,7 @@ public class Chocobo extends AbstractChocobo {
     // Inventory Related
     public final ChocoboInventory chocoboInventory = new ChocoboInventory(top_tier_chocobo_inv_slot_count, this);
     public final ChocoboGearInventory chocoboGearInventory = new ChocoboGearInventory(this);
+    private boolean fromNBT = false;
 
     // Chocobo Related
     protected void dropLoot(@NotNull DamageSource source, boolean causedByPlayer)  {
@@ -102,18 +104,19 @@ public class Chocobo extends AbstractChocobo {
         inventory.clear();
     }
     @Override
-    protected void onSaddleChanged(ItemStack oldSaddle, ItemStack newSaddle) {
-        if (this.getWorld().isClient()) { return; }
-        super.onSaddleChanged(oldSaddle, newSaddle);
-        inventoryDropClear(this.chocoboInventory, this);
-        if (this.getWorld() instanceof ServerWorld serverWorld) {
-            for (ServerPlayerEntity serverPlayer : serverWorld.getPlayers()) {
-                if (serverPlayer.currentScreenHandler instanceof SaddlebagContainer container && container.getChocobo() == this) {
-                    serverPlayer.closeHandledScreen();
-                }
+    public void onSaddleChanged() {
+        if (this.getWorld().isClient()) { return; } // should only run on the server side
+        super.onSaddleChanged();
+        if (this.fromNBT) { return; }
+        for (PlayerEntity playerEntity : this.getWorld().getPlayers()) {
+            if (playerEntity.currentScreenHandler instanceof SaddlebagContainer container && container.getChocobo() == this) {
+                container.syncInventory(true); // Force close the container to update the saddle
             }
         }
+        // Clear the chocobo's inventory when the saddle is changed
+        inventoryDropClear(this.chocoboInventory, this);
     }
+
     public Chocobo(EntityType<? extends Chocobo> entityType, World world) {
         super(entityType, world);
         this.setPathfindingPenalty(PathNodeType.FENCE,6.0F);
@@ -183,24 +186,16 @@ public class Chocobo extends AbstractChocobo {
         // Moved to AbstractChocobo Left in Override for future use
     }
     public void readCustomDataFromNbt(@NotNull NbtCompound compound) {
+        this.fromNBT = true;
         this.dataTracker.set(PARAM_CHOCOBO_PROPERTIES, compound.getInt(NBTKEY_CHOCOBO_PROPERTIES));
         this.setGeneration(compound.getInt(NBTKEY_CHOCOBO_GENERATION));
         this.setChocoboAbilityMask(compound.getByte(NBTKEY_CHOCOBO_ABILITY_MASK));
         this.setChocoboScale(false, compound.getInt(NBTKEY_CHOCOBO_SCALE), true);
         ChocoboInventoryFromNBT(compound);
-        if (compound.contains("ChocoboGearInventory", 9)) {
-            NbtList nbtList = compound.getList("ChocoboGearInventory", 10);
-            this.chocoboGearInventory.clear();
-            for (int i = 0; i < nbtList.size(); ++i) {
-                NbtCompound nbtCompound = nbtList.getCompound(i);
-                int j = nbtCompound.getByte("Slot") & 255;
-                if (j < this.chocoboGearInventory.size()) {
-                    this.chocoboGearInventory.setStack(j, ItemStack.fromNbt(nbtCompound));
-                }
-            }
-        }
+        ChocoboGearInventoryFromNBT(compound);
         this.readAngerFromNbt(this.getWorld(), compound);
         super.readCustomDataFromNbt(compound);
+        this.fromNBT = false;
     }
     public void writeCustomDataToNbt(@NotNull NbtCompound compound) {
         compound.putInt(NBTKEY_CHOCOBO_PROPERTIES, this.dataTracker.get(PARAM_CHOCOBO_PROPERTIES));
@@ -208,20 +203,11 @@ public class Chocobo extends AbstractChocobo {
         compound.putByte(NBTKEY_CHOCOBO_ABILITY_MASK, this.getChocoboAbilityMask());
         compound.putInt(NBTKEY_CHOCOBO_SCALE, this.getChocoboScale());
         ChocoboInventoryToNBT(compound);
-        NbtList nbtList = new NbtList();
-        for (int i = 0; i < this.chocoboGearInventory.size(); ++i) {
-            ItemStack itemStack = this.chocoboGearInventory.getStack(i);
-            if (!itemStack.isEmpty()) {
-                NbtCompound nbtCompound = new NbtCompound();
-                nbtCompound.putByte("Slot", (byte)i);
-                itemStack.writeNbt(nbtCompound);
-                nbtList.add(nbtCompound);
-            }
-        }
-        if (!nbtList.isEmpty()) { compound.put("ChocoboGearInventory", nbtList); }
+        ChocoboGearInventoryToNBT(compound);
         this.writeAngerToNbt(compound);
         super.writeCustomDataToNbt(compound);
     }
+
     public void ChocoboInventoryToNBT(NbtCompound compound) {
         NbtList nbtList = new NbtList();
         for (int i = 0; i < this.chocoboInventory.size(); ++i) {
@@ -235,6 +221,19 @@ public class Chocobo extends AbstractChocobo {
         }
         if (!nbtList.isEmpty()) { compound.put(NBTKEY_INVENTORY, nbtList); }
     }
+    public void ChocoboGearInventoryToNBT(NbtCompound compound) {
+        NbtList nbtList = new NbtList();
+        for (int i = 0; i < this.chocoboGearInventory.size(); ++i) {
+            ItemStack itemStack = this.chocoboGearInventory.getStack(i);
+            if (!itemStack.isEmpty()) {
+                NbtCompound nbtCompound = new NbtCompound();
+                nbtCompound.putByte("Slot", (byte)i);
+                itemStack.writeNbt(nbtCompound);
+                nbtList.add(nbtCompound);
+            }
+        }
+        if (!nbtList.isEmpty()) { compound.put(NBTKEY_INVENTORY_GEAR, nbtList); }
+    }
     public void ChocoboInventoryFromNBT(NbtCompound compound) {
         if (compound.contains(NBTKEY_INVENTORY, 9)) { // 9 = NbtList.getType()
             NbtList nbtList = compound.getList(NBTKEY_INVENTORY, 10); // 10 = NbtCompound.getType()
@@ -244,6 +243,19 @@ public class Chocobo extends AbstractChocobo {
                 int j = nbtCompound.getByte("Slot") & 255;
                 if (j < this.chocoboInventory.size()) {
                     this.chocoboInventory.setStack(j, ItemStack.fromNbt(nbtCompound));
+                }
+            }
+        }
+    }
+    public void ChocoboGearInventoryFromNBT(NbtCompound compound) {
+        if (compound.contains(NBTKEY_INVENTORY_GEAR, 9)) { // 9 = NbtList.getType()
+            NbtList nbtList = compound.getList(NBTKEY_INVENTORY_GEAR, 10); // 10 = NbtCompound.getType()
+            this.chocoboGearInventory.clear();
+            for (int i = 0; i < nbtList.size(); ++i) {
+                NbtCompound nbtCompound = nbtList.getCompound(i);
+                int j = nbtCompound.getByte("Slot") & 255;
+                if (j < this.chocoboGearInventory.size()) {
+                    this.chocoboGearInventory.setStack(j, ItemStack.fromNbt(nbtCompound));
                 }
             }
         }
@@ -516,20 +528,14 @@ public class Chocobo extends AbstractChocobo {
         }
     }
     private boolean interactInvRide(PlayerEntity player, @NotNull ItemStack stack) {
-        Item pStack = stack.getItem();
-        if (this.getEntityWorld().isClient()) { return false; }
-        if (this.isBaby()) {
-            if (pStack == GYSAHL_CAKE.asItem()) {
-                this.eat(player, Hand.MAIN_HAND, stack);
-                this.growUp(25);
-                return true;
-            } else { return false; }
-        }
-        if (!this.isTamed()) { return false; }
-        if (player.isSneaking()) {
-            if (player instanceof ServerPlayerEntity) { this.displayChocoboInventory((ServerPlayerEntity) player); }
+        if (this.getEntityWorld().isClient() || !stack.isEmpty() || !this.isTamed()) { return false; }
+        if (player.isSneaking() && player instanceof ServerPlayerEntity serverPlayer) {
+            if (ChocoboConfig.OWNER_ONLY_ACCESS.get()) {
+                if (isOwner(player)) { this.displayChocoboInventory(serverPlayer); }
+                else { player.sendMessage(Text.translatable(DelChoco.DELCHOCO_ID + ".entity_chocobo.not_owner"), true); }
+            } else { this.displayChocoboInventory(serverPlayer); }
             return true;
-        } else if (stack.isEmpty() && this.isSaddled()) {
+        } else if (this.isSaddled()) {
             if (ChocoboConfig.OWNER_ONLY_ACCESS.get()) {
                 if (isOwner(player)) { player.startRiding(this); }
                 else { player.sendMessage(Text.translatable(DelChoco.DELCHOCO_ID + ".entity_chocobo.not_owner"), true); }
@@ -541,6 +547,13 @@ public class Chocobo extends AbstractChocobo {
     private boolean interactFeed(PlayerEntity player, ItemStack stack, Hand hand) {
         Item pStack = stack.getItem();
         if (player.getWorld().isClient()) { return false; }
+        if (this.isBaby()) {
+            if (pStack == GYSAHL_CAKE.asItem()) {
+                this.eat(player, Hand.MAIN_HAND, stack);
+                this.growUp(25);
+                return true;
+            } else { return false; }
+        }
         if (pStack == GYSAHL_GREEN_ITEM) {
             if (this.isTamed()) {
                 if (this.getHealth() != this.getMaxHealth()) {
@@ -606,35 +619,36 @@ public class Chocobo extends AbstractChocobo {
         if (this.isBaby()) { return false; }
         if (pStack instanceof ChocoboSaddleItem && !this.isSaddled()) {
             this.chocoboGearInventory.setStack(SADDLE_SLOT, stack.copy().split(1));
-            player.getMainHandStack().decrement(1);
+            if (!player.isCreative()) { player.getMainHandStack().decrement(1); }
+            this.onSaddleChanged();
             return true;
         }
         if (pStack instanceof ChocoboArmorItems armor) {
             EquipmentSlot slotType = armor.getSlotType();
             if (slotType == EquipmentSlot.CHEST && !this.isArmored()) {
                 this.chocoboGearInventory.setStack(ARMOR_SLOT, stack.copy().split(1));
-                player.getMainHandStack().decrement(1);
+                if (!player.isCreative()) { player.getMainHandStack().decrement(1); }
                 return true;
             }
             if (slotType == EquipmentSlot.HEAD && !this.isHeadArmored()) {
                 this.chocoboGearInventory.setStack(HEAD_SLOT, stack.copy().split(1));
-                player.getMainHandStack().decrement(1);
+                if (!player.isCreative()) { player.getMainHandStack().decrement(1); }
                 return true;
             }
             if (slotType == EquipmentSlot.LEGS && !this.isLegsArmored()) {
                 this.chocoboGearInventory.setStack(LEGS_SLOT, stack.copy().split(1));
-                player.getMainHandStack().decrement(1);
+                if (!player.isCreative()) { player.getMainHandStack().decrement(1); }
                 return true;
             }
             if (slotType == EquipmentSlot.FEET && !this.isFeetArmored()) {
                 this.chocoboGearInventory.setStack(FEET_SLOT, stack.copy().split(1));
-                player.getMainHandStack().decrement(1);
+                if (!player.isCreative()) { player.getMainHandStack().decrement(1); }
                 return true;
             }
         }
         if (pStack instanceof ChocoboWeaponItems && !this.isArmed()) {
             this.chocoboGearInventory.setStack(WEAPON_SLOT, stack.copy().split(1));
-            player.getMainHandStack().decrement(1);
+            if (!player.isCreative()) { player.getMainHandStack().decrement(1); }
             return true;
         }
         return false;
@@ -649,14 +663,18 @@ public class Chocobo extends AbstractChocobo {
                     if (isOwner(player)) {
                         this.setCustomName(stack.getName());
                         this.setCustomNameVisible(true);
-                        player.getMainHandStack().decrement(1);
+                        if (!player.isCreative()) {
+                            player.getMainHandStack().decrement(1);
+                        }
                     } else { player.sendMessage(Text.translatable(DelChoco.DELCHOCO_ID + ".entity_chocobo.not_owner"), true); }
                     return true;
                 }
             } else {
                 this.setCustomName(stack.getName());
                 this.setCustomNameVisible(true);
-                player.getMainHandStack().decrement(1);
+                if (!player.isCreative()) {
+                    player.getMainHandStack().decrement(1);
+                }
                 return true;
             }
         }
@@ -664,7 +682,9 @@ public class Chocobo extends AbstractChocobo {
             if (pStack == CHOCOBO_FEATHER.asItem()) {
                 if (isOwner(player)) {
                     this.setCustomNameVisible(!this.isCustomNameVisible());
-                    player.getMainHandStack().decrement(1);
+                    if (!player.isCreative()) {
+                        player.getMainHandStack().decrement(1);
+                    }
                     return true;
                 } else {
                     player.sendMessage(Text.translatable(DelChoco.DELCHOCO_ID + ".entity_chocobo.not_owner"), true);
@@ -715,7 +735,9 @@ public class Chocobo extends AbstractChocobo {
         if (getDyeList().contains(pStack)) {
             if (!Objects.equals(this.getCollarColor(), COLLAR_COLOR.get(pStack))) {
                 this.setCollarColor(COLLAR_COLOR.get(pStack));
-                player.getMainHandStack().decrement(1);
+                if (!player.isCreative()) {
+                    player.getMainHandStack().decrement(1);
+                }
                 return true;
             }
         }

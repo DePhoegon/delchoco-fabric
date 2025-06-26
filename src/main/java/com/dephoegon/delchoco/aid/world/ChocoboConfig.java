@@ -16,7 +16,6 @@ public class ChocoboConfig {
     public static final ForgeConfigSpec.ConfigValue<Integer> DEFAULT_HEALING;
     public static final ForgeConfigSpec.ConfigValue<Integer> MAX_HEALTH;
     public static final ForgeConfigSpec.ConfigValue<Integer> MAX_SPEED;
-    public static final ForgeConfigSpec.ConfigValue<Integer> MAX_STAMINA;
     public static final ForgeConfigSpec.ConfigValue<Integer> MAX_ATTACK;
     public static final ForgeConfigSpec.ConfigValue<Integer> MAX_ARMOR;
     public static final ForgeConfigSpec.ConfigValue<Integer> MAX_ARMOR_TOUGHNESS;
@@ -61,7 +60,6 @@ public class ChocoboConfig {
         BUILDER.push("Max Stats");
         MAX_HEALTH = BUILDER.comment("The Maximum Health a Chocobo can have. min 25, max 3000, default 200").defineInRange("Max Health", 200, 25, 3000);
         MAX_SPEED = BUILDER.comment("The Maximum Speed a Chocobo can have. min 30, max 160, default 60").defineInRange("Max Speed", 60, 20, 160);
-        MAX_STAMINA = BUILDER.comment("The Maximum Stamina a Chocobo can have. min 10, max 1024, default 200").defineInRange("Max Stamina", 200, 10, 1024);
         MAX_ATTACK = BUILDER.comment("The Maximum Strength a Chocobo can have. min 8, max 200, default 80").defineInRange("Max Attack", 80, 8, 200);
         MAX_ARMOR = BUILDER.comment("The Maximum Armor a Chocobo can have. min 20, max 500, default 200").defineInRange("Max Armor", 200, 20, 500);
         MAX_ARMOR_TOUGHNESS = BUILDER.comment("The Maximum Armor Toughness a Chocobo can have. min 8, max 200, default 40").defineInRange("Max ArmorToughness", 40, 8, 200);

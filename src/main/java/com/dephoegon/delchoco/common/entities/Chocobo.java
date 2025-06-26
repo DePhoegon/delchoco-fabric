@@ -3,7 +3,9 @@ package com.dephoegon.delchoco.common.entities;
 import com.dephoegon.delchoco.DelChoco;
 import com.dephoegon.delchoco.aid.world.ChocoboConfig;
 import com.dephoegon.delchoco.aid.world.WorldConfig;
+import com.dephoegon.delchoco.common.entities.breeding.ChocoboBreedInfo;
 import com.dephoegon.delchoco.common.entities.breeding.ChocoboMateGoal;
+import com.dephoegon.delchoco.common.entities.breeding.ChocoboStatSnapshot;
 import com.dephoegon.delchoco.common.entities.properties.*;
 import com.dephoegon.delchoco.common.entities.properties.MovementType;
 import com.dephoegon.delchoco.common.init.ModEntities;
@@ -24,7 +26,6 @@ import net.minecraft.entity.ai.brain.Brain;
 import net.minecraft.entity.ai.goal.*;
 import net.minecraft.entity.ai.pathing.PathNodeType;
 import net.minecraft.entity.attribute.DefaultAttributeContainer;
-import net.minecraft.entity.attribute.EntityAttributeModifier;
 import net.minecraft.entity.attribute.EntityAttributes;
 import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.entity.effect.StatusEffectInstance;
@@ -35,6 +36,7 @@ import net.minecraft.entity.mob.SilverfishEntity;
 import net.minecraft.entity.mob.SpiderEntity;
 import net.minecraft.entity.passive.AbstractHorseEntity;
 import net.minecraft.entity.passive.AnimalEntity;
+import net.minecraft.entity.passive.PassiveEntity;
 import net.minecraft.entity.passive.TameableEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.inventory.Inventory;
@@ -67,21 +69,19 @@ import static com.dephoegon.delchoco.aid.chocoKB.isChocoboWaterGlide;
 import static com.dephoegon.delchoco.aid.chocoboChecks.*;
 import static com.dephoegon.delchoco.aid.dyeList.getDyeList;
 import static com.dephoegon.delchoco.common.effects.ChocoboCombatEvents.flowerChance;
+import static com.dephoegon.delchoco.common.entities.breeding.BreedingHelper.getChicoboFromBreedInfo;
 import static com.dephoegon.delchoco.common.entities.breeding.BreedingHelper.getChocoName;
 import static com.dephoegon.delchoco.common.entities.properties.ChocoboBrainAid.invalidRevengeTargets;
 import static com.dephoegon.delchoco.common.entities.properties.ChocoboBrainAid.validRevengeAllies;
 import static com.dephoegon.delchoco.common.init.ModItems.*;
 import static com.dephoegon.delchoco.common.inventory.ChocoboEquipmentSlot.*;
-import static java.lang.Math.floor;
-import static java.lang.Math.random;
+import static java.lang.Math.*;
 import static net.minecraft.entity.SpawnGroup.CREATURE;
 import static net.minecraft.item.Items.*;
 import static net.minecraft.registry.tag.BiomeTags.IS_BADLANDS;
 import static net.minecraft.registry.tag.BiomeTags.IS_FOREST;
 
 public class Chocobo extends AbstractChocobo {
-    protected static final EntityAttributeModifier CHOCOBO_SPRINTING_SPEED_BOOST = (new EntityAttributeModifier(CHOCOBO_SPRINTING_BOOST_ID, "Chocobo sprinting speed boost", 0.5, EntityAttributeModifier.Operation.MULTIPLY_TOTAL));
-
     // Inventory Related
     public final ChocoboInventory chocoboInventory = new ChocoboInventory(top_tier_chocobo_inv_slot_count, this);
     public final ChocoboGearInventory chocoboGearInventory = new ChocoboGearInventory(this);
@@ -89,8 +89,6 @@ public class Chocobo extends AbstractChocobo {
 
     // Chocobo Related
     protected void dropLoot(@NotNull DamageSource source, boolean causedByPlayer)  {
-        // Drop saddle, weapon, armor, and main inventory.
-        // The items in the equipment slots (MAINHAND, CHEST) are phantom and will not drop.
         this.inventoryDropClear(this.chocoboInventory, this);
         this.inventoryDropClear(this.chocoboGearInventory, this);
 
@@ -103,7 +101,6 @@ public class Chocobo extends AbstractChocobo {
         }
         inventory.clear();
     }
-    @Override
     public void onSaddleChanged() {
         if (this.getWorld().isClient()) { return; } // should only run on the server side
         super.onSaddleChanged();
@@ -161,6 +158,7 @@ public class Chocobo extends AbstractChocobo {
 
         this.goalSelector.add(1, new MeleeAttackGoal(this,2F, false));
         this.goalSelector.add(2, new ChocoboMateGoal(this, 1.0D));
+        this.goalSelector.add(3, new FollowParentGoal(this, 1.1D));
         this.targetSelector.add(1, new TrackOwnerAttackerGoal(this));
         this.targetSelector.add(2, new AttackWithOwnerGoal(this));
         this.targetSelector.add(3, new RevengeGoal(this, invalidRevengeTargets(this.canWalkOnWater())).setGroupRevenge(validRevengeAllies()));
@@ -185,6 +183,7 @@ public class Chocobo extends AbstractChocobo {
         super.initDataTracker();
         // Moved to AbstractChocobo Left in Override for future use
     }
+
     public void readCustomDataFromNbt(@NotNull NbtCompound compound) {
         this.fromNBT = true;
         this.dataTracker.set(PARAM_CHOCOBO_PROPERTIES, compound.getInt(NBTKEY_CHOCOBO_PROPERTIES));
@@ -207,7 +206,6 @@ public class Chocobo extends AbstractChocobo {
         this.writeAngerToNbt(compound);
         super.writeCustomDataToNbt(compound);
     }
-
     public void ChocoboInventoryToNBT(NbtCompound compound) {
         NbtList nbtList = new NbtList();
         for (int i = 0; i < this.chocoboInventory.size(); ++i) {
@@ -234,7 +232,7 @@ public class Chocobo extends AbstractChocobo {
         }
         if (!nbtList.isEmpty()) { compound.put(NBTKEY_INVENTORY_GEAR, nbtList); }
     }
-    public void ChocoboInventoryFromNBT(NbtCompound compound) {
+    public void ChocoboInventoryFromNBT(@NotNull NbtCompound compound) {
         if (compound.contains(NBTKEY_INVENTORY, 9)) { // 9 = NbtList.getType()
             NbtList nbtList = compound.getList(NBTKEY_INVENTORY, 10); // 10 = NbtCompound.getType()
             this.chocoboInventory.clear();
@@ -247,7 +245,7 @@ public class Chocobo extends AbstractChocobo {
             }
         }
     }
-    public void ChocoboGearInventoryFromNBT(NbtCompound compound) {
+    public void ChocoboGearInventoryFromNBT(@NotNull NbtCompound compound) {
         if (compound.contains(NBTKEY_INVENTORY_GEAR, 9)) { // 9 = NbtList.getType()
             NbtList nbtList = compound.getList(NBTKEY_INVENTORY_GEAR, 10); // 10 = NbtCompound.getType()
             this.chocoboGearInventory.clear();
@@ -261,7 +259,6 @@ public class Chocobo extends AbstractChocobo {
         }
     }
     // Leashing
-
 
     // Spawn/Breeding Related
     @Nullable
@@ -305,6 +302,23 @@ public class Chocobo extends AbstractChocobo {
             }
         }
         return super.initialize(worldIn, difficultyIn, reason, spawnDataIn, dataTag);
+    }
+    public PassiveEntity createChild(ServerWorld world, PassiveEntity other) {
+        if (!(other instanceof Chocobo)) {
+            DelChoco.LOGGER.warn("Chocobo breeding failed: Other entity is not a Chocobo!");
+            return null;
+        }
+        Chocobo mother, father;
+        if (this.isMale() != ((Chocobo)other).isMale()) {
+            if (this.isMale()) { return ((Chocobo)other).createChild(world, this); }  // Ensure the mother is always the one calling the method.
+            else {
+                mother = this;
+                father = ((Chocobo)other);
+            }
+        } else { return null; } // Cannot breed if both parents are the same
+        // Only allowed to run on the Mother Chocobo
+        ChocoboBreedInfo breedInfo = new ChocoboBreedInfo(new ChocoboStatSnapshot(mother), new ChocoboStatSnapshot(father));
+        return getChicoboFromBreedInfo(breedInfo, world);
     }
 
     // Combat related
@@ -623,8 +637,8 @@ public class Chocobo extends AbstractChocobo {
             this.onSaddleChanged();
             return true;
         }
-        if (pStack instanceof ChocoboArmorItems armor) {
-            EquipmentSlot slotType = armor.getSlotType();
+        if (pStack instanceof ChocoboArmorItems armorItem) {
+            EquipmentSlot slotType = armorItem.getSlotType();
             if (slotType == EquipmentSlot.CHEST && !this.isArmored()) {
                 this.chocoboGearInventory.setStack(ARMOR_SLOT, stack.copy().split(1));
                 if (!player.isCreative()) { player.getMainHandStack().decrement(1); }
@@ -905,7 +919,6 @@ public class Chocobo extends AbstractChocobo {
         }
         return new int[]{wildCount, tamedCount};
     }
-
     public void checkDespawn() {
         // Standard despawn logic
         if (this.getWorld().getDifficulty() == Difficulty.PEACEFUL && this.isDisallowedInPeaceful()) {

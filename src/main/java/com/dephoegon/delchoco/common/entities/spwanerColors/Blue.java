@@ -11,10 +11,10 @@ import net.minecraft.nbt.NbtCompound;
 import net.minecraft.world.LocalDifficulty;
 import net.minecraft.world.ServerWorldAccess;
 import net.minecraft.world.World;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import static com.dephoegon.delchoco.common.init.ModItems.BLACK_CHOCOBO_SPAWN_EGG;
-import static com.dephoegon.delchoco.common.init.ModItems.YELLOW_CHOCOBO_SPAWN_EGG;
 
 public class Blue extends Chocobo {
     public Blue(EntityType<? extends Chocobo> entityType, World world) {
@@ -24,11 +24,11 @@ public class Blue extends Chocobo {
         this.setChocobo(ChocoboColor.BLUE);
         return super.initialize(worldIn, difficultyIn, SpawnReason.SPAWNER, spawnDataIn, dataTag);
     }
-    public void writeCustomDataToNbt(NbtCompound compound) {
+    public void writeCustomDataToNbt(@NotNull NbtCompound compound) {
+        this.setChocoboColor(ChocoboColor.BLUE); // Ensure the color is set before writing
         super.writeCustomDataToNbt(compound);
-        compound.putByte(NBTKEY_CHOCOBO_COLOR, (byte) ChocoboColor.BLUE.ordinal());
     }
-    public void readCustomDataFromNbt(NbtCompound compound) {
+    public void readCustomDataFromNbt(@NotNull NbtCompound compound) {
         super.readCustomDataFromNbt(compound);
         this.setChocoboColor(ChocoboColor.BLUE);
     }

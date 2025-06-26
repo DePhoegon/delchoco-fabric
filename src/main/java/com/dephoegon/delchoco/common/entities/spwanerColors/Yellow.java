@@ -11,6 +11,7 @@ import net.minecraft.nbt.NbtCompound;
 import net.minecraft.world.LocalDifficulty;
 import net.minecraft.world.ServerWorldAccess;
 import net.minecraft.world.World;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import static com.dephoegon.delchoco.common.init.ModItems.YELLOW_CHOCOBO_SPAWN_EGG;
@@ -23,11 +24,11 @@ public class Yellow extends Chocobo {
         this.setChocobo(ChocoboColor.YELLOW);
         return super.initialize(worldIn, difficultyIn, SpawnReason.SPAWNER, spawnDataIn, dataTag);
     }
-    public void writeCustomDataToNbt(NbtCompound compound) {
+    public void writeCustomDataToNbt(@NotNull NbtCompound compound) {
+        this.setChocoboColor(ChocoboColor.YELLOW);
         super.writeCustomDataToNbt(compound);
-        compound.putByte(NBTKEY_CHOCOBO_COLOR, (byte) ChocoboColor.YELLOW.ordinal());
     }
-    public void readCustomDataFromNbt(NbtCompound compound) {
+    public void readCustomDataFromNbt(@NotNull NbtCompound compound) {
         super.readCustomDataFromNbt(compound);
         this.setChocoboColor(ChocoboColor.YELLOW);
     }

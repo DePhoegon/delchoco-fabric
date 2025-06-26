@@ -35,7 +35,6 @@ import net.minecraft.entity.effect.StatusEffectInstance;
 import net.minecraft.entity.effect.StatusEffects;
 import net.minecraft.entity.mob.*;
 import net.minecraft.entity.passive.IronGolemEntity;
-import net.minecraft.entity.passive.PassiveEntity;
 import net.minecraft.entity.passive.TameableEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.fluid.Fluid;
@@ -71,7 +70,6 @@ import java.util.*;
 import static com.dephoegon.delbase.item.ShiftingDyes.*;
 import static com.dephoegon.delchoco.aid.chocoboChecks.isWaterBreathingChocobo;
 import static com.dephoegon.delchoco.aid.chocoboChecks.isWitherImmuneChocobo;
-import static com.dephoegon.delchoco.common.entities.Chocobo.CHOCOBO_SPRINTING_SPEED_BOOST;
 import static com.dephoegon.delchoco.common.entities.breeding.ChocoboSnap.setChocoScale;
 import static com.dephoegon.delchoco.common.entities.properties.ChocoboBrainAid.requiresSwimmingToTarget;
 import static com.dephoegon.delchoco.common.init.ModItems.*;
@@ -176,8 +174,6 @@ public abstract class AbstractChocobo extends TameableEntity implements Angerabl
     protected static final TrackedData<BlockPos> PARAM_LEASH_BLOCK = DataTracker.registerData(AbstractChocobo.class, TrackedDataHandlerRegistry.BLOCK_POS);
     protected static final TrackedData<Integer> PARAM_LEASH_LENGTH = DataTracker.registerData(AbstractChocobo.class, TrackedDataHandlerRegistry.INTEGER);
 
-
-
     // Hardcoded Chocobo Values
     public static final int tier_one_chocobo_inv_slot_count = 15; // 3*5
     public static final int tier_two_chocobo_inv_slot_count = 45; //5*9
@@ -199,27 +195,19 @@ public abstract class AbstractChocobo extends TameableEntity implements Angerabl
     protected static final UUID CHOCOBO_LEGS_ARMOR_TOUGH_MOD_UUID = UUID.fromString("07dcb185-7182-4a28-83ae-d1a2de9c022d");
     protected static final UUID CHOCOBO_FEET_ARMOR_MOD_UUID = UUID.fromString("103d8021-8839-4377-ac23-ed723ece6454");
     protected static final UUID CHOCOBO_FEET_ARMOR_TOUGH_MOD_UUID = UUID.fromString("17dcb185-7182-4a28-83ae-d1a2de9c022d");
+    protected static final EntityAttributeModifier CHOCOBO_SPRINTING_SPEED_BOOST = (new EntityAttributeModifier(CHOCOBO_SPRINTING_BOOST_ID, "Chocobo sprinting speed boost", 0.5, EntityAttributeModifier.Operation.MULTIPLY_TOTAL));
 
 
-    protected AbstractChocobo(EntityType<? extends TameableEntity> entityType, World world) {
-        super(entityType, world);
-    }
+    protected AbstractChocobo(EntityType<? extends TameableEntity> entityType, World world) { super(entityType, world); }
 
-    @Override
     public void travel(@NotNull Vec3d travelInput) {
         if (this.isAlive() && this.isSubmergedInWater() && this.isWaterBreathing()) {
             this.updateVelocity(this.getMovementSpeed(), travelInput);
             this.move(SELF, this.getVelocity());
             this.setVelocity(this.getVelocity().multiply(0.9D));
-        } else {
-            super.travel(travelInput);
-        }
+        } else { super.travel(travelInput); }
     }
-
-    @Override
-    protected EntityNavigation createNavigation(World world) {
-        return new ChocoboAmphibiousSwimNavigation(this, world);
-    }
+    protected EntityNavigation createNavigation(World world) { return new ChocoboAmphibiousSwimNavigation(this, world); }
 
     // Initialization of DataTracker for all Chocobo types
     protected void initDataTracker() {
@@ -238,8 +226,6 @@ public abstract class AbstractChocobo extends TameableEntity implements Angerabl
         this.dataTracker.startTracking(PARAM_FEET_ITEM, ItemStack.EMPTY);
         super.initDataTracker();
     }
-
-    @Override
     public void writeCustomDataToNbt(NbtCompound nbt) {
         // Keep Leash related and if statements controlled Writes together for clarity
         if (!this.getLeashSpot().equals(new BlockPos(0, 50000, 0))) { nbt.put(NBTKEY_CHOCOBO_LEASH_BLOCK, NbtHelper.fromBlockPos(this.getLeashSpot())); }
@@ -252,8 +238,6 @@ public abstract class AbstractChocobo extends TameableEntity implements Angerabl
         if (!this.getFeetArmor().isEmpty()) { nbt.put(NBTKEY_FEET_ITEM, this.getFeetArmor().writeNbt(new NbtCompound())); }
         super.writeCustomDataToNbt(nbt);
     }
-
-    @Override
     public void readCustomDataFromNbt(NbtCompound nbt) {
         // Keep Leash related and if statements controlled Reads together for clarity
         if (nbt.contains(NBTKEY_CHOCOBO_LEASH_BLOCK)) { this.setLeashSpot(NbtHelper.toBlockPos(nbt.getCompound(NBTKEY_CHOCOBO_LEASH_BLOCK))); }
@@ -267,8 +251,6 @@ public abstract class AbstractChocobo extends TameableEntity implements Angerabl
         super.readCustomDataFromNbt(nbt);
         this.lastSaddleStack = this.getSaddle().copy();
     }
-
-    @Override
     public void onTrackedDataSet(TrackedData<?> data) {
         if (!this.firstUpdate) {
             if (PARAM_SADDLE_ITEM.equals(data)) {
@@ -291,7 +273,6 @@ public abstract class AbstractChocobo extends TameableEntity implements Angerabl
         }
         super.onTrackedDataSet(data);
     }
-
     public void onSaddleChanged() { }
 
     // hook for Chocobo types, left for override
@@ -442,7 +423,6 @@ public abstract class AbstractChocobo extends TameableEntity implements Angerabl
         super.applyDamageEffects(attacker, target);
     }
     public boolean canBeLeashedBy(PlayerEntity player) { return false; }
-    public PassiveEntity createChild(ServerWorld world, PassiveEntity entity) { return null; }
     protected void dropLoot(@NotNull DamageSource source, boolean causedByPlayer) {
         // Left uncompacted for readability and future expansion
         super.dropLoot(source, causedByPlayer);
@@ -691,7 +671,6 @@ public abstract class AbstractChocobo extends TameableEntity implements Angerabl
             }
         }
     }
-
     public void setChocoboArmorStats(ItemStack pStack) {
         if (!this.getWorld().isClient()) {
             Objects.requireNonNull(this.getAttributeInstance(EntityAttributes.GENERIC_ARMOR)).removeModifier(CHOCOBO_CHEST_ARMOR_MOD_UUID);
@@ -791,7 +770,6 @@ public abstract class AbstractChocobo extends TameableEntity implements Angerabl
         ChocoboColor chocobo = this.getChocoboColor();
         if ((chocobo == ChocoboColor.YELLOW || color == ChocoboColor.YELLOW) && chocobo != color) { setChocobo(color); }
     }
-
 
     // Helper methods for Chocobos
     public void updateWaterNavPenalties() {
@@ -934,7 +912,7 @@ public abstract class AbstractChocobo extends TameableEntity implements Angerabl
             case armorTough -> statPlus(EntityAttributes.GENERIC_ARMOR_TOUGHNESS, ChocoboConfig.MAX_ARMOR_TOUGHNESS.get(), key, playerEntity, chocobo, amountIncrease);
         }
     }
-    private void statPlus(EntityAttribute stat, double max, String key, PlayerEntity playerEntity, Chocobo chocobo, int amountIncrease) {
+    private void statPlus(EntityAttribute stat, double max, String key, @NotNull PlayerEntity playerEntity, Chocobo chocobo, int amountIncrease) {
         if (playerEntity.getWorld().isClient()) { return; }
         if (chocobo == null || stat == null || key == null) return; // Ensure stat, player, Chocobo, and key are not null
         double currentValue = chocobo.getAttributeInstance(stat) != null ? Objects.requireNonNull(chocobo.getAttributeInstance(stat)).getValue() : -10;
@@ -1114,7 +1092,7 @@ public abstract class AbstractChocobo extends TameableEntity implements Angerabl
             this.ticksUntilNextAlert = ALERT_INTERVAL.get(alertingChocobo.random);
         }
     }
-    protected void alertChocobo(Chocobo chocobo, LivingEntity attacker) {
+    protected void alertChocobo(@NotNull Chocobo chocobo, LivingEntity attacker) {
         // kept in for unique Chocobo Checks unable to be done in AbstractChocobo (Brains)
         //chocobo.getBrain().remember(MemoryModuleType.ATTACK_TARGET, attacker, 50L);
         chocobo.setTarget(attacker);

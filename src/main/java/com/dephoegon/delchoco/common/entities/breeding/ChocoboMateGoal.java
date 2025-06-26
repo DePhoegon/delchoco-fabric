@@ -1,15 +1,17 @@
 package com.dephoegon.delchoco.common.entities.breeding;
 
 import com.dephoegon.delchoco.common.entities.Chocobo;
+import net.minecraft.entity.ExperienceOrbEntity;
 import net.minecraft.entity.ai.goal.Goal;
-import net.minecraft.particle.ParticleTypes;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.random.Random;
+import net.minecraft.server.world.ServerWorld;
+import net.minecraft.world.GameRules;
 import net.minecraft.world.World;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.EnumSet;
 import java.util.List;
+
+import static java.lang.Math.random;
 
 public class ChocoboMateGoal extends Goal {
     private final Chocobo chocobo;
@@ -34,7 +36,7 @@ public class ChocoboMateGoal extends Goal {
         this.chocobo.getLookControl().lookAt(this.targetMate, 10.0F, (float) this.chocobo.getMaxLookPitchChange());
         this.chocobo.getNavigation().startMovingTo(this.targetMate, this.moveSpeed);
         ++this.spawnBabyDelay;
-        if (this.spawnBabyDelay >= 60 && this.chocobo.squaredDistanceTo(this.targetMate) < 9.0D) { this.spawnEgg(); }
+        if (this.spawnBabyDelay >= 60 && this.chocobo.squaredDistanceTo(this.targetMate) < 9.0D) { this.spawnChicobo(); }
     }
     private Chocobo getNearbyMate() {
         List<Chocobo> list = this.world.getNonSpectatingEntities(Chocobo.class, this.chocobo.getBoundingBox().expand(8.0D));
@@ -48,28 +50,27 @@ public class ChocoboMateGoal extends Goal {
         }
         return closestMate;
     }
-    private void spawnEgg() {
-        if (this.chocobo.isMale()) return;
+    private void spawnChicobo() {
+        if (this.chocobo.isMale() && ((int)(random()*(100)+1)) <= 85) { return; } // ~15% chance of bonus chicobo.
         this.chocobo.setBreedingAge(6000);
         this.targetMate.setBreedingAge(6000);
         this.chocobo.resetLoveTicks();
         this.targetMate.resetLoveTicks();
 
-        BlockPos pos = this.chocobo.getBlockPos();
-        ChocoboBreedInfo breedInfo = new ChocoboBreedInfo(new ChocoboStatSnapshot(this.chocobo), new ChocoboStatSnapshot(this.targetMate));
-        Chocobo baby = BreedingHelper.createChild(breedInfo, this.world);
-        assert baby != null;
-        baby.updatePositionAndAngles(pos.getX() + 0.5, pos.getY() + 0.2, pos.getZ() + 0.5, 0.0F, 0.0F);
-        this.world.spawnEntity(baby);
-        Random random = baby.getRandom();
-        for (int i = 0; i < 7; ++i) {
-            double d0 = random.nextGaussian() * 0.02D;
-            double d1 = random.nextGaussian() * 0.02D;
-            double d2 = random.nextGaussian() * 0.02D;
-            double d3 = random.nextDouble() * baby.getWidth() * 2.0D - baby.getWidth();
-            double d4 = 0.5D + random.nextDouble() * baby.getHeight();
-            double d5 = random.nextDouble() * baby.getWidth() * 2.0D - baby.getWidth();
-            this.world.addParticle(ParticleTypes.HEART, baby.getX() + d3, baby.getY() + d4, baby.getZ() + d5, d0, d1, d2);
+        ServerWorld serverWorld = (ServerWorld) this.world;
+        Chocobo baby = (Chocobo) this.chocobo.createChild(serverWorld, this.targetMate); // Create a baby Chocobo from the parents, safely casting to/from PassiveEntity
+        if (baby != null) {
+            this.chocobo.setBreedingAge(6000);
+            this.targetMate.setBreedingAge(6000);
+            this.chocobo.resetLoveTicks();
+            this.targetMate.resetLoveTicks();
+            baby.setBreedingAge(-24000);
+            baby.refreshPositionAndAngles(this.chocobo.getX(), this.chocobo.getY(), this.chocobo.getZ(), 0.0f, 0.0f);
+            this.world.spawnEntity(baby);
+            this.world.sendEntityStatus(this.chocobo, (byte)18);
+            if (this.world.getGameRules().getBoolean(GameRules.DO_MOB_LOOT)) {
+                this.world.spawnEntity(new ExperienceOrbEntity(this.world, this.chocobo.getX(), this.chocobo.getY(), this.chocobo.getZ(), this.chocobo.getRandom().nextInt(7) + 1));
+            }
         }
     }
 }

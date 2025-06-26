@@ -1,7 +1,6 @@
 package com.dephoegon.delchoco.common.commands;
 
 import com.dephoegon.delchoco.common.entities.Chocobo;
-import com.dephoegon.delchoco.common.init.ModAttributes;
 import com.dephoegon.delchoco.common.teamColors;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
@@ -113,7 +112,6 @@ public class chocoboTeams {
                 source.sendFeedback(() -> getText("get_health", chocobo, EntityAttributes.GENERIC_MAX_HEALTH), false);
                 source.sendFeedback(() -> getText("get_resistance", chocobo, EntityAttributes.GENERIC_ARMOR), false);
                 source.sendFeedback(() -> getText("get_speed", chocobo, EntityAttributes.GENERIC_MOVEMENT_SPEED), false);
-                source.sendFeedback(() -> getText("get_stamina", chocobo, ModAttributes.CHOCOBO_STAMINA), false);
                 source.sendFeedback(() -> getText("get_attack", chocobo, EntityAttributes.GENERIC_ATTACK_DAMAGE), false);
                 source.sendFeedback(() -> getText(chocobo.getGenerationString()), false);
             }

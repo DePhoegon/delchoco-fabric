@@ -71,9 +71,7 @@ public class ChocoboRenderer extends MobEntityRenderer<Chocobo, EntityModel<Choc
         this.model = chocobo.isBaby() ? chicoboModel : chocoboModel;
         if (showChocobo(chocobo)) {
             float factor = chocobo.getChocoboScale() == 0 ? 1 : Math.max(chocobo.getChocoboScaleMod(), .85F);
-            if (factor < .86F) {
-                chocobo.setChocoboScale(true, -15, true);
-            }
+            if (factor < .86F) { chocobo.setChocoboScale(true, -15, true); }
             matrixStack.scale(factor, factor, factor);
             super.render(chocobo, entityYaw, partialTicks, matrixStack, bufferSource, packedLight);
         }

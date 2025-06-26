@@ -5,7 +5,9 @@
   "mixins": [
     "MixinLivingEntity",
     "PlayerEntityMixin",
-    "ServerPlayerEntityAccessor"
+    "ServerPlayerEntityAccessor",
+    "SweepingEnchantmentMixin",
+    "LivingEntityChocoboSweepMixin"
   ],
   "client": [
     "ClientPlayNetworkHandlerMixin"

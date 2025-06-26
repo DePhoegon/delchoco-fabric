@@ -2,9 +2,7 @@ package com.dephoegon.delchoco.mixin;
 
 import com.dephoegon.delchoco.client.gui.ChocoInventoryScreen;
 import com.dephoegon.delchoco.common.entities.Chocobo;
-import com.dephoegon.delchoco.common.inventory.SaddlebagContainer;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
+import com.dephoegon.delchoco.common.inventory.ChocoboScreenHandler;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.ClientPlayNetworkHandler;
 import net.minecraft.client.network.ClientPlayerEntity;
@@ -31,7 +29,7 @@ public class ClientPlayNetworkHandlerMixin {
         if (entity instanceof Chocobo chocobo) {
             ClientPlayerEntity clientPlayerEntity = this.client.player;
             assert clientPlayerEntity != null;
-            SaddlebagContainer saddlebagContainer = new SaddlebagContainer(packet.getSyncId(), clientPlayerEntity.getInventory(), chocobo);
+            ChocoboScreenHandler saddlebagContainer = new ChocoboScreenHandler(packet.getSyncId(), clientPlayerEntity.getInventory(), chocobo);
             clientPlayerEntity.currentScreenHandler = saddlebagContainer;
             this.client.setScreen(new ChocoInventoryScreen(saddlebagContainer, clientPlayerEntity.getInventory(), chocobo));
         }

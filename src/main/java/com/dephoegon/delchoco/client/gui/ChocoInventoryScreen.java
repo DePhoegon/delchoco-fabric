@@ -3,36 +3,27 @@ package com.dephoegon.delchoco.client.gui;
 import com.dephoegon.delchoco.DelChoco;
 import com.dephoegon.delchoco.common.entities.Chocobo;
 import com.dephoegon.delchoco.common.init.ModItems;
-import com.dephoegon.delchoco.common.inventory.SaddlebagContainer;
-import net.minecraft.client.MinecraftClient;
+import com.dephoegon.delchoco.common.inventory.ChocoboScreenHandler;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.ingame.HandledScreen;
-import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.Identifier;
 import org.jetbrains.annotations.NotNull;
 
-public class ChocoInventoryScreen extends HandledScreen<SaddlebagContainer> {
+public class ChocoInventoryScreen extends HandledScreen<ChocoboScreenHandler> {
     private static final Identifier INV_TEXTURE_NULL = new Identifier(DelChoco.DELCHOCO_ID, "textures/gui/chocobo_inventory_null.png");
     private static final Identifier INV_TEXTURE_SMALL = new Identifier(DelChoco.DELCHOCO_ID, "textures/gui/chocobo_inventory_small.png");
     private static final Identifier INV_TEXTURE_LARGE = new Identifier(DelChoco.DELCHOCO_ID, "textures/gui/chocobo_inventory_large.png");
     private static final int xAdjust = (4*18+16)+5; // (Additional Sizes for slots) + Border buffer
     private final Chocobo chocobo;
 
-    public ChocoInventoryScreen(SaddlebagContainer handler, PlayerInventory inventory, @NotNull Chocobo chocobo) {
+    public ChocoInventoryScreen(ChocoboScreenHandler handler, PlayerInventory inventory, @NotNull Chocobo chocobo) {
         super(handler, inventory, chocobo.getDisplayName());
         this.backgroundWidth = 176;
         this.backgroundHeight = 204;
         this.chocobo = chocobo;
-    }
-    public static void openInventory(int windowId, Chocobo chocobo) {
-        PlayerEntity player = MinecraftClient.getInstance().player;
-        assert player != null;
-        SaddlebagContainer saddleContainer = new SaddlebagContainer(windowId, player.getInventory(), chocobo);
-        player.currentScreenHandler = saddleContainer;
-        MinecraftClient.getInstance().setScreen(new ChocoInventoryScreen(saddleContainer, player.getInventory(), chocobo));
     }
     protected void drawBackground(DrawContext context, float delta, int mouseX, int mouseY) {
         Identifier out;

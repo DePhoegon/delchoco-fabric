@@ -79,9 +79,9 @@ public class ChocoDisguiseItem extends ArmorItem implements GeoItem {
     public static @NotNull Identifier setCustomModel(String customModelData, @NotNull ChocoDisguiseItem armorItem) {
         ArmorMaterial armor = armorItem.getMaterial();
         String folder = "textures/models/armor/leather/";
-        if (armor == IRON_CHOCO_DISGUISE) { folder = "textures/models/armor/iron/"; }
-        if (armor == DIAMOND_CHOCO_DISGUISE) { folder = "textures/models/armor/diamond/"; }
-        if (armor == NETHERITE_CHOCO_DISGUISE) { folder = "textures/models/armor/netherite/"; }
+        if (armor == IRON_CHOCO_DISGUISE || armor == REINFORCED_IRON_CHOCO_DISGUISE) { folder = "textures/models/armor/iron/"; }
+        if (armor == DIAMOND_CHOCO_DISGUISE || armor == REINFORCED_DIAMOND_CHOCO_DISGUISE) { folder = "textures/models/armor/diamond/"; }
+        if (armor == NETHERITE_CHOCO_DISGUISE || armor == REINFORCED_NETHERITE_CHOCO_DISGUISE || armor == GILDED_NETHERITE_CHOCO_DISGUISE) { folder = "textures/models/armor/netherite/"; }
         String check = folder;
         if (customModelData.equals(green)) { folder = folder + "green.png"; }
         if (customModelData.equals(pink)) { folder = folder + "pink.png"; }
@@ -270,3 +270,4 @@ public class ChocoDisguiseItem extends ArmorItem implements GeoItem {
         return this.renderProvider;
     }
 }
+

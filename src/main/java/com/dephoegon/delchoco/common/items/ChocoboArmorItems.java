@@ -1,5 +1,6 @@
 package com.dephoegon.delchoco.common.items;
 
+import com.dephoegon.delchoco.aid.TieredMaterials;
 import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
@@ -7,38 +8,33 @@ import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.entity.attribute.EntityAttribute;
 import net.minecraft.entity.attribute.EntityAttributeModifier;
 import net.minecraft.entity.attribute.EntityAttributes;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.*;
-import net.minecraft.sound.SoundEvent;
-import net.minecraft.util.Hand;
-import net.minecraft.util.TypedActionResult;
+import net.minecraft.item.ArmorItem;
+import net.minecraft.item.ArmorMaterial;
+import net.minecraft.item.Item;
 import net.minecraft.util.Util;
-import net.minecraft.world.World;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.Map;
 import java.util.UUID;
 
-public class ChocoboArmorItems extends Item implements Equipment {
-    private static final UUID CHOCO_ARMOR_SLOT = UUID.fromString("02a4a813-7afd-4073-bf47-6dcffdf18fca");
-    protected final ArmorItem.Type type;
-    private final int defense;
-    private final float toughness;
-    protected final float knockBackResistance;
-    protected final ArmorMaterial material;
-    private final int enchantmentValue;
-    private final Multimap<EntityAttribute, EntityAttributeModifier> defaultModifiers;
+public class ChocoboArmorItems extends ArmorItem {
+    private static final UUID[] ARMOR_MODIFIERS = new UUID[]{UUID.fromString("845DB27C-C624-495F-8C9F-6020A9A58B6B"), UUID.fromString("D8499B04-0E66-4726-AB29-64469D734E0D"), UUID.fromString("9F3D476D-C118-4544-8365-64846904B48E"), UUID.fromString("2AD3F246-FEE1-4E67-B886-69FD380BB150")};
+    private final Multimap<EntityAttribute, EntityAttributeModifier> customModifiers;
     public static final Map<Integer, ArmorMaterial> CHOCOBO_ARMOR_MATERIALS = Util.make(Maps.newHashMap(), (map) -> {
-       map.put(1, ArmorMaterials.CHAIN);
-       map.put(2, ArmorMaterials.IRON);
-       map.put(3, ArmorMaterials.DIAMOND);
-       map.put(4, ArmorMaterials.NETHERITE);
+       map.put(1, TieredMaterials.ChocoboArmorTiers.CHAIN);
+       map.put(2, TieredMaterials.ChocoboArmorTiers.REINFORCED_CHAIN);
+       map.put(3, TieredMaterials.ChocoboArmorTiers.IRON);
+       map.put(4, TieredMaterials.ChocoboArmorTiers.REINFORCED_IRON);
+       map.put(5, TieredMaterials.ChocoboArmorTiers.DIAMOND);
+       map.put(6, TieredMaterials.ChocoboArmorTiers.REINFORCED_DIAMOND);
+       map.put(7, TieredMaterials.ChocoboArmorTiers.NETHERITE);
+       map.put(8, TieredMaterials.ChocoboArmorTiers.REINFORCED_NETHERITE);
+       map.put(9, TieredMaterials.ChocoboArmorTiers.GILDED_NETHERITE);
     });
-    private static final Map<ArmorMaterial, Integer> CHOCOBO_ARMOR_MATERIAL = Util.make(Maps.newHashMap(), (map) -> {for (int i = 0; !(i > CHOCOBO_ARMOR_MATERIALS.size()); i++) { map.put(CHOCOBO_ARMOR_MATERIALS.get(i), i); }});
+    private static final Map<ArmorMaterial, Integer> CHOCOBO_ARMOR_MATERIAL = Util.make(Maps.newHashMap(), (map) -> {for (int i = 1; i <= CHOCOBO_ARMOR_MATERIALS.size(); i++) { map.put(CHOCOBO_ARMOR_MATERIALS.get(i), i); }});
     private static final float setMod = 2.5F;
 
-    private static int totalArmorMaterialDefence(ArmorMaterial armor, ArmorItem.Type slot, int additive, boolean initialMaterial) {
+    private static int totalArmorMaterialDefence(ArmorMaterial armor, Type slot, int additive, boolean initialMaterial) {
         int out = initialMaterial ? armor.getProtection(slot) + additive : (armor.getProtection(slot) / 2) + additive;
         int nextLowestArmor = CHOCOBO_ARMOR_MATERIAL.get(armor)-1;
         return nextLowestArmor > 0 ? totalArmorMaterialDefence(CHOCOBO_ARMOR_MATERIALS.get(nextLowestArmor), slot, out, false) : out;
@@ -53,44 +49,28 @@ public class ChocoboArmorItems extends Item implements Equipment {
         int nextLowestArmor = CHOCOBO_ARMOR_MATERIAL.get(armor)-1;
         return nextLowestArmor > 0 ? totalArmorMaterialKnockBackResistance(CHOCOBO_ARMOR_MATERIALS.get(nextLowestArmor), out) : out;
     }
-    public ChocoboArmorItems(@NotNull ArmorMaterial pMaterial, ArmorItem.Type pSlot, Item.@NotNull Settings settings) {
-        super(settings.maxDamage(pMaterial.getDurability(pSlot)));
-        this.material = pMaterial;
-        this.type = pSlot;
-        this.defense = totalArmorMaterialDefence(pMaterial, pSlot, 0, true);
-        this.toughness = totalArmorMaterialToughness(pMaterial, 0, true);
-        this.enchantmentValue = pMaterial.getEnchantability();
-        this.knockBackResistance = totalArmorMaterialKnockBackResistance(pMaterial, 0);
+    public ChocoboArmorItems(@NotNull ArmorMaterial pMaterial, Type pSlot, Item.@NotNull Settings settings) {
+        super(pMaterial, pSlot, settings);
+        int defense = totalArmorMaterialDefence(pMaterial, pSlot, 0, true);
+        float toughness = totalArmorMaterialToughness(pMaterial, 0, true);
+        float knockBackResistance = totalArmorMaterialKnockBackResistance(pMaterial, 0);
         ImmutableMultimap.Builder<EntityAttribute, EntityAttributeModifier> builder = ImmutableMultimap.builder();
-        UUID uuid = CHOCO_ARMOR_SLOT;
-        builder.put(EntityAttributes.GENERIC_ARMOR, new EntityAttributeModifier(uuid, "Armor modifier", this.defense, EntityAttributeModifier.Operation.ADDITION));
-        builder.put(EntityAttributes.GENERIC_ARMOR_TOUGHNESS, new EntityAttributeModifier("Armor toughness", this.toughness, EntityAttributeModifier.Operation.ADDITION));
-        if (this.knockBackResistance > 0) { builder.put(EntityAttributes.GENERIC_KNOCKBACK_RESISTANCE, new EntityAttributeModifier(uuid, "Armor knockback resistance", this.knockBackResistance, EntityAttributeModifier.Operation.ADDITION)); }
-        this.defaultModifiers = builder.build();
-    }
-    public EquipmentSlot getSlotType() { return this.type.getEquipmentSlot(); }
-    public int getEnchantability() { return this.enchantmentValue; }
-    public ArmorMaterial getMaterial() { return this.material; }
-    public boolean canRepair(ItemStack stack, ItemStack ingredient)  { return this.material.getRepairIngredient().test(ingredient) || super.canRepair(stack, ingredient); }
-    public TypedActionResult<ItemStack> use(World world, @NotNull PlayerEntity user, Hand hand) {
-        ItemStack itemStack = user.getStackInHand(hand);
-        return TypedActionResult.fail(itemStack);
-    }
-    public Multimap<EntityAttribute, EntityAttributeModifier> getAttributeModifiers(ArmorItem.Type slot) { return slot == this.type ? this.defaultModifiers : super.getAttributeModifiers(slot.getEquipmentSlot()); }
-    public int getDefense() {
-        return this.defense;
-    }
-    public float getToughness() {
-        return this.toughness;
+        UUID uuid = ARMOR_MODIFIERS[pSlot.getEquipmentSlot().getEntitySlotId()];
+        builder.put(EntityAttributes.GENERIC_ARMOR, new EntityAttributeModifier(uuid, "Armor modifier", defense, EntityAttributeModifier.Operation.ADDITION));
+        builder.put(EntityAttributes.GENERIC_ARMOR_TOUGHNESS, new EntityAttributeModifier(uuid, "Armor toughness", toughness, EntityAttributeModifier.Operation.ADDITION));
+        if (knockBackResistance > 0) { builder.put(EntityAttributes.GENERIC_KNOCKBACK_RESISTANCE, new EntityAttributeModifier(uuid, "Armor knockback resistance", knockBackResistance, EntityAttributeModifier.Operation.ADDITION)); }
+        this.customModifiers = builder.build();
     }
     @Override
-    @Nullable
-    public SoundEvent getEquipSound() {
-        return this.getMaterial().getEquipSound();
+    public Multimap<EntityAttribute, EntityAttributeModifier> getAttributeModifiers(EquipmentSlot slot) {
+        return slot == this.type.getEquipmentSlot() ? this.customModifiers : super.getAttributeModifiers(slot);
     }
+
+    @Override
     public boolean isFireproof() {
-        boolean netherite = this.getMaterial() == ArmorMaterials.NETHERITE;
-        if (netherite) { return true; }
+        if (this.getMaterial() instanceof TieredMaterials.ChocoboArmorTiers material) {
+            return material == TieredMaterials.ChocoboArmorTiers.NETHERITE || material == TieredMaterials.ChocoboArmorTiers.REINFORCED_NETHERITE || material == TieredMaterials.ChocoboArmorTiers.GILDED_NETHERITE;
+        }
         return super.isFireproof();
     }
 }

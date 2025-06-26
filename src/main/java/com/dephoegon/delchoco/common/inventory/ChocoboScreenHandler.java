@@ -13,12 +13,12 @@ import org.jetbrains.annotations.NotNull;
 
 import static com.dephoegon.delchoco.common.inventory.ChocoboEquipmentSlot.*;
 
-public class SaddlebagContainer extends ScreenHandler {
+public class ChocoboScreenHandler extends ScreenHandler {
     private final Chocobo chocobo;
     private int syncTimer = 0;
     private final PlayerInventory playerInventory;
 
-    public SaddlebagContainer(int syncId, PlayerInventory playerInventory, Chocobo chocoboEntity) {
+    public ChocoboScreenHandler(int syncId, PlayerInventory playerInventory, Chocobo chocoboEntity) {
         super(null, syncId);
         this.chocobo = chocoboEntity;
         this.playerInventory = playerInventory;

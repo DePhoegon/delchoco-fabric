@@ -7,7 +7,7 @@ import static com.dephoegon.delchoco.common.entities.properties.ChocoboColor.FLA
 import static com.dephoegon.delchoco.common.entities.properties.ChocoboColor.getRandomColor;
 import static com.dephoegon.delchoco.utils.RandomHelper.random;
 
-public class ChocoboSnap {
+public class ChocoboTweakedSnapShots {
     final public ChocoboStatSnapshot TWEAKED_DEFAULT = new ChocoboStatSnapshot();
 
     private void setTWEAKED() {
@@ -25,7 +25,7 @@ public class ChocoboSnap {
         this.TWEAKED_DEFAULT.poisonImmune = isPoisonImmuneChocobo(this.TWEAKED_DEFAULT.color);
         this.TWEAKED_DEFAULT.scale = setChocoScale(.50f > (float) Math.random());
     }
-    public ChocoboSnap() { setTWEAKED(); }
+    public ChocoboTweakedSnapShots() { setTWEAKED(); }
     public int boundedIntRange(int lower, int upper, int origin) {
         int lowEnd = Math.max(origin - lower, 0);
         int upEnd = origin+upper;

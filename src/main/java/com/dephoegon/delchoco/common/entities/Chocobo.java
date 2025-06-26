@@ -11,7 +11,7 @@ import com.dephoegon.delchoco.common.entities.properties.MovementType;
 import com.dephoegon.delchoco.common.init.ModEntities;
 import com.dephoegon.delchoco.common.init.ModItems;
 import com.dephoegon.delchoco.common.init.ModSounds;
-import com.dephoegon.delchoco.common.inventory.SaddlebagContainer;
+import com.dephoegon.delchoco.common.inventory.ChocoboScreenHandler;
 import com.dephoegon.delchoco.common.items.ChocoboArmorItems;
 import com.dephoegon.delchoco.common.items.ChocoboLeashPointer;
 import com.dephoegon.delchoco.common.items.ChocoboSaddleItem;
@@ -75,7 +75,8 @@ import static com.dephoegon.delchoco.common.entities.properties.ChocoboBrainAid.
 import static com.dephoegon.delchoco.common.entities.properties.ChocoboBrainAid.validRevengeAllies;
 import static com.dephoegon.delchoco.common.init.ModItems.*;
 import static com.dephoegon.delchoco.common.inventory.ChocoboEquipmentSlot.*;
-import static java.lang.Math.*;
+import static java.lang.Math.floor;
+import static java.lang.Math.random;
 import static net.minecraft.entity.SpawnGroup.CREATURE;
 import static net.minecraft.item.Items.*;
 import static net.minecraft.registry.tag.BiomeTags.IS_BADLANDS;
@@ -106,7 +107,7 @@ public class Chocobo extends AbstractChocobo {
         super.onSaddleChanged();
         if (this.fromNBT) { return; }
         for (PlayerEntity playerEntity : this.getWorld().getPlayers()) {
-            if (playerEntity.currentScreenHandler instanceof SaddlebagContainer container && container.getChocobo() == this) {
+            if (playerEntity.currentScreenHandler instanceof ChocoboScreenHandler container && container.getChocobo() == this) {
                 container.syncInventory(true); // Force close the container to update the saddle
             }
         }
@@ -188,10 +189,23 @@ public class Chocobo extends AbstractChocobo {
         this.fromNBT = true;
         this.dataTracker.set(PARAM_CHOCOBO_PROPERTIES, compound.getInt(NBTKEY_CHOCOBO_PROPERTIES));
         this.setGeneration(compound.getInt(NBTKEY_CHOCOBO_GENERATION));
-        this.setChocoboAbilityMask(compound.getByte(NBTKEY_CHOCOBO_ABILITY_MASK));
+        this.setChocoboAbilitiesFromMask(compound.getByte(NBTKEY_CHOCOBO_ABILITY_MASK));
         this.setChocoboScale(false, compound.getInt(NBTKEY_CHOCOBO_SCALE), true);
         ChocoboInventoryFromNBT(compound);
-        ChocoboGearInventoryFromNBT(compound);
+        // Explicitly sync gear from inventory to tracked data from NBT
+        // This ensures that when super.readCustomDataFromNbt is called, the saddle is already set
+        // and onSaddleChanged is not incorrectly triggered later.
+        if (compound.contains(NBTKEY_INVENTORY_GEAR, 9)) { // 9 = NbtList.getType()
+            NbtList nbtList = compound.getList(NBTKEY_INVENTORY_GEAR, 10); // 10 = NbtCompound.getType()
+            this.chocoboGearInventory.clear();
+            for (int i = 0; i < nbtList.size(); ++i) {
+                NbtCompound nbtCompound = nbtList.getCompound(i);
+                int j = nbtCompound.getByte("Slot") & 255;
+                if (j < this.chocoboGearInventory.size()) {
+                    this.chocoboGearInventory.setStack(j, ItemStack.fromNbt(nbtCompound));
+                }
+            }
+        }
         this.readAngerFromNbt(this.getWorld(), compound);
         super.readCustomDataFromNbt(compound);
         this.fromNBT = false;
@@ -245,19 +259,7 @@ public class Chocobo extends AbstractChocobo {
             }
         }
     }
-    public void ChocoboGearInventoryFromNBT(@NotNull NbtCompound compound) {
-        if (compound.contains(NBTKEY_INVENTORY_GEAR, 9)) { // 9 = NbtList.getType()
-            NbtList nbtList = compound.getList(NBTKEY_INVENTORY_GEAR, 10); // 10 = NbtCompound.getType()
-            this.chocoboGearInventory.clear();
-            for (int i = 0; i < nbtList.size(); ++i) {
-                NbtCompound nbtCompound = nbtList.getCompound(i);
-                int j = nbtCompound.getByte("Slot") & 255;
-                if (j < this.chocoboGearInventory.size()) {
-                    this.chocoboGearInventory.setStack(j, ItemStack.fromNbt(nbtCompound));
-                }
-            }
-        }
-    }
+    // ChocoboGearFromNBT not used, Explicitly set in Chocobo's readCustomDataFromNbt method to prevent race condition
     // Leashing
 
     // Spawn/Breeding Related
@@ -772,7 +774,7 @@ public class Chocobo extends AbstractChocobo {
         ((ServerPlayerEntityAccessor) player).callIncrementScreenHandlerSyncId();
         int syncId = ((ServerPlayerEntityAccessor) player).getScreenHandlerSyncId();
         player.networkHandler.sendPacket(new OpenHorseScreenS2CPacket(syncId, this.chocoboInventory.size(), this.getId()));
-        player.currentScreenHandler = new SaddlebagContainer(syncId, player.getInventory(), this);
+        player.currentScreenHandler = new ChocoboScreenHandler(syncId, player.getInventory(), this);
         ((ServerPlayerEntityAccessor) player).callOnScreenHandlerOpened(player.currentScreenHandler);
     }
     public int getMinAmbientSoundDelay() { return (24 * (int) (random() * 100)); }

@@ -1,37 +1,39 @@
 package com.dephoegon.delchoco.common.init;
 
+import com.dephoegon.delchoco.aid.TieredMaterials;
 import com.google.common.collect.Maps;
 import net.minecraft.item.ArmorItem;
 import net.minecraft.item.ArmorMaterial;
-import net.minecraft.item.Items;
 import net.minecraft.recipe.Ingredient;
 import net.minecraft.sound.SoundEvent;
-import net.minecraft.sound.SoundEvents;
 import net.minecraft.util.Lazy;
 import net.minecraft.util.Util;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Map;
-import java.util.function.Supplier;
 
 public enum ModArmorMaterial implements ArmorMaterial {
-    LEATHER_CHOCO_DISGUISE("delchoco:leather_choco_disguise", 10, new int[] { 3, 4, 5, 3 }, 15, SoundEvents.ITEM_ARMOR_EQUIP_LEATHER, 0.5F, 0.0F, () -> Ingredient.ofItems(ModItems.CHOCOBO_FEATHER, Items.LEATHER)),
-    IRON_CHOCO_DISGUISE("delchoco:iron_choco_disguise", 30, new int[] { 4, 7, 8, 4 }, 15, SoundEvents.ITEM_ARMOR_EQUIP_IRON, 0.5F, 0.0F, () -> Ingredient.ofItems(ModItems.CHOCOBO_FEATHER, Items.IRON_INGOT)),
-    DIAMOND_CHOCO_DISGUISE("delchoco:diamond_choco_disguise", 66, new int[] { 5, 8, 10, 5 }, 15, SoundEvents.ITEM_ARMOR_EQUIP_DIAMOND, 2.5F, 0.0F, () -> Ingredient.ofItems(ModItems.CHOCOBO_FEATHER, Items.DIAMOND)),
-    NETHERITE_CHOCO_DISGUISE("delchoco:netherite_choco_disguise", 68, new int[] { 5, 8, 10, 5 }, 15, SoundEvents.ITEM_ARMOR_EQUIP_NETHERITE, 3.5F, 0.1F, () -> Ingredient.ofItems(ModItems.CHOCOBO_FEATHER, Items.NETHERITE_INGOT));
+    CHAIN_CHOCO_DISGUISE("delchoco:chain_choco_disguise", TieredMaterials.ChocoboArmorTiers.CHAIN),
+    REINFORCED_CHAIN_CHOCO_DISGUISE("delchoco:reinforced_chain_choco_disguise", TieredMaterials.ChocoboArmorTiers.REINFORCED_CHAIN),
+    IRON_CHOCO_DISGUISE("delchoco:iron_choco_disguise", TieredMaterials.ChocoboArmorTiers.IRON),
+    REINFORCED_IRON_CHOCO_DISGUISE("delchoco:reinforced_iron_choco_disguise", TieredMaterials.ChocoboArmorTiers.REINFORCED_IRON),
+    DIAMOND_CHOCO_DISGUISE("delchoco:diamond_choco_disguise", TieredMaterials.ChocoboArmorTiers.DIAMOND),
+    REINFORCED_DIAMOND_CHOCO_DISGUISE("delchoco:reinforced_diamond_choco_disguise", TieredMaterials.ChocoboArmorTiers.REINFORCED_DIAMOND),
+    NETHERITE_CHOCO_DISGUISE("delchoco:netherite_choco_disguise", TieredMaterials.ChocoboArmorTiers.NETHERITE),
+    REINFORCED_NETHERITE_CHOCO_DISGUISE("delchoco:reinforced_netherite_choco_disguise", TieredMaterials.ChocoboArmorTiers.REINFORCED_NETHERITE),
+    GILDED_NETHERITE_CHOCO_DISGUISE("delchoco:gilded_netherite_choco_disguise", TieredMaterials.ChocoboArmorTiers.GILDED_NETHERITE);
+
     public static final Map<Integer, ArmorMaterial> CHOCO_ARMOR_MATERIALS = Util.make(Maps.newHashMap(), (map) -> {
-        map.put(1, LEATHER_CHOCO_DISGUISE);
-        map.put(2, IRON_CHOCO_DISGUISE);
-        map.put(3, DIAMOND_CHOCO_DISGUISE);
-        map.put(4, NETHERITE_CHOCO_DISGUISE);
-    });
-    private static final int[] HEALTH_PER_SLOT = new int[]{13, 15, 16, 11};
-    private static final Map<ArmorItem.Type, Integer> SLOT_ID_PER_TYPE = Util.make(Maps.newHashMap(), (map) -> {
-        map.put(ArmorItem.Type.HELMET, 0);
-        map.put(ArmorItem.Type.CHESTPLATE, 1);
-        map.put(ArmorItem.Type.LEGGINGS, 2);
-        map.put(ArmorItem.Type.BOOTS, 3);
+        map.put(1, CHAIN_CHOCO_DISGUISE);
+        map.put(2, REINFORCED_CHAIN_CHOCO_DISGUISE);
+        map.put(3, IRON_CHOCO_DISGUISE);
+        map.put(4, REINFORCED_IRON_CHOCO_DISGUISE);
+        map.put(5, DIAMOND_CHOCO_DISGUISE);
+        map.put(6, REINFORCED_DIAMOND_CHOCO_DISGUISE);
+        map.put(7, NETHERITE_CHOCO_DISGUISE);
+        map.put(8, REINFORCED_NETHERITE_CHOCO_DISGUISE);
+        map.put(9, GILDED_NETHERITE_CHOCO_DISGUISE);
     });
     private final String name;
     private final int durabilityMultiplier;
@@ -41,25 +43,49 @@ public enum ModArmorMaterial implements ArmorMaterial {
     private final float toughness;
     private final float knockBackResistance;
     private final Lazy<Ingredient> repairIngredient;
+    private static final int[] HEALTH_PER_SLOT = new int[]{13, 15, 16, 11};
 
-    @SuppressWarnings("SameParameterValue")
-    ModArmorMaterial(String pName, int pDurabilityMultiplier, int[] pSlotProtections, int pEnchantmentValue, SoundEvent soundEvent, float pToughness, float pKnockBackResistance, Supplier<Ingredient> pRepairIngredient) {
-        this.name = pName;
-        this.durabilityMultiplier = pDurabilityMultiplier;
-        this.slotProtections = pSlotProtections;
-        this.enchantmentValue = pEnchantmentValue;
-        this.sound = soundEvent;
-        this.toughness = pToughness;
-        this.knockBackResistance = pKnockBackResistance;
-        this.repairIngredient = new Lazy<>(pRepairIngredient);
+    ModArmorMaterial(String name, TieredMaterials.ChocoboArmorTiers tier) {
+        this.name = name;
+        this.durabilityMultiplier = tier.getDurabilityMultiplier();
+        this.slotProtections = new int[]{tier.getProtection(ArmorItem.Type.BOOTS), tier.getProtection(ArmorItem.Type.LEGGINGS), tier.getProtection(ArmorItem.Type.CHESTPLATE), tier.getProtection(ArmorItem.Type.HELMET)};
+        this.enchantmentValue = tier.getEnchantability();
+        this.sound = tier.getEquipSound();
+        this.toughness = tier.getToughness();
+        this.knockBackResistance = tier.getKnockbackResistance();
+        this.repairIngredient = new Lazy<>(tier::getRepairIngredient);
     }
+
     @Contract(pure = true)
-    public int getDurability(@NotNull ArmorItem.Type type) { return HEALTH_PER_SLOT[SLOT_ID_PER_TYPE.get(type)] * this.durabilityMultiplier; }
-    public int getProtection(@NotNull ArmorItem.Type type) { return this.slotProtections[SLOT_ID_PER_TYPE.get(type)]; }
-    public int getEnchantability() { return this.enchantmentValue; }
-    public @NotNull SoundEvent getEquipSound() { return this.sound; }
-    public @NotNull Ingredient getRepairIngredient() { return this.repairIngredient.get(); }
-    public @NotNull String getName() { return this.name; }
-    public float getToughness() { return this.toughness; }
-    public float getKnockbackResistance() { return this.knockBackResistance; }
+    public int getDurability(@NotNull ArmorItem.Type type) {
+        return HEALTH_PER_SLOT[type.getEquipmentSlot().getEntitySlotId()] * this.durabilityMultiplier;
+    }
+
+    public int getProtection(@NotNull ArmorItem.Type type) {
+        return this.slotProtections[type.getEquipmentSlot().getEntitySlotId()];
+    }
+
+    public int getEnchantability() {
+        return this.enchantmentValue;
+    }
+
+    public @NotNull SoundEvent getEquipSound() {
+        return this.sound;
+    }
+
+    public @NotNull Ingredient getRepairIngredient() {
+        return this.repairIngredient.get();
+    }
+
+    public @NotNull String getName() {
+        return this.name;
+    }
+
+    public float getToughness() {
+        return this.toughness;
+    }
+
+    public float getKnockbackResistance() {
+        return this.knockBackResistance;
+    }
 }

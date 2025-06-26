@@ -4,6 +4,7 @@ import com.dephoegon.delchoco.aid.world.serverVariableAccess;
 import com.dephoegon.delchoco.client.keybind.KeyBindManager;
 import com.dephoegon.delchoco.common.commands.chocoboTeams;
 import com.dephoegon.delchoco.common.handler.LootTableEventHandler;
+import com.dephoegon.delchoco.common.init.ModEnchantments;
 import com.dephoegon.delchoco.common.init.ModEntities;
 import com.dephoegon.delchoco.common.init.ModItems;
 import com.dephoegon.delchoco.common.init.ModSounds;
@@ -24,6 +25,7 @@ public class ChocoList {
         PacketManager.init();
         serverVariableAccess.init();
         ModItems.registerModItems();
+        ModEnchantments.registerModEnchantments();
         tradeAdds.addTrades();
         ModWorldGen.generateGysahl();
         ModWorldGen.spawnChocobos();

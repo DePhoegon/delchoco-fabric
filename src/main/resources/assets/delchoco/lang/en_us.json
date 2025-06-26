@@ -132,5 +132,8 @@
     "delchoco.leash.invalid": "Leash Distance Invalid",
 
 	"tooltip.key.category": "Delbase & DelChoco (Supports KeyBoard Keys Only)",
-	"delchoco.key.in_water_glide": "Water Breather - Glide in Water"
+	"delchoco.key.in_water_glide": "Water Breather - Glide in Water",
+
+  "enchantment.delchoco.chocobo_sweep": "Chocobo Sweep",
+  "enchantment.delchoco.chocobo_sweep.desc": "Deals area damage to adjacent targets. Does not trigger on critical hits. Exclusive with Sweeping Edge."
 }

@@ -26,5 +26,5 @@ public class ChocoboBreedInfo {
         nbt.put(NBTKEY_FATHER_STAT_SNAPSHOT, this.father.serialize());
         return nbt;
     }
-    public static @NotNull ChocoboBreedInfo getFromNbtOrDefault(@Nullable NbtCompound nbt) { return nbt != null ? new ChocoboBreedInfo(nbt) : new ChocoboBreedInfo(new ChocoboSnap().TWEAKED_DEFAULT, new ChocoboSnap().TWEAKED_DEFAULT); }
+    public static @NotNull ChocoboBreedInfo getFromNbtOrDefault(@Nullable NbtCompound nbt) { return nbt != null ? new ChocoboBreedInfo(nbt) : new ChocoboBreedInfo(new ChocoboTweakedSnapShots().TWEAKED_DEFAULT, new ChocoboTweakedSnapShots().TWEAKED_DEFAULT); }
 }

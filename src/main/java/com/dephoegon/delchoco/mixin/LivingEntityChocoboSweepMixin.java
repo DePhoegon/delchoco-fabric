@@ -1,6 +1,7 @@
 package com.dephoegon.delchoco.mixin;
 
 import com.dephoegon.delchoco.common.enchantments.ChocoboSweepEnchantment;
+import com.dephoegon.delchoco.common.entities.AbstractChocobo;
 import com.dephoegon.delchoco.common.init.ModEnchantments;
 import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.entity.LivingEntity;
@@ -20,11 +21,13 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import java.util.List;
 
+@SuppressWarnings("unused")
 @Mixin(LivingEntity.class)
 public class LivingEntityChocoboSweepMixin {
 
     @Inject(method = "tryAttack", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/LivingEntity;damage(Lnet/minecraft/entity/damage/DamageSource;F)Z", shift = At.Shift.AFTER))
     private void handleChocoboSweepForAllEntities(net.minecraft.entity.Entity target, CallbackInfoReturnable<Boolean> cir) {
+        //noinspection DataFlowIssue
         LivingEntity attacker = (LivingEntity) (Object) this;
 
         // Skip if client-side or target is not a living entity
@@ -45,7 +48,7 @@ public class LivingEntityChocoboSweepMixin {
         }
 
         // Check if this was a critical hit (don't trigger sweep on crits)
-        boolean isCrit = false;
+        boolean isCrit;
         if (attacker instanceof PlayerEntity player) {
             isCrit = player.fallDistance > 0.0F && !player.isOnGround() &&
                     !player.isClimbing() && !player.isTouchingWater() &&
@@ -79,28 +82,119 @@ public class LivingEntityChocoboSweepMixin {
 
                 // CRITICAL PROTECTION CHECKS - prevent bypassing game rules and protections
 
-                // 1. Check team/alliance protection
+                // 1. Basic team/alliance protection
                 if (attacker.isTeammate(nearbyEntity)) {
                     continue;
                 }
 
-                // 2. Check distance limit
+                // 2. Enhanced team and ownership protection for Chocobos and tamed entities
+                boolean skipDamage = false;
+
+                // Check if attacker is a Chocobo and handle owner team relationships
+                if (attacker instanceof AbstractChocobo chocoboAttacker) {
+                    LivingEntity owner = chocoboAttacker.getOwner();
+
+                    // Protect the Chocobo's owner
+                    if (nearbyEntity == owner) {
+                        skipDamage = true;
+                    }
+
+                    // Protect teammates of the Chocobo's owner
+                    if (owner != null && owner.isTeammate(nearbyEntity)) {
+                        skipDamage = true;
+                    }
+
+                    // Protect other tamed entities owned by the same player or their teammates
+                    if (nearbyEntity instanceof net.minecraft.entity.passive.TameableEntity tameableTarget) {
+                        LivingEntity targetOwner = tameableTarget.getOwner();
+                        if (targetOwner != null) {
+                            // Same owner protection
+                            if (targetOwner == owner) {
+                                skipDamage = true;
+                            }
+                            // Owner's teammate protection
+                            if (owner != null && owner.isTeammate(targetOwner)) {
+                                skipDamage = true;
+                            }
+                        }
+                    }
+                }
+
+                // Check if target is a Chocobo and handle owner relationships
+                if (nearbyEntity instanceof AbstractChocobo chocoboTarget) {
+                    LivingEntity targetOwner = chocoboTarget.getOwner();
+
+                    if (attacker instanceof PlayerEntity playerAttacker) {
+                        // Protect player's own Chocobo
+                        if (targetOwner == playerAttacker) {
+                            skipDamage = true;
+                        }
+                        // Protect teammate's Chocobo
+                        if (targetOwner != null && playerAttacker.isTeammate(targetOwner)) {
+                            skipDamage = true;
+                        }
+                    } else if (attacker instanceof AbstractChocobo attackingChocobo) {
+                        LivingEntity attackerOwner = attackingChocobo.getOwner();
+                        if (attackerOwner != null) {
+                            // Same owner protection
+                            if (targetOwner == attackerOwner) {
+                                skipDamage = true;
+                            }
+                            // Owner's teammate protection
+                            if (targetOwner != null && attackerOwner.isTeammate(targetOwner)) {
+                                skipDamage = true;
+                            }
+                        }
+                    }
+                }
+
+                // Check if target is any tamed entity and handle protection
+                if (nearbyEntity instanceof net.minecraft.entity.passive.TameableEntity tameableTarget) {
+                    LivingEntity targetOwner = tameableTarget.getOwner();
+
+                    if (attacker instanceof PlayerEntity playerAttacker) {
+                        // Protect player's own tamed entities
+                        if (targetOwner == playerAttacker) {
+                            skipDamage = true;
+                        }
+                        // Protect teammate's tamed entities when friendly fire is disabled
+                        if (targetOwner != null && playerAttacker.isTeammate(targetOwner)) {
+                            // Check team friendly fire rules for tamed entities
+                            if (playerAttacker.getScoreboardTeam() != null &&
+                                !playerAttacker.getScoreboardTeam().isFriendlyFireAllowed()) {
+                                skipDamage = true;
+                            }
+                        }
+                    }
+                }
+
+                if (skipDamage) {
+                    continue;
+                }
+
+                // 3. Check distance limit
                 if (attacker.distanceTo(nearbyEntity) >= 3.0D) {
                     continue;
                 }
 
-                // 3. Check PvP rules (for player attackers)
+                // 4. Check PvP rules and team friendly fire (for player attackers)
                 if (attacker instanceof PlayerEntity playerAttacker && nearbyEntity instanceof PlayerEntity targetPlayer) {
-                    // Check if PvP is disabled on the server
-                    if (!attacker.getWorld().getGameRules().getBoolean(net.minecraft.world.GameRules.DO_PVP)) {
-                        continue;
+                    // Check team friendly fire rules
+                    if (playerAttacker.getScoreboardTeam() != null && targetPlayer.getScoreboardTeam() != null) {
+                        // If both players are on teams, check if they're on the same team
+                        if (playerAttacker.getScoreboardTeam() == targetPlayer.getScoreboardTeam()) {
+                            // Same team - check friendly fire setting
+                            if (!playerAttacker.getScoreboardTeam().isFriendlyFireAllowed()) {
+                                continue; // Friendly fire is disabled for this team
+                            }
+                        }
                     }
 
                     // Additional PvP protection checks could go here
                     // (spawn protection, claims, etc. - depends on server mods)
                 }
 
-                // 4. Check invulnerability and damage immunity
+                // 5. Check invulnerability and damage immunity
                 net.minecraft.entity.damage.DamageSource damageSource;
                 if (attacker instanceof PlayerEntity player) {
                     damageSource = attacker.getDamageSources().playerAttack(player);
@@ -118,14 +212,14 @@ public class LivingEntityChocoboSweepMixin {
                     continue;
                 }
 
-                // 5. Check if entity is in creative/spectator mode (for players)
+                // 6. Check if entity is in creative/spectator mode (for players)
                 if (nearbyEntity instanceof PlayerEntity targetPlayer) {
                     if (targetPlayer.isCreative() || targetPlayer.isSpectator()) {
                         continue;
                     }
                 }
 
-                // 6. Check mob griefing rules (for mob attackers)
+                // 7. Check mob griefing rules (for mob attackers)
                 if (!(attacker instanceof PlayerEntity)) {
                     if (!attacker.getWorld().getGameRules().getBoolean(net.minecraft.world.GameRules.DO_MOB_GRIEFING)) {
                         // If mob griefing is disabled, mobs shouldn't be able to hurt players with sweep

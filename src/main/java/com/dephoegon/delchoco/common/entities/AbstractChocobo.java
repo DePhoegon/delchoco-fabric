@@ -464,12 +464,6 @@ public abstract class AbstractChocobo extends TameableEntity implements Angerabl
     public boolean tryAttack(Entity entity) {
         boolean result = super.tryAttack(entity);
         if (result && entity instanceof LivingEntity) {
-            if (this.isArmed()) {
-                float damage = (float)this.getAttributeValue(EntityAttributes.GENERIC_ATTACK_DAMAGE);
-
-                // Use the new Chocobo Sweep enchantment system instead of hardcoded sweep
-                ChocoboWeaponItems.performChocoboSweep(this.getWorld(), this, Hand.MAIN_HAND, (LivingEntity)entity, this.getWeapon(), damage, false);
-            }
             boolean config = ChocoboConfig.EXTRA_CHOCOBO_EFFECT.get();
             if (config) {
                 if (entity instanceof LivingEntity target) {

@@ -40,17 +40,12 @@ import net.minecraft.entity.passive.TameableEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.fluid.Fluid;
 import net.minecraft.fluid.FluidState;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemConvertible;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
+import net.minecraft.item.*;
 import net.minecraft.nbt.NbtCompound;
-import net.minecraft.particle.ParticleTypes;
 import net.minecraft.registry.tag.FluidTags;
 import net.minecraft.registry.tag.TagKey;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.sound.SoundEvent;
-import net.minecraft.sound.SoundEvents;
 import net.minecraft.text.Text;
 import net.minecraft.util.Hand;
 import net.minecraft.util.TimeHelper;
@@ -140,18 +135,10 @@ public abstract class AbstractChocobo extends TameableEntity implements Angerabl
 
     // NBT Keys for Chocobo
     protected static final String NBTKEY_CHOCOBO_PROPERTIES = "ChocoboProperties";
-    protected static final String NBTKEY_SADDLE_ITEM = "Saddle";
-    protected static final String NBTKEY_WEAPON_ITEM = "Weapon";
-    protected static final String NBTKEY_ARMOR_ITEM = "Armor";
-    protected static final String NBTKEY_HEAD_ITEM = "Head";
-    protected static final String NBTKEY_LEGS_ITEM = "Legs";
-    protected static final String NBTKEY_FEET_ITEM = "Feet";
     protected static final String NBTKEY_INVENTORY = "Inventory";
     protected static final String NBTKEY_INVENTORY_GEAR = "ChocoboGearInventory";
     protected static final String NBTKEY_CHOCOBO_GENERATION = "Generation";
     protected static final String NBTKEY_CHOCOBO_SCALE = "Scale";
-    protected static final String NBTKEY_CHOCOBO_LEASH_BLOCK = "LeashBlock";
-    protected static final String NBTKEY_CHOCOBO_LEASH_DISTANCE = "LeashDistance";
     protected static final String NBTKEY_CHOCOBO_ABILITY_MASK = "AbilityMask";
 
 
@@ -189,6 +176,7 @@ public abstract class AbstractChocobo extends TameableEntity implements Angerabl
      * For boolean flags, we use bitwise OR to set a flag (properties |= FLAG_...) and
      * bitwise AND with a negated flag to clear it (properties &= ~FLAG_...).
      */
+    @SuppressWarnings("GrazieInspection")
     protected static final TrackedData<ItemStack> PARAM_SADDLE_ITEM = DataTracker.registerData(AbstractChocobo.class, TrackedDataHandlerRegistry.ITEM_STACK);
     protected static final TrackedData<ItemStack> PARAM_ARMOR_ITEM = DataTracker.registerData(AbstractChocobo.class, TrackedDataHandlerRegistry.ITEM_STACK);
     protected static final TrackedData<ItemStack> PARAM_WEAPON_ITEM = DataTracker.registerData(AbstractChocobo.class, TrackedDataHandlerRegistry.ITEM_STACK);
@@ -206,14 +194,12 @@ public abstract class AbstractChocobo extends TameableEntity implements Angerabl
     // New ability flags packed into PARAM_CHOCOBO_PROPERTIES
     // Ability flags start after the previous properties. 4 (color) + 2 (movement) + 5 (collar) = 11
     private static final int SHIFT_ABILITIES_START = 11;
-    // Each flag is a single bit, shifted from the start of the ability section.
-    protected static final int FLAG_FLAME_BLOOD     = 1 << (SHIFT_ABILITIES_START + 0); // Bit 11
+    protected static final int FLAG_FLAME_BLOOD     = 1 << (SHIFT_ABILITIES_START); // Bit 11
     protected static final int FLAG_WATER_BREATH    = 1 << (SHIFT_ABILITIES_START + 1); // Bit 12
     protected static final int FLAG_WITHER_IMMUNE   = 1 << (SHIFT_ABILITIES_START + 2); // Bit 13
     protected static final int FLAG_POISON_IMMUNE   = 1 << (SHIFT_ABILITIES_START + 3); // Bit 14
     protected static final int FLAG_IS_MALE         = 1 << (SHIFT_ABILITIES_START + 4); // Bit 15
     protected static final int FLAG_FROM_EGG        = 1 << (SHIFT_ABILITIES_START + 5); // Bit 16
-
     // These are the bitmasks for the legacy AbilityMask byte, used for NBT serialization.
     protected static final byte ABILITY_MASK_FLAME_BLOOD   = 0b00000001;
     protected static final byte ABILITY_MASK_WATER_BREATH  = 0b00000010;
@@ -223,7 +209,6 @@ public abstract class AbstractChocobo extends TameableEntity implements Angerabl
     protected static final byte ABILITY_MASK_FROM_EGG      = 0b00100000;
 
     protected final static TrackedData<Integer> PARAM_GENERATION = DataTracker.registerData(AbstractChocobo.class, TrackedDataHandlerRegistry.INTEGER);
-    // protected final static TrackedData<Byte> PARAM_CHOCOBO_ABILITY_MASK = DataTracker.registerData(AbstractChocobo.class, TrackedDataHandlerRegistry.BYTE); // Replaced by flags in PARAM_CHOCOBO_PROPERTIES
     protected static final TrackedData<Integer> PARAM_SCALE = DataTracker.registerData(AbstractChocobo.class, TrackedDataHandlerRegistry.INTEGER);
     protected static final TrackedData<BlockPos> PARAM_LEASH_BLOCK = DataTracker.registerData(AbstractChocobo.class, TrackedDataHandlerRegistry.BLOCK_POS);
     protected static final TrackedData<Integer> PARAM_LEASH_LENGTH = DataTracker.registerData(AbstractChocobo.class, TrackedDataHandlerRegistry.INTEGER);
@@ -244,8 +229,19 @@ public abstract class AbstractChocobo extends TameableEntity implements Angerabl
     protected static final UUID CHOCOBO_LEGS_ARMOR_TOUGH_MOD_UUID = UUID.fromString("07dcb185-7182-4a28-83ae-d1a2de9c022d");
     protected static final UUID CHOCOBO_FEET_ARMOR_MOD_UUID = UUID.fromString("103d8021-8839-4377-ac23-ed723ece6454");
     protected static final UUID CHOCOBO_FEET_ARMOR_TOUGH_MOD_UUID = UUID.fromString("17dcb185-7182-4a28-83ae-d1a2de9c022d");
+    protected static final UUID CHOCOBO_CHEST_ARMOR_KNOCKBACK_MOD_UUID = UUID.fromString("c13d8021-8839-4377-ac23-ed723ece6454");
+    protected static final UUID CHOCOBO_HEAD_ARMOR_KNOCKBACK_MOD_UUID = UUID.fromString("d13d8021-8839-4377-ac23-ed723ece6454");
+    protected static final UUID CHOCOBO_LEGS_ARMOR_KNOCKBACK_MOD_UUID = UUID.fromString("f13d8021-8839-4377-ac23-ed723ece6454");
+    protected static final UUID CHOCOBO_FEET_ARMOR_KNOCKBACK_MOD_UUID = UUID.fromString("113d8021-8839-4377-ac23-ed723ece6454");
+    protected static final UUID CHOCOBO_WEAPON_KNOCKBACK_MOD_UUID = UUID.fromString("b1f0dc43-15a7-49f5-815c-915322c30402");
+    protected static final UUID CHOCOBO_ARMOR_SET_ARMOR_BONUS_UUID = UUID.fromString("a5a2e443-7346-4aa2-9b5a-2b8e9a7e4a4c");
+    protected static final UUID CHOCOBO_ARMOR_SET_TOUGHNESS_BONUS_UUID = UUID.fromString("b5a2e443-7346-4aa2-9b5a-2b8e9a7e4a4c");
+    protected static final UUID CHOCOBO_ARMOR_SET_KNOCKBACK_BONUS_UUID = UUID.fromString("c5a2e443-7346-4aa2-9b5a-2b8e9a7e4a4c");
+    protected static final UUID CHOCOBO_ARMOR_SET_WEAPON_BONUS_UUID = UUID.fromString("d5a2e443-7346-4aa2-9b5a-2b8e9a7e4a4c");
     protected static final EntityAttributeModifier CHOCOBO_SPRINTING_SPEED_BOOST = (new EntityAttributeModifier(CHOCOBO_SPRINTING_BOOST_ID, "Chocobo sprinting speed boost", 0.5, EntityAttributeModifier.Operation.MULTIPLY_TOTAL));
 
+
+    private boolean hasCheckedArmorSetBonus = false;
 
     protected AbstractChocobo(EntityType<? extends TameableEntity> entityType, World world) { super(entityType, world); }
 
@@ -290,7 +286,7 @@ public abstract class AbstractChocobo extends TameableEntity implements Angerabl
                 }
                 this.lastSaddleStack = currentSaddle.copy();
             } else if (PARAM_ARMOR_ITEM.equals(data)) {
-                this.setChocoboArmorStats(this.getArmorItemStack());
+                this.setChocoboChestArmorStats(this.getArmorItemStack());
             } else if (PARAM_WEAPON_ITEM.equals(data)) {
                 this.setChocoboWeaponStats(this.getWeapon());
             } else if (PARAM_HEAD_ITEM.equals(data)) {
@@ -463,36 +459,34 @@ public abstract class AbstractChocobo extends TameableEntity implements Angerabl
     protected float getSoundVolume() { return .6f; }
     public boolean tryAttack(Entity entity) {
         boolean result = super.tryAttack(entity);
-        if (result && entity instanceof LivingEntity) {
+        if (result && entity instanceof LivingEntity target) {
             boolean config = ChocoboConfig.EXTRA_CHOCOBO_EFFECT.get();
             if (config) {
-                if (entity instanceof LivingEntity target) {
-                    if (target instanceof SpiderEntity e) {
-                        onHitMobChance(10, STRING, e);
+                if (target instanceof SpiderEntity e) {
+                    onHitMobChance(10, STRING, e);
+                }
+                if (target instanceof CaveSpiderEntity e) {
+                    onHitMobChance(5, FERMENTED_SPIDER_EYE, e);
+                }
+                if (target instanceof SkeletonEntity e) {
+                    onHitMobChance(10, BONE, e);
+                }
+                if (target instanceof WitherSkeletonEntity e) {
+                    onHitMobChance(10, CHARCOAL, e);
+                }
+                if (target instanceof IronGolemEntity e) {
+                    onHitMobChance(5, POPPY, e);
+                }
+                if (target.getEquippedStack(EquipmentSlot.MAINHAND) != ItemStack.EMPTY) {
+                    if (onHitMobChance(30)) {
+                        target.dropItem(target.getEquippedStack(EquipmentSlot.MAINHAND).getItem());
+                        target.setStackInHand(Hand.MAIN_HAND, ItemStack.EMPTY);
                     }
-                    if (target instanceof CaveSpiderEntity e) {
-                        onHitMobChance(5, FERMENTED_SPIDER_EYE, e);
-                    }
-                    if (target instanceof SkeletonEntity e) {
-                        onHitMobChance(10, BONE, e);
-                    }
-                    if (target instanceof WitherSkeletonEntity e) {
-                        onHitMobChance(10, CHARCOAL, e);
-                    }
-                    if (target instanceof IronGolemEntity e) {
-                        onHitMobChance(5, POPPY, e);
-                    }
-                    if (target.getEquippedStack(EquipmentSlot.MAINHAND) != ItemStack.EMPTY) {
-                        if (onHitMobChance(30)) {
-                            target.dropItem(target.getEquippedStack(EquipmentSlot.MAINHAND).getItem());
-                            target.setStackInHand(Hand.MAIN_HAND, ItemStack.EMPTY);
-                        }
-                    }
-                    if (target.getEquippedStack(EquipmentSlot.OFFHAND) != ItemStack.EMPTY) {
-                        if (onHitMobChance(10)) {
-                            target.dropItem(target.getEquippedStack(EquipmentSlot.OFFHAND).getItem());
-                            target.setStackInHand(Hand.OFF_HAND, ItemStack.EMPTY);
-                        }
+                }
+                if (target.getEquippedStack(EquipmentSlot.OFFHAND) != ItemStack.EMPTY) {
+                    if (onHitMobChance(10)) {
+                        target.dropItem(target.getEquippedStack(EquipmentSlot.OFFHAND).getItem());
+                        target.setStackInHand(Hand.OFF_HAND, ItemStack.EMPTY);
                     }
                 }
             }
@@ -505,6 +499,10 @@ public abstract class AbstractChocobo extends TameableEntity implements Angerabl
         return super.dropItem(item);
     }
     public void tick() {
+        if (!this.getWorld().isClient() && !this.hasCheckedArmorSetBonus) {
+            this.updateArmorSetBonus();
+            this.hasCheckedArmorSetBonus = true;
+        }
         if (this.getWorld().isClient) { super.tick(); return; }
         if (this.canWalkOnWater() && this.isTouchingWater() && !this.hasVehicle() && !this.hasPassengers()) { this.ticksOnWater++; }
         else { this.ticksOnWater = 0; }
@@ -517,7 +515,22 @@ public abstract class AbstractChocobo extends TameableEntity implements Angerabl
                         mutable.set(i, j, k);
                         BlockState blockState = this.getWorld().getBlockState(mutable);
                         if (blockState.isOf(Blocks.COBWEB)) {
-                            this.getWorld().breakBlock(mutable, true, this);
+                            // 50% chance to break with silk touch, 50% chance to break normally
+                            boolean useSilkTouch = RandomHelper.random.nextBoolean();
+                            if (useSilkTouch) {
+                                // Break with silk touch - drop the cobweb item
+                                this.getWorld().breakBlock(mutable, false, this);
+                                this.getWorld().spawnEntity(new net.minecraft.entity.ItemEntity(
+                                    this.getWorld(),
+                                    mutable.getX() + 0.5,
+                                    mutable.getY() + 0.5,
+                                    mutable.getZ() + 0.5,
+                                    new ItemStack(Blocks.COBWEB)
+                                ));
+                            } else {
+                                // Break normally (no drops)
+                                this.getWorld().breakBlock(mutable, true, this);
+                            }
                         }
                     }
                 }
@@ -588,8 +601,6 @@ public abstract class AbstractChocobo extends TameableEntity implements Angerabl
     public boolean isHeadArmored() { return !this.getHeadArmor().isEmpty(); }
     public boolean isLegsArmored() { return !this.getLegsArmor().isEmpty(); }
     public boolean isFeetArmored() { return !this.getFeetArmor().isEmpty(); }
-    public boolean isChocoboArmor(@NotNull ItemStack pStack) { return pStack.getItem() instanceof ChocoboArmorItems; }
-    public boolean isChocoWeapon(@NotNull ItemStack pStack) { return pStack.getItem() instanceof ChocoboWeaponItems; }
     public int getTicksOnWater() { return this.ticksOnWater; }
     public ItemStack getSaddle() { return this.dataTracker.get(PARAM_SADDLE_ITEM); }
     public ItemStack getWeapon() { return this.dataTracker.get(PARAM_WEAPON_ITEM); }
@@ -599,7 +610,7 @@ public abstract class AbstractChocobo extends TameableEntity implements Angerabl
     public ItemStack getFeetArmor() { return this.dataTracker.get(PARAM_FEET_ITEM); }
     public void setSaddle(ItemStack pStack) { this.dataTracker.set(PARAM_SADDLE_ITEM, pStack); }
     public void setWeapon(ItemStack pStack) { this.dataTracker.set(PARAM_WEAPON_ITEM, pStack); }
-    public void setArmor(ItemStack pStack) { this.dataTracker.set(PARAM_ARMOR_ITEM, pStack); }
+    public void setChestArmor(ItemStack pStack) { this.dataTracker.set(PARAM_ARMOR_ITEM, pStack); }
     public void setHeadArmor(ItemStack pStack) { this.dataTracker.set(PARAM_HEAD_ITEM, pStack); }
     public void setLegsArmor(ItemStack pStack) { this.dataTracker.set(PARAM_LEGS_ITEM, pStack); }
     public void setFeetArmor(ItemStack pStack) { this.dataTracker.set(PARAM_FEET_ITEM, pStack); }
@@ -708,8 +719,10 @@ public abstract class AbstractChocobo extends TameableEntity implements Angerabl
 
     @Override
     public void equipStack(EquipmentSlot slot, ItemStack stack) {
-        super.equipStack(slot, stack);
-        if (this.getWorld().isClient()) { return; }
+        if (this.getWorld().isClient()) {
+            super.equipStack(slot, stack);
+            return;
+        }
         switch (slot) {
             case MAINHAND -> {
                 if (!ItemStack.areEqual(stack, this.getWeapon())) {
@@ -718,7 +731,7 @@ public abstract class AbstractChocobo extends TameableEntity implements Angerabl
             }
             case CHEST -> {
                 if (!ItemStack.areEqual(stack, this.getArmorItemStack())) {
-                    this.setArmor(stack.copy());
+                    this.setChestArmor(stack.copy());
                 }
             }
             case HEAD -> {
@@ -736,75 +749,231 @@ public abstract class AbstractChocobo extends TameableEntity implements Angerabl
                     this.setFeetArmor(stack.copy());
                 }
             }
+            default -> super.equipStack(slot, stack);
         }
     }
-    public void setChocoboArmorStats(ItemStack pStack) {
+    private void silentUpdateArmorSetBonus(EquipmentSlot slot, ItemStack stack) {
+        this.updateArmorSetBonus();
+        super.equipStack(slot, stack);
+    }
+    public void setChocoboChestArmorStats(ItemStack pStack) {
         if (!this.getWorld().isClient()) {
+            // Remove all existing modifiers first
             Objects.requireNonNull(this.getAttributeInstance(EntityAttributes.GENERIC_ARMOR)).removeModifier(CHOCOBO_CHEST_ARMOR_MOD_UUID);
             Objects.requireNonNull(this.getAttributeInstance(EntityAttributes.GENERIC_ARMOR_TOUGHNESS)).removeModifier(CHOCOBO_CHEST_ARMOR_TOUGH_MOD_UUID);
-            if (this.isChocoboArmor(pStack)) {
+            Objects.requireNonNull(this.getAttributeInstance(EntityAttributes.GENERIC_KNOCKBACK_RESISTANCE)).removeModifier(CHOCOBO_CHEST_ARMOR_KNOCKBACK_MOD_UUID);
+
+            if (pStack.getItem() instanceof ChocoboArmorItems armorItem) {
                 this.setEquipmentDropChance(EquipmentSlot.CHEST, 0.0F);
-                int p = ((ChocoboArmorItems)pStack.getItem()).getDefense()*chocoStatMod();
-                float t = ((ChocoboArmorItems)pStack.getItem()).getToughness()*chocoStatMod();
-                if (p != 0) { Objects.requireNonNull(this.getAttributeInstance(EntityAttributes.GENERIC_ARMOR)).addPersistentModifier(new EntityAttributeModifier(CHOCOBO_CHEST_ARMOR_MOD_UUID, "Chocobo Armor Bonus", p, EntityAttributeModifier.Operation.ADDITION)); }
-                if (t != 0) { Objects.requireNonNull(this.getAttributeInstance(EntityAttributes.GENERIC_ARMOR_TOUGHNESS)).addPersistentModifier(new EntityAttributeModifier(CHOCOBO_CHEST_ARMOR_TOUGH_MOD_UUID, "Chocobo Armor Toughness", t, EntityAttributeModifier.Operation.ADDITION)); }
+                ArmorMaterial material = armorItem.getMaterial();
+
+                double armorValue = (double) ChocoboArmorItems.getTotalDefense(material, armorItem.getType()) * chocoStatMod();
+                if (armorValue != 0) {
+                    Objects.requireNonNull(this.getAttributeInstance(EntityAttributes.GENERIC_ARMOR))
+                            .addPersistentModifier(new EntityAttributeModifier(CHOCOBO_CHEST_ARMOR_MOD_UUID, "Chocobo Armor Bonus", armorValue, EntityAttributeModifier.Operation.ADDITION));
+                }
+
+                double toughnessValue = ChocoboArmorItems.getTotalToughness(material) * chocoStatMod();
+                if (toughnessValue != 0) {
+                    Objects.requireNonNull(this.getAttributeInstance(EntityAttributes.GENERIC_ARMOR_TOUGHNESS))
+                            .addPersistentModifier(new EntityAttributeModifier(CHOCOBO_CHEST_ARMOR_TOUGH_MOD_UUID, "Chocobo Armor Toughness", toughnessValue, EntityAttributeModifier.Operation.ADDITION));
+                }
+
+                double knockbackValue = ChocoboArmorItems.getTotalKnockbackResistance(material) * chocoStatMod();
+                if (knockbackValue != 0) {
+                    Objects.requireNonNull(this.getAttributeInstance(EntityAttributes.GENERIC_KNOCKBACK_RESISTANCE))
+                            .addPersistentModifier(new EntityAttributeModifier(CHOCOBO_CHEST_ARMOR_KNOCKBACK_MOD_UUID, "Chocobo Armor Knockback Resistance", knockbackValue, EntityAttributeModifier.Operation.ADDITION));
+                }
             }
-            super.equipStack(EquipmentSlot.CHEST, pStack);
+            this.silentUpdateArmorSetBonus(EquipmentSlot.CHEST, pStack);
         }
     }
     public void setChocoboWeaponStats(ItemStack pStack) {
         if (!this.getWorld().isClient()) {
+            // Remove all existing modifiers first
             Objects.requireNonNull(this.getAttributeInstance(EntityAttributes.GENERIC_ATTACK_DAMAGE)).removeModifier(CHOCOBO_WEAPON_DAM_MOD_UUID);
             Objects.requireNonNull(this.getAttributeInstance(EntityAttributes.GENERIC_ATTACK_SPEED)).removeModifier(CHOCOBO_WEAPON_SPD_MOD_UUID);
-            if (this.isChocoWeapon(pStack)) {
-                double a = ((ChocoboWeaponItems)pStack.getItem()).getAttackDamage()*chocoStatMod();
-                float s = ((ChocoboWeaponItems)pStack.getItem()).getAttackSpeed()*chocoStatMod();
-                if (a != 0) { Objects.requireNonNull(this.getAttributeInstance(EntityAttributes.GENERIC_ATTACK_DAMAGE)).addPersistentModifier(new EntityAttributeModifier(CHOCOBO_WEAPON_DAM_MOD_UUID, "Chocobo Attack Bonus", a, EntityAttributeModifier.Operation.ADDITION)); }
-                if (s != 0) { Objects.requireNonNull(this.getAttributeInstance(EntityAttributes.GENERIC_ATTACK_SPEED)).addPersistentModifier(new EntityAttributeModifier(CHOCOBO_WEAPON_SPD_MOD_UUID, "Chocobo Attack Speed Bonus", s, EntityAttributeModifier.Operation.ADDITION)); }
+            Objects.requireNonNull(this.getAttributeInstance(EntityAttributes.GENERIC_ATTACK_KNOCKBACK)).removeModifier(CHOCOBO_WEAPON_KNOCKBACK_MOD_UUID);
+
+            if (pStack.getItem() instanceof ChocoboWeaponItems weaponItem) {
+                ToolMaterial material = weaponItem.getMaterial();
+
+                double damageValue = (double) ChocoboWeaponItems.getTotalAttackDamage(material) * chocoStatMod();
+                if (damageValue != 0) {
+                    Objects.requireNonNull(this.getAttributeInstance(EntityAttributes.GENERIC_ATTACK_DAMAGE))
+                            .addPersistentModifier(new EntityAttributeModifier(CHOCOBO_WEAPON_DAM_MOD_UUID, "Chocobo Attack Bonus", damageValue, EntityAttributeModifier.Operation.ADDITION));
+                }
+
+                double speedValue = weaponItem.getAttackSpeed() * chocoStatMod();
+                if (speedValue != 0) {
+                    Objects.requireNonNull(this.getAttributeInstance(EntityAttributes.GENERIC_ATTACK_SPEED))
+                            .addPersistentModifier(new EntityAttributeModifier(CHOCOBO_WEAPON_SPD_MOD_UUID, "Chocobo Attack Speed Bonus", speedValue, EntityAttributeModifier.Operation.ADDITION));
+                }
             }
             super.equipStack(EquipmentSlot.MAINHAND, pStack);
         }
     }
     public void setChocoboHeadArmorStats(ItemStack pStack) {
         if (!this.getWorld().isClient()) {
+            // Remove all existing modifiers first
             Objects.requireNonNull(this.getAttributeInstance(EntityAttributes.GENERIC_ARMOR)).removeModifier(CHOCOBO_HEAD_ARMOR_MOD_UUID);
             Objects.requireNonNull(this.getAttributeInstance(EntityAttributes.GENERIC_ARMOR_TOUGHNESS)).removeModifier(CHOCOBO_HEAD_ARMOR_TOUGH_MOD_UUID);
-            if (this.isChocoboArmor(pStack)) {
+            Objects.requireNonNull(this.getAttributeInstance(EntityAttributes.GENERIC_KNOCKBACK_RESISTANCE)).removeModifier(CHOCOBO_HEAD_ARMOR_KNOCKBACK_MOD_UUID);
+
+            if (pStack.getItem() instanceof ChocoboArmorItems armorItem) {
                 this.setEquipmentDropChance(EquipmentSlot.HEAD, 0.0F);
-                int p = ((ChocoboArmorItems)pStack.getItem()).getDefense()*chocoStatMod();
-                float t = ((ChocoboArmorItems)pStack.getItem()).getToughness()*chocoStatMod();
-                if (p != 0) { Objects.requireNonNull(this.getAttributeInstance(EntityAttributes.GENERIC_ARMOR)).addPersistentModifier(new EntityAttributeModifier(CHOCOBO_HEAD_ARMOR_MOD_UUID, "Chocobo Head Armor Bonus", p, EntityAttributeModifier.Operation.ADDITION)); }
-                if (t != 0) { Objects.requireNonNull(this.getAttributeInstance(EntityAttributes.GENERIC_ARMOR_TOUGHNESS)).addPersistentModifier(new EntityAttributeModifier(CHOCOBO_HEAD_ARMOR_TOUGH_MOD_UUID, "Chocobo Head Armor Toughness", t, EntityAttributeModifier.Operation.ADDITION)); }
+                ArmorMaterial material = armorItem.getMaterial();
+
+                double armorValue = (double) ChocoboArmorItems.getTotalDefense(material, armorItem.getType()) * chocoStatMod();
+                if (armorValue != 0) {
+                    Objects.requireNonNull(this.getAttributeInstance(EntityAttributes.GENERIC_ARMOR))
+                            .addPersistentModifier(new EntityAttributeModifier(CHOCOBO_HEAD_ARMOR_MOD_UUID, "Chocobo Head Armor Bonus", armorValue, EntityAttributeModifier.Operation.ADDITION));
+                }
+
+                double toughnessValue = ChocoboArmorItems.getTotalToughness(material) * chocoStatMod();
+                if (toughnessValue != 0) {
+                    Objects.requireNonNull(this.getAttributeInstance(EntityAttributes.GENERIC_ARMOR_TOUGHNESS))
+                            .addPersistentModifier(new EntityAttributeModifier(CHOCOBO_HEAD_ARMOR_TOUGH_MOD_UUID, "Chocobo Head Armor Toughness", toughnessValue, EntityAttributeModifier.Operation.ADDITION));
+                }
+
+                double knockbackValue = ChocoboArmorItems.getTotalKnockbackResistance(material) * chocoStatMod();
+                if (knockbackValue != 0) {
+                    Objects.requireNonNull(this.getAttributeInstance(EntityAttributes.GENERIC_KNOCKBACK_RESISTANCE))
+                            .addPersistentModifier(new EntityAttributeModifier(CHOCOBO_HEAD_ARMOR_KNOCKBACK_MOD_UUID, "Chocobo Head Armor Knockback Resistance", knockbackValue, EntityAttributeModifier.Operation.ADDITION));
+                }
             }
-            super.equipStack(EquipmentSlot.HEAD, pStack);
+            this.silentUpdateArmorSetBonus(EquipmentSlot.HEAD, pStack);
         }
     }
     public void setChocoboLegsArmorStats(ItemStack pStack) {
         if (!this.getWorld().isClient()) {
+            // Remove all existing modifiers first
             Objects.requireNonNull(this.getAttributeInstance(EntityAttributes.GENERIC_ARMOR)).removeModifier(CHOCOBO_LEGS_ARMOR_MOD_UUID);
             Objects.requireNonNull(this.getAttributeInstance(EntityAttributes.GENERIC_ARMOR_TOUGHNESS)).removeModifier(CHOCOBO_LEGS_ARMOR_TOUGH_MOD_UUID);
-            if (this.isChocoboArmor(pStack)) {
+            Objects.requireNonNull(this.getAttributeInstance(EntityAttributes.GENERIC_KNOCKBACK_RESISTANCE)).removeModifier(CHOCOBO_LEGS_ARMOR_KNOCKBACK_MOD_UUID);
+
+            if (pStack.getItem() instanceof ChocoboArmorItems armorItem) {
                 this.setEquipmentDropChance(EquipmentSlot.LEGS, 0.0F);
-                int p = ((ChocoboArmorItems)pStack.getItem()).getDefense()*chocoStatMod();
-                float t = ((ChocoboArmorItems)pStack.getItem()).getToughness()*chocoStatMod();
-                if (p != 0) { Objects.requireNonNull(this.getAttributeInstance(EntityAttributes.GENERIC_ARMOR)).addPersistentModifier(new EntityAttributeModifier(CHOCOBO_LEGS_ARMOR_MOD_UUID, "Chocobo Legs Armor Bonus", p, EntityAttributeModifier.Operation.ADDITION)); }
-                if (t != 0) { Objects.requireNonNull(this.getAttributeInstance(EntityAttributes.GENERIC_ARMOR_TOUGHNESS)).addPersistentModifier(new EntityAttributeModifier(CHOCOBO_LEGS_ARMOR_TOUGH_MOD_UUID, "Chocobo Legs Armor Toughness", t, EntityAttributeModifier.Operation.ADDITION)); }
+                ArmorMaterial material = armorItem.getMaterial();
+
+                double armorValue = (double) ChocoboArmorItems.getTotalDefense(material, armorItem.getType()) * chocoStatMod();
+                if (armorValue != 0) {
+                    Objects.requireNonNull(this.getAttributeInstance(EntityAttributes.GENERIC_ARMOR))
+                            .addPersistentModifier(new EntityAttributeModifier(CHOCOBO_LEGS_ARMOR_MOD_UUID, "Chocobo Legs Armor Bonus", armorValue, EntityAttributeModifier.Operation.ADDITION));
+                }
+
+                double toughnessValue = ChocoboArmorItems.getTotalToughness(material) * chocoStatMod();
+                if (toughnessValue != 0) {
+                    Objects.requireNonNull(this.getAttributeInstance(EntityAttributes.GENERIC_ARMOR_TOUGHNESS))
+                            .addPersistentModifier(new EntityAttributeModifier(CHOCOBO_LEGS_ARMOR_TOUGH_MOD_UUID, "Chocobo Legs Armor Toughness", toughnessValue, EntityAttributeModifier.Operation.ADDITION));
+                }
+
+                double knockbackValue = ChocoboArmorItems.getTotalKnockbackResistance(material) * chocoStatMod();
+                if (knockbackValue != 0) {
+                    Objects.requireNonNull(this.getAttributeInstance(EntityAttributes.GENERIC_KNOCKBACK_RESISTANCE))
+                            .addPersistentModifier(new EntityAttributeModifier(CHOCOBO_LEGS_ARMOR_KNOCKBACK_MOD_UUID, "Chocobo Legs Armor Knockback Resistance", knockbackValue, EntityAttributeModifier.Operation.ADDITION));
+                }
             }
-            super.equipStack(EquipmentSlot.LEGS, pStack);
+            this.silentUpdateArmorSetBonus(EquipmentSlot.LEGS, pStack);
         }
     }
     public void setChocoboFeetArmorStats(ItemStack pStack) {
         if (!this.getWorld().isClient()) {
+            // Remove all existing modifiers first
             Objects.requireNonNull(this.getAttributeInstance(EntityAttributes.GENERIC_ARMOR)).removeModifier(CHOCOBO_FEET_ARMOR_MOD_UUID);
             Objects.requireNonNull(this.getAttributeInstance(EntityAttributes.GENERIC_ARMOR_TOUGHNESS)).removeModifier(CHOCOBO_FEET_ARMOR_TOUGH_MOD_UUID);
-            if (this.isChocoboArmor(pStack)) {
+            Objects.requireNonNull(this.getAttributeInstance(EntityAttributes.GENERIC_KNOCKBACK_RESISTANCE)).removeModifier(CHOCOBO_FEET_ARMOR_KNOCKBACK_MOD_UUID);
+
+            if (pStack.getItem() instanceof ChocoboArmorItems armorItem) {
                 this.setEquipmentDropChance(EquipmentSlot.FEET, 0.0F);
-                int p = ((ChocoboArmorItems)pStack.getItem()).getDefense()*chocoStatMod();
-                float t = ((ChocoboArmorItems)pStack.getItem()).getToughness()*chocoStatMod();
-                if (p != 0) { Objects.requireNonNull(this.getAttributeInstance(EntityAttributes.GENERIC_ARMOR)).addPersistentModifier(new EntityAttributeModifier(CHOCOBO_FEET_ARMOR_MOD_UUID, "Chocobo Feet Armor Bonus", p, EntityAttributeModifier.Operation.ADDITION)); }
-                if (t != 0) { Objects.requireNonNull(this.getAttributeInstance(EntityAttributes.GENERIC_ARMOR_TOUGHNESS)).addPersistentModifier(new EntityAttributeModifier(CHOCOBO_FEET_ARMOR_TOUGH_MOD_UUID, "Chocobo Feet Armor Toughness", t, EntityAttributeModifier.Operation.ADDITION)); }
+                ArmorMaterial material = armorItem.getMaterial();
+
+                double armorValue = (double) ChocoboArmorItems.getTotalDefense(material, armorItem.getType()) * chocoStatMod();
+                if (armorValue != 0) {
+                    Objects.requireNonNull(this.getAttributeInstance(EntityAttributes.GENERIC_ARMOR))
+                            .addPersistentModifier(new EntityAttributeModifier(CHOCOBO_FEET_ARMOR_MOD_UUID, "Chocobo Feet Armor Bonus", armorValue, EntityAttributeModifier.Operation.ADDITION));
+                }
+
+                double toughnessValue = ChocoboArmorItems.getTotalToughness(material) * chocoStatMod();
+                if (toughnessValue != 0) {
+                    Objects.requireNonNull(this.getAttributeInstance(EntityAttributes.GENERIC_ARMOR_TOUGHNESS))
+                            .addPersistentModifier(new EntityAttributeModifier(CHOCOBO_FEET_ARMOR_TOUGH_MOD_UUID, "Chocobo Feet Armor Toughness", toughnessValue, EntityAttributeModifier.Operation.ADDITION));
+                }
+
+                double knockbackValue = ChocoboArmorItems.getTotalKnockbackResistance(material) * chocoStatMod();
+                if (knockbackValue != 0) {
+                    Objects.requireNonNull(this.getAttributeInstance(EntityAttributes.GENERIC_KNOCKBACK_RESISTANCE))
+                            .addPersistentModifier(new EntityAttributeModifier(CHOCOBO_FEET_ARMOR_KNOCKBACK_MOD_UUID, "Chocobo Feet Armor Knockback Resistance", knockbackValue, EntityAttributeModifier.Operation.ADDITION));
+                }
             }
-            super.equipStack(EquipmentSlot.FEET, pStack);
+            this.silentUpdateArmorSetBonus(EquipmentSlot.FEET, pStack);
+        }
+    }
+    private void updateArmorSetBonus() {
+        if (this.getWorld().isClient()) { return; }
+        EntityAttributeInstance armorAttr = this.getAttributeInstance(EntityAttributes.GENERIC_ARMOR);
+        EntityAttributeInstance toughnessAttr = this.getAttributeInstance(EntityAttributes.GENERIC_ARMOR_TOUGHNESS);
+        EntityAttributeInstance knockbackAttr = this.getAttributeInstance(EntityAttributes.GENERIC_KNOCKBACK_RESISTANCE);
+        EntityAttributeInstance attackAttr = this.getAttributeInstance(EntityAttributes.GENERIC_ATTACK_DAMAGE);
+
+        if (armorAttr != null) { armorAttr.removeModifier(CHOCOBO_ARMOR_SET_ARMOR_BONUS_UUID); }
+        if (toughnessAttr != null) { toughnessAttr.removeModifier(CHOCOBO_ARMOR_SET_TOUGHNESS_BONUS_UUID); }
+        if (knockbackAttr != null) { knockbackAttr.removeModifier(CHOCOBO_ARMOR_SET_KNOCKBACK_BONUS_UUID); }
+        if (attackAttr != null) { attackAttr.removeModifier(CHOCOBO_ARMOR_SET_WEAPON_BONUS_UUID); }
+
+        ItemStack head = getHeadArmor();
+        ItemStack chest = getArmorItemStack();
+        ItemStack legs = getLegsArmor();
+        ItemStack feet = getFeetArmor();
+
+        if (head.isEmpty() || chest.isEmpty() || legs.isEmpty() || feet.isEmpty()) { return; }
+
+        if (head.getItem() instanceof ChocoboArmorItems headArmor &&
+                chest.getItem() instanceof ChocoboArmorItems chestArmor &&
+                legs.getItem() instanceof ChocoboArmorItems legsArmor &&
+                feet.getItem() instanceof ChocoboArmorItems feetArmor) {
+
+            Integer headTier = ChocoboArmorItems.getTier(headArmor.getMaterial());
+            Integer chestTier = ChocoboArmorItems.getTier(chestArmor.getMaterial());
+            Integer legsTier = ChocoboArmorItems.getTier(legsArmor.getMaterial());
+            Integer feetTier = ChocoboArmorItems.getTier(feetArmor.getMaterial());
+
+            if (headTier == null || chestTier == null || legsTier == null || feetTier == null) { return; }
+
+            int minTier = Collections.min(Arrays.asList(headTier, chestTier, legsTier, feetTier));
+
+            if (minTier >= 6) { // Reinforced Diamond or higher
+                float bonusPercentage = 0.0f;
+                float damageBonus = 0.0f;
+
+                if (minTier == 6) { // Reinforced Diamond
+                    bonusPercentage = 0.10f;
+                    damageBonus = 2.0f;
+                } else if (minTier == 7) { // Netherite
+                    bonusPercentage = 0.15f;
+                    damageBonus = 2.5f;
+                } else if (minTier == 8) { // Reinforced Netherite
+                    bonusPercentage = 0.20f;
+                    damageBonus = 3.0f;
+                } else { // Gilded Netherite
+                    bonusPercentage = 0.25f;
+                    damageBonus = 4.0f;
+                }
+
+                if (armorAttr != null) {
+                    armorAttr.addPersistentModifier(new EntityAttributeModifier(CHOCOBO_ARMOR_SET_ARMOR_BONUS_UUID, "Set Bonus", bonusPercentage, EntityAttributeModifier.Operation.MULTIPLY_TOTAL));
+                }
+                if (toughnessAttr != null) {
+                    toughnessAttr.addPersistentModifier(new EntityAttributeModifier(CHOCOBO_ARMOR_SET_TOUGHNESS_BONUS_UUID, "Set Bonus", bonusPercentage, EntityAttributeModifier.Operation.MULTIPLY_TOTAL));
+                }
+                if (knockbackAttr != null) {
+                    knockbackAttr.addPersistentModifier(new EntityAttributeModifier(CHOCOBO_ARMOR_SET_KNOCKBACK_BONUS_UUID, "Set Bonus", bonusPercentage, EntityAttributeModifier.Operation.MULTIPLY_TOTAL));
+                }
+
+                if (attackAttr != null) {
+                    attackAttr.addPersistentModifier(new EntityAttributeModifier(CHOCOBO_ARMOR_SET_WEAPON_BONUS_UUID, "Armor Set Weapon Boost", damageBonus, EntityAttributeModifier.Operation.ADDITION));
+                }
+            }
         }
     }
     public void setGeneration(int value) { this.dataTracker.set(PARAM_GENERATION, value); }

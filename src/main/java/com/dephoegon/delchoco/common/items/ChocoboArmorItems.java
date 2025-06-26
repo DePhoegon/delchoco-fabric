@@ -32,28 +32,49 @@ public class ChocoboArmorItems extends ArmorItem {
        map.put(9, TieredMaterials.ChocoboArmorTiers.GILDED_NETHERITE);
     });
     private static final Map<ArmorMaterial, Integer> CHOCOBO_ARMOR_MATERIAL = Util.make(Maps.newHashMap(), (map) -> {for (int i = 1; i <= CHOCOBO_ARMOR_MATERIALS.size(); i++) { map.put(CHOCOBO_ARMOR_MATERIALS.get(i), i); }});
-    private static final float setMod = 2.5F;
 
-    private static int totalArmorMaterialDefence(ArmorMaterial armor, Type slot, int additive, boolean initialMaterial) {
-        int out = initialMaterial ? armor.getProtection(slot) + additive : (armor.getProtection(slot) / 2) + additive;
-        int nextLowestArmor = CHOCOBO_ARMOR_MATERIAL.get(armor)-1;
-        return nextLowestArmor > 0 ? totalArmorMaterialDefence(CHOCOBO_ARMOR_MATERIALS.get(nextLowestArmor), slot, out, false) : out;
+    public static Integer getTier(ArmorMaterial material) {
+        return CHOCOBO_ARMOR_MATERIAL.get(material);
     }
-    private static float totalArmorMaterialToughness(ArmorMaterial armor, float additive, boolean initialMaterial) {
-        float out = initialMaterial ? armor.getToughness()*setMod + additive : ((armor.getToughness() / 2)*setMod) + additive;
-        int nextLowestArmor = CHOCOBO_ARMOR_MATERIAL.get(armor)-1;
-        return nextLowestArmor > 0 ? totalArmorMaterialToughness(CHOCOBO_ARMOR_MATERIALS.get(nextLowestArmor), out, false) : out;
+
+    public static int getTotalDefense(@NotNull ArmorMaterial armor, Type slot) {
+        if (!(armor instanceof TieredMaterials.ChocoboArmorTiers)) { return armor.getProtection(slot); }
+        Integer tier = CHOCOBO_ARMOR_MATERIAL.get(armor);
+        if (tier == null) { return armor.getProtection(slot); }
+        int totalDefense = CHOCOBO_ARMOR_MATERIALS.get(tier).getProtection(slot);
+        for (int i = tier - 1; i >= 1; i--) {
+            totalDefense += CHOCOBO_ARMOR_MATERIALS.get(i).getProtection(slot) / 2;
+        }
+        return totalDefense;
     }
-    private static float totalArmorMaterialKnockBackResistance(@NotNull ArmorMaterial armor, float additive) {
-        float out = armor.getKnockbackResistance() > 0 ? armor.getKnockbackResistance()*setMod + additive : additive;
-        int nextLowestArmor = CHOCOBO_ARMOR_MATERIAL.get(armor)-1;
-        return nextLowestArmor > 0 ? totalArmorMaterialKnockBackResistance(CHOCOBO_ARMOR_MATERIALS.get(nextLowestArmor), out) : out;
+    public static float getTotalToughness(@NotNull ArmorMaterial armor) {
+        if (!(armor instanceof TieredMaterials.ChocoboArmorTiers)) { return armor.getToughness(); }
+        Integer tier = CHOCOBO_ARMOR_MATERIAL.get(armor);
+        if (tier == null) { return armor.getToughness(); }
+        float totalToughness = CHOCOBO_ARMOR_MATERIALS.get(tier).getToughness();
+        for (int i = tier - 1; i >= 1; i--) {
+            totalToughness += CHOCOBO_ARMOR_MATERIALS.get(i).getToughness() / 2;
+        }
+        return totalToughness;
+    }
+    public static float getTotalKnockbackResistance(@NotNull ArmorMaterial armor) {
+        if (!(armor instanceof TieredMaterials.ChocoboArmorTiers)) { return armor.getKnockbackResistance(); }
+        Integer tier = CHOCOBO_ARMOR_MATERIAL.get(armor);
+        if (tier == null) { return armor.getKnockbackResistance(); }
+        float totalKnockbackResistance = 0;
+        for (int i = 1; i <= tier; i++) {
+            ArmorMaterial currentMaterial = CHOCOBO_ARMOR_MATERIALS.get(i);
+            if (currentMaterial.getKnockbackResistance() > 0) {
+                totalKnockbackResistance += currentMaterial.getKnockbackResistance();
+            }
+        }
+        return totalKnockbackResistance;
     }
     public ChocoboArmorItems(@NotNull ArmorMaterial pMaterial, Type pSlot, Item.@NotNull Settings settings) {
         super(pMaterial, pSlot, settings);
-        int defense = totalArmorMaterialDefence(pMaterial, pSlot, 0, true);
-        float toughness = totalArmorMaterialToughness(pMaterial, 0, true);
-        float knockBackResistance = totalArmorMaterialKnockBackResistance(pMaterial, 0);
+        int defense = getTotalDefense(pMaterial, pSlot);
+        float toughness = getTotalToughness(pMaterial);
+        float knockBackResistance = getTotalKnockbackResistance(pMaterial);
         ImmutableMultimap.Builder<EntityAttribute, EntityAttributeModifier> builder = ImmutableMultimap.builder();
         UUID uuid = ARMOR_MODIFIERS[pSlot.getEquipmentSlot().getEntitySlotId()];
         builder.put(EntityAttributes.GENERIC_ARMOR, new EntityAttributeModifier(uuid, "Armor modifier", defense, EntityAttributeModifier.Operation.ADDITION));
@@ -68,8 +89,8 @@ public class ChocoboArmorItems extends ArmorItem {
 
     @Override
     public boolean isFireproof() {
-        if (this.getMaterial() instanceof TieredMaterials.ChocoboArmorTiers material) {
-            return material == TieredMaterials.ChocoboArmorTiers.NETHERITE || material == TieredMaterials.ChocoboArmorTiers.REINFORCED_NETHERITE || material == TieredMaterials.ChocoboArmorTiers.GILDED_NETHERITE;
+        if (this.getMaterial() instanceof TieredMaterials.ChocoboArmorTiers chocoboArmorTiers) {
+            return chocoboArmorTiers == TieredMaterials.ChocoboArmorTiers.NETHERITE || chocoboArmorTiers == TieredMaterials.ChocoboArmorTiers.REINFORCED_NETHERITE || chocoboArmorTiers == TieredMaterials.ChocoboArmorTiers.GILDED_NETHERITE;
         }
         return super.isFireproof();
     }

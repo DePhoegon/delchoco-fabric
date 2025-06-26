@@ -36,14 +36,25 @@ public class ChocoboWeaponItems extends SwordItem {
         map.put(9, TieredMaterials.ChocoboToolTiers.GILDED_NETHERITE);
     });
     private static final Map<ToolMaterial, Integer> CHOCOBO_WEAPON_TIER = Util.make(Maps.newHashMap(), (map) -> { for (int i = 1; i <= CHOCOBO_WEAPON_TIERS.size(); i++) { map.put(CHOCOBO_WEAPON_TIERS.get(i), i); } });
-    private static int totalTierDamage(ToolMaterial tier, int additive, boolean initialTier) {
-        int out = initialTier ? (int) tier.getAttackDamage() + additive : (int) (tier.getAttackDamage()/2)+additive;
-        int nextLowestTier = CHOCOBO_WEAPON_TIER.get(tier)-1;
-        return nextLowestTier > 0 ? totalTierDamage(CHOCOBO_WEAPON_TIERS.get(nextLowestTier), out, false) : out;
+    public static int getTotalAttackDamage(ToolMaterial tier) {
+        if (!(tier instanceof TieredMaterials.ChocoboToolTiers)) { return (int)tier.getAttackDamage(); }
+        Integer tierNum = CHOCOBO_WEAPON_TIER.get(tier);
+        if (tierNum == null) { return (int)tier.getAttackDamage(); }
+
+        int totalDamage = (int)CHOCOBO_WEAPON_TIERS.get(tierNum).getAttackDamage();
+        for (int i = tierNum - 1; i >= 1; i--) {
+            totalDamage += (int)(CHOCOBO_WEAPON_TIERS.get(i).getAttackDamage() / 2);
+        }
+        return totalDamage + CHOCOBO_DAMAGE_MODIFIER;
     }
+
+    public static float getTotalAttackSpeed(ToolMaterial toolMaterial, float baseAttackSpeed) {
+        return baseAttackSpeed + toolMaterial.getMiningSpeedMultiplier();
+    }
+
     public ChocoboWeaponItems(ToolMaterial toolMaterial, float attackSpeed, Settings settings) {
-        super(toolMaterial, (totalTierDamage(toolMaterial, CHOCOBO_DAMAGE_MODIFIER, true) - (int)toolMaterial.getAttackDamage()), attackSpeed, settings);
-        this.attackSpeed = attackSpeed + toolMaterial.getMiningSpeedMultiplier();
+        super(toolMaterial, (getTotalAttackDamage(toolMaterial) - (int)toolMaterial.getAttackDamage()), attackSpeed, settings);
+        this.attackSpeed = getTotalAttackSpeed(toolMaterial, attackSpeed);
     }
     public float getAttackSpeed() { return this.attackSpeed; }
     public boolean isFireproof() {

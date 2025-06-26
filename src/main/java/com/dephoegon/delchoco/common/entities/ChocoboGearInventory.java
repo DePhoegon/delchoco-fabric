@@ -21,7 +21,7 @@ public class ChocoboGearInventory extends SimpleInventory {
     private void onInventoryChanged() {
         if (!chocobo.getWorld().isClient()) {
             chocobo.setSaddle(getStack(SADDLE_SLOT));
-            chocobo.setArmor(getStack(ARMOR_SLOT));
+            chocobo.setChestArmor(getStack(ARMOR_SLOT));
             chocobo.setWeapon(getStack(WEAPON_SLOT));
             chocobo.setHeadArmor(getStack(HEAD_SLOT));
             chocobo.setLegsArmor(getStack(LEGS_SLOT));

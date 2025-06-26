@@ -66,7 +66,7 @@ public class ChocoboStatSnapshot {
         ItemStack weapon = chocobo.getWeapon();
         if (!weapon.isEmpty()) { chocobo.setChocoboWeaponStats(ItemStack.EMPTY); }
         ItemStack armor = chocobo.getArmorItemStack();
-        if (!armor.isEmpty()) { chocobo.setChocoboArmorStats(ItemStack.EMPTY); }
+        if (!armor.isEmpty()) { chocobo.setChocoboChestArmorStats(ItemStack.EMPTY); }
         this.generation = chocobo.getGeneration();
         this.health = (float) Objects.requireNonNull(chocobo.getAttributeInstance(EntityAttributes.GENERIC_MAX_HEALTH)).getValue();
         this.speed = (float) Objects.requireNonNull(chocobo.getAttributeInstance(EntityAttributes.GENERIC_MOVEMENT_SPEED)).getValue();
@@ -80,7 +80,7 @@ public class ChocoboStatSnapshot {
         this.scale = 0;
         this.color = chocobo.getChocoboColor();
         if (!weapon.isEmpty()) { chocobo.setChocoboWeaponStats(weapon); }
-        if (!armor.isEmpty()) { chocobo.setChocoboArmorStats(armor); }
+        if (!armor.isEmpty()) { chocobo.setChocoboChestArmorStats(armor); }
     }
     public ChocoboStatSnapshot(@NotNull NbtCompound nbt) {
         this.generation = nbt.getInt(NBTKEY_GENERATION);

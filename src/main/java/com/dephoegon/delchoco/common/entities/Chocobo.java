@@ -90,15 +90,24 @@ public class Chocobo extends AbstractChocobo {
 
     // Chocobo Related
     protected void dropLoot(@NotNull DamageSource source, boolean causedByPlayer)  {
-        this.inventoryDropClear(this.chocoboInventory, this);
-        this.inventoryDropClear(this.chocoboGearInventory, this);
+        this.inventoryDropClear(this.chocoboInventory, this, false);
+        this.inventoryDropClear(this.chocoboGearInventory, this, true);
 
         super.dropLoot(source, causedByPlayer);
     }
-    protected void inventoryDropClear(@NotNull Inventory inventory, Entity entity) {
+    protected void inventoryDropClear(@NotNull Inventory inventory, Entity entity, boolean isGear) {
         for (int i = 0; i < inventory.size(); ++i) {
             ItemStack itemStack = inventory.getStack(i);
-            if (!itemStack.isEmpty()) { entity.dropStack(itemStack); }
+            if (!itemStack.isEmpty()) {
+                boolean hasVanishingCurse = net.minecraft.enchantment.EnchantmentHelper.getLevel(
+                        net.minecraft.enchantment.Enchantments.VANISHING_CURSE, itemStack) > 0;
+
+                // Only drop the item if it doesn't have Curse of Vanishing, Only for gear items
+                if (!hasVanishingCurse || !isGear) {
+                    entity.dropStack(itemStack);
+                }
+                // Items with Curse of Vanishing will simply disappear (not be dropped)
+            }
         }
         inventory.clear();
     }
@@ -111,8 +120,7 @@ public class Chocobo extends AbstractChocobo {
                 container.syncInventory(true); // Force close the container to update the saddle
             }
         }
-        // Clear the chocobo's inventory when the saddle is changed
-        inventoryDropClear(this.chocoboInventory, this);
+        inventoryDropClear(this.chocoboInventory, this, false);
     }
 
     public Chocobo(EntityType<? extends Chocobo> entityType, World world) {
@@ -155,8 +163,7 @@ public class Chocobo extends AbstractChocobo {
         DebugInfoSender.sendBrainDebugData(this);
     }
     protected void initGoals() {
-        super.initGoals(); // returns super, custom goals and targets are commented out to test Brains
-
+        super.initGoals();
         this.goalSelector.add(1, new MeleeAttackGoal(this,2F, false));
         this.goalSelector.add(2, new ChocoboMateGoal(this, 1.0D));
         this.goalSelector.add(3, new FollowParentGoal(this, 1.1D));
@@ -192,9 +199,7 @@ public class Chocobo extends AbstractChocobo {
         this.setChocoboAbilitiesFromMask(compound.getByte(NBTKEY_CHOCOBO_ABILITY_MASK));
         this.setChocoboScale(false, compound.getInt(NBTKEY_CHOCOBO_SCALE), true);
         ChocoboInventoryFromNBT(compound);
-        // Explicitly sync gear from inventory to tracked data from NBT
-        // This ensures that when super.readCustomDataFromNbt is called, the saddle is already set
-        // and onSaddleChanged is not incorrectly triggered later.
+        // Forced Syncing of the chocobo gear inventory from NBT to prevent onSaddleChanged from being called on loading chocobo gear
         if (compound.contains(NBTKEY_INVENTORY_GEAR, 9)) { // 9 = NbtList.getType()
             NbtList nbtList = compound.getList(NBTKEY_INVENTORY_GEAR, 10); // 10 = NbtCompound.getType()
             this.chocoboGearInventory.clear();
@@ -259,7 +264,6 @@ public class Chocobo extends AbstractChocobo {
             }
         }
     }
-    // ChocoboGearFromNBT not used, Explicitly set in Chocobo's readCustomDataFromNbt method to prevent race condition
     // Leashing
 
     // Spawn/Breeding Related
@@ -312,7 +316,8 @@ public class Chocobo extends AbstractChocobo {
         }
         Chocobo mother, father;
         if (this.isMale() != ((Chocobo)other).isMale()) {
-            if (this.isMale()) { return ((Chocobo)other).createChild(world, this); }  // Ensure the mother is always the one calling the method.
+            if (this.isMale()) { //noinspection RedundantCast
+                return ((Chocobo)other).createChild(world, this); }  // Ensure the mother is always the one calling the method.
             else {
                 mother = this;
                 father = ((Chocobo)other);
@@ -801,7 +806,6 @@ public class Chocobo extends AbstractChocobo {
         tickActivities(this);
         super.mobTick();
     }
-    // Mixins & Events brought into entity class
     public boolean onKilledOther(ServerWorld world, LivingEntity targetEntity) {
         if (targetEntity instanceof PlayerEntity player) {
             this.forgive(player);
@@ -894,7 +898,6 @@ public class Chocobo extends AbstractChocobo {
         // Left in for unique Chocobo Checks unable to be done in AbstractChocobo
         super.onDeath(source);
     }
-    // applyDamageEffects is used to apply effects after the damage is applied, such as dropping items or applying potion effects.
     public void applyDamageEffects(LivingEntity attacker, Entity target) {
         // Left in for unique Chocobo Checks unable to be done in AbstractChocobo
         super.applyDamageEffects(attacker, target);

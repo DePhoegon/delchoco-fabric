@@ -14,7 +14,7 @@ public class ChocoDisguiseModel extends GeoModel<ChocoDisguiseItem> {
 
     public Identifier getTextureResource(@NotNull ChocoDisguiseItem object) {
         // Default texture location, Overrides in ChocoDisguiseFeatureRenderer.java with itemStack NBT
-        return new Identifier(DelChoco.DELCHOCO_ID, "textures/models/armor/leather/yellow.png");
+        return new Identifier(DelChoco.DELCHOCO_ID, "textures/models/armor/chain/yellow.png");
     }
     public Identifier getAnimationResource(ChocoDisguiseItem animatable) {
         return new Identifier(DelChoco.DELCHOCO_ID, "animations/armor_holder.json");

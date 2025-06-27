@@ -23,10 +23,15 @@ public class LayerWeapon extends FeatureRenderer<Chocobo, EntityModel<Chocobo>> 
     private final float hide;
     private final float show;
     private static final Map<String, Identifier> CHOCOBO_WEAPONS = Util.make(Maps.newHashMap(), (map) -> {
-        map.put(STONE_CHOCO_WEAPON.getTranslationKey(), new Identifier(DelChoco.DELCHOCO_ID, "textures/entities/chocobos/weapon/chocobo_stone.png"));
+        map.put(CHAIN_CHOCO_WEAPON.getTranslationKey(), new Identifier(DelChoco.DELCHOCO_ID, "textures/entities/chocobos/weapon/chocobo_chain.png"));
+        map.put(REINFORCED_CHAIN_CHOCO_WEAPON.getTranslationKey(), new Identifier(DelChoco.DELCHOCO_ID, "textures/entities/chocobos/weapon/chocobo_chain.png"));
         map.put(IRON_CHOCO_WEAPON.getTranslationKey(), new Identifier(DelChoco.DELCHOCO_ID, "textures/entities/chocobos/weapon/chocobo_iron.png"));
+        map.put(REINFORCED_IRON_CHOCO_WEAPON.getTranslationKey(), new Identifier(DelChoco.DELCHOCO_ID, "textures/entities/chocobos/weapon/chocobo_iron.png"));
         map.put(DIAMOND_CHOCO_WEAPON.getTranslationKey(), new Identifier(DelChoco.DELCHOCO_ID, "textures/entities/chocobos/weapon/chocobo_diamond.png"));
+        map.put(REINFORCED_DIAMOND_CHOCO_WEAPON.getTranslationKey(), new Identifier(DelChoco.DELCHOCO_ID, "textures/entities/chocobos/weapon/chocobo_diamond.png"));
         map.put(NETHERITE_CHOCO_WEAPON.getTranslationKey(), new Identifier(DelChoco.DELCHOCO_ID, "textures/entities/chocobos/weapon/chocobo_netherite.png"));
+        map.put(REINFORCED_NETHERITE_CHOCO_WEAPON.getTranslationKey(), new Identifier(DelChoco.DELCHOCO_ID, "textures/entities/chocobos/weapon/chocobo_netherite.png"));
+        map.put(GILDED_NETHERITE_CHOCO_WEAPON.getTranslationKey(), new Identifier(DelChoco.DELCHOCO_ID, "textures/entities/chocobos/weapon/chocobo_netherite.png"));
     });
     public LayerWeapon(FeatureRendererContext<Chocobo, EntityModel<Chocobo>> pRenderer, float visibleAlpha, float invisibleAlpha) {
         super(pRenderer);

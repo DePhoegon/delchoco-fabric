@@ -39,39 +39,13 @@ public class TieredMaterials {
             this.repairIngredient = new Lazy<>(repairIngredient);
         }
 
-        public String getName() {
-            return this.name;
-        }
-
-        @Override
-        public int getDurability() {
-            return this.itemDurability;
-        }
-
-        @Override
-        public float getMiningSpeedMultiplier() {
-            return this.miningSpeed;
-        }
-
-        @Override
-        public float getAttackDamage() {
-            return this.attackDamage;
-        }
-
-        @Override
-        public int getMiningLevel() {
-            return this.miningLevel;
-        }
-
-        @Override
-        public int getEnchantability() {
-            return this.enchantability;
-        }
-
-        @Override
-        public Ingredient getRepairIngredient() {
-            return this.repairIngredient.get();
-        }
+        public String getName() { return this.name; }
+        public int getDurability() { return this.itemDurability; }
+        public float getMiningSpeedMultiplier() { return this.miningSpeed; }
+        public float getAttackDamage() { return this.attackDamage; }
+        public int getMiningLevel() { return this.miningLevel; }
+        public int getEnchantability() { return this.enchantability; }
+        public Ingredient getRepairIngredient() { return this.repairIngredient.get(); }
     }
 
     public enum ChocoboArmorTiers implements ArmorMaterial {
@@ -107,47 +81,14 @@ public class TieredMaterials {
         }
 
         @Override
-        public int getDurability(ArmorItem.Type type) {
-            return BASE_DURABILITY[type.getEquipmentSlot().getEntitySlotId()] * this.durabilityMultiplier;
-        }
-
-        @Override
-        public int getProtection(ArmorItem.Type type) {
-            return this.protectionAmounts[type.getEquipmentSlot().getEntitySlotId()];
-        }
-
-        @Override
-        public int getEnchantability() {
-            return this.enchantability;
-        }
-
-        @Override
-        public SoundEvent getEquipSound() {
-            return this.equipSound;
-        }
-
-        @Override
-        public Ingredient getRepairIngredient() {
-            return this.repairIngredient.get();
-        }
-
-        @Override
-        public String getName() {
-            return this.name;
-        }
-
-        @Override
-        public float getToughness() {
-            return this.toughness;
-        }
-
-        @Override
-        public float getKnockbackResistance() {
-            return this.knockbackResistance;
-        }
-
-        public int getDurabilityMultiplier() {
-            return this.durabilityMultiplier;
-        }
+        public int getDurability(ArmorItem.Type type) { return BASE_DURABILITY[type.getEquipmentSlot().getEntitySlotId()] * this.durabilityMultiplier; }
+        public int getProtection(ArmorItem.Type type) { return this.protectionAmounts[type.getEquipmentSlot().getEntitySlotId()]; }
+        public int getEnchantability() { return this.enchantability; }
+        public SoundEvent getEquipSound() { return this.equipSound; }
+        public Ingredient getRepairIngredient() { return this.repairIngredient.get(); }
+        public String getName() { return this.name; }
+        public float getToughness() { return this.toughness; }
+        public float getKnockbackResistance() { return this.knockbackResistance; }
+        public int getDurabilityMultiplier() { return this.durabilityMultiplier; }
     }
 }

@@ -26,10 +26,14 @@ public class ChocoDisguiseFeatureRenderer extends GeoArmorRenderer<ChocoDisguise
     public Identifier getTextureLocation(ChocoDisguiseItem instance) {
         String customModelData = ChocoDisguiseItem.getNBTKEY_COLOR(this.currentStack);
         ArmorMaterial armor = instance.getMaterial();
-        String folder = "textures/models/armor/leather/";
+        String folder = "textures/models/armor/chain/";
         if (armor == IRON_CHOCO_DISGUISE) { folder = "textures/models/armor/iron/"; }
+        if (armor == REINFORCED_IRON_CHOCO_DISGUISE) { folder = "textures/models/armor/iron/"; }
         if (armor == DIAMOND_CHOCO_DISGUISE) { folder = "textures/models/armor/diamond/"; }
+        if (armor == REINFORCED_DIAMOND_CHOCO_DISGUISE) { folder = "textures/models/armor/diamond/"; }
         if (armor == NETHERITE_CHOCO_DISGUISE) { folder = "textures/models/armor/netherite/"; }
+        if (armor == REINFORCED_NETHERITE_CHOCO_DISGUISE) { folder = "textures/models/armor/netherite/"; }
+        if (armor == GILDED_NETHERITE_CHOCO_DISGUISE) { folder = "textures/models/armor/netherite/"; }
         String check = folder;
         if (customModelData.equals(green)) { folder = folder + "green.png"; }
         if (customModelData.equals(pink)) { folder = folder + "pink.png"; }

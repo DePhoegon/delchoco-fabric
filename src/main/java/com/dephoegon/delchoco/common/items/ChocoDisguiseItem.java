@@ -78,7 +78,7 @@ public class ChocoDisguiseItem extends ArmorItem implements GeoItem {
     @Contract("_, _ -> new")
     public static @NotNull Identifier setCustomModel(String customModelData, @NotNull ChocoDisguiseItem armorItem) {
         ArmorMaterial armor = armorItem.getMaterial();
-        String folder = "textures/models/armor/leather/";
+        String folder = "textures/models/armor/chain/";
         if (armor == IRON_CHOCO_DISGUISE || armor == REINFORCED_IRON_CHOCO_DISGUISE) { folder = "textures/models/armor/iron/"; }
         if (armor == DIAMOND_CHOCO_DISGUISE || armor == REINFORCED_DIAMOND_CHOCO_DISGUISE) { folder = "textures/models/armor/diamond/"; }
         if (armor == NETHERITE_CHOCO_DISGUISE || armor == REINFORCED_NETHERITE_CHOCO_DISGUISE || armor == GILDED_NETHERITE_CHOCO_DISGUISE) { folder = "textures/models/armor/netherite/"; }

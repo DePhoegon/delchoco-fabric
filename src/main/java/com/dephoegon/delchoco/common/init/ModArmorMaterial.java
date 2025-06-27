@@ -55,37 +55,13 @@ public enum ModArmorMaterial implements ArmorMaterial {
         this.knockBackResistance = tier.getKnockbackResistance();
         this.repairIngredient = new Lazy<>(tier::getRepairIngredient);
     }
-
     @Contract(pure = true)
-    public int getDurability(@NotNull ArmorItem.Type type) {
-        return HEALTH_PER_SLOT[type.getEquipmentSlot().getEntitySlotId()] * this.durabilityMultiplier;
-    }
-
-    public int getProtection(@NotNull ArmorItem.Type type) {
-        return this.slotProtections[type.getEquipmentSlot().getEntitySlotId()];
-    }
-
-    public int getEnchantability() {
-        return this.enchantmentValue;
-    }
-
-    public @NotNull SoundEvent getEquipSound() {
-        return this.sound;
-    }
-
-    public @NotNull Ingredient getRepairIngredient() {
-        return this.repairIngredient.get();
-    }
-
-    public @NotNull String getName() {
-        return this.name;
-    }
-
-    public float getToughness() {
-        return this.toughness;
-    }
-
-    public float getKnockbackResistance() {
-        return this.knockBackResistance;
-    }
+    public int getDurability(@NotNull ArmorItem.Type type) { return HEALTH_PER_SLOT[type.getEquipmentSlot().getEntitySlotId()] * this.durabilityMultiplier; }
+    public int getProtection(@NotNull ArmorItem.Type type) { return this.slotProtections[type.getEquipmentSlot().getEntitySlotId()]; }
+    public int getEnchantability() { return this.enchantmentValue; }
+    public @NotNull SoundEvent getEquipSound() { return this.sound; }
+    public @NotNull Ingredient getRepairIngredient() { return this.repairIngredient.get(); }
+    public @NotNull String getName() { return this.name; }
+    public float getToughness() { return this.toughness; }
+    public float getKnockbackResistance() { return this.knockBackResistance; }
 }

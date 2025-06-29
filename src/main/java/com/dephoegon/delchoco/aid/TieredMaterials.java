@@ -49,7 +49,7 @@ public class TieredMaterials {
     }
 
     public enum ChocoboArmorTiers implements ArmorMaterial {
-        CHAIN("chain", 15, new int[]{2, 4, 5, 1}, 12, SoundEvents.ITEM_ARMOR_EQUIP_CHAIN, 0.0f, 0.0f, () -> Ingredient.ofItems(Items.IRON_INGOT)),
+        CHAIN("chain", 15, new int[]{2, 4, 5, 1}, 12, SoundEvents.ITEM_ARMOR_EQUIP_CHAIN, 0.0f, 0.0f, () -> Ingredient.ofItems(Items.IRON_NUGGET)),
         REINFORCED_CHAIN("reinforced_chain", 18, new int[]{2, 5, 6, 2}, 15, SoundEvents.ITEM_ARMOR_EQUIP_CHAIN, 0.5f, 0.0f, () -> Ingredient.ofItems(ModItems.CHOCOBO_FEATHER)),
         IRON("iron", 25, new int[]{3, 7, 8, 3}, 9, SoundEvents.ITEM_ARMOR_EQUIP_IRON, 0.0f, 0.0f, () -> Ingredient.ofItems(Items.IRON_INGOT)),
         REINFORCED_IRON("reinforced_iron", 28, new int[]{3, 7, 9, 3}, 12, SoundEvents.ITEM_ARMOR_EQUIP_IRON, 1.0f, 0.0f, () -> Ingredient.ofItems(ModItems.CHOCOBO_LEATHER)),

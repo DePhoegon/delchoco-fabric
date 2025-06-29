@@ -56,15 +56,14 @@ public class ChocoboScreenHandler extends ScreenHandler {
         ItemStack saddleStack = chocobo.getSaddle();
         int slotOneX = -16;
         int slotOneY = 18-20;
-        this.addSlot(new ChocoboEquipmentSlot(chocobo, chocobo.chocoboGearInventory, SADDLE_SLOT, slotOneX, slotOneY));
-        this.addSlot(new ChocoboEquipmentSlot(chocobo, chocobo.chocoboGearInventory, WEAPON_SLOT, 4*18+slotOneX, slotOneY));
-        this.addSlot(new ChocoboEquipmentSlot(chocobo, chocobo.chocoboGearInventory, ARMOR_SLOT, 2*18+slotOneX, slotOneY));
-        /*
-        // Commented out as these slots are not used in the current implementation - The gear for them does not exist currently. I will uncomment this when the gear is added.
-        this.addSlot(new ChocoboEquipmentSlot(chocobo, chocobo.chocoboGearInventory, HEAD_SLOT, 6*18+slotOneX, slotOneY, HEAD));
-        this.addSlot(new ChocoboEquipmentSlot(chocobo, chocobo.chocoboGearInventory, LEGS_SLOT, 8*18+slotOneX, slotOneY, LEGS));
-        this.addSlot(new ChocoboEquipmentSlot(chocobo, chocobo.chocoboGearInventory, FEET_SLOT, 10*18+slotOneX, slotOneY, FEET));
-        */
+        int gearSlotAdjustment = 9;
+        this.addSlot(new ChocoboEquipmentSlot(chocobo, chocobo.chocoboGearInventory, HEAD_SLOT, slotOneX, slotOneY));
+        this.addSlot(new ChocoboEquipmentSlot(chocobo, chocobo.chocoboGearInventory, ARMOR_SLOT, slotOneX, slotOneY+18));
+        this.addSlot(new ChocoboEquipmentSlot(chocobo, chocobo.chocoboGearInventory, LEGS_SLOT, slotOneX, slotOneY+(2*18)));
+        this.addSlot(new ChocoboEquipmentSlot(chocobo, chocobo.chocoboGearInventory, FEET_SLOT, slotOneX, slotOneY+(3*18)));
+        this.addSlot(new ChocoboEquipmentSlot(chocobo, chocobo.chocoboGearInventory, WEAPON_SLOT, 18+gearSlotAdjustment+slotOneX, slotOneY));
+        this.addSlot(new ChocoboEquipmentSlot(chocobo, chocobo.chocoboGearInventory, SADDLE_SLOT, (2*18)+(gearSlotAdjustment*2)+slotOneX, slotOneY));
+
         if(!saddleStack.isEmpty() && saddleStack.getItem() instanceof ChocoboSaddleItem saddleItem) {
             int saddleSize = saddleItem.getInventorySize();
             switch (saddleSize) {
@@ -78,13 +77,9 @@ public class ChocoboScreenHandler extends ScreenHandler {
             for (int col = 0; col < 5; col++) {
                 int guiSlotIndex = row * 5 + col;
                 int backingSlotIndex;
-                if (guiSlotIndex < 5) {
-                    backingSlotIndex = guiSlotIndex + 11;
-                } else if (guiSlotIndex < 10) {
-                    backingSlotIndex = guiSlotIndex + 15;
-                } else {
-                    backingSlotIndex = guiSlotIndex + 19;
-                }
+                if (guiSlotIndex < 5) { backingSlotIndex = guiSlotIndex + 11; }
+                else if (guiSlotIndex < 10) { backingSlotIndex = guiSlotIndex + 15;}
+                else { backingSlotIndex = guiSlotIndex + 19; }
                 this.addSlot(new Slot(inventory, backingSlotIndex, 44 + col * 18, 36 + row * 18));
             }
         }

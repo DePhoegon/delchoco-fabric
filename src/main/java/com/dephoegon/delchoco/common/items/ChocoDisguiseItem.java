@@ -1,16 +1,12 @@
 package com.dephoegon.delchoco.common.items;
 
 import com.dephoegon.delchoco.DelChoco;
-import com.dephoegon.delchoco.client.models.armor.ChocoDisguiseFeatureRenderer;
 import com.dephoegon.delchoco.common.entities.properties.ChocoboColor;
 import net.minecraft.client.item.TooltipContext;
-import net.minecraft.client.render.entity.model.BipedEntityModel;
 import net.minecraft.enchantment.Enchantment;
 import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EquipmentSlot;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.decoration.ArmorStandEntity;
 import net.minecraft.entity.effect.StatusEffectInstance;
 import net.minecraft.entity.effect.StatusEffects;
 import net.minecraft.entity.player.PlayerEntity;
@@ -26,36 +22,26 @@ import net.minecraft.world.World;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import software.bernie.geckolib.animatable.GeoItem;
-import software.bernie.geckolib.animatable.client.RenderProvider;
-import software.bernie.geckolib.constant.DataTickets;
-import software.bernie.geckolib.core.animatable.instance.AnimatableInstanceCache;
-import software.bernie.geckolib.core.animatable.instance.SingletonAnimatableInstanceCache;
-import software.bernie.geckolib.core.animation.AnimatableManager;
-import software.bernie.geckolib.core.animation.Animation;
-import software.bernie.geckolib.core.animation.AnimationController;
-import software.bernie.geckolib.core.animation.RawAnimation;
-import software.bernie.geckolib.core.object.PlayState;
-import software.bernie.geckolib.renderer.GeoArmorRenderer;
 
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.function.Consumer;
-import java.util.function.Supplier;
 
 import static com.dephoegon.delbase.item.ShiftingDyes.CLEANSE_SHIFT_DYE;
 import static com.dephoegon.delchoco.aid.dyeList.CHOCO_COLOR_ITEMS;
 import static com.dephoegon.delchoco.common.effects.ChocoboCombatEvents.armorColorMatch;
-import static com.dephoegon.delchoco.common.effects.ChocoboCombatEvents.armorMatch;
 import static com.dephoegon.delchoco.common.entities.properties.ChocoboColor.*;
 import static com.dephoegon.delchoco.common.init.ModArmorMaterial.*;
 
 @SuppressWarnings("ALL")
-public class ChocoDisguiseItem extends ArmorItem implements GeoItem {
-    private final AnimatableInstanceCache chocoCache = new SingletonAnimatableInstanceCache(this);
-    private final Supplier<Object> renderProvider = GeoItem.makeRenderer(this);
+public class ChocoDisguiseItem extends ArmorItem {
     public final static String NBTKEY_COLOR = "Color";
+    public final static String NBTKEY_RENDER_MAIN = "RenderMain";
+    public final static String NBTKEY_RENDER_LEFT = "RenderLeft";
+    public final static String NBTKEY_RENDER_RIGHT = "RenderRight";
+    public final static String NBTKEY_HAT_ROT_X = "HatRotX";
+    public final static String NBTKEY_HAT_ROT_Y = "HatRotY";
+    public final static String NBTKEY_HAT_ROT_Z = "HatRotZ";
     public final static String yellow = YELLOW.getColorName(); // default
     public final static String green = GREEN.getColorName();
     public final static String pink = PINK.getColorName();
@@ -100,6 +86,60 @@ public class ChocoDisguiseItem extends ArmorItem implements GeoItem {
         if (color != null && color.contains(NBTKEY_COLOR)) { return color.getString(NBTKEY_COLOR); }
         return yellow;
     }
+    public static boolean getRenderMain(@NotNull ItemStack stack) {
+        NbtCompound tag = stack.getNbt();
+        if (tag != null && tag.contains(NBTKEY_RENDER_MAIN)) { return tag.getBoolean(NBTKEY_RENDER_MAIN); }
+        return true;
+    }
+    public static boolean getRenderLeft(@NotNull ItemStack stack) {
+        NbtCompound tag = stack.getNbt();
+        if (tag != null && tag.contains(NBTKEY_RENDER_LEFT)) { return tag.getBoolean(NBTKEY_RENDER_LEFT); }
+        return true;
+    }
+    public static boolean getRenderRight(@NotNull ItemStack stack) {
+        NbtCompound tag = stack.getNbt();
+        if (tag != null && tag.contains(NBTKEY_RENDER_RIGHT)) { return tag.getBoolean(NBTKEY_RENDER_RIGHT); }
+        return true;
+    }
+    public static float getHatRotX(@NotNull ItemStack stack) {
+        NbtCompound tag = stack.getNbt();
+        if (tag != null && tag.contains(NBTKEY_HAT_ROT_X)) { return tag.getFloat(NBTKEY_HAT_ROT_X); }
+        return 0.0f;
+    }
+    public static float getHatRotY(@NotNull ItemStack stack) {
+        NbtCompound tag = stack.getNbt();
+        if (tag != null && tag.contains(NBTKEY_HAT_ROT_Y)) { return tag.getFloat(NBTKEY_HAT_ROT_Y); }
+        return 0.0f;
+    }
+    public static float getHatRotZ(@NotNull ItemStack stack) {
+        NbtCompound tag = stack.getNbt();
+        if (tag != null && tag.contains(NBTKEY_HAT_ROT_Z)) { return tag.getFloat(NBTKEY_HAT_ROT_Z); }
+        return 0.0f;
+    }
+    public static void setRenderMain(@NotNull ItemStack stack, boolean renderFull) {
+        NbtCompound tag = stack.getOrCreateNbt();
+        tag.putBoolean(NBTKEY_RENDER_MAIN, renderFull);
+    }
+    public static void setRenderLeft(@NotNull ItemStack stack, boolean renderFull) {
+        NbtCompound tag = stack.getOrCreateNbt();
+        tag.putBoolean(NBTKEY_RENDER_LEFT, renderFull);
+    }
+    public static void setRenderRight(@NotNull ItemStack stack, boolean renderFull) {
+        NbtCompound tag = stack.getOrCreateNbt();
+        tag.putBoolean(NBTKEY_RENDER_RIGHT, renderFull);
+    }
+    public static void setHatRotX(@NotNull ItemStack stack, float rot) {
+        NbtCompound tag = stack.getOrCreateNbt();
+        tag.putFloat(NBTKEY_HAT_ROT_X, rot);
+    }
+    public static void setHatRotY(@NotNull ItemStack stack, float rot) {
+        NbtCompound tag = stack.getOrCreateNbt();
+        tag.putFloat(NBTKEY_HAT_ROT_Y, rot);
+    }
+    public static void setHatRotZ(@NotNull ItemStack stack, float rot) {
+        NbtCompound tag = stack.getOrCreateNbt();
+        tag.putFloat(NBTKEY_HAT_ROT_Z, rot);
+    }
     public NbtCompound serialize(String key, String string) {
         NbtCompound nbt = new NbtCompound();
         nbt.putString(key, string);
@@ -112,10 +152,16 @@ public class ChocoDisguiseItem extends ArmorItem implements GeoItem {
         NbtCompound display = null;
         int damage = 0;
         int repairCost = 0;
+        float hatRotX = 0.0f;
+        float hatRotY = 0.0f;
+        float hatRotZ = 0.0f;
         if (tempTag != null) {
             if (tempTag.contains("Damage")) { damage = tempTag.getInt("Damage"); }
             if (tempTag.contains("display")) { display = tempTag.getCompound("display"); }
             if (tempTag.contains("RepairCost")) { repairCost = Math.max(0, Math.min(tempTag.getInt("RepairCost")-1, 5)); }
+            if (tempTag.contains(NBTKEY_HAT_ROT_X) && this.getSlotType() == EquipmentSlot.HEAD) { hatRotX = tempTag.getFloat(NBTKEY_HAT_ROT_X); }
+            if (tempTag.contains(NBTKEY_HAT_ROT_Y) && this.getSlotType() == EquipmentSlot.HEAD) { hatRotY = tempTag.getFloat(NBTKEY_HAT_ROT_Y); }
+            if (tempTag.contains(NBTKEY_HAT_ROT_Z) && this.getSlotType() == EquipmentSlot.HEAD) { hatRotZ = tempTag.getFloat(NBTKEY_HAT_ROT_Z); }
         }
         itemStack.setNbt(serialize(NBTKEY_COLOR, chocoboColor.getColorName()));
         NbtCompound tag = itemStack.getNbt();
@@ -124,6 +170,11 @@ public class ChocoDisguiseItem extends ArmorItem implements GeoItem {
         if (damage != 0) { tag.putInt("Damage", damage); }
         if (display != null) { tag.put("display", display); }
         tag.putInt("RepairCost", repairCost);
+        if (this.getSlotType() == EquipmentSlot.HEAD) {
+            tag.putFloat(NBTKEY_HAT_ROT_X, hatRotX);
+            tag.putFloat(NBTKEY_HAT_ROT_Y, hatRotY);
+            tag.putFloat(NBTKEY_HAT_ROT_Z, hatRotZ);
+        }
         EnchantmentHelper.set(enchantments, itemStack);
         shrinkMe.decrement(1);
     }
@@ -170,23 +221,28 @@ public class ChocoDisguiseItem extends ArmorItem implements GeoItem {
         if (stack.getNbt() == null) { stack.setNbt(serialize(NBTKEY_COLOR, yellow)); }
         int repairCost = stack.getRepairCost();
         if (repairCost > 5) { stack.setRepairCost(repairCost-1); }
-        ItemStack head = ((PlayerEntity) entity).getEquippedStack(EquipmentSlot.HEAD);
-        ItemStack chest = ((PlayerEntity) entity).getEquippedStack(EquipmentSlot.CHEST);
-        ItemStack legs = ((PlayerEntity) entity).getEquippedStack(EquipmentSlot.LEGS);
-        ItemStack feet = ((PlayerEntity) entity).getEquippedStack(EquipmentSlot.FEET);
-        if (armorColorMatch(head, chest, legs, feet)) {
-            boolean hasCpEffect = ((PlayerEntity) entity).hasStatusEffect(StatusEffects.CONDUIT_POWER) && Objects.requireNonNull(((PlayerEntity) entity).getStatusEffect(StatusEffects.CONDUIT_POWER)).getDuration() > 25;
-            boolean hasNvEffect = ((PlayerEntity) entity).hasStatusEffect(StatusEffects.NIGHT_VISION) && Objects.requireNonNull(((PlayerEntity) entity).getStatusEffect(StatusEffects.NIGHT_VISION)).getDuration() > 25;
-            NbtCompound tag = head.getNbt();
-            assert tag != null;
-            if (tag.contains(NBTKEY_COLOR)) {
-                String color = tag.getString(NBTKEY_COLOR);
-                if (color.equals(gold) && !hasNvEffect && !hasCpEffect) {
-                    if(entity.isTouchingWater()) { ((PlayerEntity) entity).addStatusEffect(new StatusEffectInstance(StatusEffects.CONDUIT_POWER, 35, 0, false, false)); }
-                    else { ((PlayerEntity) entity).addStatusEffect(new StatusEffectInstance(StatusEffects.NIGHT_VISION, 35, 0, false, false)); }
-                }
-                if (color.equals(blue) && !hasCpEffect && entity.isTouchingWater()) {
-                    ((PlayerEntity) entity).addStatusEffect(new StatusEffectInstance(StatusEffects.CONDUIT_POWER, 35, 0, false, false));
+        if (entity instanceof PlayerEntity) {
+            ItemStack head = ((PlayerEntity) entity).getEquippedStack(EquipmentSlot.HEAD);
+            ItemStack chest = ((PlayerEntity) entity).getEquippedStack(EquipmentSlot.CHEST);
+            ItemStack legs = ((PlayerEntity) entity).getEquippedStack(EquipmentSlot.LEGS);
+            ItemStack feet = ((PlayerEntity) entity).getEquippedStack(EquipmentSlot.FEET);
+            if (armorColorMatch(head, chest, legs, feet)) {
+                boolean hasCpEffect = ((PlayerEntity) entity).hasStatusEffect(StatusEffects.CONDUIT_POWER) && Objects.requireNonNull(((PlayerEntity) entity).getStatusEffect(StatusEffects.CONDUIT_POWER)).getDuration() > 25;
+                boolean hasNvEffect = ((PlayerEntity) entity).hasStatusEffect(StatusEffects.NIGHT_VISION) && Objects.requireNonNull(((PlayerEntity) entity).getStatusEffect(StatusEffects.NIGHT_VISION)).getDuration() > 25;
+                NbtCompound tag = head.getNbt();
+                assert tag != null;
+                if (tag.contains(NBTKEY_COLOR)) {
+                    String color = tag.getString(NBTKEY_COLOR);
+                    if (color.equals(gold) && !hasNvEffect && !hasCpEffect) {
+                        if (entity.isTouchingWater()) {
+                            ((PlayerEntity) entity).addStatusEffect(new StatusEffectInstance(StatusEffects.CONDUIT_POWER, 35, 0, false, false));
+                        } else {
+                            ((PlayerEntity) entity).addStatusEffect(new StatusEffectInstance(StatusEffects.NIGHT_VISION, 35, 0, false, false));
+                        }
+                    }
+                    if (color.equals(blue) && !hasCpEffect && entity.isTouchingWater()) {
+                        ((PlayerEntity) entity).addStatusEffect(new StatusEffectInstance(StatusEffects.CONDUIT_POWER, 35, 0, false, false));
+                    }
                 }
             }
         }
@@ -209,65 +265,4 @@ public class ChocoDisguiseItem extends ArmorItem implements GeoItem {
         if (color.equals(gold) || color.equals(flame) || netherite) { return true; }
         return super.isFireproof();
     }
-
-    // All you need to do here is add your animation controllers to the
-    // AnimationData
-    @SuppressWarnings({ "rawtypes", "unchecked" })
-    @Override
-    public void registerControllers(AnimatableManager.@NotNull ControllerRegistrar controllerRegistrar) {
-        controllerRegistrar.add(new AnimationController<>(this, 20, animationState -> {
-            animationState.getController().setAnimation(RawAnimation.begin().then("idle", Animation.LoopType.LOOP));
-            Entity entity = animationState.getData(DataTickets.ENTITY);
-
-            if (entity instanceof ArmorStandEntity) { return PlayState.CONTINUE; }
-
-            ItemStack head = ItemStack.EMPTY;
-            ItemStack chest = ItemStack.EMPTY;
-            ItemStack legs = ItemStack.EMPTY;
-            ItemStack feet = ItemStack.EMPTY;
-
-            for (ItemStack stack: entity.getArmorItems()) {
-                if (stack.isEmpty()) { return PlayState.STOP; }
-                if (stack.getItem() instanceof ChocoDisguiseItem choArmor) {
-                    switch (choArmor.getSlotType()) {
-                        case FEET -> feet = stack;
-                        case HEAD -> head = stack;
-                        case LEGS -> legs = stack;
-                        case CHEST -> chest = stack;
-                    }
-                }
-            }
-            boolean isWearingAll = armorMatch(head, chest, legs, feet);
-            return isWearingAll ? PlayState.CONTINUE : PlayState.STOP;
-        }));
-    }
-
-    public AnimatableInstanceCache getAnimatableInstanceCache() {
-        return this.chocoCache;
-    }
-
-    @Override
-    public void createRenderer(@NotNull Consumer<Object> consumer) {
-        consumer.accept(new RenderProvider() {
-            private GeoArmorRenderer<?> renderer;
-
-            @Override
-            public BipedEntityModel<LivingEntity> getHumanoidArmorModel(LivingEntity livingEntity, ItemStack itemStack, EquipmentSlot equipmentSlot, BipedEntityModel<LivingEntity> original) {
-                if(this.renderer == null)
-                    this.renderer = new ChocoDisguiseFeatureRenderer();
-
-                // This prepares our GeoArmorRenderer for the current render frame.
-                // These parameters may be null however, so we don't do anything further with them
-                this.renderer.prepForRender(livingEntity, itemStack, equipmentSlot, original);
-
-                return this.renderer;
-            }
-        });
-    }
-
-    @Override
-    public Supplier<Object> getRenderProvider() {
-        return this.renderProvider;
-    }
 }
-

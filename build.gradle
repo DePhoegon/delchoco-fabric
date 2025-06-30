@@ -70,7 +70,6 @@ dependencies {
 	// include "vazkii.patchouli:Patchouli:${project.patchouli_ver}"
 	modApi "fuzs.forgeconfigapiport:forgeconfigapiport-fabric:${project.config_ver}"
 	modImplementation "curse.maven:${project.delbase_project}:${project.delbase_ver}"
-	modImplementation "software.bernie.geckolib:${project.geckolib_ver}"
 }
 
 processResources {

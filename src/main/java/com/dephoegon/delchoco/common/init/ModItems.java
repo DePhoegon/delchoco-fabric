@@ -42,11 +42,11 @@ public class ModItems extends BaseReg {
     public static final Item BLUE_CHOCOBO_SPAWN_EGG = registerItem("blue_chocobo_spawn_egg", new ChocoboSpawnEggItem(new FabricItemSettings().maxCount(64), ChocoboColor.BLUE));
     public static final Item WHITE_CHOCOBO_SPAWN_EGG = registerItem("white_chocobo_spawn_egg", new ChocoboSpawnEggItem(new FabricItemSettings().maxCount(64), ChocoboColor.WHITE));
     public static final Item BLACK_CHOCOBO_SPAWN_EGG = registerItem("black_chocobo_spawn_egg", new ChocoboSpawnEggItem(new FabricItemSettings().maxCount(64), ChocoboColor.BLACK));
-    public static final Item GOLD_CHOCOBO_SPAWN_EGG = registerItem("gold_chocobo_spawn_egg", new ChocoboSpawnEggItem(new FabricItemSettings().maxCount(64), ChocoboColor.GOLD));
+    public static final Item GOLD_CHOCOBO_SPAWN_EGG = registerItem("gold_chocobo_spawn_egg", new ChocoboSpawnEggItem(new FabricItemSettings().maxCount(64).fireproof(), ChocoboColor.GOLD));
     public static final Item PINK_CHOCOBO_SPAWN_EGG = registerItem("pink_chocobo_spawn_egg", new ChocoboSpawnEggItem(new FabricItemSettings().maxCount(64), ChocoboColor.PINK));
     public static final Item RED_CHOCOBO_SPAWN_EGG = registerItem("red_chocobo_spawn_egg", new ChocoboSpawnEggItem(new FabricItemSettings().maxCount(64), ChocoboColor.RED));
     public static final Item PURPLE_CHOCOBO_SPAWN_EGG = registerItem("purple_chocobo_spawn_egg", new ChocoboSpawnEggItem(new FabricItemSettings().maxCount(64), ChocoboColor.PURPLE));
-    public static final Item FLAME_CHOCOBO_SPAWN_EGG = registerItem("flame_chocobo_spawn_egg", new ChocoboSpawnEggItem(new FabricItemSettings().maxCount(64), ChocoboColor.FLAME));
+    public static final Item FLAME_CHOCOBO_SPAWN_EGG = registerItem("flame_chocobo_spawn_egg", new ChocoboSpawnEggItem(new FabricItemSettings().maxCount(64).fireproof(), ChocoboColor.FLAME));
 
     // Chocobo MISCELLANEOUS
     public static final Item CHOCOBO_FEATHER = registerItem("chocobo_feather", new Item(new FabricItemSettings().maxCount(64)));
@@ -57,10 +57,10 @@ public class ModItems extends BaseReg {
     //Chocobo Weapon & Armor Materials
     public static final Item CHOCOBO_LEATHER = registerItem("chocobo_leather", new Item(new FabricItemSettings().maxCount(64)));
     public static final Item FEATHER_TREATED_LEATHER = registerItem("feather_treated_leather", new Item(new FabricItemSettings().maxCount(64)));
-    public static final Item DIAMOND_TREATED_FEATHER_LEATHER = registerItem("diamond_treated_feather_leather", new Item(new FabricItemSettings().maxCount(64)));
-    public static final Item NETHERITE_TREATED_FEATHER_LEATHER = registerItem("netherite_treated_feather_leather", new Item(new FabricItemSettings().maxCount(64)));
+    public static final Item DIAMOND_TREATED_FEATHER_LEATHER = registerItem("diamond_treated_feather_leather", new Item(new FabricItemSettings().maxCount(64).fireproof()));
+    public static final Item NETHERITE_TREATED_FEATHER_LEATHER = registerItem("netherite_treated_feather_leather", new Item(new FabricItemSettings().maxCount(64).fireproof()));
 
-    // Chocobo Gear
+    // Chocobo Weapons
     public static final Item CHAIN_CHOCO_WEAPON = registerItem("chocobo_weapon_chain", new ChocoboWeaponItems(CHOCOBO_WEAPON_TIERS.get(1), -3f, new FabricItemSettings().maxCount(1)));
     public static final Item REINFORCED_CHAIN_CHOCO_WEAPON = registerItem("chocobo_weapon_reinforced_chain", new ChocoboWeaponItems(CHOCOBO_WEAPON_TIERS.get(2), -3f, new FabricItemSettings().maxCount(1)));
     public static final Item IRON_CHOCO_WEAPON = registerItem("chocobo_weapon_iron", new ChocoboWeaponItems(CHOCOBO_WEAPON_TIERS.get(3), -3f, new FabricItemSettings().maxCount(1)));
@@ -71,6 +71,7 @@ public class ModItems extends BaseReg {
     public static final Item REINFORCED_NETHERITE_CHOCO_WEAPON = registerItem("chocobo_weapon_reinforced_netherite", new ChocoboWeaponItems(CHOCOBO_WEAPON_TIERS.get(8), -2.4f, new FabricItemSettings().maxCount(1).fireproof()));
     public static final Item GILDED_NETHERITE_CHOCO_WEAPON = registerItem("chocobo_weapon_gilded_netherite", new ChocoboWeaponItems(CHOCOBO_WEAPON_TIERS.get(9), -2.4f, new FabricItemSettings().maxCount(1).fireproof()));
 
+    // Chocobo Armor
     public static final Item CHAIN_CHOCO_HELMET = registerItem("chocobo_armor_chain_helmet", new ChocoboArmorItems(CHOCOBO_ARMOR_MATERIALS.get(1), ArmorItem.Type.HELMET, new FabricItemSettings().maxCount(1)));
     public static final Item CHAIN_CHOCO_CHEST = registerItem("chocobo_armor_chain_chestplate", new ChocoboArmorItems(CHOCOBO_ARMOR_MATERIALS.get(1), ArmorItem.Type.CHESTPLATE, new FabricItemSettings().maxCount(1)));
     public static final Item CHAIN_CHOCO_LEGGINGS = registerItem("chocobo_armor_chain_leggings", new ChocoboArmorItems(CHOCOBO_ARMOR_MATERIALS.get(1), ArmorItem.Type.LEGGINGS, new FabricItemSettings().maxCount(1)));
@@ -108,47 +109,48 @@ public class ModItems extends BaseReg {
     public static final Item GILDED_NETHERITE_CHOCO_LEGGINGS = registerItem("chocobo_armor_gilded_netherite_leggings", new ChocoboArmorItems(CHOCOBO_ARMOR_MATERIALS.get(9), ArmorItem.Type.LEGGINGS, new FabricItemSettings().maxCount(1).fireproof()));
     public static final Item GILDED_NETHERITE_CHOCO_BOOTS = registerItem("chocobo_armor_gilded_netherite_boots", new ChocoboArmorItems(CHOCOBO_ARMOR_MATERIALS.get(9), ArmorItem.Type.BOOTS, new FabricItemSettings().maxCount(1).fireproof()));
 
+    // Chocobo Saddles & Bags
     public static final Item CHOCOBO_SADDLE = registerItem("chocobo_saddle", new ChocoboSaddleItem(new FabricItemSettings().maxCount(4), 0, false));
     public static final Item CHOCOBO_SADDLE_BAGS = registerItem("chocobo_saddle_bags", new ChocoboSaddleItem(new FabricItemSettings().maxCount(4), tier_one_chocobo_inv_slot_count, false));
     public static final Item CHOCOBO_SADDLE_PACK = registerItem("chocobo_saddle_pack", new ChocoboSaddleItem(new FabricItemSettings().maxCount(2), tier_two_chocobo_inv_slot_count, true));
 
     // ChocoGuise Gear
-    public static final Item CHAIN_CHOCO_DISGUISE_HELMET = registerItem("choco_disguise_chain_helmet", new ChocoDisguiseItem(CHOCO_ARMOR_MATERIALS.get(1), ArmorItem.Type.HELMET, new FabricItemSettings().maxCount(1)));
-    public static final Item CHAIN_CHOCO_DISGUISE_CHEST = registerItem("choco_disguise_chain_chestplate", new ChocoDisguiseItem(CHOCO_ARMOR_MATERIALS.get(1), ArmorItem.Type.CHESTPLATE, new FabricItemSettings().maxCount(1)));
-    public static final Item CHAIN_CHOCO_DISGUISE_LEGS = registerItem("choco_disguise_chain_leggings", new ChocoDisguiseItem(CHOCO_ARMOR_MATERIALS.get(1), ArmorItem.Type.LEGGINGS, new FabricItemSettings().maxCount(1)));
-    public static final Item CHAIN_CHOCO_DISGUISE_BOOTS = registerItem("choco_disguise_chain_boots", new ChocoDisguiseItem(CHOCO_ARMOR_MATERIALS.get(1), ArmorItem.Type.BOOTS, new FabricItemSettings().maxCount(1)));
-    public static final Item REINFORCED_CHAIN_CHOCO_DISGUISE_HELMET = registerItem("choco_disguise_reinforced_chain_helmet", new ChocoDisguiseItem(CHOCO_ARMOR_MATERIALS.get(2), ArmorItem.Type.HELMET, new FabricItemSettings().maxCount(1)));
-    public static final Item REINFORCED_CHAIN_CHOCO_DISGUISE_CHEST = registerItem("choco_disguise_reinforced_chain_chestplate", new ChocoDisguiseItem(CHOCO_ARMOR_MATERIALS.get(2), ArmorItem.Type.CHESTPLATE, new FabricItemSettings().maxCount(1)));
-    public static final Item REINFORCED_CHAIN_CHOCO_DISGUISE_LEGS = registerItem("choco_disguise_reinforced_chain_leggings", new ChocoDisguiseItem(CHOCO_ARMOR_MATERIALS.get(2), ArmorItem.Type.LEGGINGS, new FabricItemSettings().maxCount(1)));
-    public static final Item REINFORCED_CHAIN_CHOCO_DISGUISE_BOOTS = registerItem("choco_disguise_reinforced_chain_boots", new ChocoDisguiseItem(CHOCO_ARMOR_MATERIALS.get(2), ArmorItem.Type.BOOTS, new FabricItemSettings().maxCount(1)));
-    public static final Item IRON_CHOCO_DISGUISE_HELMET = registerItem("choco_disguise_iron_helmet", new ChocoDisguiseItem(CHOCO_ARMOR_MATERIALS.get(3), ArmorItem.Type.HELMET, new FabricItemSettings().maxCount(1)));
-    public static final Item IRON_CHOCO_DISGUISE_CHEST = registerItem("choco_disguise_iron_chestplate", new ChocoDisguiseItem(CHOCO_ARMOR_MATERIALS.get(3), ArmorItem.Type.CHESTPLATE, new FabricItemSettings().maxCount(1)));
-    public static final Item IRON_CHOCO_DISGUISE_LEGS = registerItem("choco_disguise_iron_leggings", new ChocoDisguiseItem(CHOCO_ARMOR_MATERIALS.get(3), ArmorItem.Type.LEGGINGS, new FabricItemSettings().maxCount(1)));
-    public static final Item IRON_CHOCO_DISGUISE_BOOTS = registerItem("choco_disguise_iron_boots", new ChocoDisguiseItem(CHOCO_ARMOR_MATERIALS.get(3), ArmorItem.Type.BOOTS, new FabricItemSettings().maxCount(1)));
-    public static final Item REINFORCED_IRON_CHOCO_DISGUISE_HELMET = registerItem("choco_disguise_reinforced_iron_helmet", new ChocoDisguiseItem(CHOCO_ARMOR_MATERIALS.get(4), ArmorItem.Type.HELMET, new FabricItemSettings().maxCount(1)));
-    public static final Item REINFORCED_IRON_CHOCO_DISGUISE_CHEST = registerItem("choco_disguise_reinforced_iron_chestplate", new ChocoDisguiseItem(CHOCO_ARMOR_MATERIALS.get(4), ArmorItem.Type.CHESTPLATE, new FabricItemSettings().maxCount(1)));
-    public static final Item REINFORCED_IRON_CHOCO_DISGUISE_LEGS = registerItem("choco_disguise_reinforced_iron_leggings", new ChocoDisguiseItem(CHOCO_ARMOR_MATERIALS.get(4), ArmorItem.Type.LEGGINGS, new FabricItemSettings().maxCount(1)));
-    public static final Item REINFORCED_IRON_CHOCO_DISGUISE_BOOTS = registerItem("choco_disguise_reinforced_iron_boots", new ChocoDisguiseItem(CHOCO_ARMOR_MATERIALS.get(4), ArmorItem.Type.BOOTS, new FabricItemSettings().maxCount(1)));
-    public static final Item DIAMOND_CHOCO_DISGUISE_HELMET = registerItem("choco_disguise_diamond_helmet", new ChocoDisguiseItem(CHOCO_ARMOR_MATERIALS.get(5), ArmorItem.Type.HELMET, new FabricItemSettings().maxCount(1)));
-    public static final Item DIAMOND_CHOCO_DISGUISE_CHEST = registerItem("choco_disguise_diamond_chestplate", new ChocoDisguiseItem(CHOCO_ARMOR_MATERIALS.get(5), ArmorItem.Type.CHESTPLATE, new FabricItemSettings().maxCount(1)));
-    public static final Item DIAMOND_CHOCO_DISGUISE_LEGS = registerItem("choco_disguise_diamond_leggings", new ChocoDisguiseItem(CHOCO_ARMOR_MATERIALS.get(5), ArmorItem.Type.LEGGINGS, new FabricItemSettings().maxCount(1)));
-    public static final Item DIAMOND_CHOCO_DISGUISE_BOOTS = registerItem("choco_disguise_diamond_boots", new ChocoDisguiseItem(CHOCO_ARMOR_MATERIALS.get(5), ArmorItem.Type.BOOTS, new FabricItemSettings().maxCount(1)));
-    public static final Item REINFORCED_DIAMOND_CHOCO_DISGUISE_HELMET = registerItem("choco_disguise_reinforced_diamond_helmet", new ChocoDisguiseItem(CHOCO_ARMOR_MATERIALS.get(6), ArmorItem.Type.HELMET, new FabricItemSettings().maxCount(1)));
-    public static final Item REINFORCED_DIAMOND_CHOCO_DISGUISE_CHEST = registerItem("choco_disguise_reinforced_diamond_chestplate", new ChocoDisguiseItem(CHOCO_ARMOR_MATERIALS.get(6), ArmorItem.Type.CHESTPLATE, new FabricItemSettings().maxCount(1)));
-    public static final Item REINFORCED_DIAMOND_CHOCO_DISGUISE_LEGS = registerItem("choco_disguise_reinforced_diamond_leggings", new ChocoDisguiseItem(CHOCO_ARMOR_MATERIALS.get(6), ArmorItem.Type.LEGGINGS, new FabricItemSettings().maxCount(1)));
-    public static final Item REINFORCED_DIAMOND_CHOCO_DISGUISE_BOOTS = registerItem("choco_disguise_reinforced_diamond_boots", new ChocoDisguiseItem(CHOCO_ARMOR_MATERIALS.get(6), ArmorItem.Type.BOOTS, new FabricItemSettings().maxCount(1)));
-    public static final Item NETHERITE_CHOCO_DISGUISE_HELMET = registerItem("choco_disguise_netherite_helmet", new ChocoDisguiseItem(CHOCO_ARMOR_MATERIALS.get(7), ArmorItem.Type.HELMET, new FabricItemSettings().maxCount(1)));
-    public static final Item NETHERITE_CHOCO_DISGUISE_CHEST = registerItem("choco_disguise_netherite_chestplate", new ChocoDisguiseItem(CHOCO_ARMOR_MATERIALS.get(7), ArmorItem.Type.CHESTPLATE, new FabricItemSettings().maxCount(1)));
-    public static final Item NETHERITE_CHOCO_DISGUISE_LEGS = registerItem("choco_disguise_netherite_leggings", new ChocoDisguiseItem(CHOCO_ARMOR_MATERIALS.get(7), ArmorItem.Type.LEGGINGS, new FabricItemSettings().maxCount(1)));
-    public static final Item NETHERITE_CHOCO_DISGUISE_BOOTS = registerItem("choco_disguise_netherite_boots", new ChocoDisguiseItem(CHOCO_ARMOR_MATERIALS.get(7), ArmorItem.Type.BOOTS, new FabricItemSettings().maxCount(1)));
-    public static final Item REINFORCED_NETHERITE_CHOCO_DISGUISE_HELMET = registerItem("choco_disguise_reinforced_netherite_helmet", new ChocoDisguiseItem(CHOCO_ARMOR_MATERIALS.get(8), ArmorItem.Type.HELMET, new FabricItemSettings().maxCount(1)));
-    public static final Item REINFORCED_NETHERITE_CHOCO_DISGUISE_CHEST = registerItem("choco_disguise_reinforced_netherite_chestplate", new ChocoDisguiseItem(CHOCO_ARMOR_MATERIALS.get(8), ArmorItem.Type.CHESTPLATE, new FabricItemSettings().maxCount(1)));
-    public static final Item REINFORCED_NETHERITE_CHOCO_DISGUISE_LEGS = registerItem("choco_disguise_reinforced_netherite_leggings", new ChocoDisguiseItem(CHOCO_ARMOR_MATERIALS.get(8), ArmorItem.Type.LEGGINGS, new FabricItemSettings().maxCount(1)));
-    public static final Item REINFORCED_NETHERITE_CHOCO_DISGUISE_BOOTS = registerItem("choco_disguise_reinforced_netherite_boots", new ChocoDisguiseItem(CHOCO_ARMOR_MATERIALS.get(8), ArmorItem.Type.BOOTS, new FabricItemSettings().maxCount(1)));
-    public static final Item GILDED_NETHERITE_CHOCO_DISGUISE_HELMET = registerItem("choco_disguise_gilded_netherite_helmet", new ChocoDisguiseItem(CHOCO_ARMOR_MATERIALS.get(9), ArmorItem.Type.HELMET, new FabricItemSettings().maxCount(1)));
-    public static final Item GILDED_NETHERITE_CHOCO_DISGUISE_CHEST = registerItem("choco_disguise_gilded_netherite_chestplate", new ChocoDisguiseItem(CHOCO_ARMOR_MATERIALS.get(9), ArmorItem.Type.CHESTPLATE, new FabricItemSettings().maxCount(1)));
-    public static final Item GILDED_NETHERITE_CHOCO_DISGUISE_LEGS = registerItem("choco_disguise_gilded_netherite_leggings", new ChocoDisguiseItem(CHOCO_ARMOR_MATERIALS.get(9), ArmorItem.Type.LEGGINGS, new FabricItemSettings().maxCount(1)));
-    public static final Item GILDED_NETHERITE_CHOCO_DISGUISE_BOOTS = registerItem("choco_disguise_gilded_netherite_boots", new ChocoDisguiseItem(CHOCO_ARMOR_MATERIALS.get(9), ArmorItem.Type.BOOTS, new FabricItemSettings().maxCount(1)));
+    public static final Item CHAIN_HELMET = registerItem("choco_disguise_chain_helmet", new ChocoDisguiseItem(CHOCO_ARMOR_MATERIALS.get(1), ArmorItem.Type.HELMET, new FabricItemSettings().maxCount(1)));
+    public static final Item CHAIN_CHEST = registerItem("choco_disguise_chain_chestplate", new ChocoDisguiseItem(CHOCO_ARMOR_MATERIALS.get(1), ArmorItem.Type.CHESTPLATE, new FabricItemSettings().maxCount(1)));
+    public static final Item CHAIN_LEGS = registerItem("choco_disguise_chain_leggings", new ChocoDisguiseItem(CHOCO_ARMOR_MATERIALS.get(1), ArmorItem.Type.LEGGINGS, new FabricItemSettings().maxCount(1)));
+    public static final Item CHAIN_BOOTS = registerItem("choco_disguise_chain_boots", new ChocoDisguiseItem(CHOCO_ARMOR_MATERIALS.get(1), ArmorItem.Type.BOOTS, new FabricItemSettings().maxCount(1)));
+    public static final Item REINFORCED_CHAIN_HELMET = registerItem("choco_disguise_reinforced_chain_helmet", new ChocoDisguiseItem(CHOCO_ARMOR_MATERIALS.get(2), ArmorItem.Type.HELMET, new FabricItemSettings().maxCount(1)));
+    public static final Item REINFORCED_CHAIN_CHEST = registerItem("choco_disguise_reinforced_chain_chestplate", new ChocoDisguiseItem(CHOCO_ARMOR_MATERIALS.get(2), ArmorItem.Type.CHESTPLATE, new FabricItemSettings().maxCount(1)));
+    public static final Item REINFORCED_CHAIN_LEGS = registerItem("choco_disguise_reinforced_chain_leggings", new ChocoDisguiseItem(CHOCO_ARMOR_MATERIALS.get(2), ArmorItem.Type.LEGGINGS, new FabricItemSettings().maxCount(1)));
+    public static final Item REINFORCED_CHAIN_BOOTS = registerItem("choco_disguise_reinforced_chain_boots", new ChocoDisguiseItem(CHOCO_ARMOR_MATERIALS.get(2), ArmorItem.Type.BOOTS, new FabricItemSettings().maxCount(1)));
+    public static final Item IRON_HELMET = registerItem("choco_disguise_iron_helmet", new ChocoDisguiseItem(CHOCO_ARMOR_MATERIALS.get(3), ArmorItem.Type.HELMET, new FabricItemSettings().maxCount(1)));
+    public static final Item IRON_CHEST = registerItem("choco_disguise_iron_chestplate", new ChocoDisguiseItem(CHOCO_ARMOR_MATERIALS.get(3), ArmorItem.Type.CHESTPLATE, new FabricItemSettings().maxCount(1)));
+    public static final Item IRON_LEGS = registerItem("choco_disguise_iron_leggings", new ChocoDisguiseItem(CHOCO_ARMOR_MATERIALS.get(3), ArmorItem.Type.LEGGINGS, new FabricItemSettings().maxCount(1)));
+    public static final Item IRON_BOOTS = registerItem("choco_disguise_iron_boots", new ChocoDisguiseItem(CHOCO_ARMOR_MATERIALS.get(3), ArmorItem.Type.BOOTS, new FabricItemSettings().maxCount(1)));
+    public static final Item REINFORCED_IRON_HELMET = registerItem("choco_disguise_reinforced_iron_helmet", new ChocoDisguiseItem(CHOCO_ARMOR_MATERIALS.get(4), ArmorItem.Type.HELMET, new FabricItemSettings().maxCount(1)));
+    public static final Item REINFORCED_IRON_CHEST = registerItem("choco_disguise_reinforced_iron_chestplate", new ChocoDisguiseItem(CHOCO_ARMOR_MATERIALS.get(4), ArmorItem.Type.CHESTPLATE, new FabricItemSettings().maxCount(1)));
+    public static final Item REINFORCED_IRON_LEGS = registerItem("choco_disguise_reinforced_iron_leggings", new ChocoDisguiseItem(CHOCO_ARMOR_MATERIALS.get(4), ArmorItem.Type.LEGGINGS, new FabricItemSettings().maxCount(1)));
+    public static final Item REINFORCED_IRON_BOOTS = registerItem("choco_disguise_reinforced_iron_boots", new ChocoDisguiseItem(CHOCO_ARMOR_MATERIALS.get(4), ArmorItem.Type.BOOTS, new FabricItemSettings().maxCount(1)));
+    public static final Item DIAMOND_HELMET = registerItem("choco_disguise_diamond_helmet", new ChocoDisguiseItem(CHOCO_ARMOR_MATERIALS.get(5), ArmorItem.Type.HELMET, new FabricItemSettings().maxCount(1)));
+    public static final Item DIAMOND_CHEST = registerItem("choco_disguise_diamond_chestplate", new ChocoDisguiseItem(CHOCO_ARMOR_MATERIALS.get(5), ArmorItem.Type.CHESTPLATE, new FabricItemSettings().maxCount(1)));
+    public static final Item DIAMOND_LEGS = registerItem("choco_disguise_diamond_leggings", new ChocoDisguiseItem(CHOCO_ARMOR_MATERIALS.get(5), ArmorItem.Type.LEGGINGS, new FabricItemSettings().maxCount(1)));
+    public static final Item DIAMOND_BOOTS = registerItem("choco_disguise_diamond_boots", new ChocoDisguiseItem(CHOCO_ARMOR_MATERIALS.get(5), ArmorItem.Type.BOOTS, new FabricItemSettings().maxCount(1)));
+    public static final Item REINFORCED_DIAMOND_HELMET = registerItem("choco_disguise_reinforced_diamond_helmet", new ChocoDisguiseItem(CHOCO_ARMOR_MATERIALS.get(6), ArmorItem.Type.HELMET, new FabricItemSettings().maxCount(1)));
+    public static final Item REINFORCED_DIAMOND_CHEST = registerItem("choco_disguise_reinforced_diamond_chestplate", new ChocoDisguiseItem(CHOCO_ARMOR_MATERIALS.get(6), ArmorItem.Type.CHESTPLATE, new FabricItemSettings().maxCount(1)));
+    public static final Item REINFORCED_DIAMOND_LEGS = registerItem("choco_disguise_reinforced_diamond_leggings", new ChocoDisguiseItem(CHOCO_ARMOR_MATERIALS.get(6), ArmorItem.Type.LEGGINGS, new FabricItemSettings().maxCount(1)));
+    public static final Item REINFORCED_DIAMOND_BOOTS = registerItem("choco_disguise_reinforced_diamond_boots", new ChocoDisguiseItem(CHOCO_ARMOR_MATERIALS.get(6), ArmorItem.Type.BOOTS, new FabricItemSettings().maxCount(1)));
+    public static final Item NETHERITE_HELMET = registerItem("choco_disguise_netherite_helmet", new ChocoDisguiseItem(CHOCO_ARMOR_MATERIALS.get(7), ArmorItem.Type.HELMET, new FabricItemSettings().maxCount(1).fireproof()));
+    public static final Item NETHERITE_CHEST = registerItem("choco_disguise_netherite_chestplate", new ChocoDisguiseItem(CHOCO_ARMOR_MATERIALS.get(7), ArmorItem.Type.CHESTPLATE, new FabricItemSettings().maxCount(1).fireproof()));
+    public static final Item NETHERITE_LEGS = registerItem("choco_disguise_netherite_leggings", new ChocoDisguiseItem(CHOCO_ARMOR_MATERIALS.get(7), ArmorItem.Type.LEGGINGS, new FabricItemSettings().maxCount(1).fireproof()));
+    public static final Item NETHERITE_BOOTS = registerItem("choco_disguise_netherite_boots", new ChocoDisguiseItem(CHOCO_ARMOR_MATERIALS.get(7), ArmorItem.Type.BOOTS, new FabricItemSettings().maxCount(1).fireproof()));
+    public static final Item REINFORCED_NETHERITE_HELMET = registerItem("choco_disguise_reinforced_netherite_helmet", new ChocoDisguiseItem(CHOCO_ARMOR_MATERIALS.get(8), ArmorItem.Type.HELMET, new FabricItemSettings().maxCount(1).fireproof()));
+    public static final Item REINFORCED_NETHERITE_CHEST = registerItem("choco_disguise_reinforced_netherite_chestplate", new ChocoDisguiseItem(CHOCO_ARMOR_MATERIALS.get(8), ArmorItem.Type.CHESTPLATE, new FabricItemSettings().maxCount(1).fireproof()));
+    public static final Item REINFORCED_NETHERITE_LEGS = registerItem("choco_disguise_reinforced_netherite_leggings", new ChocoDisguiseItem(CHOCO_ARMOR_MATERIALS.get(8), ArmorItem.Type.LEGGINGS, new FabricItemSettings().maxCount(1).fireproof()));
+    public static final Item REINFORCED_NETHERITE_BOOTS = registerItem("choco_disguise_reinforced_netherite_boots", new ChocoDisguiseItem(CHOCO_ARMOR_MATERIALS.get(8), ArmorItem.Type.BOOTS, new FabricItemSettings().maxCount(1).fireproof()));
+    public static final Item GILDED_NETHERITE_HELMET = registerItem("choco_disguise_gilded_netherite_helmet", new ChocoDisguiseItem(CHOCO_ARMOR_MATERIALS.get(9), ArmorItem.Type.HELMET, new FabricItemSettings().maxCount(1).fireproof()));
+    public static final Item GILDED_NETHERITE_CHEST = registerItem("choco_disguise_gilded_netherite_chestplate", new ChocoDisguiseItem(CHOCO_ARMOR_MATERIALS.get(9), ArmorItem.Type.CHESTPLATE, new FabricItemSettings().maxCount(1).fireproof()));
+    public static final Item GILDED_NETHERITE_LEGS = registerItem("choco_disguise_gilded_netherite_leggings", new ChocoDisguiseItem(CHOCO_ARMOR_MATERIALS.get(9), ArmorItem.Type.LEGGINGS, new FabricItemSettings().maxCount(1).fireproof()));
+    public static final Item GILDED_NETHERITE_BOOTS = registerItem("choco_disguise_gilded_netherite_boots", new ChocoDisguiseItem(CHOCO_ARMOR_MATERIALS.get(9), ArmorItem.Type.BOOTS, new FabricItemSettings().maxCount(1).fireproof()));
 
 
     public static void registerModItems() {

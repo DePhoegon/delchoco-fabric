@@ -23,10 +23,6 @@ public class composable {
         add(f3, CHOCOBO_DRUMSTICK_RAW);
         add(f4, LOVELY_GYSAHL_GREEN);
         add(f4, GYSAHL_CAKE);
-        add(f4, LEATHER_CHOCO_DISGUISE_LEGS);
-        add(f4, LEATHER_CHOCO_DISGUISE_BOOTS);
-        add(f4, LEATHER_CHOCO_DISGUISE_CHEST);
-        add(f4, LEATHER_CHOCO_DISGUISE_HELMET);
     }
     private static void add(float pChance, @NotNull ItemConvertible pItem) { if (!ITEM_TO_LEVEL_INCREASE_CHANCE.containsKey(pItem.asItem())) { ITEM_TO_LEVEL_INCREASE_CHANCE.put(pItem.asItem(), pChance); } }
     public static void addToList(){ compost(); }

@@ -13,19 +13,13 @@ public class ChocoboSweepEnchantment extends Enchantment {
     }
 
     @Override
-    public int getMinPower(int level) {
-        return 5 + (level - 1) * 9;
-    }
+    public int getMinPower(int level) { return 5 + (level - 1) * 9; }
 
     @Override
-    public int getMaxPower(int level) {
-        return this.getMinPower(level) + 15;
-    }
+    public int getMaxPower(int level) { return this.getMinPower(level) + 15; }
 
     @Override
-    public int getMaxLevel() {
-        return 2;
-    }
+    public int getMaxLevel() { return 2; }
 
     @Override
     public boolean canAccept(Enchantment other) {

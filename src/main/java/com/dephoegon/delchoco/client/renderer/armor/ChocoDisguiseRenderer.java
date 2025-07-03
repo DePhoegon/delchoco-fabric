@@ -18,80 +18,141 @@ import net.minecraft.util.Identifier;
 import org.jetbrains.annotations.NotNull;
 
 public class ChocoDisguiseRenderer implements ArmorRenderer {
-    private final ChocoDisguiseModel model;
+    private ChocoDisguiseModel model;
+    // Cache the last stack hash to detect when rotations need updating
+    private int lastStackHash = 0;
+
     public ChocoDisguiseRenderer() {
-        this.model = new ChocoDisguiseModel(MinecraftClient.getInstance().getEntityModelLoader().getModelPart(ModModelLayers.CHOCO_DISGUISE_ARMOR));
+        // Model will be initialized lazily when first needed
+    }
+
+    private ChocoDisguiseModel getModel() {
+        if (this.model == null) {
+            this.model = new ChocoDisguiseModel(MinecraftClient.getInstance().getEntityModelLoader().getModelPart(ModModelLayers.CHOCO_DISGUISE_ARMOR));
+        }
+        return this.model;
     }
 
     public void render(MatrixStack matrices, VertexConsumerProvider vertexConsumers, @NotNull ItemStack stack, LivingEntity entity, EquipmentSlot slot, int light, BipedEntityModel<LivingEntity> contextModel) {
         if (!(stack.getItem() instanceof ChocoDisguiseItem armorItem)) return;
-        prepareTransforms(contextModel);
+
+        ChocoDisguiseModel model = getModel();
+        model.child = contextModel.child;
+        model.sneaking = contextModel.sneaking;
+        model.riding = contextModel.riding;
+
+        prepareTransforms(contextModel, entity);
         applyHatRotation(stack, slot);
         setVisibility(stack, entity, slot);
         renderModel(matrices, vertexConsumers, stack, armorItem, light);
     }
 
-    private void prepareTransforms(BipedEntityModel<LivingEntity> contextModel) {
-        this.model.body.copyTransform(contextModel.body);
-        this.model.head.copyTransform(contextModel.head);
-        this.model.hat.copyTransform(contextModel.hat);
-        this.model.leftArm.copyTransform(contextModel.leftArm);
-        this.model.leftLeg.copyTransform(contextModel.leftLeg);
-        this.model.rightArm.copyTransform(contextModel.rightArm);
-        this.model.rightLeg.copyTransform(contextModel.rightLeg);
+    private void prepareTransforms(BipedEntityModel<LivingEntity> contextModel, LivingEntity entity) {
+        ChocoDisguiseModel model = getModel();
+        // All transformations should be copied from the context model to ensure sync.
+        model.body.copyTransform(contextModel.body);
+        model.head.copyTransform(contextModel.head);
+        model.hat.copyTransform(contextModel.hat);
+        model.leftArm.copyTransform(contextModel.leftArm);
+        model.leftLeg.copyTransform(contextModel.leftLeg);
+        model.rightArm.copyTransform(contextModel.rightArm);
+        model.rightLeg.copyTransform(contextModel.rightLeg);
+
+        // IMPORTANT: Boots inherit transforms from their parent legs
+        // Since boots are children of legs, they automatically inherit leg transforms
+        // But we need to ensure the leg transforms are applied first
+        // This is already handled by the parent-child relationship in the model
     }
 
     private void applyHatRotation(ItemStack stack, EquipmentSlot slot) {
         if (slot != EquipmentSlot.HEAD || !(stack.getItem() instanceof ChocoDisguiseItem armor && armor.getSlotType() == EquipmentSlot.HEAD)) return;
-        this.model.hat.pitch += ChocoDisguiseItem.getHatRotX(stack);
-        this.model.hat.yaw += ChocoDisguiseItem.getHatRotY(stack);
-        this.model.hat.roll += ChocoDisguiseItem.getHatRotZ(stack);
+
+        ChocoDisguiseModel model = getModel();
+
+        // Only update rotations if the stack has changed
+        int currentStackHash = stack.hashCode();
+        if (currentStackHash != lastStackHash) {
+            // Get NBT values as relative offsets from the base transform
+            float relativeRotX = ChocoDisguiseItem.getHatRotX(stack);
+            float relativeRotY = ChocoDisguiseItem.getHatRotY(stack);
+            float relativeRotZ = ChocoDisguiseItem.getHatRotZ(stack);
+            model.setRelativeRotations(relativeRotX, relativeRotY, relativeRotZ);
+            lastStackHash = currentStackHash;
+        }
+
+        // Apply cached rotations (base + relative)
+        model.applyRotationsToChocoHead();
     }
 
     private void setVisibility(ItemStack stack, LivingEntity entity, EquipmentSlot slot) {
-        if (entity.isInvisible()) { setInvisible(); }
-        else { setVisible( ChocoDisguiseItem.getRenderMain(stack), ChocoDisguiseItem.getRenderLeft(stack), ChocoDisguiseItem.getRenderRight(stack), slot); }
+        setInvisible(); // Set all parts to invisible first
+        if (entity.isInvisible()) { return; }
+        setVisible( ChocoDisguiseItem.getRenderMain(stack), ChocoDisguiseItem.getRenderLeft(stack), ChocoDisguiseItem.getRenderRight(stack), slot);
     }
 
     private void renderModel(MatrixStack matrices, VertexConsumerProvider vertexConsumers, ItemStack stack, ChocoDisguiseItem armorItem, int light) {
         String color = ChocoDisguiseItem.getCustomModelColor(stack);
         Identifier texture = ChocoDisguiseItem.setCustomModel(color, armorItem);
         VertexConsumer vertexConsumer = vertexConsumers.getBuffer(RenderLayer.getArmorCutoutNoCull(texture));
-        this.model.render(matrices, vertexConsumer, light, OverlayTexture.DEFAULT_UV, 1.0f, 1.0f, 1.0f, 1.0f);
+        getModel().render(matrices, vertexConsumer, light, OverlayTexture.DEFAULT_UV, 1.0f, 1.0f, 1.0f, 1.0f);
     }
     public void setVisible(boolean renderMain, boolean renderLeft, boolean renderRight, EquipmentSlot slot) {
+        // Only control visibility for the specific slot being rendered
+        // Don't touch other slots - they will be handled by their own render calls
+
         switch (slot) {
-            case HEAD -> setHeadVisible(renderMain, renderLeft || renderRight);
-            case CHEST -> setChestVisible(renderMain, renderRight, renderLeft);
-            case LEGS -> setLegsVisible(renderRight, renderLeft);
-            case FEET -> setFeetVisible(renderRight, renderLeft);
-            default -> setInvisible();
+            case HEAD -> {
+                // Control head-related parts only
+                getModel().head.visible = renderMain;
+                getModel().hat.visible = false; // Always hide hat
+                // Only show chocobo head decorations if renderLeft or renderRight is true
+                if (getModel().chocoHead != null) {
+                    getModel().chocoHead.visible = renderMain && (renderLeft || renderRight);
+                }
+                getModel().setBootsOnlyRender(false); // Normal rendering
+            }
+            case CHEST -> {
+                // Control chest-related parts only
+                getModel().body.visible = renderMain;
+                getModel().rightArm.visible = renderRight;
+                getModel().leftArm.visible = renderLeft;
+                getModel().setBootsOnlyRender(false); // Normal rendering
+            }
+            case LEGS -> {
+                // Control leg-related parts only - keep as is since they work properly
+                getModel().rightLeg.visible = renderRight;
+                getModel().leftLeg.visible = renderLeft;
+                getModel().setBootsOnlyRender(false); // Normal rendering (show leg geometry)
+            }
+            case FEET -> {
+                // For boots: legs must be visible as parents, but we don't want leg geometry
+                getModel().rightLeg.visible = renderRight;  // Parent must be visible
+                getModel().leftLeg.visible = renderLeft;   // Parent must be visible
+
+                // Control only the boot parts visibility
+                getModel().armor_right_boot.visible = renderRight;
+                getModel().armor_left_boot.visible = renderLeft;
+
+                // Enable boots-only rendering mode to skip leg geometry
+                getModel().setBootsOnlyRender(true);
+            }
         }
     }
+
     private void setInvisible() {
-        this.model.head.visible = false;
-        this.model.hat.visible = false;
-        this.model.body.visible = false;
-        this.model.rightArm.visible = false;
-        this.model.leftArm.visible = false;
-        this.model.rightLeg.visible = false;
-        this.model.leftLeg.visible = false;
-    }
-    private void setHeadVisible(boolean head, boolean hat) {
-        this.model.head.visible = head;
-        this.model.hat.visible = hat;
-    }
-    private void setChestVisible(boolean chest, boolean right, boolean left) {
-        this.model.body.visible = chest;
-        this.model.rightArm.visible = right;
-        this.model.leftArm.visible = left;
-    }
-    private void setLegsVisible(boolean right, boolean left) {
-        this.model.rightLeg.visible = right;
-        this.model.leftLeg.visible = left;
-    }
-    private void setFeetVisible(boolean right, boolean left) {
-        this.model.armorRightBoot.visible = right;
-        this.model.armorLeftBoot.visible = left;
+        // This method is now only used when the entity is invisible
+        ChocoDisguiseModel model = getModel();
+        model.head.visible = false;
+        model.hat.visible = false;
+        model.body.visible = false;
+        model.rightArm.visible = false;
+        model.leftArm.visible = false;
+        model.rightLeg.visible = false;
+        model.leftLeg.visible = false;
+        model.armor_right_boot.visible = false;
+        model.armor_left_boot.visible = false;
+        if (model.chocoHead != null) {
+            model.chocoHead.visible = false;
+        }
     }
 }

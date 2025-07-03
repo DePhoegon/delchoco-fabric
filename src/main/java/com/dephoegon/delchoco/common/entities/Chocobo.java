@@ -30,14 +30,8 @@ import net.minecraft.entity.attribute.EntityAttributes;
 import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.entity.effect.StatusEffectInstance;
 import net.minecraft.entity.effect.StatusEffects;
-import net.minecraft.entity.mob.EndermiteEntity;
-import net.minecraft.entity.mob.MobEntity;
-import net.minecraft.entity.mob.SilverfishEntity;
-import net.minecraft.entity.mob.SpiderEntity;
-import net.minecraft.entity.passive.AbstractHorseEntity;
-import net.minecraft.entity.passive.AnimalEntity;
-import net.minecraft.entity.passive.PassiveEntity;
-import net.minecraft.entity.passive.TameableEntity;
+import net.minecraft.entity.mob.*;
+import net.minecraft.entity.passive.*;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.inventory.Inventory;
 import net.minecraft.item.Item;
@@ -103,9 +97,7 @@ public class Chocobo extends AbstractChocobo {
                         net.minecraft.enchantment.Enchantments.VANISHING_CURSE, itemStack) > 0;
 
                 // Only drop the item if it doesn't have Curse of Vanishing, Only for gear items
-                if (!hasVanishingCurse || !isGear) {
-                    entity.dropStack(itemStack);
-                }
+                if (!hasVanishingCurse || !isGear) { entity.dropStack(itemStack); }
                 // Items with Curse of Vanishing will simply disappear (not be dropped)
             }
         }
@@ -351,10 +343,6 @@ public class Chocobo extends AbstractChocobo {
             }
         }
         return result;
-    }
-    public boolean tryAttack(Entity entity) {
-        // Left in for unique Chocobo Checks unable to be done in AbstractChocobo
-        return super.tryAttack(entity);
     }
     public boolean canHaveStatusEffect(@NotNull StatusEffectInstance potionEffect) {
         // Left in for unique Chocobo Checks unable to be done in AbstractChocobo
@@ -893,6 +881,45 @@ public class Chocobo extends AbstractChocobo {
             }
         }
         return super.onKilledOther(world, targetEntity);
+    }
+    public boolean tryAttack(Entity entity) {
+        // The weapon is now always in the main hand, so vanilla attack logic works correctly.
+        boolean result = super.tryAttack(entity);
+
+        if (result && entity instanceof LivingEntity target) {
+            // These effects are applied only if the config is enabled and regardless of the weapon used.
+            boolean config = ChocoboConfig.EXTRA_CHOCOBO_EFFECT.get();
+            if (config) {
+                if (target instanceof SpiderEntity e) {
+                    onHitMobChance(10, STRING, e);
+                }
+                if (target instanceof CaveSpiderEntity e) {
+                    onHitMobChance(5, FERMENTED_SPIDER_EYE, e);
+                }
+                if (target instanceof SkeletonEntity e) {
+                    onHitMobChance(10, BONE, e);
+                }
+                if (target instanceof WitherSkeletonEntity e) {
+                    onHitMobChance(10, CHARCOAL, e);
+                }
+                if (target instanceof IronGolemEntity e) {
+                    onHitMobChance(5, POPPY, e);
+                }
+                if (target.getEquippedStack(EquipmentSlot.MAINHAND) != ItemStack.EMPTY) {
+                    if (onHitMobChance(30)) {
+                        target.dropItem(target.getEquippedStack(EquipmentSlot.MAINHAND).getItem());
+                        target.setStackInHand(Hand.MAIN_HAND, ItemStack.EMPTY);
+                    }
+                }
+                if (target.getEquippedStack(EquipmentSlot.OFFHAND) != ItemStack.EMPTY) {
+                    if (onHitMobChance(10)) {
+                        target.dropItem(target.getEquippedStack(EquipmentSlot.OFFHAND).getItem());
+                        target.setStackInHand(Hand.OFF_HAND, ItemStack.EMPTY);
+                    }
+                }
+            }
+        }
+        return result;
     }
     public void onDeath(DamageSource source) {
         // Left in for unique Chocobo Checks unable to be done in AbstractChocobo

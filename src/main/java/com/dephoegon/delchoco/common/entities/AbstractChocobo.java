@@ -34,8 +34,8 @@ import net.minecraft.entity.data.TrackedData;
 import net.minecraft.entity.data.TrackedDataHandlerRegistry;
 import net.minecraft.entity.effect.StatusEffectInstance;
 import net.minecraft.entity.effect.StatusEffects;
-import net.minecraft.entity.mob.*;
-import net.minecraft.entity.passive.IronGolemEntity;
+import net.minecraft.entity.mob.Angerable;
+import net.minecraft.entity.mob.MobEntity;
 import net.minecraft.entity.passive.TameableEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.fluid.Fluid;
@@ -47,7 +47,6 @@ import net.minecraft.registry.tag.TagKey;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.sound.SoundEvent;
 import net.minecraft.text.Text;
-import net.minecraft.util.Hand;
 import net.minecraft.util.TimeHelper;
 import net.minecraft.util.Util;
 import net.minecraft.util.math.BlockPos;
@@ -457,42 +456,7 @@ public abstract class AbstractChocobo extends TameableEntity implements Angerabl
     protected SoundEvent getHurtSound(@NotNull DamageSource damageSourceIn) { return AMBIENT_SOUND; }
     protected SoundEvent getDeathSound() { return AMBIENT_SOUND; }
     protected float getSoundVolume() { return .6f; }
-    public boolean tryAttack(Entity entity) {
-        boolean result = super.tryAttack(entity);
-        if (result && entity instanceof LivingEntity target) {
-            boolean config = ChocoboConfig.EXTRA_CHOCOBO_EFFECT.get();
-            if (config) {
-                if (target instanceof SpiderEntity e) {
-                    onHitMobChance(10, STRING, e);
-                }
-                if (target instanceof CaveSpiderEntity e) {
-                    onHitMobChance(5, FERMENTED_SPIDER_EYE, e);
-                }
-                if (target instanceof SkeletonEntity e) {
-                    onHitMobChance(10, BONE, e);
-                }
-                if (target instanceof WitherSkeletonEntity e) {
-                    onHitMobChance(10, CHARCOAL, e);
-                }
-                if (target instanceof IronGolemEntity e) {
-                    onHitMobChance(5, POPPY, e);
-                }
-                if (target.getEquippedStack(EquipmentSlot.MAINHAND) != ItemStack.EMPTY) {
-                    if (onHitMobChance(30)) {
-                        target.dropItem(target.getEquippedStack(EquipmentSlot.MAINHAND).getItem());
-                        target.setStackInHand(Hand.MAIN_HAND, ItemStack.EMPTY);
-                    }
-                }
-                if (target.getEquippedStack(EquipmentSlot.OFFHAND) != ItemStack.EMPTY) {
-                    if (onHitMobChance(10)) {
-                        target.dropItem(target.getEquippedStack(EquipmentSlot.OFFHAND).getItem());
-                        target.setStackInHand(Hand.OFF_HAND, ItemStack.EMPTY);
-                    }
-                }
-            }
-        }
-        return result;
-    }
+
     public ItemEntity dropItem(@NotNull ItemConvertible item) {
         Item itemToDrop = item.asItem();
         if (itemToDrop == null || itemToDrop == Items.AIR || itemToDrop instanceof ChocoboArmorItems || itemToDrop instanceof ChocoboWeaponItems || itemToDrop instanceof ChocoboSaddleItem) { return null; }
@@ -725,29 +689,19 @@ public abstract class AbstractChocobo extends TameableEntity implements Angerabl
         }
         switch (slot) {
             case MAINHAND -> {
-                if (!ItemStack.areEqual(stack, this.getWeapon())) {
-                    this.setWeapon(stack.copy());
-                }
+                if (!ItemStack.areEqual(stack, this.getWeapon())) { this.setWeapon(stack.copy()); }
             }
             case CHEST -> {
-                if (!ItemStack.areEqual(stack, this.getArmorItemStack())) {
-                    this.setChestArmor(stack.copy());
-                }
+                if (!ItemStack.areEqual(stack, this.getArmorItemStack())) { this.setChestArmor(stack.copy()); }
             }
             case HEAD -> {
-                if (!ItemStack.areEqual(stack, this.getHeadArmor())) {
-                    this.setHeadArmor(stack.copy());
-                }
+                if (!ItemStack.areEqual(stack, this.getHeadArmor())) { this.setHeadArmor(stack.copy()); }
             }
             case LEGS -> {
-                if (!ItemStack.areEqual(stack, this.getLegsArmor())) {
-                    this.setLegsArmor(stack.copy());
-                }
+                if (!ItemStack.areEqual(stack, this.getLegsArmor())) { this.setLegsArmor(stack.copy()); }
             }
             case FEET -> {
-                if (!ItemStack.areEqual(stack, this.getFeetArmor())) {
-                    this.setFeetArmor(stack.copy());
-                }
+                if (!ItemStack.areEqual(stack, this.getFeetArmor())) { this.setFeetArmor(stack.copy()); }
             }
             default -> super.equipStack(slot, stack);
         }
@@ -943,8 +897,8 @@ public abstract class AbstractChocobo extends TameableEntity implements Angerabl
             int minTier = Collections.min(Arrays.asList(headTier, chestTier, legsTier, feetTier));
 
             if (minTier >= 6) { // Reinforced Diamond or higher
-                float bonusPercentage = 0.0f;
-                float damageBonus = 0.0f;
+                float bonusPercentage;
+                float damageBonus;
 
                 if (minTier == 6) { // Reinforced Diamond
                     bonusPercentage = 0.10f;

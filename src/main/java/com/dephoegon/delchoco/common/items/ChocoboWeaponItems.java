@@ -2,8 +2,10 @@ package com.dephoegon.delchoco.common.items;
 
 import com.dephoegon.delchoco.aid.TieredMaterials;
 import com.dephoegon.delchoco.common.enchantments.ChocoboSweepEnchantment;
+import com.dephoegon.delchoco.common.entities.AbstractChocobo;
 import com.dephoegon.delchoco.common.init.ModEnchantments;
 import com.google.common.collect.Maps;
+import net.minecraft.client.item.TooltipContext;
 import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
@@ -13,13 +15,18 @@ import net.minecraft.item.ToolMaterial;
 import net.minecraft.particle.ParticleTypes;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.sound.SoundEvents;
+import net.minecraft.text.Text;
+import net.minecraft.util.Formatting;
 import net.minecraft.util.Hand;
 import net.minecraft.util.Util;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.World;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 import java.util.Map;
+
+import static com.dephoegon.delchoco.common.init.ModDamageTypes.knockbackCalculation;
 
 public class ChocoboWeaponItems extends SwordItem {
     private final float attackSpeed;
@@ -53,7 +60,7 @@ public class ChocoboWeaponItems extends SwordItem {
     }
 
     public ChocoboWeaponItems(ToolMaterial toolMaterial, float attackSpeed, Settings settings) {
-        super(toolMaterial, (getTotalAttackDamage(toolMaterial) - (int)toolMaterial.getAttackDamage()), attackSpeed, settings);
+        super(toolMaterial, 0, attackSpeed, settings);
         this.attackSpeed = getTotalAttackSpeed(toolMaterial, attackSpeed);
     }
     public float getAttackSpeed() { return this.attackSpeed; }
@@ -62,6 +69,28 @@ public class ChocoboWeaponItems extends SwordItem {
             return material == TieredMaterials.ChocoboToolTiers.NETHERITE || material == TieredMaterials.ChocoboToolTiers.REINFORCED_NETHERITE || material == TieredMaterials.ChocoboToolTiers.GILDED_NETHERITE;
         }
         return super.isFireproof();
+    }
+
+    @Override
+    public void appendTooltip(ItemStack stack, @Nullable World world, List<Text> tooltip, TooltipContext context) {
+        super.appendTooltip(stack, world, tooltip, context);
+        float totalDamage = getTotalAttackDamage(this.getMaterial());
+
+        // Add enchantment damage
+        totalDamage += EnchantmentHelper.getAttackDamage(stack, null);
+
+        int playerDamage = (int)(totalDamage * 0.25F);
+        int chocoboDamage = (int)totalDamage;
+        int mobDamage = (int)(totalDamage * 0.5F);
+
+        tooltip.add(Text.translatable("item.delchoco.chocobo_weapon.tooltip.header").formatted(Formatting.GRAY));
+        tooltip.add(Text.translatable("item.delchoco.chocobo_weapon.tooltip.player_damage", playerDamage).formatted(Formatting.GREEN));
+        tooltip.add(Text.translatable("item.delchoco.chocobo_weapon.tooltip.chocobo_damage", chocoboDamage).formatted(Formatting.GOLD));
+        tooltip.add(Text.translatable("item.delchoco.chocobo_weapon.tooltip.mob_damage", mobDamage).formatted(Formatting.RED));
+    }
+
+    private static boolean isChocobo(LivingEntity entity) {
+        return entity instanceof AbstractChocobo;
     }
 
     /**
@@ -89,7 +118,7 @@ public class ChocoboWeaponItems extends SwordItem {
 
         // Find nearby entities to hit (similar to vanilla sweep but with different range)
         List<LivingEntity> nearbyEntities = world.getNonSpectatingEntities(LivingEntity.class,
-            target.getBoundingBox().expand(1.0D, 0.25D, 1.0D));
+            target.getBoundingBox().expand(2.5D, 1.5D, 2.5D));
 
         for (LivingEntity nearbyEntity : nearbyEntities) {
             if (nearbyEntity != attacker && nearbyEntity != target &&
@@ -97,9 +126,7 @@ public class ChocoboWeaponItems extends SwordItem {
                 attacker.distanceTo(nearbyEntity) < 3.0D) {
 
                 // Apply knockback
-                nearbyEntity.takeKnockback(0.4F,
-                    MathHelper.sin(attacker.getYaw() * 0.017453292F),
-                    -MathHelper.cos(attacker.getYaw() * 0.017453292F));
+                nearbyEntity.takeKnockback(knockbackCalculation(sweepDamage, attacker), MathHelper.sin(attacker.getYaw() * 0.017453292F), -MathHelper.cos(attacker.getYaw() * 0.017453292F));
 
                 // Deal damage
                 nearbyEntity.damage(attacker.getDamageSources().mobAttack(attacker), sweepDamage);
@@ -107,29 +134,30 @@ public class ChocoboWeaponItems extends SwordItem {
         }
 
         // Play sweep sound and particles
-        world.playSound(null, attacker.getX(), attacker.getY(), attacker.getZ(),
-            SoundEvents.ENTITY_PLAYER_ATTACK_SWEEP, attacker.getSoundCategory(), 1.0F, 1.0F);
+        world.playSound(null, attacker.getX(), attacker.getY(), attacker.getZ(), SoundEvents.ENTITY_PLAYER_ATTACK_SWEEP, attacker.getSoundCategory(), 1.0F, 1.0F);
 
         if (world instanceof ServerWorld serverWorld) {
-            serverWorld.spawnParticles(ParticleTypes.SWEEP_ATTACK,
-                attacker.getX(), attacker.getBodyY(0.5), attacker.getZ(),
-                1, 0.0, 0.0, 0.0, 0.0);
+            serverWorld.spawnParticles(ParticleTypes.SWEEP_ATTACK, attacker.getX(), attacker.getBodyY(0.5), attacker.getZ(), 1, 0.0, 0.0, 0.0, 0.0);
         }
     }
 
     @Override
     public boolean postHit(ItemStack stack, LivingEntity target, LivingEntity attacker) {
-        // Handle the custom sweep attack when a player uses this weapon
-        if (attacker instanceof PlayerEntity player && !attacker.getWorld().isClient()) {
-            float baseDamage = (float) attacker.getAttributeValue(net.minecraft.entity.attribute.EntityAttributes.GENERIC_ATTACK_DAMAGE);
+        if (attacker == null || target == null || stack.isEmpty() || attacker.getWorld().isClient()) {
+            return super.postHit(stack, target, attacker);
+        }
+        // Chocobo will have the damage bonus applied directly in the chocobo class, bypassing the weapon's given damage
+        float damage = isChocobo(attacker) ? 0F : getTotalAttackDamage(this.getMaterial());
+        damage += EnchantmentHelper.getAttackDamage(stack, target.getGroup());
 
-            // Check if this was a critical hit (simplified check)
-            boolean isCrit = player.fallDistance > 0.0F && !player.isOnGround() &&
-                           !player.isClimbing() && !player.isTouchingWater() &&
-                           !player.hasStatusEffect(net.minecraft.entity.effect.StatusEffects.BLINDNESS) &&
-                           !player.hasVehicle();
+        float damageMultiplier = attacker instanceof PlayerEntity ? 0.25F : isChocobo(attacker) ? 1.0F : 0.5F;
+        float finalDamage = damage * damageMultiplier;
 
-            performChocoboSweep(attacker.getWorld(), attacker, player.getActiveHand(), target, stack, baseDamage, isCrit);
+        target.damage(attacker.getDamageSources().mobAttack(attacker), finalDamage);
+
+        //Chocobos will preform their own sweep attack
+        if (!isChocobo(attacker)) {
+            performChocoboSweep(attacker.getWorld(), attacker, null, target, stack, finalDamage, false);
         }
 
         return super.postHit(stack, target, attacker);

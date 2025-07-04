@@ -89,6 +89,7 @@ public abstract class AbstractChocobo extends TameableEntity implements Angerabl
     public int TimeSinceFeatherChance = 0;
     protected int rideTickDelay = 0;
     public int followingMrHuman = 2;
+    public static final double CHOCOBO_SWING_DISTANCE = 8D;
     protected ItemStack lastSaddleStack = ItemStack.EMPTY;
     protected final double followSpeedModifier = 2.0D;
     protected static final float maxStepUp = 1.5f;

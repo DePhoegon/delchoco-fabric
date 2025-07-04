@@ -77,7 +77,7 @@ public class ChocoboStatSnapshot {
         this.waterBreath = chocobo.isWaterBloodChocobo();
         this.witherImmune = chocobo.isWitherImmune();
         this.poisonImmune = chocobo.isPoisonImmune();
-        this.scale = 0;
+        this.scale = chocobo.getChocoboScale();
         this.color = chocobo.getChocoboColor();
         if (!weapon.isEmpty()) { chocobo.setChocoboWeaponStats(weapon); }
         if (!armor.isEmpty()) { chocobo.setChocoboChestArmorStats(armor); }
@@ -88,8 +88,8 @@ public class ChocoboStatSnapshot {
         this.speed = nbt.getFloat(NBTKEY_SPEED);
         this.stamina = nbt.getFloat(NBTKEY_STAMINA);
         this.attack = nbt.getDouble(NBTKEY_ATTACK);
-        this.attack = nbt.getDouble(NBTKEY_ARMOR);
-        this.attack = nbt.getDouble(NBTKEY_ARMOR_TOUGHNESS);
+        this.defense = nbt.getDouble(NBTKEY_ARMOR);
+        this.toughness = nbt.getDouble(NBTKEY_ARMOR_TOUGHNESS);
         this.flameBlood = nbt.getBoolean(NBTKEY_FLAME_BLOOD);
         this.waterBreath = nbt.getBoolean(NBTKEY_WATER_BREATH);
         this.witherImmune = nbt.getBoolean(NBTKEY_CHOCOBO_WITHER_IMMUNE);

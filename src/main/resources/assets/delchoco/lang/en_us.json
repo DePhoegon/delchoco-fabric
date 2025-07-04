@@ -135,5 +135,10 @@
 	"delchoco.key.in_water_glide": "Water Breather - Glide in Water",
 
   "enchantment.delchoco.chocobo_sweep": "Chocobo Sweep",
-  "enchantment.delchoco.chocobo_sweep.desc": "Deals area damage to adjacent targets. Does not trigger on critical hits. Exclusive with Sweeping Edge."
+  "enchantment.delchoco.chocobo_sweep.desc": "Deals area damage to adjacent targets. Does not trigger on critical hits. Exclusive with Sweeping Edge.",
+
+  "item.delchoco.chocobo_weapon.tooltip.header": "Wielder-based Damage:",
+  "item.delchoco.chocobo_weapon.tooltip.player_damage": "Human Wielder: %s",
+  "item.delchoco.chocobo_weapon.tooltip.chocobo_damage": "Chocobo Wielder: %s",
+  "item.delchoco.chocobo_weapon.tooltip.mob_damage": "Other Wielders: %s"
 }

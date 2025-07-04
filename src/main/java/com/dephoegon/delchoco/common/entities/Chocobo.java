@@ -3,14 +3,13 @@ package com.dephoegon.delchoco.common.entities;
 import com.dephoegon.delchoco.DelChoco;
 import com.dephoegon.delchoco.aid.world.ChocoboConfig;
 import com.dephoegon.delchoco.aid.world.WorldConfig;
+import com.dephoegon.delchoco.common.enchantments.ChocoboSweepEnchantment;
 import com.dephoegon.delchoco.common.entities.breeding.ChocoboBreedInfo;
 import com.dephoegon.delchoco.common.entities.breeding.ChocoboMateGoal;
 import com.dephoegon.delchoco.common.entities.breeding.ChocoboStatSnapshot;
 import com.dephoegon.delchoco.common.entities.properties.*;
 import com.dephoegon.delchoco.common.entities.properties.MovementType;
-import com.dephoegon.delchoco.common.init.ModEntities;
-import com.dephoegon.delchoco.common.init.ModItems;
-import com.dephoegon.delchoco.common.init.ModSounds;
+import com.dephoegon.delchoco.common.init.*;
 import com.dephoegon.delchoco.common.inventory.ChocoboScreenHandler;
 import com.dephoegon.delchoco.common.items.ChocoboArmorItems;
 import com.dephoegon.delchoco.common.items.ChocoboLeashPointer;
@@ -21,6 +20,7 @@ import com.dephoegon.delchoco.utils.RandomHelper;
 import com.dephoegon.delchoco.utils.WorldUtils;
 import com.mojang.serialization.Dynamic;
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.entity.*;
 import net.minecraft.entity.ai.brain.Brain;
 import net.minecraft.entity.ai.goal.*;
@@ -36,20 +36,24 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.inventory.Inventory;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.item.SwordItem;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtList;
 import net.minecraft.network.packet.s2c.play.OpenHorseScreenS2CPacket;
+import net.minecraft.particle.ParticleTypes;
 import net.minecraft.registry.RegistryKey;
+import net.minecraft.registry.RegistryKeys;
 import net.minecraft.registry.entry.RegistryEntry;
-import net.minecraft.scoreboard.Team;
 import net.minecraft.server.network.DebugInfoSender;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
+import net.minecraft.sound.SoundEvents;
 import net.minecraft.text.Text;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.Hand;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Box;
+import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.*;
 import net.minecraft.world.biome.Biome;
@@ -67,6 +71,7 @@ import static com.dephoegon.delchoco.common.entities.breeding.BreedingHelper.get
 import static com.dephoegon.delchoco.common.entities.breeding.BreedingHelper.getChocoName;
 import static com.dephoegon.delchoco.common.entities.properties.ChocoboBrainAid.invalidRevengeTargets;
 import static com.dephoegon.delchoco.common.entities.properties.ChocoboBrainAid.validRevengeAllies;
+import static com.dephoegon.delchoco.common.init.ModDamageTypes.knockbackCalculation;
 import static com.dephoegon.delchoco.common.init.ModItems.*;
 import static com.dephoegon.delchoco.common.inventory.ChocoboEquipmentSlot.*;
 import static java.lang.Math.floor;
@@ -326,21 +331,20 @@ public class Chocobo extends AbstractChocobo {
         return super.isInvulnerableTo(source);
     }
     public boolean damage(DamageSource source, float amount) {
-        boolean result = super.damage(source, amount);
-        PlayerEntity player = source.getAttacker() instanceof PlayerEntity ? (PlayerEntity) source.getAttacker() : null;
-        PlayerEntity owner = this.getOwner() instanceof PlayerEntity ? (PlayerEntity) this.getOwner() : null;
-        if (result && player != null) {
-            boolean shift = player.isSneaking() && ChocoboConfig.SHIFT_HIT_BYPASS.get();
-            if (RandomHelper.random.nextInt(100) + 1 > 35) { this.dropItem(ModItems.CHOCOBO_FEATHER); }
-            if (owner != null) {
-                Team group = (Team) owner.getScoreboardTeam();
-                Team playerGroup = (Team) player.getScoreboardTeam();
-                boolean teams = group != null && playerGroup == group;
-                if (!shift) {
-                    if (player == owner || teams) { return ChocoboConfig.OWN_CHOCOBO_HITTABLE.get(); }
-                    return ChocoboConfig.TAMED_CHOCOBO_HITTABLE.get();
-                }
+        if (this.isInvulnerableTo(source)) { return false; }
+
+        Entity attacker = source.getAttacker();
+        if (attacker instanceof PlayerEntity player) {
+            if (this.isOwner(player)) {
+                if (!ChocoboConfig.OWN_CHOCOBO_HITTABLE.get()) { return false; }
+            } else if (this.isTamed()) {
+                if (!ChocoboConfig.TAMED_CHOCOBO_HITTABLE.get()) { return false; }
             }
+        }
+
+        boolean result = super.damage(source, amount);
+        if (result && attacker instanceof PlayerEntity player) {
+            if (RandomHelper.random.nextInt(100) + 1 > 35) { this.dropItem(ModItems.CHOCOBO_FEATHER); }
         }
         return result;
     }
@@ -883,35 +887,25 @@ public class Chocobo extends AbstractChocobo {
         return super.onKilledOther(world, targetEntity);
     }
     public boolean tryAttack(Entity entity) {
-        // The weapon is now always in the main hand, so vanilla attack logic works correctly.
         boolean result = super.tryAttack(entity);
 
         if (result && entity instanceof LivingEntity target) {
+            handleChocoboSweep(this, target);
             // These effects are applied only if the config is enabled and regardless of the weapon used.
             boolean config = ChocoboConfig.EXTRA_CHOCOBO_EFFECT.get();
             if (config) {
-                if (target instanceof SpiderEntity e) {
-                    onHitMobChance(10, STRING, e);
-                }
-                if (target instanceof CaveSpiderEntity e) {
-                    onHitMobChance(5, FERMENTED_SPIDER_EYE, e);
-                }
-                if (target instanceof SkeletonEntity e) {
-                    onHitMobChance(10, BONE, e);
-                }
-                if (target instanceof WitherSkeletonEntity e) {
-                    onHitMobChance(10, CHARCOAL, e);
-                }
-                if (target instanceof IronGolemEntity e) {
-                    onHitMobChance(5, POPPY, e);
-                }
-                if (target.getEquippedStack(EquipmentSlot.MAINHAND) != ItemStack.EMPTY) {
+                if (target instanceof SpiderEntity e) { onHitMobChance(10, STRING, e); }
+                if (target instanceof CaveSpiderEntity e) { onHitMobChance(5, FERMENTED_SPIDER_EYE, e); }
+                if (target instanceof SkeletonEntity e) { onHitMobChance(10, BONE, e); }
+                if (target instanceof WitherSkeletonEntity e) { onHitMobChance(10, CHARCOAL, e); }
+                if (target instanceof IronGolemEntity e) { onHitMobChance(5, POPPY, e); }
+                if (target.getEquippedStack(EquipmentSlot.MAINHAND) != ItemStack.EMPTY && !(target instanceof AbstractChocobo)) {
                     if (onHitMobChance(30)) {
                         target.dropItem(target.getEquippedStack(EquipmentSlot.MAINHAND).getItem());
                         target.setStackInHand(Hand.MAIN_HAND, ItemStack.EMPTY);
                     }
                 }
-                if (target.getEquippedStack(EquipmentSlot.OFFHAND) != ItemStack.EMPTY) {
+                if (target.getEquippedStack(EquipmentSlot.OFFHAND) != ItemStack.EMPTY && !(target instanceof AbstractChocobo)) {
                     if (onHitMobChance(10)) {
                         target.dropItem(target.getEquippedStack(EquipmentSlot.OFFHAND).getItem());
                         target.setStackInHand(Hand.OFF_HAND, ItemStack.EMPTY);
@@ -928,6 +922,80 @@ public class Chocobo extends AbstractChocobo {
     public void applyDamageEffects(LivingEntity attacker, Entity target) {
         // Left in for unique Chocobo Checks unable to be done in AbstractChocobo
         super.applyDamageEffects(attacker, target);
+    }
+
+    private void handleChocoboSweep(Chocobo attacker, LivingEntity target) {
+        if (attacker.getWorld().isClient()) { return; }
+        if (target == null || !attacker.isAlive()) { return; }
+
+        ItemStack heldItem = attacker.getWeapon();
+        if (!(heldItem.getItem() instanceof SwordItem)) { return; }
+
+        int chocoboSweepLevel = EnchantmentHelper.getLevel(ModEnchantments.CHOCOBO_SWEEP, heldItem);
+        float damageMultiplier = ChocoboSweepEnchantment.getDamageMultiplier(chocoboSweepLevel);
+        if (chocoboSweepLevel <= 0 || damageMultiplier <= 0) { return; }
+
+        float baseDamage = (float) attacker.getAttributeValue(EntityAttributes.GENERIC_ATTACK_DAMAGE);
+        baseDamage += EnchantmentHelper.getAttackDamage(heldItem, target.getGroup());
+        float sweepDamage = baseDamage * damageMultiplier;
+
+        List<LivingEntity> nearbyEntities = attacker.getWorld().getNonSpectatingEntities(LivingEntity.class, target.getBoundingBox().expand(3.5D, 2.5D, 3.5D));
+
+        for (LivingEntity nearbyEntity : nearbyEntities) {
+            if (nearbyEntity != attacker && nearbyEntity != target) {
+
+                if (attacker.isTeammate(nearbyEntity)) { continue; }
+                boolean skipDamage = false;
+
+                LivingEntity owner = attacker.getOwner();
+                if (nearbyEntity instanceof PlayerEntity targetPlayer) {
+                    if (targetPlayer.isCreative() || targetPlayer.isSpectator()) { continue; }
+                }
+
+                if (nearbyEntity == owner) { skipDamage = true; }
+                if (owner != null && owner.isTeammate(nearbyEntity)) { skipDamage = true; }
+
+                if (nearbyEntity instanceof TameableEntity tameableTarget) {
+                    LivingEntity targetOwner = tameableTarget.getOwner();
+
+                    if (owner != null) {
+                        if (targetOwner == owner) { skipDamage = true; }
+                        if (targetOwner != null && owner.isTeammate(targetOwner)) {
+                            skipDamage = owner.getScoreboardTeam() != null && !owner.getScoreboardTeam().isFriendlyFireAllowed();
+                        }
+                    }
+                    if (targetOwner != null) {
+                        if (targetOwner == owner) { skipDamage = true; }
+                        if (owner != null && owner.isTeammate(targetOwner)) { skipDamage = true; }
+                    }
+                }
+
+                if (skipDamage) { continue; }
+                if (attacker.distanceTo(nearbyEntity) >= CHOCOBO_SWING_DISTANCE) { continue; }
+
+                if (owner != null && nearbyEntity instanceof PlayerEntity targetPlayer) {
+                    if (owner.getScoreboardTeam() != null && targetPlayer.getScoreboardTeam() != null) {
+                        if (owner.getScoreboardTeam() == targetPlayer.getScoreboardTeam()) {
+                            if (!owner.getScoreboardTeam().isFriendlyFireAllowed()) { continue; }
+                        }
+                    }
+                }
+
+                DamageSource damageSource = new DamageSource(attacker.getWorld().getRegistryManager().get(RegistryKeys.DAMAGE_TYPE).entryOf(ModDamageTypes.CHOCOBO_SWEEP_ATTACK), attacker);
+
+                if (nearbyEntity.isInvulnerableTo(damageSource)) { continue; }
+                
+                nearbyEntity.takeKnockback(knockbackCalculation(sweepDamage, attacker), MathHelper.sin(attacker.getYaw() * 0.017453292F), -MathHelper.cos(attacker.getYaw() * 0.017453292F));
+
+                nearbyEntity.damage(damageSource, sweepDamage);
+            }
+        }
+
+        attacker.getWorld().playSound(null, attacker.getX(), attacker.getY(), attacker.getZ(), SoundEvents.ENTITY_PLAYER_ATTACK_SWEEP, attacker.getSoundCategory(), 1.0F, 1.0F);
+
+        if (attacker.getWorld() instanceof ServerWorld serverWorld) {
+            serverWorld.spawnParticles(ParticleTypes.SWEEP_ATTACK, attacker.getX(), attacker.getBodyY(0.5), attacker.getZ(), 1, 0.0, 0.0, 0.0, 0.0);
+        }
     }
 
     /**

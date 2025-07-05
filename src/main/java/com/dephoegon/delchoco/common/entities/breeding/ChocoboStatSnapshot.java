@@ -65,7 +65,7 @@ public class ChocoboStatSnapshot {
     public ChocoboStatSnapshot(@NotNull Chocobo chocobo) {
         ItemStack weapon = chocobo.getWeapon();
         if (!weapon.isEmpty()) { chocobo.setChocoboWeaponStats(ItemStack.EMPTY); }
-        ItemStack armor = chocobo.getArmorItemStack();
+        ItemStack armor = chocobo.getChestArmor();
         if (!armor.isEmpty()) { chocobo.setChocoboChestArmorStats(ItemStack.EMPTY); }
         this.generation = chocobo.getGeneration();
         this.health = (float) Objects.requireNonNull(chocobo.getAttributeInstance(EntityAttributes.GENERIC_MAX_HEALTH)).getValue();

@@ -58,21 +58,11 @@ public class ChocoDisguiseModel extends BipedEntityModel<LivingEntity> {
 
     private void renderBootsOnly(MatrixStack matrices, VertexConsumer vertices, int light, int overlay, float red, float green, float blue, float alpha) {
         // Render all parts except leg geometry
-        if (this.head.visible) {
-            this.head.render(matrices, vertices, light, overlay, red, green, blue, alpha);
-        }
-        if (this.hat.visible) {
-            this.hat.render(matrices, vertices, light, overlay, red, green, blue, alpha);
-        }
-        if (this.body.visible) {
-            this.body.render(matrices, vertices, light, overlay, red, green, blue, alpha);
-        }
-        if (this.rightArm.visible) {
-            this.rightArm.render(matrices, vertices, light, overlay, red, green, blue, alpha);
-        }
-        if (this.leftArm.visible) {
-            this.leftArm.render(matrices, vertices, light, overlay, red, green, blue, alpha);
-        }
+        if (this.head.visible) { this.head.render(matrices, vertices, light, overlay, red, green, blue, alpha); }
+        if (this.hat.visible) { this.hat.render(matrices, vertices, light, overlay, red, green, blue, alpha); }
+        if (this.body.visible) { this.body.render(matrices, vertices, light, overlay, red, green, blue, alpha); }
+        if (this.rightArm.visible) { this.rightArm.render(matrices, vertices, light, overlay, red, green, blue, alpha); }
+        if (this.leftArm.visible) { this.leftArm.render(matrices, vertices, light, overlay, red, green, blue, alpha); }
 
         // For legs: only render the boot children, skip the leg geometry
         if (this.rightLeg.visible) {

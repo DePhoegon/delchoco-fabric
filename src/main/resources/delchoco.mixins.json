@@ -3,11 +3,9 @@
   "package": "com.dephoegon.delchoco.mixin",
   "compatibilityLevel": "JAVA_17",
   "mixins": [
-    "MixinLivingEntity",
     "PlayerEntityMixin",
     "ServerPlayerEntityAccessor",
-    "SweepingEnchantmentMixin",
-    "LivingEntityChocoboSweepMixin"
+    "SweepingEnchantmentMixin"
   ],
   "client": [
     "ClientPlayNetworkHandlerMixin"

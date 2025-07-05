@@ -40,7 +40,7 @@ public class LayerWeapon extends FeatureRenderer<Chocobo, EntityModel<Chocobo>> 
     }
     public void render(@NotNull MatrixStack matrixStackIn, @NotNull VertexConsumerProvider bufferIn, int packedLightIn, @NotNull Chocobo chocoboEntity, float limbSwing, float limbSwingAmount, float partialTicks, float ageInTicks, float netHeadYaw, float headPitch) {
         if (!chocoboEntity.isBaby()) {
-            String weaponID = chocoboEntity.isArmed() ? chocoboEntity.getWeapon().getTranslationKey() : null;
+            String weaponID = chocoboEntity.isWeaponArmed() ? chocoboEntity.getWeapon().getTranslationKey() : null;
             float alpha = chocoboEntity.isInvisible() ? hide : show;
             if (weaponID != null && alpha != 0F) {
                 VertexConsumer vertexconsumer = bufferIn.getBuffer(RenderLayer.getEntityTranslucent(CHOCOBO_WEAPONS.get(weaponID), false));

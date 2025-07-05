@@ -178,7 +178,7 @@ public abstract class AbstractChocobo extends TameableEntity implements Angerabl
      */
     @SuppressWarnings("GrazieInspection")
     protected static final TrackedData<ItemStack> PARAM_SADDLE_ITEM = DataTracker.registerData(AbstractChocobo.class, TrackedDataHandlerRegistry.ITEM_STACK);
-    protected static final TrackedData<ItemStack> PARAM_ARMOR_ITEM = DataTracker.registerData(AbstractChocobo.class, TrackedDataHandlerRegistry.ITEM_STACK);
+    protected static final TrackedData<ItemStack> PARAM_CHEST_ITEM = DataTracker.registerData(AbstractChocobo.class, TrackedDataHandlerRegistry.ITEM_STACK);
     protected static final TrackedData<ItemStack> PARAM_WEAPON_ITEM = DataTracker.registerData(AbstractChocobo.class, TrackedDataHandlerRegistry.ITEM_STACK);
     protected static final TrackedData<ItemStack> PARAM_HEAD_ITEM = DataTracker.registerData(AbstractChocobo.class, TrackedDataHandlerRegistry.ITEM_STACK);
     protected static final TrackedData<ItemStack> PARAM_LEGS_ITEM = DataTracker.registerData(AbstractChocobo.class, TrackedDataHandlerRegistry.ITEM_STACK);
@@ -263,7 +263,7 @@ public abstract class AbstractChocobo extends TameableEntity implements Angerabl
         this.dataTracker.startTracking(PARAM_LEASH_BLOCK, new BlockPos(0, 50000, 0));
         this.dataTracker.startTracking(PARAM_LEASH_LENGTH, 0);
         this.dataTracker.startTracking(PARAM_SADDLE_ITEM, ItemStack.EMPTY);
-        this.dataTracker.startTracking(PARAM_ARMOR_ITEM, ItemStack.EMPTY);
+        this.dataTracker.startTracking(PARAM_CHEST_ITEM, ItemStack.EMPTY);
         this.dataTracker.startTracking(PARAM_WEAPON_ITEM, ItemStack.EMPTY);
         this.dataTracker.startTracking(PARAM_HEAD_ITEM, ItemStack.EMPTY);
         this.dataTracker.startTracking(PARAM_LEGS_ITEM, ItemStack.EMPTY);
@@ -285,8 +285,8 @@ public abstract class AbstractChocobo extends TameableEntity implements Angerabl
                     this.onSaddleChanged();
                 }
                 this.lastSaddleStack = currentSaddle.copy();
-            } else if (PARAM_ARMOR_ITEM.equals(data)) {
-                this.setChocoboChestArmorStats(this.getArmorItemStack());
+            } else if (PARAM_CHEST_ITEM.equals(data)) {
+                this.setChocoboChestArmorStats(this.getChestArmor());
             } else if (PARAM_WEAPON_ITEM.equals(data)) {
                 this.setChocoboWeaponStats(this.getWeapon());
             } else if (PARAM_HEAD_ITEM.equals(data)) {
@@ -471,30 +471,34 @@ public abstract class AbstractChocobo extends TameableEntity implements Angerabl
         if (this.getWorld().isClient) { super.tick(); return; }
         if (this.canWalkOnWater() && this.isTouchingWater() && !this.hasVehicle() && !this.hasPassengers()) { this.ticksOnWater++; }
         else { this.ticksOnWater = 0; }
-        if (this.isArmed()) {
-            Box box = this.getBoundingBox();
-            BlockPos.Mutable mutable = new BlockPos.Mutable();
-            for (int i = MathHelper.floor(box.minX); i < MathHelper.ceil(box.maxX); ++i) {
-                for (int j = MathHelper.floor(box.minY); j < MathHelper.ceil(box.maxY); ++j) {
-                    for (int k = MathHelper.floor(box.minZ); k < MathHelper.ceil(box.maxZ); ++k) {
-                        mutable.set(i, j, k);
-                        BlockState blockState = this.getWorld().getBlockState(mutable);
-                        if (blockState.isOf(Blocks.COBWEB)) {
-                            // 50% chance to break with silk touch, 50% chance to break normally
-                            boolean useSilkTouch = RandomHelper.random.nextBoolean();
-                            if (useSilkTouch) {
-                                // Break with silk touch - drop the cobweb item
-                                this.getWorld().breakBlock(mutable, false, this);
-                                this.getWorld().spawnEntity(new net.minecraft.entity.ItemEntity(
-                                    this.getWorld(),
-                                    mutable.getX() + 0.5,
-                                    mutable.getY() + 0.5,
-                                    mutable.getZ() + 0.5,
-                                    new ItemStack(Blocks.COBWEB)
-                                ));
-                            } else {
-                                // Break normally (no drops)
-                                this.getWorld().breakBlock(mutable, true, this);
+
+        if (this.age % 100 == 0){
+            // prevents frequent checks.
+            if (this.isWeaponArmed()) {
+                Box box = this.getBoundingBox();
+                BlockPos.Mutable mutable = new BlockPos.Mutable();
+                for (int i = MathHelper.floor(box.minX); i < MathHelper.ceil(box.maxX); ++i) {
+                    for (int j = MathHelper.floor(box.minY); j < MathHelper.ceil(box.maxY); ++j) {
+                        for (int k = MathHelper.floor(box.minZ); k < MathHelper.ceil(box.maxZ); ++k) {
+                            mutable.set(i, j, k);
+                            BlockState blockState = this.getWorld().getBlockState(mutable);
+                            if (blockState.isOf(Blocks.COBWEB)) {
+                                // 50% chance to break with silk touch, 50% chance to break normally
+                                boolean useSilkTouch = RandomHelper.random.nextBoolean();
+                                if (useSilkTouch) {
+                                    // Break with silk touch - drop the cobweb item
+                                    this.getWorld().breakBlock(mutable, false, this);
+                                    this.getWorld().spawnEntity(new net.minecraft.entity.ItemEntity(
+                                            this.getWorld(),
+                                            mutable.getX() + 0.5,
+                                            mutable.getY() + 0.5,
+                                            mutable.getZ() + 0.5,
+                                            new ItemStack(Blocks.COBWEB)
+                                    ));
+                                } else {
+                                    // Break normally (no drops)
+                                    this.getWorld().breakBlock(mutable, true, this);
+                                }
                             }
                         }
                     }
@@ -561,21 +565,22 @@ public abstract class AbstractChocobo extends TameableEntity implements Angerabl
         return mask;
     }
     public boolean isSaddled() { return !this.getSaddle().isEmpty(); }
-    public boolean isArmored() { return !this.getArmorItemStack().isEmpty(); }
-    public boolean isArmed() { return !this.getWeapon().isEmpty(); }
+    public boolean isArmored() { return isChestArmored() || isHeadArmored() || isLegsArmored() || isFeetArmored(); }
+    public boolean isWeaponArmed() { return !this.getWeapon().isEmpty(); }
     public boolean isHeadArmored() { return !this.getHeadArmor().isEmpty(); }
     public boolean isLegsArmored() { return !this.getLegsArmor().isEmpty(); }
     public boolean isFeetArmored() { return !this.getFeetArmor().isEmpty(); }
+    public boolean isChestArmored() { return !this.getChestArmor().isEmpty(); }
     public int getTicksOnWater() { return this.ticksOnWater; }
     public ItemStack getSaddle() { return this.dataTracker.get(PARAM_SADDLE_ITEM); }
     public ItemStack getWeapon() { return this.dataTracker.get(PARAM_WEAPON_ITEM); }
-    public ItemStack getArmorItemStack() { return this.dataTracker.get(PARAM_ARMOR_ITEM); }
+    public ItemStack getChestArmor() { return this.dataTracker.get(PARAM_CHEST_ITEM); }
     public ItemStack getHeadArmor() { return this.dataTracker.get(PARAM_HEAD_ITEM); }
     public ItemStack getLegsArmor() { return this.dataTracker.get(PARAM_LEGS_ITEM); }
     public ItemStack getFeetArmor() { return this.dataTracker.get(PARAM_FEET_ITEM); }
     public void setSaddle(ItemStack pStack) { this.dataTracker.set(PARAM_SADDLE_ITEM, pStack); }
     public void setWeapon(ItemStack pStack) { this.dataTracker.set(PARAM_WEAPON_ITEM, pStack); }
-    public void setChestArmor(ItemStack pStack) { this.dataTracker.set(PARAM_ARMOR_ITEM, pStack); }
+    public void setChestArmor(ItemStack pStack) { this.dataTracker.set(PARAM_CHEST_ITEM, pStack); }
     public void setHeadArmor(ItemStack pStack) { this.dataTracker.set(PARAM_HEAD_ITEM, pStack); }
     public void setLegsArmor(ItemStack pStack) { this.dataTracker.set(PARAM_LEGS_ITEM, pStack); }
     public void setFeetArmor(ItemStack pStack) { this.dataTracker.set(PARAM_FEET_ITEM, pStack); }
@@ -693,7 +698,7 @@ public abstract class AbstractChocobo extends TameableEntity implements Angerabl
                 if (!ItemStack.areEqual(stack, this.getWeapon())) { this.setWeapon(stack.copy()); }
             }
             case CHEST -> {
-                if (!ItemStack.areEqual(stack, this.getArmorItemStack())) { this.setChestArmor(stack.copy()); }
+                if (!ItemStack.areEqual(stack, this.getChestArmor())) { this.setChestArmor(stack.copy()); }
             }
             case HEAD -> {
                 if (!ItemStack.areEqual(stack, this.getHeadArmor())) { this.setHeadArmor(stack.copy()); }
@@ -877,7 +882,7 @@ public abstract class AbstractChocobo extends TameableEntity implements Angerabl
         if (attackAttr != null) { attackAttr.removeModifier(CHOCOBO_ARMOR_SET_WEAPON_BONUS_UUID); }
 
         ItemStack head = getHeadArmor();
-        ItemStack chest = getArmorItemStack();
+        ItemStack chest = getChestArmor();
         ItemStack legs = getLegsArmor();
         ItemStack feet = getFeetArmor();
 

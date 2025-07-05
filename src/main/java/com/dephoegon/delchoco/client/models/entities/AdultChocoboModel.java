@@ -131,12 +131,12 @@ public class AdultChocoboModel<T extends Chocobo> extends EntityModel<Chocobo> {
 
         ModelPartData neck_r1 = neck.addChild("neck_r1", ModelPartBuilder.create()
                         .uv(36, 20).cuboid(-2.0F, -12.0F, -3.0F, 4.0F, 12.0F, 4.0F,
-                                new Dilation(0.2F)),
+                                new Dilation(0.15F)),
                 ModelTransform.of(0.0F, 1.0F, 0.0F, 0.1309F, 0.0F, 0.0F));
 
         ModelPartData armor_neck_r1 = neck.addChild("armor_neck_r1", ModelPartBuilder.create()
                         .uv(36, 84).cuboid(-2.0F, -12.0F, -3.0F, 4.0F, 12.0F, 4.0F,
-                                new Dilation(0.45F)),
+                                new Dilation(0.3F)),
                 ModelTransform.of(0.0F, 1.0F, 0.0F, 0.1309F, 0.0F, 0.0F));
 
         ModelPartData head = neck.addChild("head", ModelPartBuilder.create()
@@ -145,8 +145,8 @@ public class AdultChocoboModel<T extends Chocobo> extends EntityModel<Chocobo> {
                         .uv(100, 0).cuboid(-3.25F, -4.0F, -3.0F, 1.0F, 3.0F, 3.0F).mirrored(),
                 ModelTransform.pivot(0.0F, -11.0F, -2.0F));
 
-        ModelPartData armor_head = neck.addChild("armor_head", ModelPartBuilder.create()
-                        .uv(0, 72).cuboid(-3.0F, -5.0F, -9.0F, 6.0F, 6.0F, 12.0F,
+        ModelPartData armor_head = head.addChild("armor_head", ModelPartBuilder.create()
+                        .uv(0, 64).cuboid(-3.0F, 6.0F, -7.0F, 6.0F, 6.0F, 12.0F,
                                 new Dilation(0.25F)), // 3D eyes aren't included for armor layer
                 ModelTransform.pivot(0.0F, -11.0F, -2.0F));
 

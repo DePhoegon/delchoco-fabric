@@ -638,7 +638,7 @@ public class Chocobo extends AbstractChocobo {
         }
         if (pStack instanceof ChocoboArmorItems armorItem) {
             EquipmentSlot slotType = armorItem.getSlotType();
-            if (slotType == EquipmentSlot.CHEST && !this.isArmored()) {
+            if (slotType == EquipmentSlot.CHEST && !this.isChestArmored()) {
                 this.chocoboGearInventory.setStack(ARMOR_SLOT, stack.copy().split(1));
                 if (!player.isCreative()) { player.getMainHandStack().decrement(1); }
                 return true;
@@ -659,7 +659,7 @@ public class Chocobo extends AbstractChocobo {
                 return true;
             }
         }
-        if (pStack instanceof ChocoboWeaponItems && !this.isArmed()) {
+        if (pStack instanceof ChocoboWeaponItems && !this.isWeaponArmed()) {
             this.chocoboGearInventory.setStack(WEAPON_SLOT, stack.copy().split(1));
             if (!player.isCreative()) { player.getMainHandStack().decrement(1); }
             return true;

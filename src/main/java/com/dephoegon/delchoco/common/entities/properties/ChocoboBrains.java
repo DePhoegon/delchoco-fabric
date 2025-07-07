@@ -1,8 +1,10 @@
 // src/main/java/com/dephoegon/delchoco/common/entities/properties/ChocoboBrains.java
 package com.dephoegon.delchoco.common.entities.properties;
 
+import com.dephoegon.delchoco.DelChoco;
 import com.dephoegon.delchoco.common.entities.AbstractChocobo;
 import com.dephoegon.delchoco.common.entities.Chocobo;
+import com.dephoegon.delchoco.common.init.ModEntities;
 import com.dephoegon.delchoco.common.items.ChocoDisguiseItem;
 import com.dephoegon.delchoco.utils.RandomHelper;
 import com.google.common.collect.ImmutableList;
@@ -20,9 +22,7 @@ import net.minecraft.entity.ai.NoPenaltyTargeting;
 import net.minecraft.entity.ai.brain.*;
 import net.minecraft.entity.ai.brain.sensor.Sensor;
 import net.minecraft.entity.ai.brain.sensor.SensorType;
-import net.minecraft.entity.ai.brain.task.LookAroundTask;
-import net.minecraft.entity.ai.brain.task.LookAtMobTask;
-import net.minecraft.entity.ai.brain.task.MultiTickTask;
+import net.minecraft.entity.ai.brain.task.*;
 import net.minecraft.entity.ai.control.MoveControl;
 import net.minecraft.entity.ai.pathing.EntityNavigation;
 import net.minecraft.entity.ai.pathing.Path;
@@ -56,12 +56,18 @@ public class ChocoboBrains {
             MemoryModuleType.CANT_REACH_WALK_TARGET_SINCE,
             MemoryModuleType.ATTACK_TARGET,
             MemoryModuleType.ATTACK_COOLING_DOWN,
-            MemoryModuleType.VISIBLE_MOBS
+            MemoryModuleType.VISIBLE_MOBS,
+            MemoryModuleType.NEAREST_VISIBLE_PLAYER,
+            MemoryModuleType.NEAREST_VISIBLE_TARGETABLE_PLAYER,
+            MemoryModuleType.HURT_BY,
+            MemoryModuleType.HURT_BY_ENTITY,
+            MemoryModuleType.BREED_TARGET
     );
     public static final ImmutableList<? extends SensorType<? extends Sensor<? super Chocobo>>> CHOCOBO_SENSORS = ImmutableList.of(
             SensorType.NEAREST_PLAYERS,
             SensorType.NEAREST_LIVING_ENTITIES,
-            SensorType.HURT_BY
+            SensorType.HURT_BY,
+            SensorType.NEAREST_ITEMS
     );
 
     public static Brain<?> makeBrain(Brain<Chocobo> brain) {
@@ -70,6 +76,7 @@ public class ChocoboBrains {
         addTemptActivities(brain);
         addPanicActivities(brain);
         addAvoidPlayerActivities(brain);
+        addFightActivities(brain);
         brain.setCoreActivities(ImmutableSet.of(Activity.CORE));
         brain.setDefaultActivity(Activity.IDLE);
         brain.resetPossibleActivities();
@@ -83,35 +90,40 @@ public class ChocoboBrains {
                 new FollowOwnerTask(1.6, 10.0F, 300.0F, true)
         ));
     }
-
     private static void addIdleActivities(Brain<Chocobo> brain) {
         brain.setTaskList(Activity.IDLE, 10, ImmutableList.of(
+                new BreedTask(ModEntities.CHOCOBO_ENTITY, 1.0f),
                 new LookAroundTask(45, 90),
                 LookAtMobTask.create(EntityType.PLAYER, 8.0f)
         ));
     }
-
     private static void addPanicActivities(Brain<Chocobo> brain) {
         brain.setTaskList(Activity.PANIC, 10, ImmutableList.of(
                 new PanicTask(1.3F)
         ));
     }
-
     private static void addAvoidPlayerActivities(Brain<Chocobo> brain) {
         brain.setTaskList(Activity.AVOID, -1, ImmutableList.of(
                 new AvoidPlayerTask(12F, 1.1F, 1.3F)
         ), MemoryModuleType.AVOID_TARGET);
     }
-
     private static void addTemptActivities(Brain<Chocobo> brain) {
         brain.setTaskList(Activity.IDLE, 5, ImmutableList.of(
                 new ChocoboTemptTask() // Higher priority than roaming (10) but lower than panic
         ));
     }
+    private static void addFightActivities(Brain<Chocobo> brain) {
+        brain.setTaskList(Activity.FIGHT, 10, ImmutableList.of(
+                ForgetAttackTargetTask.create(),
+                MeleeAttackTask.create(20)
+        ), MemoryModuleType.ATTACK_TARGET);
+    }
 
     public static class RoamTask extends MultiTickTask<Chocobo> {
         private static final int MAX_UPDATE_COUNTDOWN = 40;
         private static final int PATH_CACHE_TICKS = 100; // Cache paths for longer periods
+        private static long totalPathfindingTime = 0;
+        private static int pathfindingAttempts = 0;
         private int pathUpdateCountdownTicks = 0;
         private int pathCacheExpiryTicks = 0;
         private Path path;
@@ -147,7 +159,7 @@ public class ChocoboBrains {
             }
 
             Vec3d pos;
-            if (chocobo.isWaterBreathing() && chocobo.isSubmergedInWater()) { // Check if it's a swimmer and in water
+            if (chocobo.isSubmergedInWater()) { // Check if it's a swimmer and in water
                 // For swimmers in water, find a target suitable for swimming
                 pos = FuzzyTargeting.find(chocobo, 10, 7); // Use vanilla fuzzy targeting for swim
             } else {
@@ -173,7 +185,14 @@ public class ChocoboBrains {
 
                 // Only compute a new path if we don't have a valid cached one
                 if (this.path == null || this.pathCacheExpiryTicks <= 0 || !this.path.reachesTarget()) {
+                    pathfindingAttempts++;
+                    long startTime = System.nanoTime();
                     this.path = chocobo.getNavigation().findPathTo(targetPos, 0);
+                    long duration = System.nanoTime() - startTime;
+                    totalPathfindingTime += duration;
+                    if (pathfindingAttempts > 0 && pathfindingAttempts % 100 == 0) {
+                        DelChoco.LOGGER.info("Average pathfinding time for RoamTask: " + (totalPathfindingTime / pathfindingAttempts) / 1_000_000.0 + "ms over " + pathfindingAttempts + " attempts.");
+                    }
                     if (this.path != null) {
                         this.pathCacheExpiryTicks = PATH_CACHE_TICKS;
                         brain.remember(MemoryModuleType.PATH, this.path);
@@ -294,7 +313,7 @@ public class ChocoboBrains {
 
                 // Set a random walk target to make the chocobo run
                 Vec3d pos;
-                if (chocobo.isWaterBreathing() && chocobo.isSubmergedInWater()) {
+                if (chocobo.isSubmergedInWater()) {
                     pos = FuzzyTargeting.find(chocobo, 10, 7); // Find a 3D point in water for swimmers
                 } else {
                     pos = ChocoboNoPenaltyTargeting.find(chocobo, 10, 7); // Original logic for land/surface
@@ -582,7 +601,6 @@ public class ChocoboBrains {
 
     public static class ChocoboSwimMoveControl extends MoveControl {
         private final AbstractChocobo chocobo;
-        private int bounceCounter;
 
         public ChocoboSwimMoveControl(AbstractChocobo chocobo) {
             super(chocobo);
@@ -591,25 +609,21 @@ public class ChocoboBrains {
 
         @Override
         public void tick() {
-            if (this.chocobo.isWaterBreathing() && this.chocobo.isSubmergedInWater()) {
+            this.chocobo.pubUpdateWaterState();
+            if ((this.chocobo.getFluidHeight(FluidTags.WATER) > 0.1D || this.chocobo.isSubmergedInWater()) && !this.chocobo.hasPassengers()) {
                 if (this.state == MoveControl.State.MOVE_TO) {
-                    Vec3d vec3d = new Vec3d(this.targetX - this.chocobo.getX(), this.targetY - this.chocobo.getY(), this.targetZ - this.chocobo.getZ());
+                    double targetYPos = this.targetY;
+                    if (this.chocobo.isTouchingWater()) {
+                        // If submerged, aim for the surface
+                        targetYPos = this.chocobo.getY() + 1.0D;
+                    }
+
+                    Vec3d vec3d = new Vec3d(this.targetX - this.chocobo.getX(), targetYPos - this.chocobo.getY(), this.targetZ - this.chocobo.getZ());
                     double d = vec3d.length();
                     if (d < 1.0E-7) {
                         this.entity.setForwardSpeed(0.0f);
                         this.state = MoveControl.State.WAIT;
                         return;
-                    }
-
-                    // Drowned-like bobbing/bouncing behavior
-                    if (vec3d.y > 0 && this.chocobo.getVelocity().y < 0.1) { // Moving up
-                        if (this.bounceCounter <= 0) {
-                            this.chocobo.addVelocity(0, 0.3, 0); // Larger bounce
-                            this.bounceCounter = 10; // Cooldown for the bounce
-                        }
-                    }
-                    if (this.bounceCounter > 0) {
-                        this.bounceCounter--;
                     }
 
                     float yawToTarget = (float)(MathHelper.atan2(vec3d.z, vec3d.x) * 57.2957763671875) - 90.0f;
@@ -624,14 +638,15 @@ public class ChocoboBrains {
 
                     float speed = (float)(this.speed * this.chocobo.getAttributeValue(EntityAttributes.GENERIC_MOVEMENT_SPEED));
 
+                    // Keep the Chocobo at the surface of the water
+                    this.chocobo.setVelocity(this.chocobo.getVelocity().x, this.chocobo.getVelocity().y+0.02, this.chocobo.getVelocity().z);
+
                     float pitchToTarget = -((float)(MathHelper.atan2(vec3d.y, vec3d.horizontalLength()) * 57.2957763671875));
                     this.chocobo.setPitch(this.wrapDegrees(this.chocobo.getPitch(), pitchToTarget, 10.0f));
 
                     float cosPitch = MathHelper.cos(this.chocobo.getPitch() * ((float)Math.PI / 180));
-                    float sinPitch = MathHelper.sin(this.chocobo.getPitch() * ((float)Math.PI / 180));
 
                     this.chocobo.setForwardSpeed(cosPitch * speed);
-                    this.chocobo.setUpwardSpeed(-sinPitch * speed);
 
                 } else {
                     this.chocobo.setSidewaysSpeed(0.0f);
@@ -726,13 +741,11 @@ public class ChocoboBrains {
 
         @Override
         protected boolean shouldKeepRunning(ServerWorld world, Chocobo chocobo, long time) {
-            if (this.targetPlayer == null || !this.targetPlayer.isAlive() ||
-                    this.targetPlayer.isSpectator() || this.targetPlayer.isCreative())
+            if (this.targetPlayer == null || !this.targetPlayer.isAlive() || this.targetPlayer.isSpectator() || this.targetPlayer.isCreative())
             { return false; }
 
             // Check if player still has tempting item
-            return isTemptingItem(this.targetPlayer.getMainHandStack()) ||
-                    isTemptingItem(this.targetPlayer.getOffHandStack());
+            return isTemptingItem(this.targetPlayer.getMainHandStack()) || isTemptingItem(this.targetPlayer.getOffHandStack());
         }
 
         @Override

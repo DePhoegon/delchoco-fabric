@@ -106,6 +106,7 @@ public class ChocoboWeaponItems extends SwordItem {
     public static void performChocoboSweep(World world, LivingEntity attacker, Hand hand, LivingEntity target, ItemStack stack, float baseDamage, boolean isCrit) {
         // Don't perform sweep on critical hits as specified
         if (isCrit) return;
+        boolean isPlayer = target instanceof PlayerEntity;
 
         int sweepLevel = EnchantmentHelper.getLevel(ModEnchantments.CHOCOBO_SWEEP, stack);
         if (sweepLevel <= 0) return;
@@ -121,9 +122,8 @@ public class ChocoboWeaponItems extends SwordItem {
             target.getBoundingBox().expand(2.5D, 1.5D, 2.5D));
 
         for (LivingEntity nearbyEntity : nearbyEntities) {
-            if (nearbyEntity != attacker && nearbyEntity != target &&
-                !attacker.isTeammate(nearbyEntity) &&
-                attacker.distanceTo(nearbyEntity) < 3.0D) {
+            if (!isPlayer && nearbyEntity instanceof PlayerEntity) { continue; } // Skip players if the attacker is not a player
+            if (nearbyEntity != attacker && nearbyEntity != target && !attacker.isTeammate(nearbyEntity) && attacker.distanceTo(nearbyEntity) < 3.0D) {
 
                 // Apply knockback
                 nearbyEntity.takeKnockback(knockbackCalculation(sweepDamage, attacker), MathHelper.sin(attacker.getYaw() * 0.017453292F), -MathHelper.cos(attacker.getYaw() * 0.017453292F));
@@ -143,9 +143,7 @@ public class ChocoboWeaponItems extends SwordItem {
 
     @Override
     public boolean postHit(ItemStack stack, LivingEntity target, LivingEntity attacker) {
-        if (attacker == null || target == null || stack.isEmpty() || attacker.getWorld().isClient()) {
-            return super.postHit(stack, target, attacker);
-        }
+        if (attacker == null || target == null || stack.isEmpty() || attacker.getWorld().isClient()) { return super.postHit(stack, target, attacker); }
         // Chocobo will have the damage bonus applied directly in the chocobo class, bypassing the weapon's given damage
         float damage = isChocobo(attacker) ? 0F : getTotalAttackDamage(this.getMaterial());
         damage += EnchantmentHelper.getAttackDamage(stack, target.getGroup());
@@ -156,25 +154,17 @@ public class ChocoboWeaponItems extends SwordItem {
         target.damage(attacker.getDamageSources().mobAttack(attacker), finalDamage);
 
         //Chocobos will preform their own sweep attack
-        if (!isChocobo(attacker)) {
-            performChocoboSweep(attacker.getWorld(), attacker, null, target, stack, finalDamage, false);
-        }
+        if (!isChocobo(attacker)) { performChocoboSweep(attacker.getWorld(), attacker, null, target, stack, finalDamage, false); }
 
         return super.postHit(stack, target, attacker);
     }
 
     @Override
-    public boolean canRepair(ItemStack stack, ItemStack ingredient) {
-        return super.canRepair(stack, ingredient);
-    }
+    public boolean canRepair(ItemStack stack, ItemStack ingredient) { return super.canRepair(stack, ingredient); }
 
     @Override
-    public boolean isEnchantable(ItemStack stack) {
-        return true;
-    }
+    public boolean isEnchantable(ItemStack stack) { return true; }
 
     @Override
-    public int getEnchantability() {
-        return this.getMaterial().getEnchantability();
-    }
+    public int getEnchantability() { return this.getMaterial().getEnchantability(); }
 }

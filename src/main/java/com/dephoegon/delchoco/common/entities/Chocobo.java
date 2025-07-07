@@ -5,7 +5,6 @@ import com.dephoegon.delchoco.aid.world.ChocoboConfig;
 import com.dephoegon.delchoco.aid.world.WorldConfig;
 import com.dephoegon.delchoco.common.enchantments.ChocoboSweepEnchantment;
 import com.dephoegon.delchoco.common.entities.breeding.ChocoboBreedInfo;
-import com.dephoegon.delchoco.common.entities.breeding.ChocoboMateGoal;
 import com.dephoegon.delchoco.common.entities.breeding.ChocoboStatSnapshot;
 import com.dephoegon.delchoco.common.entities.properties.*;
 import com.dephoegon.delchoco.common.entities.properties.MovementType;
@@ -23,7 +22,6 @@ import net.minecraft.client.MinecraftClient;
 import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.entity.*;
 import net.minecraft.entity.ai.brain.Brain;
-import net.minecraft.entity.ai.goal.*;
 import net.minecraft.entity.ai.pathing.PathNodeType;
 import net.minecraft.entity.attribute.DefaultAttributeContainer;
 import net.minecraft.entity.attribute.EntityAttributes;
@@ -69,8 +67,6 @@ import static com.dephoegon.delchoco.aid.dyeList.getDyeList;
 import static com.dephoegon.delchoco.common.effects.ChocoboCombatEvents.flowerChance;
 import static com.dephoegon.delchoco.common.entities.breeding.BreedingHelper.getChicoboFromBreedInfo;
 import static com.dephoegon.delchoco.common.entities.breeding.BreedingHelper.getChocoName;
-import static com.dephoegon.delchoco.common.entities.properties.ChocoboBrainAid.invalidRevengeTargets;
-import static com.dephoegon.delchoco.common.entities.properties.ChocoboBrainAid.validRevengeAllies;
 import static com.dephoegon.delchoco.common.init.ModDamageTypes.knockbackCalculation;
 import static com.dephoegon.delchoco.common.init.ModItems.*;
 import static com.dephoegon.delchoco.common.inventory.ChocoboEquipmentSlot.*;
@@ -160,17 +156,17 @@ public class Chocobo extends AbstractChocobo {
         DebugInfoSender.sendBrainDebugData(this);
     }
     protected void initGoals() {
-        super.initGoals();
-        this.goalSelector.add(1, new MeleeAttackGoal(this,2F, false));
-        this.goalSelector.add(2, new ChocoboMateGoal(this, 1.0D));
-        this.goalSelector.add(3, new FollowParentGoal(this, 1.1D));
-        this.targetSelector.add(1, new TrackOwnerAttackerGoal(this));
-        this.targetSelector.add(2, new AttackWithOwnerGoal(this));
-        this.targetSelector.add(3, new RevengeGoal(this, invalidRevengeTargets(this.canWalkOnWater())).setGroupRevenge(validRevengeAllies()));
-        this.targetSelector.add(4, new ActiveTargetGoal<>(this, PlayerEntity.class, 10, true, false, this::shouldAngerAt));
-        this.targetSelector.add(5, new UniversalAngerGoal<>(this, false));
-        this.targetSelector.add(6, new ActiveTargetGoal<>(this, EndermiteEntity.class, false));
-        this.targetSelector.add(7, new ActiveTargetGoal<>(this, SilverfishEntity.class, false));
+        // super.initGoals();
+        // this.goalSelector.add(1, new MeleeAttackGoal(this,2F, false));
+        // this.goalSelector.add(2, new ChocoboMateGoal(this, 1.0D));
+        // this.goalSelector.add(3, new FollowParentGoal(this, 1.1D));
+        // this.targetSelector.add(1, new TrackOwnerAttackerGoal(this));
+        // this.targetSelector.add(2, new AttackWithOwnerGoal(this));
+        // this.targetSelector.add(3, new RevengeGoal(this, invalidRevengeTargets(this.canWalkOnWater())).setGroupRevenge(validRevengeAllies()));
+        // this.targetSelector.add(4, new ActiveTargetGoal<>(this, PlayerEntity.class, 10, true, false, this::shouldAngerAt));
+        // this.targetSelector.add(5, new UniversalAngerGoal<>(this, false));
+        // this.targetSelector.add(6, new ActiveTargetGoal<>(this, EndermiteEntity.class, false));
+        // this.targetSelector.add(7, new ActiveTargetGoal<>(this, SilverfishEntity.class, false));
     }
     @Override
     public float getPathfindingFavor(BlockPos pos, WorldView world) { return super.getPathfindingFavor(pos, world); }
@@ -374,10 +370,6 @@ public class Chocobo extends AbstractChocobo {
         this.setMovementTypeByFollowMrHuman(this.followingMrHuman);
         super.dismountVehicle();
     }
-    protected boolean updateWaterState() {
-        // left in for unique Chocobo Checks unable to be done in AbstractChocobo
-        return super.updateWaterState();
-    }
     protected void updateInWaterStateAndDoWaterCurrentPushing() {
         // left in for unique Chocobo Checks unable to be done in AbstractChocobo
         super.updateInWaterStateAndDoWaterCurrentPushing();
@@ -426,15 +418,7 @@ public class Chocobo extends AbstractChocobo {
                     if (MinecraftClient.getInstance().options.jumpKey.isPressed() || MinecraftClient.getInstance().options.sneakKey.isPressed() || isChocoboWaterGlide()) {
                         setVelocity(new Vec3d(motion.x, verticalMovement, motion.z));
                     }
-                } else if (rider.isTouchingWater()) { // Player is in water BUT Chocobo walks on water
-                    Vec3d motion = getVelocity();
-                    if (MinecraftClient.getInstance().options.jumpKey.isPressed()) {
-                        setVelocity(new Vec3d(motion.x, .5f, motion.z));
-                    } else if (this.isWaterBreathing() && isChocoboWaterGlide()) {
-                        Vec3d waterMotion = getVelocity();
-                        setVelocity(new Vec3d(waterMotion.x, waterMotion.y * 0.65F, waterMotion.z));
-                    }
-                }
+                } else if (rider.isTouchingWater()) {  rider.dismountVehicle(); }
                 if (rider.isInLava()) {
                     Vec3d motion = getVelocity();
                     if (MinecraftClient.getInstance().options.jumpKey.isPressed()) {
@@ -571,9 +555,13 @@ public class Chocobo extends AbstractChocobo {
             if (this.isTamed()) {
                 if (this.getHealth() != this.getMaxHealth()) {
                     this.eat(player, hand, stack);
+                    double health = this.getHealth();
                     heal(ChocoboConfig.DEFAULT_HEALING.get());
-                    return true;
-                } else { player.sendMessage(Text.translatable(DelChoco.DELCHOCO_ID + ".entity_chocobo.heal_fail"), true); }
+                    double newHealth = this.getHealth();
+                    player.sendMessage(Text.translatable(DelChoco.DELCHOCO_ID + ".chocobo.heal.amount", this.getName(), (int) health, (int) newHealth), true);
+                } else {
+                    player.sendMessage(Text.translatable(DelChoco.DELCHOCO_ID + ".entity_chocobo.heal_fail"), true);
+                }
             } else {
                 this.eat(player, hand, player.getInventory().getMainHandStack());
                 if ((float) random() < ChocoboConfig.TAME_CHANCE.get() || player.isCreative()) {
@@ -585,16 +573,17 @@ public class Chocobo extends AbstractChocobo {
                     this.setCustomNameVisible(true);
                 } else { player.sendMessage(Text.translatable(DelChoco.DELCHOCO_ID + ".entity_chocobo.tame_fail"), true); }
             }
+            return true;
         }
         if (this.fruitAteTimer < 1) {
             boolean ate = false;
             if (pStack == GOLDEN_GYSAHL_GREEN) {
-                increaseStat(this, all, 1, player);
+                increaseStat(this, all, 2, player);
                 this.fruitAteTimer = ChocoboConfig.FRUIT_COOL_DOWN.get();
                 ate = true;
             }
             if (pStack == PINK_GYSAHL_GREEN) {
-                increaseStat(this, health, 1, player);
+                increaseStat(this, health, 2, player);
                 this.fruitAteTimer = ChocoboConfig.FRUIT_COOL_DOWN.get();
                 ate =  true;
             }
@@ -628,8 +617,7 @@ public class Chocobo extends AbstractChocobo {
     }
     private boolean interactEquip(PlayerEntity player, ItemStack stack) {
         Item pStack = stack.getItem();
-        if (this.getEntityWorld().isClient()) { return false; }
-        if (this.isBaby()) { return false; }
+        if (this.getEntityWorld().isClient() || this.isBaby()) { return false; }
         if (pStack instanceof ChocoboSaddleItem && !this.isSaddled()) {
             this.chocoboGearInventory.setStack(SADDLE_SLOT, stack.copy().split(1));
             if (!player.isCreative()) { player.getMainHandStack().decrement(1); }
@@ -757,13 +745,15 @@ public class Chocobo extends AbstractChocobo {
         return false;
     }
     public ActionResult interactAt(@NotNull PlayerEntity player, Vec3d vec, Hand hand) {
-        if (this.getEntityWorld().isClient()) return ActionResult.PASS;
+        if (this.getEntityWorld().isClient()) { return super.interactAt(player, vec, hand); }
         ItemStack heldItemStack = player.getStackInHand(hand);
-        if (interactInvRide(player, heldItemStack)) { return ActionResult.SUCCESS; }
-        if (interactFeed(player, heldItemStack, hand)) { return ActionResult.SUCCESS; }
+
+        if (this.isSaddled() && interactInvRide(player, heldItemStack)) { return ActionResult.SUCCESS; }
         if (interactEquip(player, heldItemStack)) { return ActionResult.SUCCESS; }
+        if (interactFeed(player, heldItemStack, hand)) { return ActionResult.SUCCESS; }
         if (interactUtil(player, heldItemStack)) { return ActionResult.SUCCESS; }
         if (interactDye(player, heldItemStack)) { return ActionResult.SUCCESS; }
+
         return super.interactAt(player, vec, hand);
     }
     private void displayChocoboInventory(@NotNull ServerPlayerEntity player) {
@@ -930,6 +920,7 @@ public class Chocobo extends AbstractChocobo {
 
         ItemStack heldItem = attacker.getWeapon();
         if (!(heldItem.getItem() instanceof SwordItem)) { return; }
+        boolean isPlayer = target instanceof PlayerEntity;
 
         int chocoboSweepLevel = EnchantmentHelper.getLevel(ModEnchantments.CHOCOBO_SWEEP, heldItem);
         float damageMultiplier = ChocoboSweepEnchantment.getDamageMultiplier(chocoboSweepLevel);
@@ -949,7 +940,8 @@ public class Chocobo extends AbstractChocobo {
 
                 LivingEntity owner = attacker.getOwner();
                 if (nearbyEntity instanceof PlayerEntity targetPlayer) {
-                    if (targetPlayer.isCreative() || targetPlayer.isSpectator()) { continue; }
+                    if (targetPlayer.isCreative() || targetPlayer.isSpectator() || !isPlayer) { continue; }
+                    // Only apply sweep to players if the attacker is a player
                 }
 
                 if (nearbyEntity == owner) { skipDamage = true; }

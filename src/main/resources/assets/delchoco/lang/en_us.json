@@ -118,6 +118,8 @@
     "command.delchoco.chocobo.get_attack": "Attack Strength: %s",
     "command.delchoco.chocobo.get_generation": "Chocobo Generation: %s",
 
+    "delchoco.chocobo.heal.amount": "Healed %s from %s to %s",
+
     "delchoco.container.nest": "Chocobo Nest",
     "delchoco.alter.invalid_base": "Invalid Alter Base Block",
     "delchoco.alter.invalid_center": "Invalid Alter Center",

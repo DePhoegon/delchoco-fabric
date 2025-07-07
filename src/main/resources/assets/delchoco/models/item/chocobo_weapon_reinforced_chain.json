@@ -1,7 +1,7 @@
 {
     "parent": "delchoco:item/chocobo_weapon_template",
     "textures": {
-        "texture": "delchoco:entities/chocobos/weapon/chocobo_iron"
+        "weapon": "delchoco:entities/chocobos/weapon/chocobo_stone"
     }
 }
 

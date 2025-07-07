@@ -70,7 +70,6 @@ import static com.dephoegon.delchoco.common.entities.breeding.ChocoboTweakedSnap
 import static com.dephoegon.delchoco.common.entities.properties.ChocoboBrainAid.requiresSwimmingToTarget;
 import static com.dephoegon.delchoco.common.init.ModItems.*;
 import static com.dephoegon.delchoco.common.init.ModSounds.AMBIENT_SOUND;
-import static net.minecraft.entity.MovementType.SELF;
 import static net.minecraft.item.Items.*;
 
 public abstract class AbstractChocobo extends TameableEntity implements Angerable {
@@ -161,6 +160,7 @@ public abstract class AbstractChocobo extends TameableEntity implements Angerabl
      * 14     | Poison Immune   | 1 bit boolean flag.
      * 15     | Is Male         | 1 bit boolean flag.
      * 16     | From Egg        | 1 bit boolean flag.
+     * 17     | Can Fly         | 1 bit boolean flag.
      * ...    | (Unused)        | Remaining bits are available for future properties.
      *
      * To read a value, we first right-shift the integer to move the desired bits to the far right,
@@ -200,6 +200,7 @@ public abstract class AbstractChocobo extends TameableEntity implements Angerabl
     protected static final int FLAG_POISON_IMMUNE   = 1 << (SHIFT_ABILITIES_START + 3); // Bit 14
     protected static final int FLAG_IS_MALE         = 1 << (SHIFT_ABILITIES_START + 4); // Bit 15
     protected static final int FLAG_FROM_EGG        = 1 << (SHIFT_ABILITIES_START + 5); // Bit 16
+    protected static final int FLAG_CAN_FLY         = 1 << (SHIFT_ABILITIES_START + 6); // Bit 17
     // These are the bitmasks for the legacy AbilityMask byte, used for NBT serialization.
     protected static final byte ABILITY_MASK_FLAME_BLOOD   = 0b00000001;
     protected static final byte ABILITY_MASK_WATER_BREATH  = 0b00000010;
@@ -207,6 +208,7 @@ public abstract class AbstractChocobo extends TameableEntity implements Angerabl
     protected static final byte ABILITY_MASK_POISON_IMMUNE = 0b00001000;
     protected static final byte ABILITY_MASK_IS_MALE       = 0b00010000;
     protected static final byte ABILITY_MASK_FROM_EGG      = 0b00100000;
+    protected static final byte ABILITY_MASK_CAN_FLY       = 0b01000000;
 
     protected final static TrackedData<Integer> PARAM_GENERATION = DataTracker.registerData(AbstractChocobo.class, TrackedDataHandlerRegistry.INTEGER);
     protected static final TrackedData<Integer> PARAM_SCALE = DataTracker.registerData(AbstractChocobo.class, TrackedDataHandlerRegistry.INTEGER);
@@ -246,11 +248,13 @@ public abstract class AbstractChocobo extends TameableEntity implements Angerabl
     protected AbstractChocobo(EntityType<? extends TameableEntity> entityType, World world) { super(entityType, world); }
 
     public void travel(@NotNull Vec3d travelInput) {
-        if (this.isAlive() && this.isSubmergedInWater() && this.isWaterBreathing()) {
-            this.updateVelocity(this.getMovementSpeed(), travelInput);
-            this.move(SELF, this.getVelocity());
-            this.setVelocity(this.getVelocity().multiply(0.9D));
-        } else { super.travel(travelInput); }
+        if (this.isAlive()) {
+            if (this.isSubmergedInWater() && !this.hasPassengers()) {
+                Vec3d velocity = this.getVelocity();
+                this.setVelocity(velocity.x, .5, velocity.z);
+            }
+            super.travel(travelInput);
+        }
     }
     protected EntityNavigation createNavigation(World world) { return new ChocoboAmphibiousSwimNavigation(this, world); }
 
@@ -309,7 +313,6 @@ public abstract class AbstractChocobo extends TameableEntity implements Angerabl
     public boolean isDisallowedInPeaceful() { return false; }
     // Method to get World, Used by 'default public LivingEntity getOwner()' to get Owner by UUID in the world.
     public EntityView method_48926() { return super.getWorld(); }
-    protected void onTamedChanged() { super.onTamedChanged(); }
     public boolean isBreedingItem(@NotNull ItemStack stack) { return false; }
     public boolean isInvulnerableTo(@NotNull DamageSource source) {
         // Left uncompacted for readability and future expansion
@@ -392,6 +395,7 @@ public abstract class AbstractChocobo extends TameableEntity implements Angerabl
         if (this.isSaddled() && entity instanceof PlayerEntity playerEntity) { return playerEntity; }
         return null;
     }
+    public void pubUpdateWaterState() { if (this.isTouchingWater()) { this.updateWaterState(); } }
     protected boolean updateWaterState() {
         this.fluidHeight.clear();
         this.updateInWaterStateAndDoWaterCurrentPushing();
@@ -419,10 +423,6 @@ public abstract class AbstractChocobo extends TameableEntity implements Angerabl
         if (passenger instanceof MobEntity && this.getPrimaryPassenger() == passenger) { this.bodyYaw = ((LivingEntity) passenger).bodyYaw; }
         double d = this.getY() + this.getMountedHeightOffset() + passenger.getHeightOffset();
         positionUpdater.accept(passenger, this.getX(), d, this.getZ());
-    }
-    public boolean onKilledOther(ServerWorld world, LivingEntity targetEntity) {
-        // Left uncompacted for readability and future expansion
-        return super.onKilledOther(world, targetEntity);
     }
     public void onDeath(DamageSource source) {
         // Left in for unique Chocobo Checks able to be done in AbstractChocobo
@@ -521,10 +521,6 @@ public abstract class AbstractChocobo extends TameableEntity implements Angerabl
         return super.canWalkOnFluid(state);
     }
     public boolean shouldDismountUnderwater() { return this.canWalkOnWater(); }
-    protected boolean shouldSwimInFluids() {
-        // Left uncompacted for readability and future expansion
-        return super.shouldSwimInFluids();
-    }
     public float getPathfindingFavor(BlockPos pos, WorldView world) {
         BlockState state = world.getBlockState(pos);
         if (state.getFluidState().isIn(FluidTags.WATER)) {
@@ -538,8 +534,9 @@ public abstract class AbstractChocobo extends TameableEntity implements Angerabl
     // boolean checks for Chocobo properties
     public boolean isWaterBreathing() { return this.isWaterBloodChocobo() || this.hasStatusEffect(StatusEffects.WATER_BREATHING); }
     public boolean canWalkOnWater() {
-        // TODO -> logic to enable disable walking on water (controlling water breathing) on a temporary condition.
-        return !this.isWaterBreathing();
+        if (!this.hasPassengers()) { return true; }
+        if (this.isWaterBreathing()) { return !this.isArmored() && !this.isWeaponArmed(); }
+        return true;
     }
     public boolean isWaterBloodChocobo() { return (this.dataTracker.get(PARAM_CHOCOBO_PROPERTIES) & FLAG_WATER_BREATH) != 0; }
     public boolean isWitherImmune() { return (this.dataTracker.get(PARAM_CHOCOBO_PROPERTIES) & FLAG_WITHER_IMMUNE) != 0; }
@@ -548,6 +545,7 @@ public abstract class AbstractChocobo extends TameableEntity implements Angerabl
     public float getChocoboScaleMod() { return ScaleMod(getChocoboScale()); }
     public boolean isMale() { return (this.dataTracker.get(PARAM_CHOCOBO_PROPERTIES) & FLAG_IS_MALE) != 0; }
     public boolean fromEgg() { return (this.dataTracker.get(PARAM_CHOCOBO_PROPERTIES) & FLAG_FROM_EGG) != 0; }
+    public boolean canFly() { return (this.dataTracker.get(PARAM_CHOCOBO_PROPERTIES) & FLAG_CAN_FLY) != 0; }
 
     // getters for Chocobo properties
     public MovementType getMovementType() { return MovementType.values()[(this.dataTracker.get(PARAM_CHOCOBO_PROPERTIES) >> SHIFT_MOVEMENT_TYPE) & MASK_MOVEMENT_TYPE]; }
@@ -562,6 +560,7 @@ public abstract class AbstractChocobo extends TameableEntity implements Angerabl
         if ((properties & FLAG_POISON_IMMUNE) != 0) mask |= ABILITY_MASK_POISON_IMMUNE;
         if ((properties & FLAG_IS_MALE) != 0) mask |= ABILITY_MASK_IS_MALE;
         if ((properties & FLAG_FROM_EGG) != 0) mask |= ABILITY_MASK_FROM_EGG;
+        if ((properties & FLAG_CAN_FLY) != 0) mask |= ABILITY_MASK_CAN_FLY;
         return mask;
     }
     public boolean isSaddled() { return !this.getSaddle().isEmpty(); }
@@ -644,10 +643,16 @@ public abstract class AbstractChocobo extends TameableEntity implements Angerabl
         else { properties &= ~FLAG_POISON_IMMUNE; }
         this.dataTracker.set(PARAM_CHOCOBO_PROPERTIES, properties);
     }
+    public void setCanFly(boolean canFly) {
+        int properties = this.dataTracker.get(PARAM_CHOCOBO_PROPERTIES);
+        if (canFly) { properties |= FLAG_CAN_FLY; }
+        else { properties &= ~FLAG_CAN_FLY; }
+        this.dataTracker.set(PARAM_CHOCOBO_PROPERTIES, properties);
+    }
     public void setChocoboAbilitiesFromMask(byte mask) {
         int properties = this.dataTracker.get(PARAM_CHOCOBO_PROPERTIES);
         // Clear old ability flags first
-        properties &= ~(FLAG_FLAME_BLOOD | FLAG_WATER_BREATH | FLAG_WITHER_IMMUNE | FLAG_POISON_IMMUNE | FLAG_IS_MALE | FLAG_FROM_EGG);
+        properties &= ~(FLAG_FLAME_BLOOD | FLAG_WATER_BREATH | FLAG_WITHER_IMMUNE | FLAG_POISON_IMMUNE | FLAG_IS_MALE | FLAG_FROM_EGG | FLAG_CAN_FLY);
 
         if ((mask & ABILITY_MASK_FLAME_BLOOD) != 0) { properties |= FLAG_FLAME_BLOOD; }
         if ((mask & ABILITY_MASK_WATER_BREATH) != 0) { properties |= FLAG_WATER_BREATH; }
@@ -655,6 +660,7 @@ public abstract class AbstractChocobo extends TameableEntity implements Angerabl
         if ((mask & ABILITY_MASK_POISON_IMMUNE) != 0) { properties |= FLAG_POISON_IMMUNE; }
         if ((mask & ABILITY_MASK_IS_MALE) != 0) { properties |= FLAG_IS_MALE; }
         if ((mask & ABILITY_MASK_FROM_EGG) != 0) { properties |= FLAG_FROM_EGG; }
+        if ((mask & ABILITY_MASK_CAN_FLY) != 0) { properties |= FLAG_CAN_FLY; }
 
         this.dataTracker.set(PARAM_CHOCOBO_PROPERTIES, properties);
         this.updateNavigationAndMoveControl(false); // Update based on new ability mask state
@@ -1079,8 +1085,7 @@ public abstract class AbstractChocobo extends TameableEntity implements Angerabl
         }
         if (statCount(hold, HEALTH_COST) >= 0) {
             hold -= HEALTH_COST;
-            if (amountIncrease % 2 != 0) { amountIncrease +=1; } // Ensure even number for health increase
-            else { amountIncrease = (amountIncrease / 2) + 1; } // If odd, round up
+            amountIncrease *= 2;
             statSwitch(health, playerEntity, chocobo, amountIncrease);
         }
         if (statCount(hold, ARMOR_TOUGHNESS_COST) >= 0) {
@@ -1329,3 +1334,4 @@ public abstract class AbstractChocobo extends TameableEntity implements Angerabl
         return true;
     }
 }
+

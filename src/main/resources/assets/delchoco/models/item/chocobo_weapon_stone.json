@@ -1,6 +1,0 @@
-{
-  "parent": "item/generated",
-  "textures": {
-    "layer0": "delchoco:item/choco_gear/chocobo_weapon_stone"
-  }
-}

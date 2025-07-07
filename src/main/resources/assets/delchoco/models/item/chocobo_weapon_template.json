@@ -1,0 +1,82 @@
+{
+    "gui_light": "side",
+    "textures": {
+        "particle": "#weapon"
+    },
+    "elements": [
+        {
+            "name": "leg_blade",
+            "from": [ 6.5, 0, 6.5 ],
+            "to": [ 9.5, 16, 9.5 ],
+            "_comment": "up is actually down next to the toes, east is right side to the player when holding in 3D person perspective",
+            "faces": {
+                "north": { "uv": [ 82, 115, 85, 127 ], "texture": "#weapon", "uvlock": true },
+                "east":  { "uv": [ 88, 127, 85, 115 ], "texture": "#weapon", "uvlock": true },
+                "south": { "uv": [ 88, 115, 91, 127 ], "texture": "#weapon", "uvlock": true },
+                "west":  { "uv": [ 79, 115, 82, 127 ], "texture": "#weapon", "uvlock": true },
+                "up":    { "uv": [ 85, 112, 88, 115 ], "texture": "#weapon", "uvlock": true },
+                "down":  { "uv": [ 0, 0, 3, 3 ], "texture": "#weapon", "uvlock": true }
+            }
+        },
+        {
+            "name": "toe_right",
+            "from": [ 7.5, 15, 3 ],
+            "to": [ 9.5, 17, 10 ],
+            "rotation": { "origin": [ 8, 17, 8 ], "axis": "y", "angle": -22.5 },
+            "faces": {
+                "west":  { "uv": [ 92, 61, 99, 63 ], "texture": "#weapon", "uvlock": true },
+                "north": { "uv": [ 99, 61, 101, 63 ], "texture": "#weapon", "uvlock": true },
+                "east":  { "uv": [ 101, 61, 108, 63 ], "texture": "#weapon", "uvlock": true },
+                "south": { "uv": [ 108, 61, 110, 63 ], "texture": "#weapon", "uvlock": true },
+                "up":    { "uv": [ 99, 54, 101, 61 ], "texture": "#weapon", "uvlock": true },
+                "down":  { "uv": [ 101, 54, 103, 61 ], "texture": "#weapon", "uvlock": true }
+            }
+        },
+        {
+            "name": "toe_left",
+            "from": [ 6.5, 15, 3 ],
+            "to": [ 8.5, 17, 10 ],
+            "rotation": { "origin": [ 8, 17, 8 ], "axis": "y", "angle": 22.5 },
+            "faces": {
+                "west":  { "uv": [ 104, 58, 109, 60 ], "texture": "#weapon", "uvlock": true },
+                "north": { "uv": [ 109, 58, 111, 60 ], "texture": "#weapon", "uvlock": true },
+                "east":  { "uv": [ 111, 58, 116, 60 ], "texture": "#weapon", "uvlock": true },
+                "south": { "uv": [ 116, 58, 118, 60 ], "texture": "#weapon", "uvlock": true },
+                "up":    { "uv": [ 109, 53, 111, 58 ], "texture": "#weapon", "uvlock": true },
+                "down":  { "uv": [ 111, 53, 113, 58 ], "texture": "#weapon", "uvlock": true }
+            }
+        }
+    ],
+    "display": {
+        "gui": {
+            "rotation": [ 30, 45, 180 ],
+            "translation": [ 0, 5, 0 ],
+            "scale": [ 1.25, 1.25, 1.25 ]
+        },
+        "ground": {
+            "rotation":  [ 30, 45, 180 ],
+            "translation": [ 0, 3, 0 ],
+            "scale": [ 1.25, 1.25, 1.25 ]
+        },
+        "fixed": {
+            "rotation":  [ 30, 45, 180 ],
+            "translation": [ 0, 0, 0 ],
+            "scale": [ 1.25, 1.25, 1.25 ]
+        },
+        "thirdperson_righthand": {
+            "rotation": [ 75, 45, 0 ],
+            "translation": [ 0, 2.5, 0 ],
+            "scale": [ 1.25, 1.25, 1.25 ]
+        },
+        "firstperson_righthand": {
+            "rotation": [ 0, 45, 0 ],
+            "translation": [ 0, 0, 0 ],
+            "scale": [ 1.25, 1.25, 1.25 ]
+        },
+        "firstperson_lefthand": {
+            "rotation": [ 0, 225, 0 ],
+            "translation": [ 0, 0, 0 ],
+            "scale": [ 1.25, 1.25, 1.25 ]
+        }
+    }
+}

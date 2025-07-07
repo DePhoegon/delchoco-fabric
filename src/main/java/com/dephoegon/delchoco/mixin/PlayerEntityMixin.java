@@ -52,15 +52,16 @@ public abstract class PlayerEntityMixin extends LivingEntity {
         if (damageImmune) { cir.setReturnValue(true); }
     }
 
-    @Inject(method = "addStatusEffect(Lnet/minecraft/entity/effect/StatusEffectInstance;Lnet/minecraft/entity/Entity;)Z", at = @At("HEAD"), cancellable = true)
-    private void onAddStatusEffect(StatusEffectInstance effect, @Nullable Entity source, CallbackInfoReturnable<Boolean> cir) {
-        if (this.getWorld().isClient()) { return; }
+    @Override
+    public boolean addStatusEffect(StatusEffectInstance effect, @Nullable Entity source) {
+        if (this.getWorld().isClient()) { return super.addStatusEffect(effect, source); }
         ItemStack helmet = this.getEquippedStack(EquipmentSlot.HEAD);
         ItemStack chestplate = this.getEquippedStack(EquipmentSlot.CHEST);
         ItemStack leggings = this.getEquippedStack(EquipmentSlot.LEGS);
         ItemStack boots = this.getEquippedStack(EquipmentSlot.FEET);
         boolean check = ChocoboCombatEvents.playerStatusImmunityCheck(effect, helmet, chestplate, leggings, boots);
-        if (check) { cir.setReturnValue(false); }
+        if (check) { return false; }
+        return super.addStatusEffect(effect, source);
     }
 
     // Chocobo Sweep Attack for Players
@@ -92,10 +93,11 @@ public abstract class PlayerEntityMixin extends LivingEntity {
         List<LivingEntity> targets = self.getWorld().getEntitiesByClass(LivingEntity.class, self.getBoundingBox().expand(2.5D, 1.5D, 2.5D), e -> e != self && e != living && e.isAttackable() && e.isAlive());
 
         boolean thwack = false;
+        boolean isPlayer = target instanceof PlayerEntity;
         for (LivingEntity targetEntity : targets) {
             if (targetEntity.isAlive() && !target.handleAttack(self)) {
                 if (targetEntity instanceof PlayerEntity targetPlayer) {
-                    if (targetPlayer.isCreative() || targetPlayer.isSpectator()) { continue; }
+                    if (targetPlayer.isCreative() || targetPlayer.isSpectator() || !isPlayer) { continue; }
                 }
                 boolean skipAttack = false;
                 if (targetEntity instanceof TameableEntity tameTarget) {

@@ -14,14 +14,18 @@ public class ChicoboModel<T extends Chocobo> extends EntityModel<Chocobo> {
 
     private final ModelPart root;
 
-    private final ModelPart head;
-    private final ModelPart leg_left;
-    private final ModelPart leg_right;
+    protected final ModelPart head;
+    protected final ModelPart leg_left;
+    protected final ModelPart leg_right;
+    protected final ModelPart left_wing;
+    protected final ModelPart right_wing;
     public ChicoboModel(@NotNull ModelPart root) {
         this.root = root.getChild("root");
         this.head = this.root.getChild("head");
         this.leg_left = this.root.getChild("leg_left");
         this.leg_right = this.root.getChild("leg_right");
+        this.left_wing = this.root.getChild("wing_left");
+        this.right_wing = this.root.getChild("wing_right");
     }
     public static @NotNull TexturedModelData createBodyLayer() {
         ModelData meshDefinition = new ModelData();

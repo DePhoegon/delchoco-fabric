@@ -21,13 +21,17 @@ public class AdultChocoboModel<T extends Chocobo> extends EntityModel<Chocobo> {
     private static final float WING_IDLE_Y_RIGHT = -0.0174533F;
     private static final float WING_IDLE_Y_LEFT = 0.0174533F;
 
-    private final ModelPart root;
-    private final ModelPart wing_left;
-    private final ModelPart wing_right;
-    private final ModelPart head;
-    private final ModelPart neck;
-    private final ModelPart leg_left;
-    private final ModelPart leg_right;
+    protected final ModelPart root;
+    protected final ModelPart wing_left;
+    protected final ModelPart wing_right;
+    protected final ModelPart head;
+    protected final ModelPart neck;
+    protected final ModelPart leg_left;
+    protected final ModelPart leg_right;
+    protected final ModelPart foot_left;
+    protected final ModelPart foot_right;
+    protected final ModelPart tail_feathers;
+    protected final ModelPart head_crest;
     private float headPitchModifier;
 
     // Internal animation variables
@@ -48,6 +52,10 @@ public class AdultChocoboModel<T extends Chocobo> extends EntityModel<Chocobo> {
         this.leg_right = body.getChild("leg_right");
         this.wing_left = body.getChild("wing_left");
         this.wing_right = body.getChild("wing_right");
+        this.foot_left = leg_left.getChild("foot_left");
+        this.foot_right = leg_right.getChild("foot_right");
+        this.tail_feathers = body.getChild("fan_top_r1");
+        this.head_crest = head.getChild("crest_top_r1");
     }
 
     public static @NotNull TexturedModelData createBodyLayer() {

@@ -4,9 +4,7 @@ import com.dephoegon.delchoco.DelChoco;
 import com.dephoegon.delchoco.aid.chocoboChecks;
 import com.dephoegon.delchoco.aid.world.ChocoboConfig;
 import com.dephoegon.delchoco.common.entities.pathing.ChocoboAmphibiousSwimNavigation;
-import com.dephoegon.delchoco.common.entities.properties.ChocoboBrainAid;
-import com.dephoegon.delchoco.common.entities.properties.ChocoboBrains;
-import com.dephoegon.delchoco.common.entities.properties.ChocoboColor;
+import com.dephoegon.delchoco.common.entities.properties.*;
 import com.dephoegon.delchoco.common.entities.properties.MovementType;
 import com.dephoegon.delchoco.common.items.ChocoboArmorItems;
 import com.dephoegon.delchoco.common.items.ChocoboSaddleItem;
@@ -72,7 +70,7 @@ import static com.dephoegon.delchoco.common.init.ModItems.*;
 import static com.dephoegon.delchoco.common.init.ModSounds.AMBIENT_SOUND;
 import static net.minecraft.item.Items.*;
 
-public abstract class AbstractChocobo extends TameableEntity implements Angerable {
+public abstract class AbstractChocobo extends TameableEntity implements Angerable, IChocobo {
     // Chocobo Variables to be used by all Chocobo types
     @Nullable
     protected UUID persistentAngerTarget;
@@ -218,7 +216,7 @@ public abstract class AbstractChocobo extends TameableEntity implements Angerabl
     // Hardcoded Chocobo Values
     public static final int tier_one_chocobo_inv_slot_count = 15; // 3*5
     public static final int tier_two_chocobo_inv_slot_count = 45; //5*9
-    public final int top_tier_chocobo_inv_slot_count = tier_two_chocobo_inv_slot_count;
+    public static final int top_tier_chocobo_inv_slot_count = tier_two_chocobo_inv_slot_count;
 
     protected static final UUID CHOCOBO_CHEST_ARMOR_MOD_UUID = UUID.fromString("c03d8021-8839-4377-ac23-ed723ece6454");
     protected static final UUID CHOCOBO_CHEST_ARMOR_TOUGH_MOD_UUID = UUID.fromString("f7dcb185-7182-4a28-83ae-d1a2de9c022d");
@@ -595,7 +593,7 @@ public abstract class AbstractChocobo extends TameableEntity implements Angerabl
     public ChocoboColor getChocoboColor() { return ChocoboColor.values()[(this.dataTracker.get(PARAM_CHOCOBO_PROPERTIES) >> SHIFT_COLOR) & MASK_COLOR]; }
     public int getAngerTime() { return this.remainingPersistentAngerTime; }
     public UUID getAngryAt() { return this.persistentAngerTarget; }
-    public Integer getCollarColor() { return (this.dataTracker.get(PARAM_CHOCOBO_PROPERTIES) >> SHIFT_COLLAR_COLOR) & MASK_COLLAR_COLOR; }
+    public int getCollarColor() { return (this.dataTracker.get(PARAM_CHOCOBO_PROPERTIES) >> SHIFT_COLLAR_COLOR) & MASK_COLLAR_COLOR; }
     public BlockPos getLeashSpot() { return this.dataTracker.get(PARAM_LEASH_BLOCK); }
     public boolean canWonder() { return this.getMovementType() == MovementType.WANDER; }
     public boolean isNoRoam() { return this.getMovementType() == MovementType.STANDSTILL; }
@@ -983,7 +981,7 @@ public abstract class AbstractChocobo extends TameableEntity implements Angerabl
             this.setPathfindingPenalty(PathNodeType.WATER_BORDER, 0.0F);
         }
     }
-    public float ScaleMod(int scale) { return (scale == 0) ? 0 : ((scale < 0) ? (((float) ((scale * -1) - 100) / 100) * -1) : (1f + ((float) scale / 100))); }
+    public static float ScaleMod(int scale) { return (scale == 0) ? 0 : ((scale < 0) ? (((float) ((scale * -1) - 100) / 100) * -1) : (1f + ((float) scale / 100))); }
     protected Box spawnControlBoxSize(@NotNull Box box, int multi) {
         int xz = 8*5 * Math.max(multi, 1); //8 half a chunk
         int y = 32 * Math.max(multi/2, 1);
@@ -1150,6 +1148,9 @@ public abstract class AbstractChocobo extends TameableEntity implements Angerabl
         if (this.isBaby()) { return; }
         this.dropStack(new ItemStack(CHOCOBO_FEATHER, 1), 0.0F);
     }
+    public boolean isBaby() { return super.isBaby(); }
+    public boolean isTamed() { return super.isTamed(); }
+    public boolean isInvisible() { return super.isInvisible(); }
     public boolean updateMovementInFluid(TagKey<Fluid> tag, double speed) {
         if (this.isRegionUnloaded()) { return false; }
         Box box = this.getBoundingBox().contract(0.001);
@@ -1334,4 +1335,3 @@ public abstract class AbstractChocobo extends TameableEntity implements Angerabl
         return true;
     }
 }
-

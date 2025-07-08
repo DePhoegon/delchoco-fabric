@@ -2,6 +2,7 @@ package com.dephoegon.delchoco.client.renderer.layers;
 
 import com.dephoegon.delchoco.DelChoco;
 import com.dephoegon.delchoco.common.entities.Chocobo;
+import com.dephoegon.delchoco.common.entities.ChocoboArmorStand;
 import net.minecraft.client.render.RenderLayer;
 import net.minecraft.client.render.VertexConsumer;
 import net.minecraft.client.render.VertexConsumerProvider;
@@ -28,5 +29,18 @@ public class LayerMaleTrims extends FeatureRenderer<Chocobo, EntityModel<Chocobo
             VertexConsumer vertexconsumer = bufferIn.getBuffer(RenderLayer.getEntityTranslucent(chocobo.isTamed() ? tamed : notTamed, false));
             this.getContextModel().render(matrixStackIn, vertexconsumer, packedLightIn, LivingEntityRenderer.getOverlay(chocobo, 0F), 1F, 1F, 1F, mAlpha);
         }
+    }
+    public void render(@NotNull MatrixStack matrixStackIn, @NotNull VertexConsumerProvider bufferIn, int packedLightIn, @NotNull ChocoboArmorStand chocobo, float limbSwing, float limbSwingAmount, float partialTicks, float ageInTicks, float netHeadYaw, float headPitch) {
+        float mAlpha = chocobo.isMale() ? alpha : 0F;
+        if (!chocobo.isInvisible() && !chocobo.isBaby()) {
+            VertexConsumer vertexconsumer = bufferIn.getBuffer(RenderLayer.getEntityTranslucent(chocobo.isTamed() ? tamed : notTamed, false));
+            this.getContextModel().render(matrixStackIn, vertexconsumer, packedLightIn, getArmorStandOverlay(chocobo, 0F), 1F, 1F, 1F, mAlpha);
+        }
+    }
+    private static int getArmorStandOverlay(ChocoboArmorStand armorStand, float whiteOverlayProgress) {
+        return net.minecraft.client.render.OverlayTexture.packUv(
+                net.minecraft.client.render.OverlayTexture.getU(whiteOverlayProgress),
+                net.minecraft.client.render.OverlayTexture.getV(false)
+        );
     }
 }

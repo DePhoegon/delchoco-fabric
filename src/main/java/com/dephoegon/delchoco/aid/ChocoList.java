@@ -5,14 +5,13 @@ import com.dephoegon.delchoco.client.clientHandler;
 import com.dephoegon.delchoco.client.keybind.KeyBindManager;
 import com.dephoegon.delchoco.client.models.ModModelLayers;
 import com.dephoegon.delchoco.client.models.armor.ChocoDisguiseModel;
+import com.dephoegon.delchoco.client.models.entities.ChocoboArmorStandModel;
 import com.dephoegon.delchoco.client.renderer.armor.ChocoDisguiseRenderer;
+import com.dephoegon.delchoco.client.renderer.entities.ChocoboArmorStandRenderer;
 import com.dephoegon.delchoco.client.renderer.entities.ChocoboRenderer;
 import com.dephoegon.delchoco.common.commands.chocoboTeams;
 import com.dephoegon.delchoco.common.handler.LootTableEventHandler;
-import com.dephoegon.delchoco.common.init.ModEnchantments;
-import com.dephoegon.delchoco.common.init.ModEntities;
-import com.dephoegon.delchoco.common.init.ModItems;
-import com.dephoegon.delchoco.common.init.ModSounds;
+import com.dephoegon.delchoco.common.init.*;
 import com.dephoegon.delchoco.common.network.PacketManager;
 import com.dephoegon.delchoco.common.world.worldgen.ModWorldGen;
 import net.fabricmc.fabric.api.client.rendering.v1.ArmorRenderer;
@@ -37,9 +36,12 @@ public class ChocoList {
         EntityRendererRegistry.register(ModEntities.RED_CHOCOBO_ENTITY, ChocoboRenderer::new);
         EntityRendererRegistry.register(ModEntities.PURPLE_CHOCOBO_ENTITY, ChocoboRenderer::new);
         EntityRendererRegistry.register(ModEntities.FLAME_CHOCOBO_ENTITY, ChocoboRenderer::new);
+        EntityRendererRegistry.register(ModEntities.CHOCOBO_ARMOR_STAND_ENTITY, ChocoboArmorStandRenderer::new);
+
         clientHandler.ChocoboRendering();
         registerChocoDisguiseArmorRenderers();
         EntityModelLayerRegistry.registerModelLayer(ModModelLayers.CHOCO_DISGUISE_ARMOR, ChocoDisguiseModel::getTexturedModelData);
+        EntityModelLayerRegistry.registerModelLayer(clientHandler.CHOCOBO_ARMOR_STAND_LAYER, ChocoboArmorStandModel::createAdultBodyLayer);
     }
     private static void registerChocoDisguiseArmorRenderers() {
         ArmorRenderer.register(new ChocoDisguiseRenderer(), ModItems.CHAIN_HELMET, ModItems.CHAIN_CHEST, ModItems.CHAIN_LEGS, ModItems.CHAIN_BOOTS);

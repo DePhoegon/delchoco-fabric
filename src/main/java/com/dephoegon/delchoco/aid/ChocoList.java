@@ -3,19 +3,18 @@ package com.dephoegon.delchoco.aid;
 import com.dephoegon.delchoco.aid.world.serverVariableAccess;
 import com.dephoegon.delchoco.client.clientHandler;
 import com.dephoegon.delchoco.client.keybind.KeyBindManager;
-import com.dephoegon.delchoco.client.models.ModModelLayers;
-import com.dephoegon.delchoco.client.models.armor.ChocoDisguiseModel;
-import com.dephoegon.delchoco.client.models.entities.ChocoboArmorStandModel;
 import com.dephoegon.delchoco.client.renderer.armor.ChocoDisguiseRenderer;
 import com.dephoegon.delchoco.client.renderer.entities.ChocoboArmorStandRenderer;
 import com.dephoegon.delchoco.client.renderer.entities.ChocoboRenderer;
 import com.dephoegon.delchoco.common.commands.chocoboTeams;
 import com.dephoegon.delchoco.common.handler.LootTableEventHandler;
-import com.dephoegon.delchoco.common.init.*;
+import com.dephoegon.delchoco.common.init.ModEnchantments;
+import com.dephoegon.delchoco.common.init.ModEntities;
+import com.dephoegon.delchoco.common.init.ModItems;
+import com.dephoegon.delchoco.common.init.ModSounds;
 import com.dephoegon.delchoco.common.network.PacketManager;
 import com.dephoegon.delchoco.common.world.worldgen.ModWorldGen;
 import net.fabricmc.fabric.api.client.rendering.v1.ArmorRenderer;
-import net.fabricmc.fabric.api.client.rendering.v1.EntityModelLayerRegistry;
 import net.fabricmc.fabric.api.client.rendering.v1.EntityRendererRegistry;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 
@@ -40,8 +39,6 @@ public class ChocoList {
 
         clientHandler.ChocoboRendering();
         registerChocoDisguiseArmorRenderers();
-        EntityModelLayerRegistry.registerModelLayer(ModModelLayers.CHOCO_DISGUISE_ARMOR, ChocoDisguiseModel::getTexturedModelData);
-        EntityModelLayerRegistry.registerModelLayer(clientHandler.CHOCOBO_ARMOR_STAND_LAYER, ChocoboArmorStandModel::createAdultBodyLayer);
     }
     private static void registerChocoDisguiseArmorRenderers() {
         ArmorRenderer.register(new ChocoDisguiseRenderer(), ModItems.CHAIN_HELMET, ModItems.CHAIN_CHEST, ModItems.CHAIN_LEGS, ModItems.CHAIN_BOOTS);

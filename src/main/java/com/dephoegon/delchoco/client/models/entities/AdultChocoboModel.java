@@ -1,12 +1,11 @@
 package com.dephoegon.delchoco.client.models.entities;
 
+import com.dephoegon.delchoco.client.animation.ChocoboAnimationHandler;
 import com.dephoegon.delchoco.common.entities.Chocobo;
 import net.minecraft.client.model.*;
 import net.minecraft.client.render.VertexConsumer;
 import net.minecraft.client.render.entity.model.EntityModel;
 import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.math.Vec3d;
 import org.jetbrains.annotations.NotNull;
 
 public class AdultChocoboModel<T extends Chocobo> extends EntityModel<Chocobo> {
@@ -15,15 +14,12 @@ public class AdultChocoboModel<T extends Chocobo> extends EntityModel<Chocobo> {
     private static final float PI = (float) Math.PI;
     private static final float PI_HALF = PI / 2.0F;
     private static final float DEFAULT_LEG_PITCH = 0.2094395F;
-    private static final float LIMB_SWING_SPEED = 0.6662F;
 
     // Cached angle values for better performance
     private static final float WING_IDLE_Y_RIGHT = -0.0174533F;
     private static final float WING_IDLE_Y_LEFT = 0.0174533F;
 
     protected final ModelPart root;
-    protected final ModelPart wing_left;
-    protected final ModelPart wing_right;
     protected final ModelPart head;
     protected final ModelPart neck;
     protected final ModelPart leg_left;
@@ -32,17 +28,16 @@ public class AdultChocoboModel<T extends Chocobo> extends EntityModel<Chocobo> {
     protected final ModelPart foot_right;
     protected final ModelPart tail_feathers;
     protected final ModelPart head_crest;
-    private float headPitchModifier;
+    protected final ModelPart wing_left;
+    protected final ModelPart wing_right;
 
-    // Internal animation variables
-    private float wingRotation;
-    private float destinationPos;
-    private float wingRotDelta;
-    private boolean isChocoboJumping;
-    private float swimAnimationTicks = 0.0F;
-    private float rainShakeTimer = 0.0F;
+    // Animation handler
+    private final ChocoboAnimationHandler animationHandler;
+    private String currentPose;
 
     public AdultChocoboModel(@NotNull ModelPart root) {
+        ModelPart wingRight1;
+        ModelPart wingLeft1;
         this.root = root.getChild("root");
         ModelPart body = this.root.getChild("body");
 
@@ -50,12 +45,138 @@ public class AdultChocoboModel<T extends Chocobo> extends EntityModel<Chocobo> {
         this.head = neck.getChild("head");
         this.leg_left = body.getChild("leg_left");
         this.leg_right = body.getChild("leg_right");
-        this.wing_left = body.getChild("wing_left");
-        this.wing_right = body.getChild("wing_right");
+
+        // Initialize wing fields and handle potential missing parts
+        try {
+            wingLeft1 = body.getChild("wing_left");
+        } catch (Exception e) {
+            wingLeft1 = null;
+        }
+
+        this.wing_left = wingLeft1;
+        try {
+            wingRight1 = body.getChild("wing_right");
+        } catch (Exception e) {
+            wingRight1 = null;
+        }
+
+        this.wing_right = wingRight1;
         this.foot_left = leg_left.getChild("foot_left");
         this.foot_right = leg_right.getChild("foot_right");
         this.tail_feathers = body.getChild("fan_top_r1");
         this.head_crest = head.getChild("crest_top_r1");
+
+        // Initialize animation handler
+        this.animationHandler = new ChocoboAnimationHandler();
+        this.currentPose = "";
+    }
+
+    /**
+     * Sets the current pose for the model
+     *
+     * @param pose The pose name to apply
+     */
+    public void setPose(String pose) {
+        this.currentPose = pose;
+    }
+
+    /**
+     * Gets the root model part
+     *
+     * @return The root ModelPart
+     */
+    public ModelPart getRoot() {
+        return root;
+    }
+
+    /**
+     * Gets the head model part
+     *
+     * @return The head ModelPart
+     */
+    public ModelPart getHead() {
+        return head;
+    }
+
+    /**
+     * Gets the neck model part
+     *
+     * @return The neck ModelPart
+     */
+    public ModelPart getNeck() {
+        return neck;
+    }
+
+    /**
+     * Gets the left leg model part
+     *
+     * @return The left leg ModelPart
+     */
+    public ModelPart getLeftLeg() {
+        return leg_left;
+    }
+
+    /**
+     * Gets the right leg model part
+     *
+     * @return The right leg ModelPart
+     */
+    public ModelPart getRightLeg() {
+        return leg_right;
+    }
+
+    /**
+     * Gets the left foot model part
+     *
+     * @return The left foot ModelPart
+     */
+    public ModelPart getLeftFoot() {
+        return foot_left;
+    }
+
+    /**
+     * Gets the right foot model part
+     *
+     * @return The right foot ModelPart
+     */
+    public ModelPart getRightFoot() {
+        return foot_right;
+    }
+
+    /**
+     * Gets the tail feathers model part
+     *
+     * @return The tail feathers ModelPart
+     */
+    public ModelPart getTailFeathers() {
+        return tail_feathers;
+    }
+
+    /**
+     * Gets the head crest model part
+     *
+     * @return The head crest ModelPart
+     */
+    public ModelPart getHeadCrest() {
+        return head_crest;
+    }
+
+    /**
+     * Gets the left wing model part
+     *
+     * @return The left wing ModelPart
+     */
+    public ModelPart getLeftWing() {
+        return wing_left;
+    }
+
+    /**
+     * Gets the right wing model part
+     *
+     * @return The right wing ModelPart
+     */
+    public ModelPart getRightWing() {
+        return wing_right;
     }
 
     public static @NotNull TexturedModelData createBodyLayer() {
@@ -236,190 +357,21 @@ public class AdultChocoboModel<T extends Chocobo> extends EntityModel<Chocobo> {
 
         return TexturedModelData.of(meshDefinition, 128, 128);
     }
+
     public void render(@NotNull MatrixStack poseStack, @NotNull VertexConsumer consumer, int packedLightIn, int packedOverlayIn, float red, float green, float blue, float alpha) {
         this.root.render(poseStack, consumer, packedLightIn, packedOverlayIn, red, green, blue, alpha);
     }
 
-    private void setRotateAngle(@NotNull ModelPart modelRenderer, float x, float y, float z) {
-        modelRenderer.pitch = x;
-        modelRenderer.yaw = y;
-        modelRenderer.roll = z;
-    }
-
+    @Override
     public void animateModel(@NotNull Chocobo entityIn, float limbSwing, float limbSwingAmount, float partialTick) {
         super.animateModel(entityIn, limbSwing, limbSwingAmount, partialTick);
-
-        // Update animation variables from entity - this remains necessary
-        this.wingRotation = entityIn.wingRotation;
-        this.destinationPos = entityIn.destinationPos;
-        this.wingRotDelta = entityIn.wingRotDelta;
-        this.isChocoboJumping = entityIn.isChocoboJumping;
-
-        // Cache state checks to avoid repeated method calls
-        boolean isSwimming = entityIn.isTouchingWater() && entityIn.isWaterBreathing();
-        boolean isRainedOn = entityIn.isTouchingWaterOrRain(); // isSwiming goes first, then isRainedOn & does not matter if the wings get animated from swimming or rain
-        boolean isOnGround = entityIn.isOnGround();
-
-        // Update wing animation variables - optimized logic
-        if (isSwimming) {
-            this.destinationPos = Math.min(this.destinationPos + 0.2F, 1.0F);
-            this.wingRotDelta = Math.max(this.wingRotDelta, 1.0F);
-            this.swimAnimationTicks += 0.15F;
-            this.rainShakeTimer = 0.0F;
-        } else if (isRainedOn) {
-            this.rainShakeTimer += 0.1F;
-            this.wingRotDelta = Math.max(this.wingRotDelta, 0.8F);
-            this.destinationPos = Math.min(this.destinationPos + 0.1F, 1.0F);
-            this.swimAnimationTicks = 0.0F;
-        } else {
-            this.swimAnimationTicks = 0.0F;
-            this.rainShakeTimer = 0.0F;
-
-            // Optimize by using direct math instead of casting to double and back
-            float destPosChange = isOnGround ? -0.3F : 1.2F;
-            this.destinationPos += destPosChange;
-
-            if (!isOnGround) {
-                this.wingRotDelta = Math.min(this.wingRotation, 1f);
-            }
-        }
-
-        // Common calculations done once
-        this.destinationPos = MathHelper.clamp(this.destinationPos, 0.0F, 1.0F);
-        this.wingRotDelta *= 0.9F;
-        this.wingRotation += this.wingRotDelta * 2.0F;
-
-        // Leg animations with optimized logic
-        animateLegs(entityIn, limbSwing, limbSwingAmount, isSwimming);
-
-        // Wing animations
-        animateWings(entityIn, limbSwing, limbSwingAmount, isOnGround, isSwimming, isRainedOn);
+        // Delegate to animation handler
+        animationHandler.animate(this, entityIn, limbSwing, limbSwingAmount, partialTick, 0, 0, currentPose);
     }
 
-    // Extract leg animation logic to a separate method for better organization
-    private void animateLegs(Chocobo entityIn, float limbSwing, float limbSwingAmount, boolean isSwimming) {
-        if (isSwimming) {
-            // Swimming leg animation - optimize calculations
-            float swimSpeed = LIMB_SWING_SPEED * 1.5F;
-            float swimStrength = Math.max(limbSwingAmount, 0.4F);
-
-
-            boolean offGround = !entityIn.isOnGround();
-
-            if (offGround) {
-                // Stationary swimming animation
-                float paddleSpeed = LIMB_SWING_SPEED * 1.2F;
-                float paddleStrength = 0.6F;
-
-                setRightLegXRotation(MathHelper.cos(this.swimAnimationTicks * paddleSpeed) * paddleStrength);
-                setLeftLegXRotation(MathHelper.cos(this.swimAnimationTicks * paddleSpeed + PI) * paddleStrength);
-            } else {
-                // Moving swimming animation
-                setRightLegXRotation(MathHelper.cos(limbSwing * swimSpeed) * 1.2F * swimStrength);
-                setLeftLegXRotation(MathHelper.cos(limbSwing * swimSpeed + PI) * 1.2F * swimStrength);
-            }
-        } else {
-            // Normal walking animation
-            float walkSpeed = limbSwing * LIMB_SWING_SPEED;
-            float walkStrength = 0.8F * limbSwingAmount;
-
-            setRightLegXRotation(MathHelper.cos(walkSpeed) * walkStrength);
-            setLeftLegXRotation(MathHelper.cos(walkSpeed + PI) * walkStrength);
-        }
-    }
-
-    // Extract wing animation logic to a separate method
-    private void animateWings(Chocobo entityIn, float limbSwing, float limbSwingAmount,
-                              boolean isOnGround, boolean isSwimming, boolean isRainedOn) {
-
-        // Calculate values used for both wings once
-        float limbSwingCos = MathHelper.cos(limbSwing * LIMB_SWING_SPEED);
-        float limbSwingCosPi = MathHelper.cos(limbSwing * LIMB_SWING_SPEED + PI);
-        float limbSwingMod = 1.4F * limbSwingAmount;
-
-        float leftSwingMod = 90 + limbSwingCosPi * limbSwingMod;
-        float rightSwingMod = -90 + limbSwingCos * limbSwingMod;
-
-        if (!isOnGround) {
-            if (isSwimming) {
-                // Swimming wing position - more horizontal
-                float horizontalPitch = PI_HALF - (PI / 12);
-                setRotateAngle(this.wing_right, horizontalPitch, WING_IDLE_Y_RIGHT, rightSwingMod);
-                setRotateAngle(this.wing_left, horizontalPitch, WING_IDLE_Y_LEFT, leftSwingMod);
-            } else {
-                // Flying wing animation - flapping
-                float wingCycle = MathHelper.sin(entityIn.age * this.wingRotation);
-                float basePitch = 0.15F;
-
-                // Wing extension calculations
-                float rightWingExtension = 0.6F - wingCycle * 0.5F;
-                float leftWingExtension = -0.6F + wingCycle * 0.5F;
-                float randomVariation = MathHelper.sin(this.rainShakeTimer * 1.6F) * 0.05F;
-
-                setRotateAngle(this.wing_right, basePitch, WING_IDLE_Y_RIGHT, rightWingExtension - randomVariation);
-                setRotateAngle(this.wing_left, basePitch, WING_IDLE_Y_LEFT, leftWingExtension + randomVariation);
-
-                // Different leg positions for flying - constant value instead of recalculation
-                this.leg_left.pitch = DEFAULT_LEG_PITCH + 0.6F;
-                this.leg_right.pitch = DEFAULT_LEG_PITCH + 0.6F;
-            }
-        } else if (isRainedOn) {
-            // Rain shake animation - light wing movements
-            float rainShakeCycle = MathHelper.sin(this.rainShakeTimer * 0.8F);
-            float rightWingExtension = 0.4F - rainShakeCycle * 0.15F;
-            float leftWingExtension = -0.4F + rainShakeCycle * 0.15F;
-            float randomVariation = MathHelper.sin(this.rainShakeTimer * 1.6F) * 0.05F;
-
-            setRotateAngle(this.wing_right, 0.1F, WING_IDLE_Y_RIGHT, rightWingExtension - randomVariation);
-            setRotateAngle(this.wing_left, 0.1F, WING_IDLE_Y_LEFT, leftWingExtension + randomVariation);
-        } else {
-            // Idle animation - gentle wing movements when grounded
-            float idleWingMovement = MathHelper.sin(entityIn.age * 0.05F) * 0.05F;
-            float rightWingIdle = -0.25F - idleWingMovement * 0.5F;
-            float leftWingIdle = 0.25F + idleWingMovement * 0.5F;
-
-            setRotateAngle(this.wing_right, 0.1F, WING_IDLE_Y_RIGHT, rightWingIdle);
-            setRotateAngle(this.wing_left, 0.1F, WING_IDLE_Y_LEFT, leftWingIdle);
-        }
-    }
-
+    @Override
     public void setAngles(@NotNull Chocobo entityIn, float limbSwing, float limbSwingAmount, float ageInTicks, float netHeadYaw, float headPitch) {
-        // Head rotation - convert angles once
-        float headYawRad = netHeadYaw * DEG_TO_RAD;
-        float headPitchRad = headPitch * DEG_TO_RAD;
-
-        head.pitch = headPitchRad;
-        head.yaw = headYawRad;
-
-        // Neck follows head slightly - optimize calculation
-        neck.pitch = (-0.8F * headYawRad) / 8;
-        neck.yaw = headYawRad / 9;
-
-        // Adjust neck position based on movement
-        Vec3d velocity = entityIn.getVelocity();
-        float velocityMagnitude = (float)(Math.abs(velocity.x) + Math.abs(velocity.z));
-
-        if (velocityMagnitude > 0.1F) {
-            // When moving, neck is more forward
-            neck.pitch = entityIn.hasPassengers() ? -0.2F : -0.3F;
-        } else {
-            // When idle, neck is more upright
-            neck.pitch = 0.1F;
-        }
-
-        // Additional wing flutter for idle animation when on ground
-        if (entityIn.isOnGround() && velocityMagnitude < 0.05F) {
-            float idleWingFlutter = MathHelper.sin(ageInTicks * 0.05F) * 0.05F;
-            setRotateAngle(this.wing_right, idleWingFlutter, WING_IDLE_Y_RIGHT, 0F);
-            setRotateAngle(this.wing_left, idleWingFlutter, WING_IDLE_Y_LEFT, 0F);
-        }
-    }
-
-    private void setLeftLegXRotation(float deltaX) {
-        this.leg_left.pitch = DEFAULT_LEG_PITCH + deltaX;
-    }
-
-    private void setRightLegXRotation(float deltaX) {
-        this.leg_right.pitch = DEFAULT_LEG_PITCH + deltaX;
+        // Delegate to animation handler
+        animationHandler.animate(this, entityIn, limbSwing, limbSwingAmount, ageInTicks, netHeadYaw, headPitch, currentPose);
     }
 }

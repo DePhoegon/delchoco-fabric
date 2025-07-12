@@ -1,7 +1,8 @@
 package com.dephoegon.delchoco.client.models.entities;
 
 import com.dephoegon.delchoco.common.entities.ChocoboArmorStand;
-import net.minecraft.client.model.*;
+import net.minecraft.client.model.ModelPart;
+import net.minecraft.client.model.TexturedModelData;
 import net.minecraft.client.render.VertexConsumer;
 import net.minecraft.client.render.entity.model.EntityModel;
 import net.minecraft.client.util.math.MatrixStack;
@@ -49,10 +50,6 @@ public class ChocoboArmorStandModel extends EntityModel<ChocoboArmorStand> {
     private void createDefaultAdultModelPose() {
         setRotateAngle(adultModel.leg_left, 0.2f, 0f, 0f);
         setRotateAngle(adultModel.leg_right, 0.2f, 0f, 0f);
-
-        setRotateAngle(adultModel.wing_left, 0.1f, 0.0174533f, 0.25f);
-        setRotateAngle(adultModel.wing_right, 0.1f, -0.0174533f, -0.25f);
-
         setRotateAngle(adultModel.neck, 0.15f, 0f, 0f);
     }
 
@@ -63,9 +60,6 @@ public class ChocoboArmorStandModel extends EntityModel<ChocoboArmorStand> {
     private void createDefaultChicoboModelPose() {
         setRotateAngle(chicoboModel.leg_left, 0f, -0.1745f, 0f);
         setRotateAngle(chicoboModel.leg_right, 0f, 0.1745f, 0f);
-
-        setRotateAngle(chicoboModel.left_wing, 0.05f, 0.05f, 0.15f);
-        setRotateAngle(chicoboModel.right_wing, 0.05f, -0.05f, -0.15f);
 
         setRotateAngle(chicoboModel.head, -0.1f, 0f, 0f);
     }
@@ -107,15 +101,6 @@ public class ChocoboArmorStandModel extends EntityModel<ChocoboArmorStand> {
      */
     public ModelPart getAdultNeck() { return adultModel.neck; }
 
-    /**
-     * @return The adult model left wing part
-     */
-    public ModelPart getAdultLeftWing() { return adultModel.wing_left; }
-
-    /**
-     * @return The adult model right wing part
-     */
-    public ModelPart getAdultRightWing() { return adultModel.wing_right; }
 
     /**
      * @return The adult model left leg part
@@ -153,16 +138,6 @@ public class ChocoboArmorStandModel extends EntityModel<ChocoboArmorStand> {
     public ModelPart getChicoboHead() { return chicoboModel.head; }
 
     /**
-     * @return The chicobo model left wing part
-     */
-    public ModelPart getChicoboLeftWing() { return chicoboModel.left_wing; }
-
-    /**
-     * @return The chicobo model right wing part
-     */
-    public ModelPart getChicoboRightWing() { return chicoboModel.right_wing; }
-
-    /**
      * @return The chicobo model left leg part
      */
     public ModelPart getChicoboLeftLeg() { return chicoboModel.leg_left; }
@@ -176,6 +151,20 @@ public class ChocoboArmorStandModel extends EntityModel<ChocoboArmorStand> {
      * @return true if the model is currently in baby (chicobo) mode
      */
     public boolean isInBabyMode() { return isCurrentlyBaby; }
+
+    /**
+     * @return The underlying adult chocobo model
+     */
+    public AdultChocoboModel<?> getAdultModel() {
+        return this.adultModel;
+    }
+
+    /**
+     * @return The underlying baby (chicobo) model
+     */
+    public ChicoboModel<?> getChicoboModel() {
+        return this.chicoboModel;
+    }
 
     // ==================== ADULT MODEL POSING METHODS ====================
 
@@ -199,28 +188,6 @@ public class ChocoboArmorStandModel extends EntityModel<ChocoboArmorStand> {
      */
     public void setAdultNeckRotation(float pitch, float yaw, float roll) {
         if (!isCurrentlyBaby) { setRotateAngle(adultModel.neck, pitch, yaw, roll); }
-    }
-
-    /**
-     * Sets the rotation of the adult chocobo's left wing
-     *
-     * @param pitch X-axis rotation (up/down)
-     * @param yaw Y-axis rotation (forward/backward)
-     * @param roll Z-axis rotation (fold/unfold)
-     */
-    public void setAdultLeftWingRotation(float pitch, float yaw, float roll) {
-        if (!isCurrentlyBaby) { setRotateAngle(adultModel.wing_left, pitch, yaw, roll); }
-    }
-
-    /**
-     * Sets the rotation of the adult chocobo's right wing
-     *
-     * @param pitch X-axis rotation (up/down)
-     * @param yaw Y-axis rotation (forward/backward)
-     * @param roll Z-axis rotation (fold/unfold)
-     */
-    public void setAdultRightWingRotation(float pitch, float yaw, float roll) {
-        if (!isCurrentlyBaby) { setRotateAngle(adultModel.wing_right, pitch, yaw, roll); }
     }
 
     /**
@@ -299,28 +266,6 @@ public class ChocoboArmorStandModel extends EntityModel<ChocoboArmorStand> {
     }
 
     /**
-     * Sets the rotation of the chicobo's left wing
-     *
-     * @param pitch X-axis rotation (up/down)
-     * @param yaw Y-axis rotation (forward/backward)
-     * @param roll Z-axis rotation (fold/unfold)
-     */
-    public void setChicoboLeftWingRotation(float pitch, float yaw, float roll) {
-        if (isCurrentlyBaby) { setRotateAngle(chicoboModel.left_wing, pitch, yaw, roll); }
-    }
-
-    /**
-     * Sets the rotation of the chicobo's right wing
-     *
-     * @param pitch X-axis rotation (up/down)
-     * @param yaw Y-axis rotation (forward/backward)
-     * @param roll Z-axis rotation (fold/unfold)
-     */
-    public void setChicoboRightWingRotation(float pitch, float yaw, float roll) {
-        if (isCurrentlyBaby) { setRotateAngle(chicoboModel.right_wing, pitch, yaw, roll); }
-    }
-
-    /**
      * Sets the rotation of the chicobo's left leg
      *
      * @param pitch X-axis rotation (forward/backward)
@@ -358,27 +303,6 @@ public class ChocoboArmorStandModel extends EntityModel<ChocoboArmorStand> {
     public void setHeadRotation(float pitch, float yaw, float roll) {
         if (isCurrentlyBaby) { setChicoboHeadRotation(pitch, yaw, roll); }
         else { setAdultHeadRotation(pitch, yaw, roll); }
-    }
-
-    /**
-     * Sets the rotation of the wings, adapting to whether it's an adult or baby model
-     *
-     * @param leftPitch Left wing X-axis rotation
-     * @param leftYaw Left wing Y-axis rotation
-     * @param leftRoll Left wing Z-axis rotation
-     * @param rightPitch Right wing X-axis rotation
-     * @param rightYaw Right wing Y-axis rotation
-     * @param rightRoll Right wing Z-axis rotation
-     */
-    public void setWingsRotation(float leftPitch, float leftYaw, float leftRoll,
-                                float rightPitch, float rightYaw, float rightRoll) {
-        if (isCurrentlyBaby) {
-            setChicoboLeftWingRotation(leftPitch, leftYaw, leftRoll);
-            setChicoboRightWingRotation(rightPitch, rightYaw, rightRoll);
-        } else {
-            setAdultLeftWingRotation(leftPitch, leftYaw, leftRoll);
-            setAdultRightWingRotation(rightPitch, rightYaw, rightRoll);
-        }
     }
 
     /**

@@ -22,9 +22,7 @@ public class ChocoboArmorStandInventory extends SimpleInventory {
 
     private void onInventoryChanged() {
         // Mark the armor stand as dirty when inventory changes
-        if (armorStand != null && !armorStand.getWorld().isClient()) {
-            armorStand.markDirty();
-        }
+        if (armorStand != null && !armorStand.getWorld().isClient()) { armorStand.markDirty(); }
     }
 
     @Override

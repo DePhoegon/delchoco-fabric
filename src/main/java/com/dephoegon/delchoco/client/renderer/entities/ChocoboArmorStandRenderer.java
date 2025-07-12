@@ -76,11 +76,19 @@ public class ChocoboArmorStandRenderer extends ChocoboLikeRenderer<ChocoboArmorS
             matrixStack.scale(factor, factor, factor);
         }
 
-        // Apply the static pose rotation from the pose class
-        armorStand.getChocoboModelPose().applyStaticPoseRotation(armorStand);
-
-        // Apply the pose from the entity to the model
-        armorStand.applyPoseToModel(this.model);
+        /*  comented out for now
+        // Initialize the model with the appropriate pose string from the armor stand
+        if (this.model instanceof ChocoboArmorStandModel armorStandModel) {
+            // Get the model instance and access the underlying adult model
+            if (armorStand.isAdult()) {
+                // Set the pose string to control animations
+                armorStandModel.getAdultModel().setPose(armorStand.getPoseString());
+            } else {
+                // Baby models will use a default pose for now
+                armorStandModel.getAdultModel().setPose("default_baby");
+            }
+        }
+        */
 
         // Let the parent handle the rest of the rendering
         super.render(armorStand, entityYaw, partialTicks, matrixStack, bufferSource, packedLight);

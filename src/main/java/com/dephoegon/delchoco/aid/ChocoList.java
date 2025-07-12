@@ -4,7 +4,6 @@ import com.dephoegon.delchoco.aid.world.serverVariableAccess;
 import com.dephoegon.delchoco.client.clientHandler;
 import com.dephoegon.delchoco.client.keybind.KeyBindManager;
 import com.dephoegon.delchoco.client.renderer.armor.ChocoDisguiseRenderer;
-import com.dephoegon.delchoco.client.renderer.entities.ChocoboArmorStandRenderer;
 import com.dephoegon.delchoco.client.renderer.entities.ChocoboRenderer;
 import com.dephoegon.delchoco.common.commands.chocoboTeams;
 import com.dephoegon.delchoco.common.handler.LootTableEventHandler;
@@ -35,7 +34,7 @@ public class ChocoList {
         EntityRendererRegistry.register(ModEntities.RED_CHOCOBO_ENTITY, ChocoboRenderer::new);
         EntityRendererRegistry.register(ModEntities.PURPLE_CHOCOBO_ENTITY, ChocoboRenderer::new);
         EntityRendererRegistry.register(ModEntities.FLAME_CHOCOBO_ENTITY, ChocoboRenderer::new);
-        EntityRendererRegistry.register(ModEntities.CHOCOBO_ARMOR_STAND_ENTITY, ChocoboArmorStandRenderer::new);
+        // EntityRendererRegistry.register(ModEntities.CHOCOBO_ARMOR_STAND_ENTITY, ChocoboArmorStandRenderer::new);
 
         clientHandler.ChocoboRendering();
         registerChocoDisguiseArmorRenderers();

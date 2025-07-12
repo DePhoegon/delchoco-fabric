@@ -2,7 +2,6 @@ package com.dephoegon.delchoco.client.renderer.layers;
 
 import com.dephoegon.delchoco.DelChoco;
 import com.dephoegon.delchoco.common.entities.Chocobo;
-import com.dephoegon.delchoco.common.entities.properties.IChocobo;
 import com.google.common.collect.Maps;
 import net.minecraft.client.render.RenderLayer;
 import net.minecraft.client.render.VertexConsumer;
@@ -12,16 +11,13 @@ import net.minecraft.client.render.entity.feature.FeatureRenderer;
 import net.minecraft.client.render.entity.feature.FeatureRendererContext;
 import net.minecraft.client.render.entity.model.EntityModel;
 import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.entity.Entity;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.Util;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Map;
 
-import static net.minecraft.client.render.OverlayTexture.*;
-
-public class LayerCollar<T extends Entity & IChocobo, M extends EntityModel<T>> extends FeatureRenderer<T, M> {
+public class LayerCollar extends FeatureRenderer<Chocobo, EntityModel<Chocobo>> {
     private final float hide;
     private final float show;
     private static final Map<Integer, Identifier> FEMALE_CHOCOBOS = Util.make(Maps.newHashMap(), (map) ->{
@@ -79,27 +75,20 @@ public class LayerCollar<T extends Entity & IChocobo, M extends EntityModel<T>> 
         map.put(16, new Identifier(DelChoco.DELCHOCO_ID, "textures/entities/chicobos/collars/red_collar.png"));
     });
 
-    public LayerCollar(FeatureRendererContext<T, M> rendererIn, float visibleAlpha, float invisibleAlpha) {
+    public LayerCollar(FeatureRendererContext<Chocobo, EntityModel<Chocobo>> rendererIn, float visibleAlpha, float invisibleAlpha) {
         super(rendererIn);
         this.hide = invisibleAlpha;
         this.show = visibleAlpha;
     }
-
-    @Override
-    public void render(@NotNull MatrixStack matrixStackIn, @NotNull VertexConsumerProvider bufferIn, int packedLightIn, @NotNull T entity, float limbSwing, float limbSwingAmount, float partialTicks, float ageInTicks, float netHeadYaw, float headPitch) {
-        if (entity.isTamed()) {
-            int color = entity.getCollarColor();
-            Identifier COLLAR = color != 0 ? entity.isBaby() ? CHICOBOS.get(color) : entity.isMale() ? MALE_CHOCOBOS.get(color) : FEMALE_CHOCOBOS.get(color) : null;
-            float alpha = entity.isInvisible() ? hide : show;
+    public void render(@NotNull MatrixStack matrixStackIn, @NotNull VertexConsumerProvider bufferIn, int packedLightIn, @NotNull Chocobo chocoboEntity, float limbSwing, float limbSwingAmount, float partialTicks, float ageInTicks, float netHeadYaw, float headPitch) {
+        if (chocoboEntity.isTamed()) {
+            int color = chocoboEntity.getCollarColor();
+            Identifier COLLAR = color != 0 ? chocoboEntity.isBaby() ? CHICOBOS.get(color) : chocoboEntity.isMale() ? MALE_CHOCOBOS.get(color) : FEMALE_CHOCOBOS.get(color) : null;
+            float alpha = chocoboEntity.isInvisible() ? hide : show;
             if (COLLAR != null && alpha != 0F) {
                 VertexConsumer vertexconsumer = bufferIn.getBuffer(RenderLayer.getEntityTranslucent(COLLAR, false));
-                this.getContextModel().render(matrixStackIn, vertexconsumer, packedLightIn, getOverlay(entity, 0F), 1F, 1F, 1F, alpha);
+                this.getContextModel().render(matrixStackIn, vertexconsumer, packedLightIn, LivingEntityRenderer.getOverlay(chocoboEntity, 0F), 1F, 1F, 1F, alpha);
             }
         }
-    }
-    protected int getOverlay(T entity, float whiteOverlayProgress) {
-        if (entity instanceof Chocobo choco) {
-            return LivingEntityRenderer.getOverlay(choco, whiteOverlayProgress);
-        } else { return packUv(getU(whiteOverlayProgress), getV(false)); }
     }
 }

@@ -1,10 +1,7 @@
 package com.dephoegon.delchoco.mixin;
 
 import com.dephoegon.delchoco.client.gui.ChocoInventoryScreen;
-import com.dephoegon.delchoco.client.gui.ChocoboArmorStandScreen;
 import com.dephoegon.delchoco.common.entities.Chocobo;
-import com.dephoegon.delchoco.common.entities.ChocoboArmorStand;
-import com.dephoegon.delchoco.common.inventory.ChocoboArmorStandScreenHandler;
 import com.dephoegon.delchoco.common.inventory.ChocoboScreenHandler;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.ClientPlayNetworkHandler;
@@ -35,12 +32,6 @@ public class ClientPlayNetworkHandlerMixin {
             ChocoboScreenHandler saddlebagContainer = new ChocoboScreenHandler(packet.getSyncId(), clientPlayerEntity.getInventory(), chocobo);
             clientPlayerEntity.currentScreenHandler = saddlebagContainer;
             this.client.setScreen(new ChocoInventoryScreen(saddlebagContainer, clientPlayerEntity.getInventory(), chocobo));
-        } else if (entity instanceof ChocoboArmorStand armorStand) {
-            ClientPlayerEntity clientPlayerEntity = this.client.player;
-            assert clientPlayerEntity != null;
-            ChocoboArmorStandScreenHandler screenHandler = new ChocoboArmorStandScreenHandler(packet.getSyncId(), clientPlayerEntity.getInventory(), armorStand);
-            clientPlayerEntity.currentScreenHandler = screenHandler;
-            this.client.setScreen(new ChocoboArmorStandScreen(screenHandler, clientPlayerEntity.getInventory(), armorStand.getDisplayName()));
         }
     }
 }

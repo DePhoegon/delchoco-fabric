@@ -2,7 +2,6 @@ package com.dephoegon.delchoco.common.init;
 
 import com.dephoegon.delchoco.DelChoco;
 import com.dephoegon.delchoco.common.entities.Chocobo;
-import com.dephoegon.delchoco.common.entities.ChocoboArmorStand;
 import com.dephoegon.delchoco.common.entities.spwanerColors.*;
 import net.fabricmc.fabric.api.object.builder.v1.entity.FabricDefaultAttributeRegistry;
 import net.fabricmc.fabric.api.object.builder.v1.entity.FabricEntityTypeBuilder;
@@ -25,8 +24,10 @@ public class ModEntities {
     public static final EntityType<Red> RED_CHOCOBO_ENTITY = Registry.register(Registries.ENTITY_TYPE, new Identifier(DelChoco.DELCHOCO_ID, "red_spawner_chocobo"), FabricEntityTypeBuilder.create(SpawnGroup.CREATURE, Red::new).spawnableFarFromPlayer().dimensions(EntityDimensions.fixed(1.2f, 2.8f)).trackedUpdateRate(64).trackRangeChunks(5).build());
     public static final EntityType<Purple> PURPLE_CHOCOBO_ENTITY = Registry.register(Registries.ENTITY_TYPE, new Identifier(DelChoco.DELCHOCO_ID, "purple_spawner_chocobo"), FabricEntityTypeBuilder.create(SpawnGroup.CREATURE, Purple::new).spawnableFarFromPlayer().dimensions(EntityDimensions.fixed(1.2f, 2.8f)).trackedUpdateRate(64).trackRangeChunks(5).build());
     public static final EntityType<Flame> FLAME_CHOCOBO_ENTITY = Registry.register(Registries.ENTITY_TYPE, new Identifier(DelChoco.DELCHOCO_ID, "flame_spawner_chocobo"), FabricEntityTypeBuilder.create(SpawnGroup.CREATURE, Flame::new).spawnableFarFromPlayer().dimensions(EntityDimensions.fixed(1.2f, 2.8f)).trackedUpdateRate(64).trackRangeChunks(5).build());
+    /*
     // Keeping armor stand at 4 chunks since it's a stationary display entity
     public static final EntityType<ChocoboArmorStand> CHOCOBO_ARMOR_STAND_ENTITY = Registry.register(Registries.ENTITY_TYPE, new Identifier(DelChoco.DELCHOCO_ID, "chocobo_armor_stand"), FabricEntityTypeBuilder.create(SpawnGroup.MISC, ChocoboArmorStand::new).dimensions(EntityDimensions.fixed(1.2f, 2.8f)).trackRangeChunks(4).trackedUpdateRate(Integer.MAX_VALUE).fireImmune().disableSummon().build());
+    */
 
     public static void registerAttributes() {
         DelChoco.LOGGER.info("Registering Chocobo Attributes");

@@ -4,7 +4,6 @@ import com.dephoegon.delchoco.DelChoco;
 import com.dephoegon.delchoco.client.models.armor.ChocoDisguiseModel;
 import com.dephoegon.delchoco.client.models.entities.AdultChocoboModel;
 import com.dephoegon.delchoco.client.models.entities.ChicoboModel;
-import com.dephoegon.delchoco.client.models.entities.ChocoboArmorStandModel;
 import com.dephoegon.delchoco.common.init.ModItems;
 import net.fabricmc.fabric.api.blockrenderlayer.v1.BlockRenderLayerMap;
 import net.fabricmc.fabric.api.client.rendering.v1.EntityModelLayerRegistry;
@@ -16,8 +15,6 @@ public class clientHandler {
     public static final EntityModelLayer CHOCOBO_LAYER = new EntityModelLayer(new Identifier(DelChoco.DELCHOCO_ID, "main"), "chocobo");
     public static final EntityModelLayer CHICOBO_LAYER = new EntityModelLayer(new Identifier(DelChoco.DELCHOCO_ID, "main"), "chicobo");
     public static final EntityModelLayer CHOCO_DISGUISE_LAYER = new EntityModelLayer(new Identifier(DelChoco.DELCHOCO_ID, "main"), "choco_disguise");
-    public static final EntityModelLayer CHOCOBO_ARMOR_STAND_LAYER = new EntityModelLayer(new Identifier(DelChoco.DELCHOCO_ID, "main"), "chocobo_armor_stand");
-    public static final EntityModelLayer CHICOBO_ARMOR_STAND_LAYER = new EntityModelLayer(new Identifier(DelChoco.DELCHOCO_ID, "main"), "chicobo_armor_stand");
 
     public static void ChocoboRendering() {
         BlockRenderLayerMap.INSTANCE.putBlock(ModItems.GYSAHL_GREEN, RenderLayer.getCutoutMipped());
@@ -26,8 +23,6 @@ public class clientHandler {
     public static void registerLayerDefinitions() {
         EntityModelLayerRegistry.registerModelLayer(CHOCOBO_LAYER, AdultChocoboModel::createBodyLayer);
         EntityModelLayerRegistry.registerModelLayer(CHICOBO_LAYER, ChicoboModel::createBodyLayer);
-        EntityModelLayerRegistry.registerModelLayer(CHOCOBO_ARMOR_STAND_LAYER, ChocoboArmorStandModel::createAdultBodyLayer);
-        EntityModelLayerRegistry.registerModelLayer(CHICOBO_ARMOR_STAND_LAYER, ChocoboArmorStandModel::createChicoboBodyLayer);
         EntityModelLayerRegistry.registerModelLayer(CHOCO_DISGUISE_LAYER, ChocoDisguiseModel::getTexturedModelData);
     }
 }

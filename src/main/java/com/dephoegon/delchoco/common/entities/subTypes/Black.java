@@ -1,4 +1,4 @@
-package com.dephoegon.delchoco.common.entities.spwanerColors;
+package com.dephoegon.delchoco.common.entities.subTypes;
 
 import com.dephoegon.delchoco.common.entities.Chocobo;
 import com.dephoegon.delchoco.common.entities.properties.ChocoboColor;

@@ -343,7 +343,7 @@ public class Chocobo extends AbstractChocobo {
         }
 
         boolean result = super.damage(source, amount);
-        if (result && attacker instanceof PlayerEntity player) {
+        if (result && attacker instanceof PlayerEntity) {
             if (RandomHelper.random.nextInt(100) + 1 > 35) { this.dropItem(ModItems.CHOCOBO_FEATHER); }
         }
         return result;

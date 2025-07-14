@@ -37,16 +37,17 @@ public class ModItems extends BaseReg {
     public static final Item SPIKE_FRUIT = registerItem("spike_fruit", new Item(new FabricItemSettings().maxCount(64)));
 
     // Spawn Eggs
-    public static final Item YELLOW_CHOCOBO_SPAWN_EGG = registerItem("yellow_chocobo_spawn_egg", new ChocoboSpawnEggItem(new FabricItemSettings().maxCount(64), ChocoboColor.YELLOW));
-    public static final Item GREEN_CHOCOBO_SPAWN_EGG = registerItem("green_chocobo_spawn_egg", new ChocoboSpawnEggItem(new FabricItemSettings().maxCount(64), ChocoboColor.GREEN));
-    public static final Item BLUE_CHOCOBO_SPAWN_EGG = registerItem("blue_chocobo_spawn_egg", new ChocoboSpawnEggItem(new FabricItemSettings().maxCount(64), ChocoboColor.BLUE));
-    public static final Item WHITE_CHOCOBO_SPAWN_EGG = registerItem("white_chocobo_spawn_egg", new ChocoboSpawnEggItem(new FabricItemSettings().maxCount(64), ChocoboColor.WHITE));
-    public static final Item BLACK_CHOCOBO_SPAWN_EGG = registerItem("black_chocobo_spawn_egg", new ChocoboSpawnEggItem(new FabricItemSettings().maxCount(64), ChocoboColor.BLACK));
-    public static final Item GOLD_CHOCOBO_SPAWN_EGG = registerItem("gold_chocobo_spawn_egg", new ChocoboSpawnEggItem(new FabricItemSettings().maxCount(64).fireproof(), ChocoboColor.GOLD));
-    public static final Item PINK_CHOCOBO_SPAWN_EGG = registerItem("pink_chocobo_spawn_egg", new ChocoboSpawnEggItem(new FabricItemSettings().maxCount(64), ChocoboColor.PINK));
-    public static final Item RED_CHOCOBO_SPAWN_EGG = registerItem("red_chocobo_spawn_egg", new ChocoboSpawnEggItem(new FabricItemSettings().maxCount(64), ChocoboColor.RED));
-    public static final Item PURPLE_CHOCOBO_SPAWN_EGG = registerItem("purple_chocobo_spawn_egg", new ChocoboSpawnEggItem(new FabricItemSettings().maxCount(64), ChocoboColor.PURPLE));
-    public static final Item FLAME_CHOCOBO_SPAWN_EGG = registerItem("flame_chocobo_spawn_egg", new ChocoboSpawnEggItem(new FabricItemSettings().maxCount(64).fireproof(), ChocoboColor.FLAME));
+    public static final Item YELLOW_CHOCOBO_SPAWN_EGG = registerItem("yellow_chocobo_spawn_egg", new ChocoboSpawnEggItem(new FabricItemSettings().maxCount(64), ChocoboColor.YELLOW, false));
+    public static final Item GREEN_CHOCOBO_SPAWN_EGG = registerItem("green_chocobo_spawn_egg", new ChocoboSpawnEggItem(new FabricItemSettings().maxCount(64), ChocoboColor.GREEN, false));
+    public static final Item BLUE_CHOCOBO_SPAWN_EGG = registerItem("blue_chocobo_spawn_egg", new ChocoboSpawnEggItem(new FabricItemSettings().maxCount(64), ChocoboColor.BLUE, false));
+    public static final Item WHITE_CHOCOBO_SPAWN_EGG = registerItem("white_chocobo_spawn_egg", new ChocoboSpawnEggItem(new FabricItemSettings().maxCount(64), ChocoboColor.WHITE, false));
+    public static final Item BLACK_CHOCOBO_SPAWN_EGG = registerItem("black_chocobo_spawn_egg", new ChocoboSpawnEggItem(new FabricItemSettings().maxCount(64), ChocoboColor.BLACK, false));
+    public static final Item GOLD_CHOCOBO_SPAWN_EGG = registerItem("gold_chocobo_spawn_egg", new ChocoboSpawnEggItem(new FabricItemSettings().maxCount(64).fireproof(), ChocoboColor.GOLD, false));
+    public static final Item PINK_CHOCOBO_SPAWN_EGG = registerItem("pink_chocobo_spawn_egg", new ChocoboSpawnEggItem(new FabricItemSettings().maxCount(64), ChocoboColor.PINK, false));
+    public static final Item RED_CHOCOBO_SPAWN_EGG = registerItem("red_chocobo_spawn_egg", new ChocoboSpawnEggItem(new FabricItemSettings().maxCount(64), ChocoboColor.RED, false));
+    public static final Item PURPLE_CHOCOBO_SPAWN_EGG = registerItem("purple_chocobo_spawn_egg", new ChocoboSpawnEggItem(new FabricItemSettings().maxCount(64), ChocoboColor.PURPLE, false));
+    public static final Item FLAME_CHOCOBO_SPAWN_EGG = registerItem("flame_chocobo_spawn_egg", new ChocoboSpawnEggItem(new FabricItemSettings().maxCount(64).fireproof(), ChocoboColor.FLAME, false));
+    public static final Item CHOCOBO_ARMOR_STAND_SPAWN_EGG = registerItem("chocobo_armor_stand_spawn_egg", new ChocoboSpawnEggItem(new FabricItemSettings().maxCount(64), ChocoboColor.ARMOR, true));
 
     // Chocobo MISCELLANEOUS
     public static final Item CHOCOBO_FEATHER = registerItem("chocobo_feather", new Item(new FabricItemSettings().maxCount(64)));

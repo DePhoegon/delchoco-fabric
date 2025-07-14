@@ -24,6 +24,7 @@ import static com.dephoegon.delchoco.aid.chocoKB.showChocobo;
 
 public class ChocoboRenderer extends MobEntityRenderer<Chocobo, EntityModel<Chocobo>> {
     private static final Map<ChocoboColor, Identifier> CHOCOBO_PER_COLOR = Util.make(Maps.newHashMap(), (map) -> {
+        map.put(null, new Identifier(DelChoco.DELCHOCO_ID, "textures/entities/chocobos/base/leather.png"));
         map.put(ChocoboColor.YELLOW, new Identifier(DelChoco.DELCHOCO_ID, "textures/entities/chocobos/base/yellow.png"));
         map.put(ChocoboColor.GREEN, new Identifier(DelChoco.DELCHOCO_ID, "textures/entities/chocobos/base/green.png"));
         map.put(ChocoboColor.BLUE, new Identifier(DelChoco.DELCHOCO_ID, "textures/entities/chocobos/base/blue.png"));
@@ -36,6 +37,7 @@ public class ChocoboRenderer extends MobEntityRenderer<Chocobo, EntityModel<Choc
         map.put(ChocoboColor.FLAME, new Identifier(DelChoco.DELCHOCO_ID, "textures/entities/chocobos/flame/flame.png"));
     });
     private static final Map<ChocoboColor, Identifier> CHICOBO_PER_COLOR = Util.make(Maps.newHashMap(), (map) -> {
+        map.put(null, new Identifier(DelChoco.DELCHOCO_ID, "textures/entities/chicobos/base/leather.png"));
         map.put(ChocoboColor.YELLOW, new Identifier(DelChoco.DELCHOCO_ID, "textures/entities/chicobos/base/yellow.png"));
         map.put(ChocoboColor.GREEN, new Identifier(DelChoco.DELCHOCO_ID, "textures/entities/chicobos/base/green.png"));
         map.put(ChocoboColor.BLUE, new Identifier(DelChoco.DELCHOCO_ID, "textures/entities/chicobos/base/blue.png"));

@@ -12,6 +12,7 @@ import static com.dephoegon.delchoco.common.init.ModEntities.*;
 
 @SuppressWarnings("SameParameterValue")
 public enum ChocoboColor {
+    ARMOR("armor_stand",0), // Used for armor stand chocobos, not a real color
     YELLOW("yellow",1),
     GREEN("green",2),
     BLUE("blue",3),
@@ -44,6 +45,7 @@ public enum ChocoboColor {
     public EntityType<?> getEntityTypeByColor() {
         ChocoboColor chocoboColor = this;
         return switch (chocoboColor) {
+            case ARMOR -> CHOCOBO_ARMOR_STAND_ENTITY;
             case RED -> RED_CHOCOBO_ENTITY;
             case YELLOW -> YELLOW_CHOCOBO_ENTITY;
             case BLUE -> BLUE_CHOCOBO_ENTITY;

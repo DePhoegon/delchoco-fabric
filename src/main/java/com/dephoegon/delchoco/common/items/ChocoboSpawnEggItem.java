@@ -29,9 +29,11 @@ import static java.lang.Math.random;
 
 public class ChocoboSpawnEggItem extends Item {
     private final ChocoboColor color;
-    public ChocoboSpawnEggItem(Settings settings, ChocoboColor color) {
+    private final boolean noAI;
+    public ChocoboSpawnEggItem(Settings settings, ChocoboColor color, boolean noAI) {
         super(settings);
         this.color = color;
+        this.noAI = noAI;
     }
     private Text name(@NotNull ItemStack egg) { return egg.getName(); }
     public ActionResult useOnBlock(@NotNull ItemUsageContext context) {
@@ -41,7 +43,7 @@ public class ChocoboSpawnEggItem extends Item {
         final BlockPos pos = context.getBlockPos();
         final PlayerEntity player = context.getPlayer();
         BlockState blockState = worldIn.getBlockState(pos);
-        if (blockState.isOf(Blocks.SPAWNER) && (blockEntity = worldIn.getBlockEntity(pos)) instanceof MobSpawnerBlockEntity) {
+        if (blockState.isOf(Blocks.SPAWNER) && (blockEntity = worldIn.getBlockEntity(pos)) instanceof MobSpawnerBlockEntity && !this.noAI) {
             MobSpawnerBlockEntity mobSpawnerBlockEntity = (MobSpawnerBlockEntity)blockEntity;
             mobSpawnerBlockEntity.setEntityType(this.color.getEntityTypeByColor(), worldIn.getRandom());
             blockEntity.markDirty();
@@ -53,6 +55,7 @@ public class ChocoboSpawnEggItem extends Item {
             final Chocobo chocobo = CHOCOBO_ENTITY.create(worldIn);
             if (chocobo != null) {
                 if (player != null) { if (player.isInSneakingPose()) { chocobo.setBreedingAge(-7500); } }
+                if (this.noAI) { chocobo.setAiDisabled(true); }
 
                 chocobo.refreshPositionAndAngles(pos.getX() + .5, pos.getY() + 1.5F, pos.getZ() + .5, MathHelper.wrapDegrees(worldIn.random.nextFloat() * 360.0F), 0.0F);
                 chocobo.headYaw = chocobo.getYaw();

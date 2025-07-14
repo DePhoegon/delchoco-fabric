@@ -1,4 +1,4 @@
-package com.dephoegon.delchoco.common.entities.spwanerColors;
+package com.dephoegon.delchoco.common.entities.subTypes;
 
 import com.dephoegon.delchoco.common.entities.Chocobo;
 import com.dephoegon.delchoco.common.entities.properties.ChocoboColor;
@@ -15,7 +15,6 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import static com.dephoegon.delchoco.common.init.ModItems.GOLD_CHOCOBO_SPAWN_EGG;
-import static com.dephoegon.delchoco.common.init.ModItems.YELLOW_CHOCOBO_SPAWN_EGG;
 
 public class Green extends Chocobo {
     public Green(EntityType<? extends Chocobo> entityType, World world) {

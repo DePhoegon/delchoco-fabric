@@ -428,6 +428,7 @@ public abstract class AbstractChocobo extends TameableEntity implements Angerabl
         // Left in for unique Chocobo Checks able to be done in AbstractChocobo
         if (this.getClass().equals(Chocobo.class)) {
             @NotNull ItemStack egg = switch (this.getChocoboColor()) {
+                case ARMOR -> new ItemStack(CHOCOBO_ARMOR_STAND_SPAWN_EGG);
                 case YELLOW -> new ItemStack(YELLOW_CHOCOBO_SPAWN_EGG);
                 case WHITE -> new ItemStack(WHITE_CHOCOBO_SPAWN_EGG);
                 case GREEN -> new ItemStack(GREEN_CHOCOBO_SPAWN_EGG);

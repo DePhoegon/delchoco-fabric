@@ -1,4 +1,4 @@
-package com.dephoegon.delchoco.common.entities.spwanerColors;
+package com.dephoegon.delchoco.common.entities.subTypes;
 
 import com.dephoegon.delchoco.common.entities.Chocobo;
 import com.dephoegon.delchoco.common.entities.properties.ChocoboColor;
@@ -14,26 +14,26 @@ import net.minecraft.world.World;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import static com.dephoegon.delchoco.common.init.ModItems.FLAME_CHOCOBO_SPAWN_EGG;
+import static com.dephoegon.delchoco.common.init.ModItems.YELLOW_CHOCOBO_SPAWN_EGG;
 
-public class Flame extends Chocobo {
-    public Flame(EntityType<? extends Chocobo> entityType, World world) {
+public class Yellow extends Chocobo {
+    public Yellow(EntityType<? extends Chocobo> entityType, World world) {
         super(entityType, world);
     }
     public EntityData initialize(ServerWorldAccess worldIn, LocalDifficulty difficultyIn, SpawnReason reason, @Nullable EntityData spawnDataIn, @Nullable NbtCompound dataTag) {
-        this.setChocobo(ChocoboColor.FLAME);
+        this.setChocobo(ChocoboColor.YELLOW);
         return super.initialize(worldIn, difficultyIn, SpawnReason.SPAWNER, spawnDataIn, dataTag);
     }
     public void writeCustomDataToNbt(@NotNull NbtCompound compound) {
-        this.setChocoboColor(ChocoboColor.FLAME); // Ensure the color is set before writing
+        this.setChocoboColor(ChocoboColor.YELLOW);
         super.writeCustomDataToNbt(compound);
     }
     public void readCustomDataFromNbt(@NotNull NbtCompound compound) {
         super.readCustomDataFromNbt(compound);
-        this.setChocoboColor(ChocoboColor.FLAME);
+        this.setChocoboColor(ChocoboColor.YELLOW);
     }
     public void onDeath(DamageSource source) {
-        if (onDeathCheck(1000, 85)) {  this.dropStack(new ItemStack(FLAME_CHOCOBO_SPAWN_EGG)); }
+        if (onDeathCheck(1000, 85)) {  this.dropStack(new ItemStack(YELLOW_CHOCOBO_SPAWN_EGG)); }
         super.onDeath(source);
     }
     public boolean isPersistent() { return this.isTamed() || this.isCustomNameVisible(); }

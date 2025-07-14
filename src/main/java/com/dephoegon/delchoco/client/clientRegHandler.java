@@ -11,7 +11,7 @@ import net.minecraft.client.render.RenderLayer;
 import net.minecraft.client.render.entity.model.EntityModelLayer;
 import net.minecraft.util.Identifier;
 
-public class clientHandler {
+public class clientRegHandler {
     public static final EntityModelLayer CHOCOBO_LAYER = new EntityModelLayer(new Identifier(DelChoco.DELCHOCO_ID, "main"), "chocobo");
     public static final EntityModelLayer CHICOBO_LAYER = new EntityModelLayer(new Identifier(DelChoco.DELCHOCO_ID, "main"), "chicobo");
     public static final EntityModelLayer CHOCO_DISGUISE_LAYER = new EntityModelLayer(new Identifier(DelChoco.DELCHOCO_ID, "main"), "choco_disguise");

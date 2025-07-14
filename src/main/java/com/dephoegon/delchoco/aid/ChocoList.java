@@ -1,7 +1,7 @@
 package com.dephoegon.delchoco.aid;
 
 import com.dephoegon.delchoco.aid.world.serverVariableAccess;
-import com.dephoegon.delchoco.client.clientHandler;
+import com.dephoegon.delchoco.client.clientRegHandler;
 import com.dephoegon.delchoco.client.keybind.KeyBindManager;
 import com.dephoegon.delchoco.client.renderer.armor.ChocoDisguiseRenderer;
 import com.dephoegon.delchoco.client.renderer.entities.ChocoboRenderer;
@@ -36,7 +36,7 @@ public class ChocoList {
         EntityRendererRegistry.register(ModEntities.FLAME_CHOCOBO_ENTITY, ChocoboRenderer::new);
         // EntityRendererRegistry.register(ModEntities.CHOCOBO_ARMOR_STAND_ENTITY, ChocoboArmorStandRenderer::new);
 
-        clientHandler.ChocoboRendering();
+        clientRegHandler.ChocoboRendering();
         registerChocoDisguiseArmorRenderers();
     }
     private static void registerChocoDisguiseArmorRenderers() {

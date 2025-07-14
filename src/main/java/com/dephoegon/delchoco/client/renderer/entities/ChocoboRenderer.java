@@ -2,7 +2,7 @@ package com.dephoegon.delchoco.client.renderer.entities;
 
 import com.dephoegon.delchoco.DelChoco;
 import com.dephoegon.delchoco.aid.world.ChocoboConfig;
-import com.dephoegon.delchoco.client.clientHandler;
+import com.dephoegon.delchoco.client.clientRegHandler;
 import com.dephoegon.delchoco.client.models.entities.AdultChocoboModel;
 import com.dephoegon.delchoco.client.models.entities.ChicoboModel;
 import com.dephoegon.delchoco.client.renderer.layers.*;
@@ -61,8 +61,8 @@ public class ChocoboRenderer extends MobEntityRenderer<Chocobo, EntityModel<Choc
     public static final float saddleAlpha = 1;
 
     public ChocoboRenderer(Context context) {
-        super(context, new AdultChocoboModel<>(context.getPart(clientHandler.CHOCOBO_LAYER)), 0.75f);
-        this.chicoboModel = new ChicoboModel<>(context.getPart(clientHandler.CHICOBO_LAYER));
+        super(context, new AdultChocoboModel<>(context.getPart(clientRegHandler.CHOCOBO_LAYER)), 0.75f);
+        this.chicoboModel = new ChicoboModel<>(context.getPart(clientRegHandler.CHICOBO_LAYER));
 
         this.addFeature(new LayerChocoboTrims(this, .75F, .85F));
         this.addFeature(new LayerCollar(this, collarAlpha, ChocoboConfig.configTwist(ChocoboConfig.CHOCOBO_COLLAR_ALPHA.get())));

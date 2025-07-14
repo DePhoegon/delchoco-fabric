@@ -15,11 +15,14 @@ public class ChicoboModel<T extends Chocobo> extends EntityModel<Chocobo> {
     private final ModelPart root;
 
     private final ModelPart head;
+    private final ModelPart body;
     private final ModelPart leg_left;
     private final ModelPart leg_right;
+
     public ChicoboModel(@NotNull ModelPart root) {
         this.root = root.getChild("root");
         this.head = this.root.getChild("head");
+        this.body = this.root.getChild("body_r1");
         this.leg_left = this.root.getChild("leg_left");
         this.leg_right = this.root.getChild("leg_right");
     }
@@ -114,4 +117,46 @@ public class ChicoboModel<T extends Chocobo> extends EntityModel<Chocobo> {
 
     @Override
     public void render(MatrixStack poseStack, @NotNull VertexConsumer vertexConsumer, int packedLight, int packedOverlay, float red, float green, float blue, float alpha) { root.render(poseStack, vertexConsumer, packedLight, packedOverlay, red, green, blue, alpha); }
+    public void animateModel(@NotNull Chocobo entityIn, float limbSwing, float limbSwingAmount, float partialTick) {
+        if (entityIn.isArmorStandNotAlive()) { return; }
+        super.animateModel(entityIn, limbSwing, limbSwingAmount, partialTick);
+    }
+
+    /**
+     * Sets the rotation of the chicobo's head
+     *
+     * @param pitch X-axis rotation (up/down)
+     * @param yaw Y-axis rotation (left/right)
+     * @param roll Z-axis rotation (tilt)
+     */
+    public void setChicoboHeadRotation(float pitch, float yaw, float roll) {
+        setRotateAngle(head, pitch, yaw, roll);
+    }
+
+    /**
+     * Sets the rotation of the chicobo's left leg
+     *
+     * @param pitch X-axis rotation (forward/backward)
+     * @param yaw Y-axis rotation (inward/outward)
+     */
+    public void setChicoboLeftLegRotation(float pitch, float yaw) {
+        leg_left.pitch = pitch;
+        leg_left.yaw = yaw;
+    }
+
+    /**
+     * Sets the rotation of the chicobo's right leg
+     *
+     * @param pitch X-axis rotation (forward/backward)
+     * @param yaw Y-axis rotation (inward/outward)
+     */
+    public void setChicoboRightLegRotation(float pitch, float yaw) {
+        leg_right.pitch = pitch;
+        leg_right.yaw = yaw;
+    }
+    private void setRotateAngle(@NotNull ModelPart modelRenderer, float x, float y, float z) {
+        modelRenderer.pitch = x;
+        modelRenderer.yaw = y;
+        modelRenderer.roll = z;
+    }
 }

@@ -22,12 +22,15 @@ public class AdultChocoboModel<T extends Chocobo> extends EntityModel<Chocobo> {
     private static final float WING_IDLE_Y_LEFT = 0.0174533F;
 
     private final ModelPart root;
+    private final ModelPart body;
     private final ModelPart wing_left;
     private final ModelPart wing_right;
     private final ModelPart head;
     private final ModelPart neck;
     private final ModelPart leg_left;
     private final ModelPart leg_right;
+    private final ModelPart foot_left;
+    private final ModelPart foot_right;
     private float headPitchModifier;
 
     // Internal animation variables
@@ -40,7 +43,7 @@ public class AdultChocoboModel<T extends Chocobo> extends EntityModel<Chocobo> {
 
     public AdultChocoboModel(@NotNull ModelPart root) {
         this.root = root.getChild("root");
-        ModelPart body = this.root.getChild("body");
+        this.body = this.root.getChild("body");
 
         this.neck = body.getChild("chest").getChild("neck");
         this.head = neck.getChild("head");
@@ -48,6 +51,8 @@ public class AdultChocoboModel<T extends Chocobo> extends EntityModel<Chocobo> {
         this.leg_right = body.getChild("leg_right");
         this.wing_left = body.getChild("wing_left");
         this.wing_right = body.getChild("wing_right");
+        this.foot_left = leg_left.getChild("foot_left");
+        this.foot_right = leg_right.getChild("foot_right");
     }
 
     public static @NotNull TexturedModelData createBodyLayer() {
@@ -239,6 +244,7 @@ public class AdultChocoboModel<T extends Chocobo> extends EntityModel<Chocobo> {
     }
 
     public void animateModel(@NotNull Chocobo entityIn, float limbSwing, float limbSwingAmount, float partialTick) {
+        if (entityIn.isArmorStandNotAlive()) { return; }
         super.animateModel(entityIn, limbSwing, limbSwingAmount, partialTick);
 
         // Update animation variables from entity - this remains necessary
@@ -323,7 +329,7 @@ public class AdultChocoboModel<T extends Chocobo> extends EntityModel<Chocobo> {
     // Extract wing animation logic to a separate method
     private void animateWings(Chocobo entityIn, float limbSwing, float limbSwingAmount,
                               boolean isOnGround, boolean isSwimming, boolean isRainedOn) {
-
+        if (entityIn.isArmorStandNotAlive()) { return; }
         // Calculate values used for both wings once
         float limbSwingCos = MathHelper.cos(limbSwing * LIMB_SWING_SPEED);
         float limbSwingCosPi = MathHelper.cos(limbSwing * LIMB_SWING_SPEED + PI);
@@ -411,7 +417,110 @@ public class AdultChocoboModel<T extends Chocobo> extends EntityModel<Chocobo> {
         this.leg_left.pitch = DEFAULT_LEG_PITCH + deltaX;
     }
 
+    /**
+     * Sets the rotation of the adult chocobo's left wing
+     * @param pitch X-axis rotation (up/down)
+     * @param yaw Y-axis rotation (forward/backward)
+     * @param roll Z-axis rotation (fold/unfold)
+     *
+     */
+    public void setAdultLeftWingRotation(float pitch, float yaw, float roll) {
+        setRotateAngle(this.wing_left, pitch, yaw, roll);
+    }
     private void setRightLegXRotation(float deltaX) {
         this.leg_right.pitch = DEFAULT_LEG_PITCH + deltaX;
+    }
+
+    /**
+     * Sets the rotation of the adult chocobo's head
+     *
+     * @param pitch X-axis rotation (up/down)
+     * @param yaw Y-axis rotation (left/right)
+     * @param roll Z-axis rotation (tilt)
+     */
+    public void setAdultHeadRotation(float pitch, float yaw, float roll) {
+        setRotateAngle(this.head, pitch, yaw, roll);
+    }
+
+    /**
+     * Sets the rotation of the adult chocobo's neck
+     *
+     * @param pitch X-axis rotation (forward/backward bend)
+     * @param yaw Y-axis rotation (sideways turn)
+     * @param roll Z-axis rotation (twist)
+     */
+    public void setAdultNeckRotation(float pitch, float yaw, float roll) {
+        setRotateAngle(this.neck, pitch, yaw, roll);
+    }
+
+    /**
+     * Sets the rotation of the adult chocobo's right wing
+     *
+     * @param pitch X-axis rotation (up/down)
+     * @param yaw Y-axis rotation (forward/backward)
+     * @param roll Z-axis rotation (fold/unfold)
+     */
+    public void setAdultRightWingRotation(float pitch, float yaw, float roll) {
+        setRotateAngle(this.wing_right, pitch, yaw, roll);
+    }
+
+    /**
+     * Sets the rotation of the adult chocobo's left leg
+     *
+     * @param pitch X-axis rotation (forward/backward)
+     * @param yaw Y-axis rotation (inward/outward)
+     * @param roll Z-axis rotation (twist)
+     */
+    public void setAdultLeftLegRotation(float pitch, float yaw, float roll) {
+        setRotateAngle(this.leg_left, pitch, yaw, roll);
+    }
+
+    /**
+     * Sets the rotation of the adult chocobo's right leg
+     *
+     * @param pitch X-axis rotation (forward/backward)
+     * @param yaw Y-axis rotation (inward/outward)
+     * @param roll Z-axis rotation (twist)
+     */
+    public void setAdultRightLegRotation(float pitch, float yaw, float roll) {
+        setRotateAngle(this.leg_right, pitch, yaw, roll);
+    }
+
+    /**
+     * Sets the rotation of the adult chocobo's left foot
+     *
+     * @param pitch X-axis rotation (up/down)
+     */
+    public void setAdultLeftFootRotation(float pitch) {
+        this.foot_left.pitch = pitch;
+    }
+
+    /**
+     * Sets the rotation of the adult chocobo's right foot
+     *
+     * @param pitch X-axis rotation (up/down)
+     */
+    public void setAdultRightFootRotation(float pitch) {
+        this.foot_right.pitch = pitch;
+    }
+
+    /**
+     * Sets the rotation of the adult chocobo's tail feathers
+     *
+     * @param pitch X-axis rotation (up/down)
+     * @param yaw Y-axis rotation (left/right)
+     * @param roll Z-axis rotation (fan out)
+     */
+    public void setAdultTailFeathersRotation(float pitch, float yaw, float roll) {
+        setRotateAngle(this.body.getChild("fan_top_r1"), pitch, yaw, roll);
+    }
+
+    /**
+     * Sets the rotation of the adult chocobo's head crest
+     *
+     * @param pitch X-axis rotation (forward/backward)
+     */
+    public void setAdultHeadCrestRotation(float pitch) {
+        this.head.getChild("crest_top_r1").pitch = pitch;
     }
 }

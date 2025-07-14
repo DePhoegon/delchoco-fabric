@@ -8,6 +8,7 @@ import com.dephoegon.delchoco.client.models.entities.ChicoboModel;
 import com.dephoegon.delchoco.client.renderer.layers.*;
 import com.dephoegon.delchoco.common.entities.Chocobo;
 import com.dephoegon.delchoco.common.entities.properties.ChocoboColor;
+import com.dephoegon.delchoco.common.entities.subTypes.ArmorStandChocobo;
 import com.google.common.collect.Maps;
 import net.minecraft.client.render.VertexConsumerProvider;
 import net.minecraft.client.render.entity.EntityRendererFactory.Context;
@@ -21,6 +22,8 @@ import org.jetbrains.annotations.NotNull;
 import java.util.Map;
 
 import static com.dephoegon.delchoco.aid.chocoKB.showChocobo;
+import static com.dephoegon.delchoco.common.entities.ArmorStandChocoboPose.applyToModel;
+import static com.dephoegon.delchoco.common.entities.ArmorStandChocoboPose.setPoseByType;
 
 public class ChocoboRenderer extends MobEntityRenderer<Chocobo, EntityModel<Chocobo>> {
     private static final Map<ChocoboColor, Identifier> CHOCOBO_PER_COLOR = Util.make(Maps.newHashMap(), (map) -> {
@@ -75,6 +78,11 @@ public class ChocoboRenderer extends MobEntityRenderer<Chocobo, EntityModel<Choc
             float factor = chocobo.getChocoboScale() == 0 ? 1 : Math.max(chocobo.getChocoboScaleMod(), .85F);
             if (factor < .86F) { chocobo.setChocoboScale(true, -15, true); }
             matrixStack.scale(factor, factor, factor);
+            if (chocobo.isArmorStandNotAlive()) {
+                setPoseByType(chocobo.getPoseType(), (ArmorStandChocobo) chocobo);
+                if (chocobo.isBaby()) { applyToModel((ChicoboModel<Chocobo>)this.model, ((ArmorStandChocobo) chocobo).getChocoboModelPose()); }
+                else { applyToModel((AdultChocoboModel<Chocobo>) this.model, ((ArmorStandChocobo) chocobo).getChocoboModelPose()); }
+            }
             super.render(chocobo, entityYaw, partialTicks, matrixStack, bufferSource, packedLight);
         }
     }

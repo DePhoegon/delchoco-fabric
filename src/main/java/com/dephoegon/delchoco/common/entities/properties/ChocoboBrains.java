@@ -4,6 +4,7 @@ package com.dephoegon.delchoco.common.entities.properties;
 import com.dephoegon.delchoco.DelChoco;
 import com.dephoegon.delchoco.common.entities.AbstractChocobo;
 import com.dephoegon.delchoco.common.entities.Chocobo;
+import com.dephoegon.delchoco.common.entities.subTypes.ArmorStandChocobo;
 import com.dephoegon.delchoco.common.init.ModEntities;
 import com.dephoegon.delchoco.common.items.ChocoDisguiseItem;
 import com.dephoegon.delchoco.utils.RandomHelper;

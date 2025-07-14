@@ -8,6 +8,7 @@ import com.dephoegon.delchoco.common.entities.properties.ChocoboBrainAid;
 import com.dephoegon.delchoco.common.entities.properties.ChocoboBrains;
 import com.dephoegon.delchoco.common.entities.properties.ChocoboColor;
 import com.dephoegon.delchoco.common.entities.properties.MovementType;
+import com.dephoegon.delchoco.common.entities.subTypes.ArmorStandChocobo;
 import com.dephoegon.delchoco.common.items.ChocoboArmorItems;
 import com.dephoegon.delchoco.common.items.ChocoboSaddleItem;
 import com.dephoegon.delchoco.common.items.ChocoboWeaponItems;
@@ -307,9 +308,11 @@ public abstract class AbstractChocobo extends TameableEntity implements Angerabl
 
     // hook for Chocobo types, left for override
     public boolean isSitting() { return false; }
+    public boolean handleFallDamage(float fallDistance, float damageMultiplier, DamageSource damageSource) { return false; }
     public boolean isPersistent() { return this.isTamed() || this.isCustomNameVisible(); }
     public boolean cannotDespawn() { return this.hasVehicle() || this.isPersistent(); }
     public boolean canImmediatelyDespawn(double pDistanceToClosestPlayer) { return !this.cannotDespawn(); }
+    public boolean canUsePortals() { return true; }
     public boolean isDisallowedInPeaceful() { return false; }
     // Method to get World, Used by 'default public LivingEntity getOwner()' to get Owner by UUID in the world.
     public EntityView method_48926() { return super.getWorld(); }
@@ -426,23 +429,10 @@ public abstract class AbstractChocobo extends TameableEntity implements Angerabl
     }
     public void onDeath(DamageSource source) {
         // Left in for unique Chocobo Checks able to be done in AbstractChocobo
-        if (this.getClass().equals(Chocobo.class)) {
-            @NotNull ItemStack egg = switch (this.getChocoboColor()) {
-                case ARMOR -> new ItemStack(CHOCOBO_ARMOR_STAND_SPAWN_EGG);
-                case YELLOW -> new ItemStack(YELLOW_CHOCOBO_SPAWN_EGG);
-                case WHITE -> new ItemStack(WHITE_CHOCOBO_SPAWN_EGG);
-                case GREEN -> new ItemStack(GREEN_CHOCOBO_SPAWN_EGG);
-                case FLAME -> new ItemStack(FLAME_CHOCOBO_SPAWN_EGG);
-                case BLACK -> new ItemStack(BLACK_CHOCOBO_SPAWN_EGG);
-                case GOLD -> new ItemStack(GOLD_CHOCOBO_SPAWN_EGG);
-                case BLUE -> new ItemStack(BLUE_CHOCOBO_SPAWN_EGG);
-                case RED -> new ItemStack(RED_CHOCOBO_SPAWN_EGG);
-                case PINK -> new ItemStack(PINK_CHOCOBO_SPAWN_EGG);
-                case PURPLE -> new ItemStack(PURPLE_CHOCOBO_SPAWN_EGG);
-            };
-            if (RandomHelper.random.nextInt(1000)+1 < 45) { this.dropStack(egg); }
-        }
         super.onDeath(source);
+    }
+    protected void dropEquipment(DamageSource source, int lootingMultiplier, boolean allowDrops) {
+        // Custom drop logic for Chocobo Items, Overridden to prevent dropping items that are not Chocobo related.
     }
     // applyDamageEffects is used to apply effects after the damage is applied, such as dropping items or applying potion effects.
     public void applyDamageEffects(LivingEntity attacker, Entity target) {
@@ -1288,6 +1278,9 @@ public abstract class AbstractChocobo extends TameableEntity implements Angerabl
         }
     }
     protected void maybeAlertOthers(@NotNull Chocobo alertingChocobo) {
+        if (alertingChocobo.getWorld().isClient()) { return; }
+        if (alertingChocobo.getTarget() == null) { return; } // No target, no alerting
+        if (alertingChocobo.isArmorStandNotAlive()) { return; }
         if (alertingChocobo.ticksUntilNextAlert > 0) { --alertingChocobo.ticksUntilNextAlert; }
         else {
             if (alertingChocobo.getVisibilityCache().canSee(alertingChocobo.getTarget())) { alertOthers(null, alertingChocobo); }
@@ -1334,5 +1327,12 @@ public abstract class AbstractChocobo extends TameableEntity implements Angerabl
         // Left this method empty for now, future use for tempting chocobos in more complex ways
         return true;
     }
+    public boolean isValidChocobo() { return this.isAlive(); }
+    public boolean isArmorStand() { return false; }
+    public boolean isNotArmorStand() { return true; }
+    public boolean isArmorStandNotAlive() { return false; }
+    public boolean isArmorStandAlive() { return false; }
+    public void setChocoboArmorPose(ArmorStandChocoboPose pose) { /* No Op for Base */}
+    public ArmorStandChocobo.ChocoboModelPose getPoseType() { return null; } // Null for base chocobo, used in armor stand chocobos
+    public void setPoseType(ArmorStandChocobo.ChocoboModelPose type) { /* No Op for Base */ }
 }
-

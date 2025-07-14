@@ -383,7 +383,7 @@ public class Chocobo extends AbstractChocobo {
         super.updateInWaterStateAndDoWaterCurrentPushing();
     }
     public void travel(@NotNull Vec3d travelVector) {
-        if (this.isAlive()) {
+        if (this.isValidChocobo()) {
             if (this.getPrimaryPassenger() instanceof PlayerEntity rider) {
                 this.prevY = rider.getYaw();
                 this.prevPitch = rider.getPitch();
@@ -478,6 +478,7 @@ public class Chocobo extends AbstractChocobo {
     public void tick() {
         super.tick();
         if (this.getWorld().isClient()) { return; }
+        if (this.isArmorStandNotAlive()) { return; }
         this.fruitAteTimer = this.fruitAteTimer > 0 ? this.fruitAteTimer - 1 : 0;
         LivingEntity owner = this.getOwner() != null ? this.getOwner() : null;
         if (this.rideTickDelay < 0) {
@@ -516,6 +517,7 @@ public class Chocobo extends AbstractChocobo {
     }
     protected boolean canStartRiding(@NotNull Entity entityIn) { return false; }
     public void tickMovement() {
+        if (this.isArmorStandNotAlive()) { return; }
         super.tickMovement();
         this.setStepHeight(maxStepUp);
         this.fallDistance = 0f;
@@ -541,9 +543,9 @@ public class Chocobo extends AbstractChocobo {
         }
     }
     private boolean interactInvRide(PlayerEntity player, @NotNull ItemStack stack) {
-        if (this.getEntityWorld().isClient() || !stack.isEmpty() || !this.isTamed()) { return false; }
+        if (this.getEntityWorld().isClient() || !stack.isEmpty() || !(this.isTamed() && this.isValidChocobo())) { return false; }
         if (player.isSneaking() && player instanceof ServerPlayerEntity serverPlayer) {
-            if (ChocoboConfig.OWNER_ONLY_ACCESS.get()) {
+            if (ChocoboConfig.OWNER_ONLY_ACCESS.get() || this.isArmorStandNotAlive()) {
                 if (isOwner(player)) { this.displayChocoboInventory(serverPlayer); }
                 else { player.sendMessage(Text.translatable(DelChoco.DELCHOCO_ID + ".entity_chocobo.not_owner"), true); }
             } else { this.displayChocoboInventory(serverPlayer); }
@@ -558,9 +560,10 @@ public class Chocobo extends AbstractChocobo {
         return false;
     }
     private boolean interactFeed(PlayerEntity player, ItemStack stack, Hand hand) {
+        if (this.isArmorStandNotAlive()) { return false; }
         Item pStack = stack.getItem();
         if (player.getWorld().isClient()) { return false; }
-        if (this.isBaby()) {
+        if (this.isBaby() && this.isNotArmorStand()) {
             if (pStack == GYSAHL_CAKE.asItem()) {
                 this.eat(player, Hand.MAIN_HAND, stack);
                 this.growUp(25);
@@ -617,7 +620,7 @@ public class Chocobo extends AbstractChocobo {
                 return true;
             }
         }
-        if (pStack == LOVELY_GYSAHL_GREEN) {
+        if (pStack == LOVELY_GYSAHL_GREEN && this.isNotArmorStand()) {
             if (!this.isInLove() && !this.isBaby()) {
                 this.eat(player, hand, stack);
                 this.lovePlayer(player);
@@ -703,7 +706,7 @@ public class Chocobo extends AbstractChocobo {
                     player.sendMessage(Text.translatable(DelChoco.DELCHOCO_ID + ".entity_chocobo.not_owner"), true);
                 }
             }
-            if (pStack instanceof ChocoboLeashPointer item) {
+            if (pStack instanceof ChocoboLeashPointer item && this.isValidChocobo()) {
                 BlockPos center = item.getCenterPoint();
                 BlockPos leash = item.getLeashPoint();
                 double dist = (double) Math.max(Math.min(item.getLeashDistance(), 40), 6) /2;
@@ -716,7 +719,7 @@ public class Chocobo extends AbstractChocobo {
             }
         }
         if (this.isBaby()) { return false; }
-        if (pStack == CHOCOBO_WHISTLE) {
+        if (pStack == CHOCOBO_WHISTLE && this.isValidChocobo()) {
             if (isOwner(player)) {
                 if (this.followingMrHuman == 3) {
                     this.playSound(ModSounds.WHISTLE_SOUND_FOLLOW, 1.0F, 1.0F);
@@ -744,13 +747,12 @@ public class Chocobo extends AbstractChocobo {
     public boolean interactDye(PlayerEntity player, ItemStack stack) {
         Item pStack = stack.getItem();
         if (this.getEntityWorld().isClient()) { return false; }
+        if (this.isArmorStandAlive()) { return false; } // Armor Stand Chocobos cannot be dyed while alive
         if (!this.isTamed()) { return false; }
         if (getDyeList().contains(pStack)) {
             if (!Objects.equals(this.getCollarColor(), COLLAR_COLOR.get(pStack))) {
                 this.setCollarColor(COLLAR_COLOR.get(pStack));
-                if (!player.isCreative()) {
-                    player.getMainHandStack().decrement(1);
-                }
+                if (!player.isCreative()) { player.getMainHandStack().decrement(1); }
                 return true;
             }
         }
@@ -1014,6 +1016,7 @@ public class Chocobo extends AbstractChocobo {
                 ModEntities.CHOCOBO_ENTITY,
                 new Box(-Double.MAX_VALUE/2, this.getWorld().getBottomY(), -Double.MAX_VALUE/2, Double.MAX_VALUE/2, this.getWorld().getTopY(), Double.MAX_VALUE/2),
                 entity -> true)) {
+            if (chocobo.isArmorStandNotAlive()) { continue; } // Skip armor stand chocobos
             if (chocobo.isTamed()) { tamedCount++; }
             else if (!chocobo.isBaby()) { wildCount++; }
         }

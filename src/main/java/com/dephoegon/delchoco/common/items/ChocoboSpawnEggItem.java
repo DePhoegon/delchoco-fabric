@@ -7,7 +7,6 @@ import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.block.entity.MobSpawnerBlockEntity;
-import net.minecraft.entity.Entity;
 import net.minecraft.entity.SpawnReason;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Item;
@@ -18,8 +17,6 @@ import net.minecraft.text.Text;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.math.random.Random;
-import net.minecraft.world.MobSpawnerLogic;
 import net.minecraft.world.World;
 import net.minecraft.world.event.GameEvent;
 import org.jetbrains.annotations.NotNull;
@@ -45,7 +42,7 @@ public class ChocoboSpawnEggItem extends Item {
         BlockState blockState = worldIn.getBlockState(pos);
         if (blockState.isOf(Blocks.SPAWNER) && (blockEntity = worldIn.getBlockEntity(pos)) instanceof MobSpawnerBlockEntity && !this.noAI) {
             MobSpawnerBlockEntity mobSpawnerBlockEntity = (MobSpawnerBlockEntity)blockEntity;
-            mobSpawnerBlockEntity.setEntityType(this.color.getEntityTypeByColor(), worldIn.getRandom());
+            mobSpawnerBlockEntity.setEntityType(this.color.getEntityType(), worldIn.getRandom());
             blockEntity.markDirty();
             worldIn.updateListeners(pos, blockState, blockState, Block.NOTIFY_ALL);
             worldIn.emitGameEvent(context.getPlayer(), GameEvent.BLOCK_CHANGE, pos);

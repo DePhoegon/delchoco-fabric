@@ -57,9 +57,9 @@ public class ChocoDisguiseItem extends ArmorItem {
         ItemStack stack = new ItemStack(this);
         stack.setNbt(serialize(NBTKEY_COLOR, yellow));
     }
-    public NbtCompound getNbt() {
+    public NbtCompound getOrCreateNbt() {
         ItemStack stack = new ItemStack(this);
-        return stack.getNbt();
+        return stack.getOrCreateNbt();
     }
     @Contract("_, _ -> new")
     public static @NotNull Identifier setCustomModel(String customModelData, @NotNull ChocoDisguiseItem armorItem) {
@@ -86,57 +86,62 @@ public class ChocoDisguiseItem extends ArmorItem {
         if (color != null && color.contains(NBTKEY_COLOR)) { return color.getString(NBTKEY_COLOR); }
         return yellow;
     }
-    public static boolean getRenderMain(@NotNull ItemStack stack) {
-        NbtCompound tag = stack.getNbt();
+    public static String getCustomModelColor(@NotNull ChocoDisguiseItem stack) {
+        NbtCompound color = stack.getOrCreateNbt();
+        if (color != null && color.contains(NBTKEY_COLOR)) { return color.getString(NBTKEY_COLOR); }
+        return yellow;
+    }
+    public static boolean getRenderMain(@NotNull ChocoDisguiseItem stack) {
+        NbtCompound tag = stack.getOrCreateNbt();
         if (tag != null && tag.contains(NBTKEY_RENDER_MAIN)) { return tag.getBoolean(NBTKEY_RENDER_MAIN); }
         return true;
     }
-    public static boolean getRenderLeft(@NotNull ItemStack stack) {
-        NbtCompound tag = stack.getNbt();
+    public static boolean getRenderLeft(@NotNull ChocoDisguiseItem stack) {
+        NbtCompound tag = stack.getOrCreateNbt();
         if (tag != null && tag.contains(NBTKEY_RENDER_LEFT)) { return tag.getBoolean(NBTKEY_RENDER_LEFT); }
         return true;
     }
-    public static boolean getRenderRight(@NotNull ItemStack stack) {
-        NbtCompound tag = stack.getNbt();
+    public static boolean getRenderRight(@NotNull ChocoDisguiseItem stack) {
+        NbtCompound tag = stack.getOrCreateNbt();
         if (tag != null && tag.contains(NBTKEY_RENDER_RIGHT)) { return tag.getBoolean(NBTKEY_RENDER_RIGHT); }
         return true;
     }
-    public static float getHatRotX(@NotNull ItemStack stack) {
-        NbtCompound tag = stack.getNbt();
+    public static float getHatRotX(@NotNull ChocoDisguiseItem stack) {
+        NbtCompound tag = stack.getOrCreateNbt();
         if (tag != null && tag.contains(NBTKEY_HAT_ROT_X)) { return tag.getFloat(NBTKEY_HAT_ROT_X); }
         return 0.0f;
     }
-    public static float getHatRotY(@NotNull ItemStack stack) {
-        NbtCompound tag = stack.getNbt();
+    public static float getHatRotY(@NotNull ChocoDisguiseItem stack) {
+        NbtCompound tag = stack.getOrCreateNbt();
         if (tag != null && tag.contains(NBTKEY_HAT_ROT_Y)) { return tag.getFloat(NBTKEY_HAT_ROT_Y); }
         return 0.0f;
     }
-    public static float getHatRotZ(@NotNull ItemStack stack) {
-        NbtCompound tag = stack.getNbt();
+    public static float getHatRotZ(@NotNull ChocoDisguiseItem stack) {
+        NbtCompound tag = stack.getOrCreateNbt();
         if (tag != null && tag.contains(NBTKEY_HAT_ROT_Z)) { return tag.getFloat(NBTKEY_HAT_ROT_Z); }
         return 0.0f;
     }
-    public static void setRenderMain(@NotNull ItemStack stack, boolean renderFull) {
+    public static void setRenderMain(@NotNull ChocoDisguiseItem stack, boolean renderFull) {
         NbtCompound tag = stack.getOrCreateNbt();
         tag.putBoolean(NBTKEY_RENDER_MAIN, renderFull);
     }
-    public static void setRenderLeft(@NotNull ItemStack stack, boolean renderFull) {
+    public static void setRenderLeft(@NotNull ChocoDisguiseItem stack, boolean renderFull) {
         NbtCompound tag = stack.getOrCreateNbt();
         tag.putBoolean(NBTKEY_RENDER_LEFT, renderFull);
     }
-    public static void setRenderRight(@NotNull ItemStack stack, boolean renderFull) {
+    public static void setRenderRight(@NotNull ChocoDisguiseItem stack, boolean renderFull) {
         NbtCompound tag = stack.getOrCreateNbt();
         tag.putBoolean(NBTKEY_RENDER_RIGHT, renderFull);
     }
-    public static void setHatRotX(@NotNull ItemStack stack, float rot) {
+    public static void setHatRotX(@NotNull ChocoDisguiseItem stack, float rot) {
         NbtCompound tag = stack.getOrCreateNbt();
         tag.putFloat(NBTKEY_HAT_ROT_X, rot);
     }
-    public static void setHatRotY(@NotNull ItemStack stack, float rot) {
+    public static void setHatRotY(@NotNull ChocoDisguiseItem stack, float rot) {
         NbtCompound tag = stack.getOrCreateNbt();
         tag.putFloat(NBTKEY_HAT_ROT_Y, rot);
     }
-    public static void setHatRotZ(@NotNull ItemStack stack, float rot) {
+    public static void setHatRotZ(@NotNull ChocoDisguiseItem stack, float rot) {
         NbtCompound tag = stack.getOrCreateNbt();
         tag.putFloat(NBTKEY_HAT_ROT_Z, rot);
     }

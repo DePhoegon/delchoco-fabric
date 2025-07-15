@@ -119,13 +119,11 @@ public class ArmorStandChocobo extends Chocobo {
 
     public void readCustomDataFromNbt(@NotNull NbtCompound nbt) {
         super.readCustomDataFromNbt(nbt);
-        this.setAiDisabled(nbt.getBoolean(NBT_KEY_LIVING)); // Disable AI for armor stand
+        this.setAiDisabled(!(nbt.getBoolean(NBT_KEY_LIVING))); // Disable AI for armor stand
         if (this.isArmorStandAlive()) { this.setChocobo(ChocoboColor.ARMOR); }
         this.breedingAgeOverride = nbt.getInt("Age");
 
-        if (this.isArmorStandNotAlive()) {
-            ArmorStandChocoboPose.readFromNbt(nbt, this);
-        }
+        if (this.isArmorStandNotAlive()) { ArmorStandChocoboPose.readFromNbt(nbt, this); }
 
     }
     public void writeCustomDataToNbt(@NotNull NbtCompound nbt) {

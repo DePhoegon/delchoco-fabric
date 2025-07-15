@@ -583,7 +583,7 @@ public abstract class AbstractChocobo extends TameableEntity implements Angerabl
         int gen = this.getGeneration();
         return Integer.toString(gen);
     }
-    public ChocoboColor getChocoboColor() { return ChocoboColor.values()[(this.dataTracker.get(PARAM_CHOCOBO_PROPERTIES) >> SHIFT_COLOR) & MASK_COLOR]; }
+    public ChocoboColor getChocoboColor() { return ChocoboColor.getChocoboColorFromID((this.dataTracker.get(PARAM_CHOCOBO_PROPERTIES) >> SHIFT_COLOR) & MASK_COLOR, true); }
     public int getAngerTime() { return this.remainingPersistentAngerTime; }
     public UUID getAngryAt() { return this.persistentAngerTarget; }
     public Integer getCollarColor() { return (this.dataTracker.get(PARAM_CHOCOBO_PROPERTIES) >> SHIFT_COLLAR_COLOR) & MASK_COLLAR_COLOR; }
@@ -939,7 +939,7 @@ public abstract class AbstractChocobo extends TameableEntity implements Angerabl
     public void setChocoboColor(@NotNull ChocoboColor color) {
         int properties = this.dataTracker.get(PARAM_CHOCOBO_PROPERTIES);
         properties &= ~(MASK_COLOR << SHIFT_COLOR);
-        properties |= (color.ordinal() & MASK_COLOR) << SHIFT_COLOR;
+        properties |= (color.getChocoboColorID() & MASK_COLOR) << SHIFT_COLOR;
         this.dataTracker.set(PARAM_CHOCOBO_PROPERTIES, properties);
     }
     public void setCollarColor(Integer color) {

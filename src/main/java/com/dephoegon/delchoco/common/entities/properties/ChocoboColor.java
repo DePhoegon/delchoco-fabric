@@ -12,50 +12,57 @@ import static com.dephoegon.delchoco.common.init.ModEntities.*;
 
 @SuppressWarnings("SameParameterValue")
 public enum ChocoboColor {
-    ARMOR("armor_stand",0), // Used for armor stand chocobos, not a real color
-    YELLOW("yellow",1),
-    GREEN("green",2),
-    BLUE("blue",3),
-    WHITE("white",4),
-    BLACK("black",5),
-    GOLD("gold",6),
-    PINK("pink",7),
-    RED("red",8),
-    PURPLE("purple",9),
-    FLAME("flame",10);
+    YELLOW("yellow",1, 0, CHOCOBO_ENTITY),
+    GREEN("green",2,1, GREEN_CHOCOBO_ENTITY),
+    BLUE("blue",3, 2, BLUE_CHOCOBO_ENTITY),
+    WHITE("white",4, 3, WHITE_CHOCOBO_ENTITY),
+    BLACK("black",5, 4, BLACK_CHOCOBO_ENTITY),
+    GOLD("gold",6,5, GOLD_CHOCOBO_ENTITY),
+    PINK("pink",7, 6, PINK_CHOCOBO_ENTITY),
+    RED("red",8, 7, RED_CHOCOBO_ENTITY),
+    PURPLE("purple",9, 8, PURPLE_CHOCOBO_ENTITY),
+    FLAME("flame",10, 9, FLAME_CHOCOBO_ENTITY),
+    ARMOR("armor_stand",11, 10, CHOCOBO_ARMOR_STAND_ENTITY);
 
     private final static Random rand = new Random();
     private final String colorTag;
     private final MutableText eggText;
     private final int customModelData;
-    ChocoboColor(String colorNameString, int CustomModelData) {
+    private final int chocoboColorID;
+    private final EntityType<?> chocoboEntityType;
+    ChocoboColor(String colorNameString, int CustomModelData, int chocoboColorID, EntityType<?> chocoboEntityType) {
         this.colorTag = colorNameString;
         this.customModelData = CustomModelData;
         this.eggText = Text.translatable("item." + DelChoco.DELCHOCO_ID + ".chocobo_egg.tooltip." + this.name().toLowerCase());
+        this.chocoboColorID = chocoboColorID;
+        this.chocoboEntityType = chocoboEntityType;
     }
     public int getCustomModelData() { return this.customModelData; }
-    public static ChocoboColor getRandomColor() { return values()[rand.nextInt(values().length)]; }
+    /**
+     * @return Returns a random ChocoboColor, excluding ARMOR STAND color.
+     */
+    public static ChocoboColor getRandomColor() {
+        ChocoboColor[] validColors = {YELLOW, GREEN, BLUE, WHITE, BLACK, GOLD, PINK, RED, PURPLE, FLAME};
+        return validColors[rand.nextInt(validColors.length)];
+    }
+    public int getChocoboColorID() { return this.chocoboColorID; }
     public String getColorName() { return this.colorTag; }
     public static ChocoboColor getColorFromName(String name) {
         for (ChocoboColor color : values()) { if(name.equals(color.colorTag.toLowerCase())) { return color; } }
         return YELLOW;
     }
+    /**
+     * @param isChocobo If true, checks against the Chocobo Color ID, otherwise checks against Custom Model Data.
+     * @return Returns a ChocoboColor based on the ID provided.
+     */
+    public static ChocoboColor getChocoboColorFromID(int id, boolean isChocobo) {
+        for (ChocoboColor color : values()) {
+            int switchID = isChocobo ? color.chocoboColorID : color.customModelData;
+            if(id == switchID) { return color; }
+        }
+        return YELLOW;
+    }
     public MutableText getEggText() { return eggText; }
     @Contract(pure = true)
-    public EntityType<?> getEntityTypeByColor() {
-        ChocoboColor chocoboColor = this;
-        return switch (chocoboColor) {
-            case ARMOR -> CHOCOBO_ARMOR_STAND_ENTITY;
-            case RED -> RED_CHOCOBO_ENTITY;
-            case YELLOW -> YELLOW_CHOCOBO_ENTITY;
-            case BLUE -> BLUE_CHOCOBO_ENTITY;
-            case GOLD -> GOLD_CHOCOBO_ENTITY;
-            case PINK -> PINK_CHOCOBO_ENTITY;
-            case BLACK -> BLACK_CHOCOBO_ENTITY;
-            case FLAME -> FLAME_CHOCOBO_ENTITY;
-            case GREEN -> GREEN_CHOCOBO_ENTITY;
-            case WHITE -> WHITE_CHOCOBO_ENTITY;
-            case PURPLE -> PURPLE_CHOCOBO_ENTITY;
-        };
-    }
+    public EntityType<?> getEntityType() { return this.chocoboEntityType; }
 }

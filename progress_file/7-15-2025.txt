@@ -1,0 +1,8 @@
+Disguise Render - Fixed
+Updated Stat bonuses
+Custom Regen Added
+Testing AI on ArmorCHocobo
+Disabled Chocobo Summon
+increase stats chocobo armorstand
+modified full armor set bonuses.
+updated chocobo render UI to  not use hearts  when over a number of HP  and use Numbers directly

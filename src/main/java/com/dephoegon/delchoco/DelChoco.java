@@ -3,7 +3,6 @@ package com.dephoegon.delchoco;
 import com.dephoegon.delchoco.aid.ChocoList;
 import com.dephoegon.delchoco.aid.world.ChocoboConfig;
 import com.dephoegon.delchoco.aid.world.WorldConfig;
-import com.dephoegon.delchoco.common.init.ModEntities;
 import fuzs.forgeconfigapiport.api.config.v2.ForgeConfigRegistry;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.api.EnvType;
@@ -20,7 +19,6 @@ public class DelChoco implements ModInitializer, ClientModInitializer {
 	public void onInitialize() {
 		ForgeConfigRegistry.INSTANCE.register(DELCHOCO_ID, ModConfig.Type.COMMON, ChocoboConfig.SPEC, DelChoco.DELCHOCO_ID+"-chocobo_config.toml");
 		ForgeConfigRegistry.INSTANCE.register(DELCHOCO_ID, ModConfig.Type.COMMON, WorldConfig.SPEC, DelChoco.DELCHOCO_ID+"-world_config.toml");
-		ModEntities.registerAttributes();
 		ChocoList.commonRegOrder();
 	}
 	@Environment(EnvType.CLIENT)

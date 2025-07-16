@@ -2,11 +2,13 @@ package com.dephoegon.delchoco.common.items;
 
 import com.dephoegon.delchoco.common.entities.Chocobo;
 import com.dephoegon.delchoco.common.entities.properties.ChocoboColor;
+import com.dephoegon.delchoco.common.entities.subTypes.ArmorStandChocobo;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.block.entity.MobSpawnerBlockEntity;
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.SpawnReason;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Item;
@@ -21,6 +23,9 @@ import net.minecraft.world.World;
 import net.minecraft.world.event.GameEvent;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.Objects;
+
+import static com.dephoegon.delchoco.common.init.ModEntities.CHOCOBO_ARMOR_STAND_ENTITY;
 import static com.dephoegon.delchoco.common.init.ModEntities.CHOCOBO_ENTITY;
 import static java.lang.Math.random;
 
@@ -49,9 +54,28 @@ public class ChocoboSpawnEggItem extends Item {
             context.getStack().decrement(1);
             return ActionResult.CONSUME;
         } else {
-            final Chocobo chocobo = CHOCOBO_ENTITY.create(worldIn);
+            boolean isChicobo = Objects.requireNonNull(player).isInSneakingPose();
+            Chocobo chocobo = null;
+            if (this.color == ChocoboColor.ARMOR) {
+                ArmorStandChocobo armor = CHOCOBO_ARMOR_STAND_ENTITY.create(worldIn);
+                if (armor != null) {
+                    armor.setChocoboColor(ChocoboColor.getColorFromName(this.color.getColorName()));
+                    armor.setChocoboScale(true, -15, true);
+                    armor.setFromEgg(true);
+                    armor.setChocoboScale(armor.isMale(), 0, false);
+                    if (isChicobo) {
+                        armor.setBreedingAgeOverride(-7500);
+                    }
+                    chocobo = armor;
+                }
+            } else {
+                chocobo = CHOCOBO_ENTITY.create(worldIn);
+                if (chocobo != null) {
+                    if (isChicobo) { chocobo.setBreedingAge(-7500); }
+                }
+            }
+
             if (chocobo != null) {
-                if (player != null) { if (player.isInSneakingPose()) { chocobo.setBreedingAge(-7500); } }
                 if (this.noAI) { chocobo.setAiDisabled(true); }
 
                 chocobo.refreshPositionAndAngles(pos.getX() + .5, pos.getY() + 1.5F, pos.getZ() + .5, MathHelper.wrapDegrees(worldIn.random.nextFloat() * 360.0F), 0.0F);

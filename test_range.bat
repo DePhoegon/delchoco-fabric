@@ -1,0 +1,4 @@
+@echo off
+cls
+javac comprehensive_range_test.java
+java comprehensive_range_test

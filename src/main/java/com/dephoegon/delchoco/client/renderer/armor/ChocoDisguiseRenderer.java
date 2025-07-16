@@ -34,20 +34,20 @@ public class ChocoDisguiseRenderer implements ArmorRenderer {
     }
 
     public void render(MatrixStack matrices, VertexConsumerProvider vertexConsumers, @NotNull ItemStack stack, LivingEntity entity, EquipmentSlot slot, int light, BipedEntityModel<LivingEntity> contextModel) {
-        if (!(stack.getItem() instanceof ChocoDisguiseItem armorItem)) { return; }
+        if (!(stack.getItem() instanceof ChocoDisguiseItem)) { return; }
 
         ChocoDisguiseModel model = getModel();
         model.child = contextModel.child;
         model.sneaking = contextModel.sneaking;
         model.riding = contextModel.riding;
 
-        prepareTransforms(contextModel, entity);
-        applyHatRotation(armorItem, slot);
-        setVisibility(armorItem, entity, slot);
-        renderModel(matrices, vertexConsumers, getTexture(armorItem), light);
+        prepareTransforms(contextModel);
+        applyHatRotation(stack, slot);
+        setVisibility(stack, entity, slot);
+        renderModel(matrices, vertexConsumers, getTexture(stack), light);
     }
 
-    private void prepareTransforms(BipedEntityModel<LivingEntity> contextModel, LivingEntity entity) {
+    private void prepareTransforms(BipedEntityModel<LivingEntity> contextModel) {
         ChocoDisguiseModel model = getModel();
         // All transformations should be copied from the context model to ensure sync.
         model.body.copyTransform(contextModel.body);
@@ -64,8 +64,8 @@ public class ChocoDisguiseRenderer implements ArmorRenderer {
         // This is already handled by the parent-child relationship in the model
     }
 
-    private void applyHatRotation(ChocoDisguiseItem stack, EquipmentSlot slot) {
-        if (slot != EquipmentSlot.HEAD || !(stack.getSlotType() == EquipmentSlot.HEAD)) { return; }
+    private void applyHatRotation(ItemStack stack, EquipmentSlot slot) {
+        if (slot != EquipmentSlot.HEAD) { return; }
 
         ChocoDisguiseModel model = getModel();
 
@@ -84,14 +84,14 @@ public class ChocoDisguiseRenderer implements ArmorRenderer {
         model.applyRotationsToChocoHead();
     }
 
-    private void setVisibility(ChocoDisguiseItem stack, LivingEntity entity, EquipmentSlot slot) {
+    private void setVisibility(ItemStack stack, LivingEntity entity, EquipmentSlot slot) {
         setInvisible(); // Set all parts to invisible first
         if (entity.isInvisible()) { return; }
         setVisible( ChocoDisguiseItem.getRenderMain(stack), ChocoDisguiseItem.getRenderLeft(stack), ChocoDisguiseItem.getRenderRight(stack), slot);
     }
-    private Identifier getTexture(ChocoDisguiseItem armorItem) {
-        String color = ChocoDisguiseItem.getCustomModelColor(armorItem);
-        return ChocoDisguiseItem.setCustomModel(color, armorItem);
+    private Identifier getTexture(ItemStack stack) {
+        String color = ChocoDisguiseItem.getCustomModelColor(stack);
+        return ChocoDisguiseItem.setCustomModel(color, (ChocoDisguiseItem) stack.getItem());
     }
     private void renderModel(MatrixStack matrices, VertexConsumerProvider vertexConsumers, Identifier texture, int light) {
         VertexConsumer vertexConsumer = vertexConsumers.getBuffer(RenderLayer.getArmorCutoutNoCull(texture));

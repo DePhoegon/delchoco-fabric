@@ -9,6 +9,8 @@ import org.jetbrains.annotations.Contract;
 import java.util.Random;
 
 import static com.dephoegon.delchoco.common.init.ModEntities.*;
+import static com.dephoegon.delchoco.common.init.ModEntities.GOLD_CHOCOBO_SUMMON;
+import static com.dephoegon.delchoco.common.init.ModEntities.PINK_CHOCOBO_SUMMON;
 
 @SuppressWarnings("SameParameterValue")
 public enum ChocoboColor {

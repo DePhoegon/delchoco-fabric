@@ -97,7 +97,7 @@ public class ArmorStandChocoboPose {
     // Track the placement direction
     private float placementYaw = DEFAULT_STATIC_YAW;
 
-    public ArmorStandChocoboPose(ArmorStandChocobo chocobo) { setDefaultPose(chocobo.getChocoboModelPose(), chocobo.isBaby()); }
+    public ArmorStandChocoboPose(ArmorStandChocobo chocobo) { setDefaultPose(this, chocobo.isBaby()); }
     public ArmorStandChocobo.ChocoboModelPose getType() { return type; }
     public void setType(ArmorStandChocobo.ChocoboModelPose type) { this.type = type; }
     public void applyStaticPoseRotation(@NotNull ArmorStandChocobo armorStand) {

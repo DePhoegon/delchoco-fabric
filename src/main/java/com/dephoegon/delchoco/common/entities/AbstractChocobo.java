@@ -9,6 +9,7 @@ import com.dephoegon.delchoco.common.entities.properties.ChocoboBrains;
 import com.dephoegon.delchoco.common.entities.properties.ChocoboColor;
 import com.dephoegon.delchoco.common.entities.properties.MovementType;
 import com.dephoegon.delchoco.common.entities.subTypes.ArmorStandChocobo;
+import com.dephoegon.delchoco.common.init.ModEffects;
 import com.dephoegon.delchoco.common.items.ChocoboArmorItems;
 import com.dephoegon.delchoco.common.items.ChocoboSaddleItem;
 import com.dephoegon.delchoco.common.items.ChocoboWeaponItems;
@@ -67,13 +68,21 @@ import java.util.*;
 import static com.dephoegon.delbase.item.ShiftingDyes.*;
 import static com.dephoegon.delchoco.aid.chocoboChecks.isWaterBreathingChocobo;
 import static com.dephoegon.delchoco.aid.chocoboChecks.isWitherImmuneChocobo;
+import static com.dephoegon.delchoco.common.effects.CustomRegenerationEffect.getBonusAmplification;
 import static com.dephoegon.delchoco.common.entities.breeding.ChocoboTweakedSnapShots.setChocoScale;
 import static com.dephoegon.delchoco.common.entities.properties.ChocoboBrainAid.requiresSwimmingToTarget;
-import static com.dephoegon.delchoco.common.init.ModItems.*;
+import static com.dephoegon.delchoco.common.init.ModItems.CHOCOBO_FEATHER;
 import static com.dephoegon.delchoco.common.init.ModSounds.AMBIENT_SOUND;
 import static net.minecraft.item.Items.*;
 
 public abstract class AbstractChocobo extends TameableEntity implements Angerable {
+    // Armor set bonus constants - percentage bonuses for each tier (for MULTIPLY_TOTAL operation)
+    protected static final float REINFORCED_DIAMOND_DAMAGE_PERCENT = 0.15f; // 15% bonus
+    protected static final float NETHERITE_DAMAGE_PERCENT = 0.18f; // 18% bonus
+    protected static final float REINFORCED_NETHERITE_DAMAGE_PERCENT = 0.22f; // 22% bonus
+    protected static final float GILDED_NETHERITE_DAMAGE_PERCENT = 0.25f; // 25% bonus
+    protected static final float WEAPON_DAMAGE_PERCENT = 0.75f; // 15% bonus for weapon damage
+
     // Chocobo Variables to be used by all Chocobo types
     @Nullable
     protected UUID persistentAngerTarget;
@@ -241,6 +250,7 @@ public abstract class AbstractChocobo extends TameableEntity implements Angerabl
     protected static final UUID CHOCOBO_ARMOR_SET_TOUGHNESS_BONUS_UUID = UUID.fromString("b5a2e443-7346-4aa2-9b5a-2b8e9a7e4a4c");
     protected static final UUID CHOCOBO_ARMOR_SET_KNOCKBACK_BONUS_UUID = UUID.fromString("c5a2e443-7346-4aa2-9b5a-2b8e9a7e4a4c");
     protected static final UUID CHOCOBO_ARMOR_SET_WEAPON_BONUS_UUID = UUID.fromString("d5a2e443-7346-4aa2-9b5a-2b8e9a7e4a4c");
+    protected static final UUID CHOCOBO_ARMOR_SET_HEALTH_BONUS_UUID = UUID.fromString("e5a2e443-7346-4aa2-9b5a-2b8e9a7e4a4c");
     protected static final EntityAttributeModifier CHOCOBO_SPRINTING_SPEED_BOOST = (new EntityAttributeModifier(CHOCOBO_SPRINTING_BOOST_ID, "Chocobo sprinting speed boost", 0.5, EntityAttributeModifier.Operation.MULTIPLY_TOTAL));
 
 
@@ -459,6 +469,12 @@ public abstract class AbstractChocobo extends TameableEntity implements Angerabl
             this.updateArmorSetBonus();
             this.hasCheckedArmorSetBonus = true;
         }
+
+        // Health-based regeneration system
+        if (!this.getWorld().isClient()) {
+            this.applyHealthBasedRegeneration();
+        }
+
         if (this.getWorld().isClient) { super.tick(); return; }
         if (this.canWalkOnWater() && this.isTouchingWater() && !this.hasVehicle() && !this.hasPassengers()) { this.ticksOnWater++; }
         else { this.ticksOnWater = 0; }
@@ -498,6 +514,42 @@ public abstract class AbstractChocobo extends TameableEntity implements Angerabl
         }
         super.tick();
     }
+
+    /**
+     * Applies health-based regeneration to the chocobo using our custom regeneration effect.
+     * - Requires max health above 40
+     * - Only applies when health is below 95% of max health
+     * - Uses custom regeneration effect that provides enhanced healing based on amplifier
+     * - Revamped scaling: levels 6-15 with smaller intervals, especially tight for high HP
+     */
+    private void applyHealthBasedRegeneration() {
+        if (this.getWorld().isClient()) { return; }
+
+        float maxHealth = this.getMaxHealth();
+        float currentHealth = this.getHealth();
+
+        // Check if max health is above 40
+        if (maxHealth <= 40.0f) { return; }
+
+        // Check if health is below 95% of max health
+        if (currentHealth >= maxHealth * 0.95f) { return; }
+
+        // Use the new regeneration strength formula targeting 1-1.2 minute healing
+        int regenStrength = getBonusAmplification(this);
+
+        // Cap at maximum reasonable regen level
+        // regenStrength = Math.min(regenStrength, 25);
+
+        // Apply our custom regeneration effect
+        StatusEffectInstance currentCustomRegen = this.getStatusEffect(ModEffects.CUSTOM_REGENERATION);
+
+        // Only apply if no custom regeneration effect exists or if the new one would be stronger
+        if (currentCustomRegen == null || currentCustomRegen.getAmplifier() < regenStrength - 1) {
+            // Duration of 120 ticks (6 seconds) to allow for regular reapplication
+            this.addStatusEffect(new StatusEffectInstance(ModEffects.CUSTOM_REGENERATION, 120, regenStrength - 1, true, false));
+        }
+    }
+
     public void setSprinting(boolean sprinting) {
         this.setFlag(SPRINTING_FLAG_INDEX, sprinting);
         EntityAttributeInstance attributeInstance = this.getAttributeInstance(EntityAttributes.GENERIC_MOVEMENT_SPEED);
@@ -709,7 +761,7 @@ public abstract class AbstractChocobo extends TameableEntity implements Angerabl
             default -> super.equipStack(slot, stack);
         }
     }
-    private void silentUpdateArmorSetBonus(EquipmentSlot slot, ItemStack stack) {
+    protected void silentUpdateArmorSetBonus(EquipmentSlot slot, ItemStack stack) {
         this.updateArmorSetBonus();
         super.equipStack(slot, stack);
     }
@@ -866,73 +918,124 @@ public abstract class AbstractChocobo extends TameableEntity implements Angerabl
             this.silentUpdateArmorSetBonus(EquipmentSlot.FEET, pStack);
         }
     }
-    private void updateArmorSetBonus() {
+    protected void updateArmorSetBonus() {
         if (this.getWorld().isClient()) { return; }
         EntityAttributeInstance armorAttr = this.getAttributeInstance(EntityAttributes.GENERIC_ARMOR);
         EntityAttributeInstance toughnessAttr = this.getAttributeInstance(EntityAttributes.GENERIC_ARMOR_TOUGHNESS);
         EntityAttributeInstance knockbackAttr = this.getAttributeInstance(EntityAttributes.GENERIC_KNOCKBACK_RESISTANCE);
         EntityAttributeInstance attackAttr = this.getAttributeInstance(EntityAttributes.GENERIC_ATTACK_DAMAGE);
+        EntityAttributeInstance healthAttr = this.getAttributeInstance(EntityAttributes.GENERIC_MAX_HEALTH);
 
+        // Remove existing modifiers
         if (armorAttr != null) { armorAttr.removeModifier(CHOCOBO_ARMOR_SET_ARMOR_BONUS_UUID); }
         if (toughnessAttr != null) { toughnessAttr.removeModifier(CHOCOBO_ARMOR_SET_TOUGHNESS_BONUS_UUID); }
         if (knockbackAttr != null) { knockbackAttr.removeModifier(CHOCOBO_ARMOR_SET_KNOCKBACK_BONUS_UUID); }
         if (attackAttr != null) { attackAttr.removeModifier(CHOCOBO_ARMOR_SET_WEAPON_BONUS_UUID); }
+        if (healthAttr != null) { healthAttr.removeModifier(CHOCOBO_ARMOR_SET_HEALTH_BONUS_UUID); }
 
         ItemStack head = getHeadArmor();
         ItemStack chest = getChestArmor();
         ItemStack legs = getLegsArmor();
         ItemStack feet = getFeetArmor();
 
-        if (head.isEmpty() || chest.isEmpty() || legs.isEmpty() || feet.isEmpty()) { return; }
+        // Calculate total bonus percentage from all pieces (25% per piece tier 6+)
+        float totalBonusPercentage = 0.0f;
+        float totalHealthBonus = 0.0f;
 
-        if (head.getItem() instanceof ChocoboArmorItems headArmor &&
-                chest.getItem() instanceof ChocoboArmorItems chestArmor &&
-                legs.getItem() instanceof ChocoboArmorItems legsArmor &&
-                feet.getItem() instanceof ChocoboArmorItems feetArmor) {
+        if (this instanceof ArmorStandChocobo) {
+            totalBonusPercentage += .1f; // Armor Stand Chocobo gets a flat 10% bonus
+            totalHealthBonus += .15f; // Armor Stand Chocobo gets a flat 15% health bonus
+        }
 
+        // Check each piece individually
+        if (head.getItem() instanceof ChocoboArmorItems headArmor) {
             Integer headTier = ChocoboArmorItems.getTier(headArmor.getMaterial());
+            if (headTier != null && headTier >= 6) {
+                float pieceBonusPercentage = getBonusPercentage(headTier) * 0.25f; // 25% of full bonus
+                totalBonusPercentage += pieceBonusPercentage;
+                totalHealthBonus += pieceBonusPercentage;
+            }
+        }
+
+        if (chest.getItem() instanceof ChocoboArmorItems chestArmor) {
             Integer chestTier = ChocoboArmorItems.getTier(chestArmor.getMaterial());
+            if (chestTier != null && chestTier >= 6) {
+                float pieceBonusPercentage = getBonusPercentage(chestTier) * 0.25f; // 25% of full bonus
+                totalBonusPercentage += pieceBonusPercentage;
+                totalHealthBonus += pieceBonusPercentage;
+            }
+        }
+
+        if (legs.getItem() instanceof ChocoboArmorItems legsArmor) {
             Integer legsTier = ChocoboArmorItems.getTier(legsArmor.getMaterial());
+            if (legsTier != null && legsTier >= 6) {
+                float pieceBonusPercentage = getBonusPercentage(legsTier) * 0.25f; // 25% of full bonus
+                totalBonusPercentage += pieceBonusPercentage;
+                totalHealthBonus += pieceBonusPercentage;
+            }
+        }
+
+        if (feet.getItem() instanceof ChocoboArmorItems feetArmor) {
             Integer feetTier = ChocoboArmorItems.getTier(feetArmor.getMaterial());
+            if (feetTier != null && feetTier >= 6) {
+                float pieceBonusPercentage = getBonusPercentage(feetTier) * 0.25f; // 25% of full bonus
+                totalBonusPercentage += pieceBonusPercentage;
+                totalHealthBonus += pieceBonusPercentage;
+            }
+        }
 
-            if (headTier == null || chestTier == null || legsTier == null || feetTier == null) { return; }
-
-            int minTier = Collections.min(Arrays.asList(headTier, chestTier, legsTier, feetTier));
-
-            if (minTier >= 6) { // Reinforced Diamond or higher
-                float bonusPercentage;
-                float damageBonus;
-
-                if (minTier == 6) { // Reinforced Diamond
-                    bonusPercentage = 0.10f;
-                    damageBonus = 2.0f;
-                } else if (minTier == 7) { // Netherite
-                    bonusPercentage = 0.15f;
-                    damageBonus = 2.5f;
-                } else if (minTier == 8) { // Reinforced Netherite
-                    bonusPercentage = 0.20f;
-                    damageBonus = 3.0f;
-                } else { // Gilded Netherite
-                    bonusPercentage = 0.25f;
-                    damageBonus = 4.0f;
+        // Apply bonuses if any pieces qualify
+        if (totalBonusPercentage > 0) {
+            // Calculate weapon damage bonus based on highest tier piece
+            int highestTier = 0;
+            ItemStack[] armorPieces = {head, chest, legs, feet};
+            for (ItemStack piece : armorPieces) {
+                if (piece.getItem() instanceof ChocoboArmorItems armorItem) {
+                    Integer tier = ChocoboArmorItems.getTier(armorItem.getMaterial());
+                    if (tier != null && tier >= 6) {
+                        highestTier = Math.max(highestTier, tier);
+                    }
                 }
+            }
 
+            if (highestTier > 0) {
+                float weaponDamage = ChocoboWeaponItems.getTotalAttackDamage(ChocoboWeaponItems.CHOCOBO_WEAPON_TIERS.get(highestTier));
+                float damageBonus = weaponDamage * (totalBonusPercentage + WEAPON_DAMAGE_PERCENT);
+
+                // Apply all bonuses
                 if (armorAttr != null) {
-                    armorAttr.addPersistentModifier(new EntityAttributeModifier(CHOCOBO_ARMOR_SET_ARMOR_BONUS_UUID, "Set Bonus", bonusPercentage, EntityAttributeModifier.Operation.MULTIPLY_TOTAL));
+                    armorAttr.addPersistentModifier(new EntityAttributeModifier(CHOCOBO_ARMOR_SET_ARMOR_BONUS_UUID, "Armor Set Bonus", totalBonusPercentage, EntityAttributeModifier.Operation.MULTIPLY_TOTAL));
                 }
                 if (toughnessAttr != null) {
-                    toughnessAttr.addPersistentModifier(new EntityAttributeModifier(CHOCOBO_ARMOR_SET_TOUGHNESS_BONUS_UUID, "Set Bonus", bonusPercentage, EntityAttributeModifier.Operation.MULTIPLY_TOTAL));
+                    toughnessAttr.addPersistentModifier(new EntityAttributeModifier(CHOCOBO_ARMOR_SET_TOUGHNESS_BONUS_UUID, "Armor Set Bonus", totalBonusPercentage, EntityAttributeModifier.Operation.MULTIPLY_TOTAL));
                 }
                 if (knockbackAttr != null) {
-                    knockbackAttr.addPersistentModifier(new EntityAttributeModifier(CHOCOBO_ARMOR_SET_KNOCKBACK_BONUS_UUID, "Set Bonus", bonusPercentage, EntityAttributeModifier.Operation.MULTIPLY_TOTAL));
+                    knockbackAttr.addPersistentModifier(new EntityAttributeModifier(CHOCOBO_ARMOR_SET_KNOCKBACK_BONUS_UUID, "Armor Set Bonus", totalBonusPercentage, EntityAttributeModifier.Operation.MULTIPLY_TOTAL));
                 }
-
                 if (attackAttr != null) {
                     attackAttr.addPersistentModifier(new EntityAttributeModifier(CHOCOBO_ARMOR_SET_WEAPON_BONUS_UUID, "Armor Set Weapon Boost", damageBonus, EntityAttributeModifier.Operation.ADDITION));
+                }
+                if (healthAttr != null) {
+                    healthAttr.addPersistentModifier(new EntityAttributeModifier(CHOCOBO_ARMOR_SET_HEALTH_BONUS_UUID, "Armor Set Health Boost", totalHealthBonus, EntityAttributeModifier.Operation.MULTIPLY_TOTAL));
                 }
             }
         }
     }
+    protected static float getBonusPercentage(int minTier) {
+        float bonusPercentage;
+
+        if (minTier == 6) { // Reinforced Diamond
+            bonusPercentage = REINFORCED_DIAMOND_DAMAGE_PERCENT;
+        } else if (minTier == 7) { // Netherite
+            bonusPercentage = NETHERITE_DAMAGE_PERCENT;
+        } else if (minTier == 8) { // Reinforced Netherite
+            bonusPercentage = REINFORCED_NETHERITE_DAMAGE_PERCENT;
+        } else { // Gilded Netherite
+            bonusPercentage = GILDED_NETHERITE_DAMAGE_PERCENT;
+        }
+        return bonusPercentage;
+    }
+
     public void setGeneration(int value) { this.dataTracker.set(PARAM_GENERATION, value); }
     public void setAngerTime(int angerTime) { this.remainingPersistentAngerTime = angerTime; }
     public void setAngryAt(@Nullable UUID angryAt) { this.persistentAngerTarget = angryAt; }

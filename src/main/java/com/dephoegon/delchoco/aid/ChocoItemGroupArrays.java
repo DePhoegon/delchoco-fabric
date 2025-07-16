@@ -52,6 +52,7 @@ public class ChocoItemGroupArrays {
         out.add(RED_CHOCOBO_SPAWN_EGG);
         out.add(PURPLE_CHOCOBO_SPAWN_EGG);
         out.add(FLAME_CHOCOBO_SPAWN_EGG);
+        out.add(CHOCOBO_ARMOR_STAND_SPAWN_EGG);
         return out;
     }
     private static @NotNull ArrayList<Item> chocoboGuiseGear() {

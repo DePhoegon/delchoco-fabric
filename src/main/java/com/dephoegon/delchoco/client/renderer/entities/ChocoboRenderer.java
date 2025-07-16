@@ -47,17 +47,22 @@ public class ChocoboRenderer extends MobEntityRenderer<Chocobo, EntityModel<Choc
         this.addFeature(new LayerWeapon(this, weaponAlpha, ChocoboConfig.configTwist(ChocoboConfig.CHOCOBO_WEAPON_ALPHA.get())));
     }
     public void render(@NotNull Chocobo chocobo, float entityYaw, float partialTicks, MatrixStack matrixStack, VertexConsumerProvider bufferSource, int packedLight) {
-        this.model = chocobo.isBaby() ? chicoboModel : chocoboModel;
+        boolean isChicobo = chocobo.isBaby();
+        this.model = isChicobo ? chicoboModel : chocoboModel;
         if (showChocobo(chocobo)) {
             float factor = chocobo.getChocoboScale() == 0 ? 1 : Math.max(chocobo.getChocoboScaleMod(), .85F);
             if (factor < .86F) { chocobo.setChocoboScale(true, -15, true); }
             matrixStack.scale(factor, factor, factor);
-            if (chocobo.isArmorStandNotAlive()) {
-                setPoseByType(chocobo.getPoseType(), (ArmorStandChocobo) chocobo);
-                if (chocobo.isBaby()) { applyToModel((ChicoboModel<Chocobo>)this.model, ((ArmorStandChocobo) chocobo).getChocoboModelPose()); }
-                else { applyToModel((AdultChocoboModel<Chocobo>) this.model, ((ArmorStandChocobo) chocobo).getChocoboModelPose()); }
+            if (showChocobo(chocobo)) {
+                if (chocobo instanceof ArmorStandChocobo) {
+                    if (((ArmorStandChocobo)chocobo).isArmorStandNotAlive()) {
+                        setPoseByType(chocobo.getPoseType(), (ArmorStandChocobo) chocobo);
+                        if (isChicobo) { applyToModel((ChicoboModel<Chocobo>) this.model, ((ArmorStandChocobo) chocobo).getChocoboModelPose()); }
+                        else { applyToModel((AdultChocoboModel<Chocobo>) this.model, ((ArmorStandChocobo) chocobo).getChocoboModelPose()); }
+                    }
+                }
+                super.render(chocobo, entityYaw, partialTicks, matrixStack, bufferSource, packedLight);
             }
-            super.render(chocobo, entityYaw, partialTicks, matrixStack, bufferSource, packedLight);
         }
     }
     public Identifier getTexture(@NotNull Chocobo chocobo) {

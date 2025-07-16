@@ -47,7 +47,7 @@ public class ModItems extends BaseReg {
     public static final Item RED_CHOCOBO_SPAWN_EGG = registerItem("red_chocobo_spawn_egg", new ChocoboSpawnEggItem(new FabricItemSettings().maxCount(64), ChocoboColor.RED, false));
     public static final Item PURPLE_CHOCOBO_SPAWN_EGG = registerItem("purple_chocobo_spawn_egg", new ChocoboSpawnEggItem(new FabricItemSettings().maxCount(64), ChocoboColor.PURPLE, false));
     public static final Item FLAME_CHOCOBO_SPAWN_EGG = registerItem("flame_chocobo_spawn_egg", new ChocoboSpawnEggItem(new FabricItemSettings().maxCount(64).fireproof(), ChocoboColor.FLAME, false));
-    public static final Item CHOCOBO_ARMOR_STAND_SPAWN_EGG = registerItem("chocobo_armor_stand_spawn_egg", new ChocoboSpawnEggItem(new FabricItemSettings().maxCount(64), ChocoboColor.ARMOR, true));
+    public static final Item CHOCOBO_ARMOR_STAND_SPAWN_EGG = registerItem("chocobo_armor_stand_spawn_egg", new ChocoboSpawnEggItem(new FabricItemSettings().maxCount(64), ChocoboColor.ARMOR, false));
 
     // Chocobo MISCELLANEOUS
     public static final Item CHOCOBO_FEATHER = registerItem("chocobo_feather", new Item(new FabricItemSettings().maxCount(64)));

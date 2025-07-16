@@ -54,7 +54,7 @@ public class ChocoboConfig {
         DEFAULT_ARMOR_TOUGHNESS = BUILDER.comment("The Amount of Toughness a Chocobo has by default. min 0, max 10, default 1").defineInRange("Default ArmorToughness", 1, 0, 10);
         DEFAULT_ATTACK_DAMAGE = BUILDER.comment("The Amount of Attack Damage a Chocobo has by default. min 1, max 10, default 2").defineInRange("Default Attack Damage", 2, 1, 10);
         DEFAULT_ATTACK_SPEED = BUILDER.comment("The Speed of Attacks a Chocobo has by default. min 3, max 100, default 4").defineInRange("Default Attack Speed", 4, 3, 100);
-        DEFAULT_GEAR_MOD = BUILDER.comment("The Multiplier a Chocobo has by default to Armor (Toughness & Defence)& Weapons (Damage & Speed). min 1, max 4, default 1").defineInRange("Default Gear Mod", 1, 1, 4);
+        DEFAULT_GEAR_MOD = BUILDER.comment("The Multiplier a Chocobo has by default to Armor (Toughness & Defence)& Weapons (Damage & Speed). min 1, max 4, default 1").defineInRange("Default Gear Mod", 2, 1, 4);
         DEFAULT_HEALING = BUILDER.comment("The Amount of Health a Chocobo Heals when fed a Gysahl Green in Half Hearts. min 2, max 10, default 5").defineInRange("Default Healing", 5, 2, 10);
         BUILDER.pop();
         BUILDER.push("Max Stats");

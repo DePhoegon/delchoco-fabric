@@ -132,6 +132,7 @@ public class Chocobo extends AbstractChocobo {
         this.setPathfindingPenalty(PathNodeType.DANGER_FIRE, this.isFireImmune() ? -0.1F : 16.0F);
         this.setPathfindingPenalty(PathNodeType.LAVA, this.isFireImmune() ? 0.0F : 16.0F);
     }
+
     public boolean canAttackWithOwner(LivingEntity target, LivingEntity owner) {
         if (!this.isTamed()) { return false; }
         PlayerEntity chocoboOwner = (owner instanceof PlayerEntity) ? (PlayerEntity) owner : null;
@@ -918,7 +919,23 @@ public class Chocobo extends AbstractChocobo {
         return result;
     }
     public void onDeath(DamageSource source) {
-        // Left in for unique Chocobo Checks unable to be done in AbstractChocobo
+        if (onDeathCheck(1000, 85)) {
+            ChocoboColor color = this.getChocoboColor();
+            Item dropItem = switch (color) {
+                case BLACK -> BLACK_CHOCOBO_SPAWN_EGG;
+                case BLUE -> BLUE_CHOCOBO_SPAWN_EGG;
+                case FLAME -> FLAME_CHOCOBO_SPAWN_EGG;
+                case GOLD -> GOLD_CHOCOBO_SPAWN_EGG;
+                case GREEN -> GREEN_CHOCOBO_SPAWN_EGG;
+                case PINK -> PINK_CHOCOBO_SPAWN_EGG;
+                case PURPLE -> PURPLE_CHOCOBO_SPAWN_EGG;
+                case RED -> RED_CHOCOBO_SPAWN_EGG;
+                case WHITE -> WHITE_CHOCOBO_SPAWN_EGG;
+                case YELLOW -> YELLOW_CHOCOBO_SPAWN_EGG;
+                case ARMOR -> CHOCOBO_ARMOR_STAND_SPAWN_EGG;
+            };
+            this.dropItem(dropItem);
+        }
         super.onDeath(source);
     }
     public void applyDamageEffects(LivingEntity attacker, Entity target) {

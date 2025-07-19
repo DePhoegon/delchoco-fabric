@@ -29,8 +29,10 @@ public class ChocoboEquipmentSlot extends Slot {
 
     @Override
     public boolean canInsert(@NotNull ItemStack stack) {
+        return isItemValid(stack);
+    }
+    public boolean isItemValid(@NotNull ItemStack stack) {
         if (stack.isEmpty()) { return false; }
-
         return switch (type) {
             case SADDLE_SLOT -> stack.getItem() instanceof ChocoboSaddleItem;
             case WEAPON_SLOT -> stack.getItem() instanceof ChocoboWeaponItems;
@@ -41,8 +43,7 @@ public class ChocoboEquipmentSlot extends Slot {
             default -> false;
         };
     }
-
-    @Override
+    public int getType() { return type; }
     public int getMaxItemCount() {
         return 1;
     }

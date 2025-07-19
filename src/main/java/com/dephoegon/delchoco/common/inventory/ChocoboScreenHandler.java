@@ -1,10 +1,14 @@
 package com.dephoegon.delchoco.common.inventory;
 
+import com.dephoegon.delchoco.DelChoco;
 import com.dephoegon.delchoco.common.entities.Chocobo;
+import com.dephoegon.delchoco.common.items.ChocoboArmorItems;
 import com.dephoegon.delchoco.common.items.ChocoboSaddleItem;
+import com.dephoegon.delchoco.common.items.ChocoboWeaponItems;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.inventory.Inventory;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.screen.ScreenHandler;
 import net.minecraft.screen.slot.Slot;
@@ -17,6 +21,10 @@ public class ChocoboScreenHandler extends ScreenHandler {
     private final Chocobo chocobo;
     private int syncTimer = 0;
     private final PlayerInventory playerInventory;
+    private static final int chocoboInventoryStart = 6; // Chocobo inventory starts at index 6
+    private int inventorySize = 0;
+    private int playerInventorySize = 0;
+    private int playerHotbarSize = 0;
 
     public ChocoboScreenHandler(int syncId, PlayerInventory playerInventory, Chocobo chocoboEntity) {
         super(null, syncId);
@@ -28,11 +36,7 @@ public class ChocoboScreenHandler extends ScreenHandler {
     public Chocobo getChocobo() { return this.chocobo; }
 
     @Override
-    public void onClosed(PlayerEntity player) {
-        super.onClosed(player);
-        // The inventory is directly manipulated, so no special sync is needed on close.
-        // The sorting is visual only.
-    }
+    public void onClosed(PlayerEntity player) { super.onClosed(player); }
 
     @Override
     public void sendContentUpdates() {
@@ -51,8 +55,10 @@ public class ChocoboScreenHandler extends ScreenHandler {
 
     public void refreshSlots(@NotNull Chocobo chocobo, PlayerInventory playerInventory) {
         this.slots.clear();
+        this.inventorySize = 0;
+        this.playerInventorySize = 0;
+        this.playerHotbarSize = 0;
 
-        bindPlayerInventory(playerInventory);
         ItemStack saddleStack = chocobo.getSaddle();
         int slotOneX = -16;
         int slotOneY = 18-20;
@@ -71,6 +77,7 @@ public class ChocoboScreenHandler extends ScreenHandler {
                 case 45 -> bindInventoryBig(chocobo.chocoboInventory);
             }
         }
+        bindPlayerInventory(playerInventory);
     }
     private void bindInventorySmall(Inventory inventory) {
         for (int row = 0; row < 3; row++) {
@@ -80,48 +87,137 @@ public class ChocoboScreenHandler extends ScreenHandler {
                 if (guiSlotIndex < 5) { backingSlotIndex = guiSlotIndex + 11; }
                 else if (guiSlotIndex < 10) { backingSlotIndex = guiSlotIndex + 15;}
                 else { backingSlotIndex = guiSlotIndex + 19; }
-                this.addSlot(new Slot(inventory, backingSlotIndex, 44 + col * 18, 36 + row * 18));
+                this.addSlot(new ChocoboInventorySlot(inventory, backingSlotIndex, 44 + col * 18, 36 + row * 18));
+                this.inventorySize += 1;
             }
         }
     }
     private void bindInventoryBig(Inventory inventory) {
         for (int row = 0; row < 5; row++) {
             for (int col = 0; col < 9; col++) {
-                this.addSlot(new Slot(inventory, row * 9 + col, 8 + col * 18, 18 + row * 18));
+                this.addSlot(new ChocoboInventorySlot(inventory, row * 9 + col, 8 + col * 18, 18 + row * 18));
+                this.inventorySize += 1;
             }
         }
     }
     private void bindPlayerInventory(Inventory playerInventory) {
-        for (int row = 0; row < 3; ++row) { for (int col = 0; col < 9; ++col) {
-            this.addSlot(new Slot(playerInventory, col + row * 9 + 9, 8 + col * 18, 122 + row * 18));
-        } }
-        for (int i = 0; i < 9; ++i) { this.addSlot(new Slot(playerInventory, i, 8 + i * 18, 180)); }
+        for (int row = 0; row < 3; ++row) {
+            for (int col = 0; col < 9; ++col) {
+                this.addSlot(new PlayerInventorySlot(playerInventory, col + row * 9 + 9, 8 + col * 18, 122 + row * 18));
+                this.playerInventorySize += 1;
+            }
+        }
+        for (int i = 0; i < 9; ++i) {
+            this.addSlot(new PlayerHotbarSlot(playerInventory, i, 8 + i * 18, 180));
+            playerHotbarSize += 1;
+        }
     }
     @Override
     public ItemStack quickMove(PlayerEntity player, int index) {
-        ItemStack itemstack = ItemStack.EMPTY;
         Slot slot = this.slots.get(index);
-        ItemStack saddleStack = chocobo.getSaddle();
-        boolean notEmpty;
-        int slotSize;
-        if (!saddleStack.isEmpty() && saddleStack.getItem() instanceof ChocoboSaddleItem saddleItem) {
-            slotSize = saddleItem.getInventorySize();
-        } else {
-            slotSize = 0;
-        }
-        notEmpty = !(slot instanceof ChocoboEquipmentSlot);
-        if (notEmpty) {
-            if (slot.hasStack()) {
-                ItemStack itemstack1 = slot.getStack();
-                itemstack = itemstack1.copy();
+        if (!slot.hasStack()) return ItemStack.EMPTY;
 
-                if (index < slotSize) { if (!this.insertItem(itemstack1, slotSize, this.slots.size(), true)) { return ItemStack.EMPTY; } }
-                else if (!this.insertItem(itemstack1, 0, slotSize, false)) { return ItemStack.EMPTY; }
-                if (itemstack1.isEmpty()) { slot.setStack(ItemStack.EMPTY); }
-                else { slot.markDirty(); }
-            }
+        ItemStack stackInSlot = slot.getStack();
+        ItemStack itemStackCopy = stackInSlot.copy();
+
+        boolean moved = false;
+
+        if (slot instanceof ChocoboEquipmentSlot) {
+            if (((ChocoboEquipmentSlot) slot).getType() == SADDLE_SLOT) { return ItemStack.EMPTY; }
+            if (quickMoveChocoInventory(slot, stackInSlot)) { moved = true; }
+            else if (quickMovePlayerInventory(slot, stackInSlot)) { moved = true; }
+            else if (quickMovePlayerHotbar(slot, stackInSlot)) { moved = true; }
         }
-        if (notEmpty) { return itemstack; } else { return ItemStack.EMPTY; }
+        if (this.inventorySize > 0 && slot instanceof ChocoboInventorySlot) {
+            if (quickMoveChocoGear(slot, stackInSlot)) { moved = true; }
+            else if (quickMovePlayerInventory(slot, stackInSlot)) { moved = true; }
+            else if (quickMovePlayerHotbar(slot, stackInSlot)) { moved = true; }
+        }
+        if (slot instanceof PlayerInventorySlot) {
+            if (quickMoveChocoGear(slot, stackInSlot)) { moved = true; }
+            else if (quickMoveChocoInventory(slot, stackInSlot)) { moved = true; }
+            else if (quickMovePlayerHotbar(slot, stackInSlot)) { moved = true; }
+        }
+        if (slot instanceof PlayerHotbarSlot) {
+            if (quickMoveChocoGear(slot, stackInSlot)) { moved = true; }
+            else if (quickMoveChocoInventory(slot, stackInSlot)) { moved = true; }
+            else if (quickMovePlayerInventory(slot, stackInSlot)) { moved = true; }
+        }
+        if (stackInSlot.isEmpty()) { slot.setStack(ItemStack.EMPTY); }
+        else { slot.markDirty(); }
+        return moved ? itemStackCopy : ItemStack.EMPTY;
     }
+    // Quick move methods for different slot types
+    private boolean quickMoveChocoGear(Slot slot, ItemStack stackInSlot) {
+        boolean moved = false;
+        if (stackInSlot.isEmpty()) { return moved; }
+        // Only process Chocobo gear items
+        boolean isChocoboGear = stackInSlot.getItem() instanceof ChocoboArmorItems || stackInSlot.getItem() instanceof ChocoboWeaponItems || stackInSlot.getItem() instanceof ChocoboSaddleItem;
+        if (isChocoboGear) {
+            for (int i = 0; i < chocoboInventoryStart; i++) {
+                Slot equipmentSlot = this.slots.get(i);
+                if (equipmentSlot instanceof ChocoboEquipmentSlot) {
+                    // Should be meaningless check, but just in case
+                    if (((ChocoboEquipmentSlot) equipmentSlot).isItemValid(stackInSlot)) {
+                        if (equipmentSlot.getStack().isEmpty()) {
+                            equipmentSlot.setStack(stackInSlot.split(1));
+                            equipmentSlot.markDirty();
+                            moved = true;
+                        }
+                        break;
+                    } else { continue; }
+                } else { DelChoco.LOGGER.warn("Unexpected slot type at index {}: {}", i, equipmentSlot.getClass().getName()); }
+            }
+            if (moved) { slot.markDirty(); }
+        }
+        return moved;
+
+    }
+    private boolean quickMoveChocoInventory(Slot slot, ItemStack stackInSlot) {
+        boolean moved = false;
+        if (stackInSlot.isEmpty()) { return moved; }
+        if (this.inventorySize <= 0) { return moved; }
+
+        int startIndex = chocoboInventoryStart;
+        int endIndex = startIndex + this.inventorySize;
+        if (this.insertItem(stackInSlot, startIndex, endIndex, false)) {
+            slot.markDirty();
+            moved = true;
+        }
+
+        if (moved) { slot.markDirty(); }
+        return moved;
+    }
+    private boolean quickMovePlayerInventory(Slot slot, ItemStack stackInSlot) {
+        boolean moved = false;
+        if (stackInSlot.isEmpty()) { return moved; }
+        if (this.playerInventorySize <= 0) { return moved; }
+
+        int startIndex = chocoboInventoryStart + this.inventorySize;
+        int endIndex = startIndex + this.playerInventorySize;
+        if (this.insertItem(stackInSlot, startIndex, endIndex, false)) {
+            slot.markDirty();
+            moved = true;
+        }
+
+        if (moved) { slot.markDirty(); }
+        return moved;
+    }
+    private boolean quickMovePlayerHotbar(Slot slot, ItemStack stackInSlot) {
+        boolean moved = false;
+        if (stackInSlot.isEmpty()) { return moved; }
+        if (this.playerInventorySize <= 0) { return moved; }
+
+        int startIndex = chocoboInventoryStart + this.inventorySize + this.playerInventorySize;
+        int endIndex = startIndex + playerHotbarSize;
+        if (this.insertItem(stackInSlot, startIndex, endIndex, false)) {
+            slot.markDirty();
+            moved = true;
+        }
+
+        if (moved) { slot.markDirty(); }
+        return moved;
+    }
+
     public boolean canUse(PlayerEntity player) { return this.chocobo.isAlive() && this.chocobo.distanceTo(player) < 8.0F; }
 }

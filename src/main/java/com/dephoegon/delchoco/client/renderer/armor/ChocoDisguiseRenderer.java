@@ -80,7 +80,7 @@ public class ChocoDisguiseRenderer implements ArmorRenderer {
             lastStackHash = currentStackHash;
         }
 
-        // Apply cached rotations (base + relative)
+        // Apply cached rotations (base plus relative)
         model.applyRotationsToChocoHead();
     }
 

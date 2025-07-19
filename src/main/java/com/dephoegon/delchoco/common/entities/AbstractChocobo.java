@@ -3,7 +3,7 @@ package com.dephoegon.delchoco.common.entities;
 import com.dephoegon.delchoco.DelChoco;
 import com.dephoegon.delchoco.aid.chocoboChecks;
 import com.dephoegon.delchoco.aid.world.ChocoboConfig;
-import com.dephoegon.delchoco.common.entities.pathing.ChocoboAmphibiousSwimNavigation;
+import com.dephoegon.delchoco.common.entities.pathing.ChocoboHybridNavigation;
 import com.dephoegon.delchoco.common.entities.properties.ChocoboBrainAid;
 import com.dephoegon.delchoco.common.entities.properties.ChocoboBrains;
 import com.dephoegon.delchoco.common.entities.properties.ChocoboColor;
@@ -267,7 +267,7 @@ public abstract class AbstractChocobo extends TameableEntity implements Angerabl
             super.travel(travelInput);
         }
     }
-    protected EntityNavigation createNavigation(World world) { return new ChocoboAmphibiousSwimNavigation(this, world); }
+    protected EntityNavigation createNavigation(World world) { return new ChocoboHybridNavigation(this, world); }
 
     // Initialization of DataTracker for all Chocobo types
     protected void initDataTracker() {
@@ -375,7 +375,6 @@ public abstract class AbstractChocobo extends TameableEntity implements Angerabl
         super.onStatusEffectApplied(effect, source);
         if (effect.getEffectType() == StatusEffects.WATER_BREATHING) {
             this.updateWaterNavPenalties();
-            this.updateNavigationAndMoveControl(true); // Force amphibious for effect duration
         }
         if (effect.getEffectType() == StatusEffects.FIRE_RESISTANCE) {
             this.setPathfindingPenalty(PathNodeType.DAMAGE_FIRE, -0.2F);
@@ -388,7 +387,6 @@ public abstract class AbstractChocobo extends TameableEntity implements Angerabl
         super.onStatusEffectRemoved(effect);
         if (effect.getEffectType() == StatusEffects.WATER_BREATHING) {
             this.updateWaterNavPenalties();
-            this.updateNavigationAndMoveControl(false); // Revert to default based on current state (innate abilities)
         }
         if (effect.getEffectType() == StatusEffects.FIRE_RESISTANCE) {
             this.setPathfindingPenalty(PathNodeType.DAMAGE_FIRE, this.isFireImmune() ? -0.2F : 32.0F);
@@ -578,7 +576,7 @@ public abstract class AbstractChocobo extends TameableEntity implements Angerabl
     public boolean isWaterBreathing() { return this.isWaterBloodChocobo() || this.hasStatusEffect(StatusEffects.WATER_BREATHING); }
     public boolean canWalkOnWater() {
         if (!this.hasPassengers()) { return true; }
-        if (this.isWaterBreathing()) { return !this.isArmored() && !this.isWeaponArmed(); }
+        if (!this.isWaterBreathing()) { return !this.isArmored() && !this.isWeaponArmed(); }
         return true;
     }
     public boolean isWaterBloodChocobo() { return (this.dataTracker.get(PARAM_CHOCOBO_PROPERTIES) & FLAG_WATER_BREATH) != 0; }
@@ -672,7 +670,6 @@ public abstract class AbstractChocobo extends TameableEntity implements Angerabl
         else { properties &= ~FLAG_WATER_BREATH; }
         this.dataTracker.set(PARAM_CHOCOBO_PROPERTIES, properties);
         this.updateWaterNavPenalties();
-        this.updateNavigationAndMoveControl(false); // Update based on new innate ability state
     }
     public void setWitherImmune(boolean witherImmune) {
         int properties = this.dataTracker.get(PARAM_CHOCOBO_PROPERTIES);
@@ -706,7 +703,7 @@ public abstract class AbstractChocobo extends TameableEntity implements Angerabl
         if ((mask & ABILITY_MASK_CAN_FLY) != 0) { properties |= FLAG_CAN_FLY; }
 
         this.dataTracker.set(PARAM_CHOCOBO_PROPERTIES, properties);
-        this.updateNavigationAndMoveControl(false); // Update based on new ability mask state
+        this.updateNavigationAndMoveControl(); // Update based on new ability mask state
     }
     public void setChocoboScale(boolean isMale, int overrideValue, boolean override) {
         int scale;
@@ -1060,7 +1057,7 @@ public abstract class AbstractChocobo extends TameableEntity implements Angerabl
         this.setWitherImmune(isWitherImmuneChocobo(color));
         this.setPoisonImmune(chocoboChecks.isPoisonImmuneChocobo(color));
         this.updateWaterNavPenalties();
-        this.updateNavigationAndMoveControl(false); // Sets Default for chocobos on spawn, and updates based on new innate ability state
+        this.updateNavigationAndMoveControl(); // Sets Default for chocobos on spawn, and updates based on new innate ability state
     }
     protected void setChocoboSpawnCheck(ChocoboColor color) {
         ChocoboColor chocobo = this.getChocoboColor();
@@ -1395,15 +1392,14 @@ public abstract class AbstractChocobo extends TameableEntity implements Angerabl
         //chocobo.getBrain().remember(MemoryModuleType.ATTACK_TARGET, attacker, 50L);
         chocobo.setTarget(attacker);
     }
-    private void updateNavigationAndMoveControl(boolean forceAmphibiousDuringEffect) {
+    private void updateNavigationAndMoveControl() {
         if (this.getWorld().isClient()) { return; }
 
         EntityNavigation oldNavInstance = this.navigation;
         Class<? extends EntityNavigation> oldNavClass = oldNavInstance.getClass();
         EntityNavigation newNavInstance;
 
-        if (forceAmphibiousDuringEffect) { newNavInstance = new ChocoboAmphibiousSwimNavigation(this, this.getWorld()); }
-        else { newNavInstance = this.createNavigation(this.getWorld()); }
+        newNavInstance = new ChocoboHybridNavigation(this, this.getWorld());
 
         if (newNavInstance.getClass() != oldNavClass) {
             this.navigation = newNavInstance;
@@ -1411,8 +1407,7 @@ public abstract class AbstractChocobo extends TameableEntity implements Angerabl
         }
 
         boolean shouldUseSwimControl;
-        if (forceAmphibiousDuringEffect) { shouldUseSwimControl = true; }
-        else { shouldUseSwimControl = !this.canWalkOnWater(); }
+        shouldUseSwimControl = !this.canWalkOnWater();
 
         if (shouldUseSwimControl) {
             if (!(this.moveControl instanceof ChocoboBrains.ChocoboSwimMoveControl)) {

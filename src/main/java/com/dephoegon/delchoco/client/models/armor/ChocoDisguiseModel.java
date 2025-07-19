@@ -95,7 +95,7 @@ public class ChocoDisguiseModel extends BipedEntityModel<LivingEntity> {
 
     public void applyRotationsToChocoHead() {
         if (rotationsCached) {
-            // Apply base transform + relative NBT rotations
+            // Apply base transform plus relative NBT rotations
             // DO NOT TREAT THESE AS THE ARMOR HEAD ROTATIONS
             // THEY ARE NOT THE SAME, CHOCOHEAD IS A DECORATION ATTACHED TO THE HEAD
             chocoHead.pitch = BASE_PITCH + cachedRelativeRotX;

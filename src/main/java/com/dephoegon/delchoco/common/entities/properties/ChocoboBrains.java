@@ -4,7 +4,6 @@ package com.dephoegon.delchoco.common.entities.properties;
 import com.dephoegon.delchoco.DelChoco;
 import com.dephoegon.delchoco.common.entities.AbstractChocobo;
 import com.dephoegon.delchoco.common.entities.Chocobo;
-import com.dephoegon.delchoco.common.entities.subTypes.ArmorStandChocobo;
 import com.dephoegon.delchoco.common.init.ModEntities;
 import com.dephoegon.delchoco.common.items.ChocoDisguiseItem;
 import com.dephoegon.delchoco.utils.RandomHelper;
@@ -192,7 +191,7 @@ public class ChocoboBrains {
                     long duration = System.nanoTime() - startTime;
                     totalPathfindingTime += duration;
                     if (pathfindingAttempts > 0 && pathfindingAttempts % 100 == 0) {
-                        DelChoco.LOGGER.info("Average pathfinding time for RoamTask: " + (totalPathfindingTime / pathfindingAttempts) / 1_000_000.0 + "ms over " + pathfindingAttempts + " attempts.");
+                        DelChoco.LOGGER.info("Average pathfinding time for RoamTask: {}ms over {} attempts.", (totalPathfindingTime / pathfindingAttempts) / 1_000_000.0, pathfindingAttempts);
                     }
                     if (this.path != null) {
                         this.pathCacheExpiryTicks = PATH_CACHE_TICKS;
@@ -733,10 +732,15 @@ public class ChocoboBrains {
             if (this.targetPlayer != null) {
                 // Set walk target to player with tempting item
                 Vec3d targetPos = this.targetPlayer.getPos();
-                chocobo.getBrain().remember(
-                        MemoryModuleType.WALK_TARGET,
-                        new WalkTarget(targetPos, (float) TEMPT_SPEED, 2)
-                );
+                int completionRange = 4;
+                float speed = (float) TEMPT_SPEED;
+                Path path = chocobo.getNavigation().findPathTo(this.targetPlayer, completionRange);
+                if (path != null) {
+                    chocobo.getNavigation().startMovingAlong(path, speed);
+                    chocobo.getBrain().remember(MemoryModuleType.PATH, path);
+                } else {
+                    chocobo.getBrain().remember( MemoryModuleType.WALK_TARGET, new WalkTarget(targetPos, speed, completionRange));
+                }
             }
         }
 
